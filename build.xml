@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+
+<project name="REKON" default="jar" basedir=".">
+
+	<!-- Build script for REKON -->
+	<echo message="OS: ${os.name}"/>
+	<echo message="Java Runtime Environment version: ${java.version}"/>
+
+	<!-- sources -->
+	<property name="src.lib" value="lib"/>
+	<property name="src.code.src" value="code/src"/>
+	<property name="src.code.test" value="code/test"/>
+
+	<!-- build -->
+	<property name="build" location="build"/>
+	<property name="build.classes.rel" value="classes" />
+	<property name="build.classes" location="${build}/${build.classes.rel}" />
+	<property name="build.lib.rel" value="lib" />
+	<property name="build.lib" location="${build}/${build.lib.rel}" />
+
+	<!-- output jar -->
+	<property name="build.jar" location="${build.lib}/rekon.jar"/>
+
+	<!-- debug property -->
+	<property name="debug" value="true"/>
+
+	<!-- build class-path -->
+	<path id="classpath">
+		<fileset dir="${build.lib}">
+			<include name="*.jar"/>
+		</fileset>
+	</path>
+
+	<!-- clean target -->
+	<target name="clean">
+		<delete dir="${build}"/>
+	</target>
+
+	<!-- base target -->
+	<target name="base">
+		<mkdir dir="${build.lib}"/>
+		<mkdir dir="${build.classes}"/>
+		<copy todir="${build.lib}" flatten="true">
+			<fileset dir="${src.lib}/">
+                <include name="**/*.jar"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- rekon targets -->
+	<target name="code" depends="base">
+		<mkdir dir="${build.classes}"/>
+		<javac srcdir="${src.code.src}" classpathref="classpath" destdir="${build.classes}" debug="${debug}">
+			<compilerarg value="-Xlint"/>
+		</javac>
+		<javac srcdir="${src.code.test}" classpathref="classpath" destdir="${build.classes}" debug="${debug}">
+			<compilerarg value="-Xlint"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="code">
+		<jar destfile="${build.jar}">
+			<fileset dir="${build.classes}" />
+			<fileset dir="${src.code.src}" includes="**/*.java"/>
+		</jar>
+	</target>
+
+</project>
