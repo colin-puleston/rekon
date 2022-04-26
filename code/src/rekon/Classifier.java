@@ -24,119 +24,18 @@
 
 package rekon;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
 abstract class Classifier {
 
-	void classify() {
-
-		Collection<MatchableNode> passCandidates = getMatchableCandidates();
-
-		do {
-
-			passCandidates = perfomPass(passCandidates);
-		}
-		while (!passCandidates.isEmpty());
-	}
-
-	Collection<MatchableNode> perfomPass(Collection<MatchableNode> passCandidates) {
-
-		checkSubsumptions(passCandidates);
-		setNewInferredSubsumptions(passCandidates);
-
-		if (!dynamicClassification()) {
-
-			expandNewInferredSubsumptions();
-		}
-
-		List<MatchableNode> reclassifiables = findAnyReclassifiables();
-
-		resetNewInferredSubsumptions();
-		resetAllReclassifiablesReferences(reclassifiables);
-
-		return reclassifiables;
-	}
-
-	abstract void checkSubsumptions(Collection<MatchableNode> passCandidates);
-
-	abstract boolean dynamicClassification();
-
-	abstract Collection<NodeName> getAllCandidates();
-
-	abstract Collection<MatchableNode> getMatchableCandidates();
-
-	void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode cand) {
+	static void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode cand) {
 
 		if (cand != defined && !defined.getName().subsumes(cand.getName())) {
 
 			if (defn.subsumes(cand.getProfile())) {
 
 				cand.checkNewInferredSubsumer(defined);
-			}
-		}
-	}
-
-	private void setNewInferredSubsumptions(Collection<MatchableNode> passCandidates) {
-
-		for (MatchableNode c : passCandidates) {
-
-			c.setNewInferredSubsumptions();
-		}
-	}
-
-	private void expandNewInferredSubsumptions() {
-
-		while (true) {
-
-			boolean expansions = false;
-
-			for (NodeName c : getAllCandidates()) {
-
-				expansions |= c.getClassifier().expandNewInferreds();
-			}
-
-			if (!expansions) {
-
-				break;
-			}
-		}
-	}
-
-	private List<MatchableNode> findAnyReclassifiables() {
-
-		List<MatchableNode> reclassifiables = new ArrayList<MatchableNode>();
-
-		for (MatchableNode c : getMatchableCandidates()) {
-
-			if (c.reclassifiable()) {
-
-				reclassifiables.add(c);
-			}
-		}
-
-		return reclassifiables;
-	}
-
-	private void resetNewInferredSubsumptions() {
-
-		for (Name c : getAllCandidates()) {
-
-			c.getClassifier().resetNewInferreds();
-		}
-	}
-
-	private void resetAllReclassifiablesReferences(List<MatchableNode> reclassifiables) {
-
-		for (MatchableNode m : reclassifiables) {
-
-			m.getProfile().resetAllReferences();
-
-			for (NodePattern d : m.getDefinitions()) {
-
-				d.resetAllReferences();
 			}
 		}
 	}

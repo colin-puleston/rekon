@@ -106,7 +106,7 @@ class NodeValue extends ObjectValue {
 
 		if (n != null) {
 
-			if (collector.onePassMatch() && n.dynamic()) {
+			if (collector.extendedMatch() && n.dynamic()) {
 
 				for (NodePattern d : n.getDefinitions()) {
 
@@ -130,7 +130,7 @@ class NodeValue extends ObjectValue {
 
 			collector.collectFor(d);
 
-			if (collector.onePassMatch()) {
+			if (collector.extendedMatch()) {
 
 				NodePattern p = ((NodeName)d).getProfile();
 

@@ -31,9 +31,10 @@ import java.util.*;
  */
 class MatchableNodes {
 
-	private Map<NodeName, MatchableNode> allByName = new HashMap<NodeName, MatchableNode>();
-
+	private List<MatchableNode> all = new ArrayList<MatchableNode>();
 	private List<MatchableNode> defineds = new ArrayList<MatchableNode>();
+
+	private List<NodeName> names = new ArrayList<NodeName>();
 
 	MatchableNode checkAddForClass(
 						ClassName name,
@@ -60,12 +61,12 @@ class MatchableNodes {
 
 	Collection<MatchableNode> getAll() {
 
-		return allByName.values();
+		return all;
 	}
 
 	Collection<MatchableNode> copyAll() {
 
-		return new ArrayList<MatchableNode>(allByName.values());
+		return new ArrayList<MatchableNode>(all);
 	}
 
 	Collection<MatchableNode> getDefineds() {
@@ -75,12 +76,7 @@ class MatchableNodes {
 
 	Collection<NodeName> getAllNames() {
 
-		return allByName.keySet();
-	}
-
-	MatchableNode lookFor(NodeName name) {
-
-		return allByName.get(name);
+		return names;
 	}
 
 	private MatchableNode checkAddFor(NodeName name, Collection<Relation> relations) {
@@ -110,7 +106,8 @@ class MatchableNodes {
 
 		MatchableNode m = new MatchableNode(name, profile);
 
-		allByName.put(m.getName(), m);
+		all.add(m);
+		names.add(m.getName());
 
 		return m;
 	}

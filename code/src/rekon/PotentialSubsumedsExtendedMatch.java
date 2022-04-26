@@ -29,20 +29,20 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialSubsumedsOnePassMatch extends PotentialSubsumeds {
+class PotentialSubsumedsExtendedMatch extends PotentialSubsumeds {
 
-	PotentialSubsumedsOnePassMatch(Collection<MatchableNode> allOptions) {
+	PotentialSubsumedsExtendedMatch(Collection<MatchableNode> allOptions) {
 
 		super(allOptions);
 	}
 
 	List<Names> getOptionMatchNames(NodePattern pattern) {
 
-		return NameCollector.signatureOptionsOnePassMatch.collectRanked(pattern);
+		return NameCollector.signatureOptionsExtendedMatch.collectRanked(pattern);
 	}
 
 	List<Names> getRequestMatchNames(NodePattern pattern) {
 
-		return NameCollector.definitionRequestsOnePassMatch.collectRanked(pattern);
+		return NameCollector.definitionRequestsExtendedMatch.collectRanked(pattern);
 	}
 }

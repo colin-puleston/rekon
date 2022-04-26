@@ -35,7 +35,7 @@ class NameClassifier {
 	private NameSet subsumers = new NameSet();
 
 	private boolean multipleAsserteds = false;
-	private boolean newInferreds = false;
+	private boolean newInferredSubsumers = false;
 
 	NameClassifier(Name name) {
 
@@ -77,23 +77,23 @@ class NameClassifier {
 		}
 	}
 
-	void checkAddInferred(Name subsumer) {
+	void checkAddInferredSubsumer(Name subsumer) {
 
 		if (checkAddSubsumer(subsumer)) {
 
 			checkAddSubsumers(subsumer.getSubsumers());
 
-			newInferreds = true;
+			newInferredSubsumers = true;
 		}
 	}
 
-	boolean expandNewInferreds() {
+	boolean expandNewInferredSubsumers() {
 
 		boolean expansions = false;
 
 		for (Name subsumer : subsumers.copyNames()) {
 
-			if (subsumer.getClassifier().newInferreds()) {
+			if (subsumer.getClassifier().newInferredSubsumers()) {
 
 				for (Name subsSubsumer : subsumer.getSubsumers().getNames()) {
 
@@ -108,9 +108,9 @@ class NameClassifier {
 		return expansions;
 	}
 
-	void resetNewInferreds() {
+	void resetNewInferredSubsumers() {
 
-		newInferreds = false;
+		newInferredSubsumers = false;
 	}
 
 	boolean rootName() {
@@ -123,9 +123,9 @@ class NameClassifier {
 		return multipleAsserteds;
 	}
 
-	boolean newInferreds() {
+	boolean newInferredSubsumers() {
 
-		return newInferreds;
+		return newInferredSubsumers;
 	}
 
 	boolean noSubsumers() {

@@ -153,7 +153,7 @@ class DynamicPatternOps {
 
 				if (n != null) {
 
-					return new DynamicNodeOpsHandler(ontology, n);
+					return new DynamicNodeOpsHandler(n);
 				}
 			}
 

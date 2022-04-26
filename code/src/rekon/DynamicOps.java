@@ -33,13 +33,12 @@ import org.semanticweb.owlapi.model.*;
  */
 class DynamicOps {
 
-	private Ontology ontology;
+	private MappedNames mappedNames;
 	private DynamicPatternOps patternOps;
 
 	DynamicOps(Ontology ontology) {
 
-		this.ontology = ontology;
-
+		mappedNames = ontology.getMappedNames();
 		patternOps = new DynamicPatternOps(ontology);
 	}
 
@@ -100,11 +99,11 @@ class DynamicOps {
 
 	private DynamicNodeOpsHandler createNodeOpsHandler(OWLClass cls) {
 
-		return new DynamicNodeOpsHandler(ontology, ontology.getMappedNames().get(cls));
+		return new DynamicNodeOpsHandler(mappedNames.get(cls));
 	}
 
 	private DynamicNodeOpsHandler createNodeOpsHandler(OWLNamedIndividual ind) {
 
-		return new DynamicNodeOpsHandler(ontology, ontology.getMappedNames().get(ind));
+		return new DynamicNodeOpsHandler(mappedNames.get(ind));
 	}
 }

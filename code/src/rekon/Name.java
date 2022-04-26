@@ -95,7 +95,7 @@ abstract class Name {
 
 	boolean reclassifiable() {
 
-		return classifier != null && classifier.newInferreds();
+		return classifier != null && classifier.newInferredSubsumers();
 	}
 
 	Names getSubsumers() {

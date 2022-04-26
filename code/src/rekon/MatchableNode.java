@@ -36,7 +36,7 @@ class MatchableNode {
 	private NodePattern profile;
 	private Set<NodePattern> definitions = new HashSet<NodePattern>();
 
-	private Set<MatchableNode> newInferreds = new HashSet<MatchableNode>();
+	private Set<MatchableNode> newInferredSubsumers = new HashSet<MatchableNode>();
 	private Set<MatchableNode> allInferredSubsumers = new HashSet<MatchableNode>();
 
 	public String toString() {
@@ -61,18 +61,28 @@ class MatchableNode {
 
 		if (allInferredSubsumers.add(m)) {
 
-			newInferreds.add(m);
+			newInferredSubsumers.add(m);
 		}
 	}
 
 	void setNewInferredSubsumptions() {
 
-		for (MatchableNode subsumer : newInferreds) {
+		for (MatchableNode subsumer : newInferredSubsumers) {
 
-			name.getClassifier().checkAddInferred(subsumer.name);
+			name.getClassifier().checkAddInferredSubsumer(subsumer.name);
 		}
 
-		newInferreds.clear();
+		newInferredSubsumers.clear();
+	}
+
+	void resetAllReferences() {
+
+		profile.resetAllReferences();
+
+		for (NodePattern d : definitions) {
+
+			d.resetAllReferences();
+		}
 	}
 
 	boolean reclassifiable() {

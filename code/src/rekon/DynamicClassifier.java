@@ -33,8 +33,66 @@ class DynamicClassifier extends Classifier {
 
 	private PotentialSubsumers definedsFilter;
 
-	private MatchableNodes dynamicMatchables = null;
-	private Collection<MatchableNode> preFilteredDefineds = null;
+	private class CandidateClassifier {
+
+		private Collection<MatchableNode> preFilteredDefineds;
+
+		CandidateClassifier(
+			MatchableNodes dynamicMatchables,
+			Collection<MatchableNode> preFilteredDefineds) {
+
+			this.preFilteredDefineds = preFilteredDefineds;
+
+			for (MatchableNode c : dynamicMatchables.getAll()) {
+
+				classifyCandidate(c);
+			}
+		}
+
+		private void classifyCandidate(MatchableNode c) {
+
+			do {
+
+				checkCandidateSubsumptions(c);
+				c.setNewInferredSubsumptions();
+			}
+			while (checkReclassifiable(c));
+		}
+
+		private boolean checkReclassifiable(MatchableNode c) {
+
+			Name n = c.getName();
+
+			if (n.reclassifiable()) {
+
+				n.getClassifier().resetNewInferredSubsumers();
+				c.resetAllReferences();
+
+				return true;
+			}
+
+			return false;
+		}
+
+		private void checkCandidateSubsumptions(MatchableNode c) {
+
+			for (MatchableNode defined : filterDefinedsFor(c.getProfile())) {
+
+				for (NodePattern defn : defined.getDefinitions()) {
+
+					checkSubsumption(defined, defn, c);
+				}
+			}
+		}
+
+		private Collection<MatchableNode> filterDefinedsFor(NodePattern p) {
+
+			return preFilteredDefineds != null
+					? preFilteredDefineds
+					: definedsFilter.getPotentialsFor(p);
+		}
+
+	}
 
 	DynamicClassifier(Ontology ontology) {
 
@@ -43,50 +101,6 @@ class DynamicClassifier extends Classifier {
 
 	void classify(MatchableNodes dynamicMatchables, Collection<MatchableNode> preFilteredDefineds) {
 
-		this.dynamicMatchables = dynamicMatchables;
-		this.preFilteredDefineds = preFilteredDefineds;
-
-		classify();
-	}
-
-	void checkSubsumptions(Collection<MatchableNode> passCandidates) {
-
-		for (MatchableNode c : passCandidates) {
-
-			checkCandidateSubsumptions(c);
-		}
-	}
-
-	boolean dynamicClassification() {
-
-		return true;
-	}
-
-	Collection<MatchableNode> getMatchableCandidates() {
-
-		return dynamicMatchables.getAll();
-	}
-
-	Collection<NodeName> getAllCandidates() {
-
-		return dynamicMatchables.getAllNames();
-	}
-
-	private void checkCandidateSubsumptions(MatchableNode cand) {
-
-		for (MatchableNode defined : filterDefinedsFor(cand.getProfile())) {
-
-			for (NodePattern defn : defined.getDefinitions()) {
-
-				checkSubsumption(defined, defn, cand);
-			}
-		}
-	}
-
-	private Collection<MatchableNode> filterDefinedsFor(NodePattern p) {
-
-		return preFilteredDefineds != null
-				? preFilteredDefineds
-				: definedsFilter.getPotentialsFor(p);
+		new CandidateClassifier(dynamicMatchables, preFilteredDefineds);
 	}
 }

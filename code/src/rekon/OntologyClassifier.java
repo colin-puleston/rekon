@@ -32,53 +32,128 @@ import java.util.*;
 class OntologyClassifier extends Classifier {
 
 	private Ontology ontology;
-	private PotentialSubsumeds candidatesFilter = null;
+
+	private Collection<NodeName> allNodes;
+	private MatchableNodes matchables;
+
+	private class ClassificationPass {
+
+		private Collection<MatchableNode> passCandidates;
+		private PotentialSubsumeds candidatesFilter;
+
+		private List<MatchableNode> reclassifiables = new ArrayList<MatchableNode>();
+
+		ClassificationPass(Collection<MatchableNode> passCandidates) {
+
+			this.passCandidates = passCandidates;
+
+			candidatesFilter = new PotentialSubsumeds(passCandidates);
+		}
+
+		Collection<MatchableNode> perfomPass() {
+
+			checkSubsumptions();
+
+			setNewInferredSubsumptions();
+			expandNewInferredSubsumptions();
+
+			findAnyReclassifiables();
+
+			resetNewInferredSubsumptions();
+			resetAllReclassifiablesReferences();
+
+			return reclassifiables;
+		}
+
+		private void checkSubsumptions() {
+
+			for (MatchableNode d : matchables.getDefineds()) {
+
+				checkDefinedSubsumptions(d);
+			}
+		}
+
+		private void checkDefinedSubsumptions(MatchableNode defined) {
+
+			for (NodePattern defn : defined.getDefinitions()) {
+
+				for (MatchableNode c : candidatesFilter.getPotentialsFor(defn)) {
+
+					checkSubsumption(defined, defn, c);
+				}
+			}
+		}
+
+		private void setNewInferredSubsumptions() {
+
+			for (MatchableNode c : passCandidates) {
+
+				c.setNewInferredSubsumptions();
+			}
+		}
+
+		private void expandNewInferredSubsumptions() {
+
+			while (true) {
+
+				boolean expansions = false;
+
+				for (NodeName c : allNodes) {
+
+					expansions |= c.getClassifier().expandNewInferredSubsumers();
+				}
+
+				if (!expansions) {
+
+					break;
+				}
+			}
+		}
+
+		private void findAnyReclassifiables() {
+
+			for (MatchableNode c : matchables.getAll()) {
+
+				if (c.reclassifiable()) {
+
+					reclassifiables.add(c);
+				}
+			}
+		}
+
+		private void resetNewInferredSubsumptions() {
+
+			for (Name n : allNodes) {
+
+				n.getClassifier().resetNewInferredSubsumers();
+			}
+		}
+
+		private void resetAllReclassifiablesReferences() {
+
+			for (MatchableNode m : reclassifiables) {
+
+				m.resetAllReferences();
+			}
+		}
+	}
 
 	OntologyClassifier(Ontology ontology) {
 
-		this.ontology = ontology;
+		allNodes = ontology.getAllNodeNames();
+		matchables = ontology.getMatchables();
 
 		classify();
 	}
 
-	Collection<MatchableNode> perfomPass(Collection<MatchableNode> passCandidates) {
+	private void classify() {
 
-		candidatesFilter = new PotentialSubsumeds(passCandidates);
+		Collection<MatchableNode> passCandidates = matchables.getAll();
 
-		return super.perfomPass(passCandidates);
-	}
+		do {
 
-	void checkSubsumptions(Collection<MatchableNode> passCandidates) {
-
-		for (MatchableNode d : ontology.getMatchables().getDefineds()) {
-
-			checkDefinedSubsumptions(d);
+			passCandidates = new ClassificationPass(passCandidates).perfomPass();
 		}
-	}
-
-	boolean dynamicClassification() {
-
-		return false;
-	}
-
-	Collection<NodeName> getAllCandidates() {
-
-		return ontology.getAllNodeNames();
-	}
-
-	Collection<MatchableNode> getMatchableCandidates() {
-
-		return ontology.getMatchables().getAll();
-	}
-
-	private void checkDefinedSubsumptions(MatchableNode defined) {
-
-		for (NodePattern defn : defined.getDefinitions()) {
-
-			for (MatchableNode c : candidatesFilter.getPotentialsFor(defn)) {
-
-				checkSubsumption(defined, defn, c);
-			}
-		}
+		while (!passCandidates.isEmpty());
 	}
 }

@@ -31,12 +31,10 @@ import java.util.*;
  */
 class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
-	private Ontology ontology;
 	private NodeName name;
 
-	DynamicNodeOpsHandler(Ontology ontology, NodeName name) {
+	DynamicNodeOpsHandler(NodeName name) {
 
-		this.ontology = ontology;
 		this.name = name;
 	}
 
@@ -131,7 +129,7 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	private void checkAddMatchable(Collection<MatchableNode> ms, NodeName n) {
 
-		MatchableNode m = ontology.getMatchables().lookFor(n);
+		MatchableNode m = n.getMatchable();
 
 		if (m != null) {
 

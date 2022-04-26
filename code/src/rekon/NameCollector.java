@@ -41,14 +41,14 @@ abstract class NameCollector {
 		return signatureOptions.collectUnranked(sign);
 	}
 
-	static Names forDefinitionRequestOnePassMatch(NodePattern defn) {
+	static Names forDefinitionRequestExtendedMatch(NodePattern defn) {
 
-		return definitionRequestsOnePassMatch.collectUnranked(defn);
+		return definitionRequestsExtendedMatch.collectUnranked(defn);
 	}
 
-	static Names forSignatureOptionOnePassMatch(NodePattern sign) {
+	static Names forSignatureOptionExtendedMatch(NodePattern sign) {
 
-		return signatureOptionsOnePassMatch.collectUnranked(sign);
+		return signatureOptionsExtendedMatch.collectUnranked(sign);
 	}
 
 	static List<Names> forSignatureRequestRanked(NodePattern defn) {
@@ -64,8 +64,8 @@ abstract class NameCollector {
 	static final NameCollector definitionRequests = new RootNameCollector(true, true, false);
 	static final NameCollector signatureOptions = new RootNameCollector(false, false, false);
 
-	static final NameCollector definitionRequestsOnePassMatch = new RootNameCollector(true, true, true);
-	static final NameCollector signatureOptionsOnePassMatch = new RootNameCollector(false, false, true);
+	static final NameCollector definitionRequestsExtendedMatch = new RootNameCollector(true, true, true);
+	static final NameCollector signatureOptionsExtendedMatch = new RootNameCollector(false, false, true);
 
 	static final NameCollector signatureRequests = new RootNameCollector(false, false, false);
 	static final NameCollector definitionOptions = new RootNameCollector(true, false, false);
@@ -74,17 +74,17 @@ abstract class NameCollector {
 
 		private boolean definition;
 		private boolean request;
-		private boolean onePassMatch;
+		private boolean extendedMatch;
 
 		private boolean ranked = false;
 
-		RootNameCollector(boolean definition, boolean request, boolean onePassMatch) {
+		RootNameCollector(boolean definition, boolean request, boolean extendedMatch) {
 
 			super(new ArrayList<Names>());
 
 			this.definition = definition;
 			this.request = request;
-			this.onePassMatch = onePassMatch;
+			this.extendedMatch = extendedMatch;
 		}
 
 		boolean definition() {
@@ -97,9 +97,9 @@ abstract class NameCollector {
 			return request;
 		}
 
-		boolean onePassMatch() {
+		boolean extendedMatch() {
 
-			return onePassMatch;
+			return extendedMatch;
 		}
 
 		boolean ranked() {
@@ -158,9 +158,9 @@ abstract class NameCollector {
 			return rootCollector.request();
 		}
 
-		boolean onePassMatch() {
+		boolean extendedMatch() {
 
-			return rootCollector.onePassMatch();
+			return rootCollector.extendedMatch();
 		}
 
 		boolean ranked() {
@@ -194,7 +194,7 @@ abstract class NameCollector {
 		return !request();
 	}
 
-	abstract boolean onePassMatch();
+	abstract boolean extendedMatch();
 
 	abstract boolean ranked();
 
