@@ -31,36 +31,6 @@ import java.util.*;
  */
 abstract class NameCollector {
 
-	static Names forDefinitionRequest(NodePattern defn) {
-
-		return definitionRequests.collectUnranked(defn);
-	}
-
-	static Names forSignatureOption(NodePattern sign) {
-
-		return signatureOptions.collectUnranked(sign);
-	}
-
-	static Names forDefinitionRequestExtendedMatch(NodePattern defn) {
-
-		return definitionRequestsExtendedMatch.collectUnranked(defn);
-	}
-
-	static Names forSignatureOptionExtendedMatch(NodePattern sign) {
-
-		return signatureOptionsExtendedMatch.collectUnranked(sign);
-	}
-
-	static List<Names> forSignatureRequestRanked(NodePattern defn) {
-
-		return definitionRequests.collectRanked(defn);
-	}
-
-	static List<Names> forDefinitionOptionRanked(NodePattern defn) {
-
-		return definitionOptions.collectRanked(defn);
-	}
-
 	static final NameCollector definitionRequests = new RootNameCollector(true, true, false);
 	static final NameCollector signatureOptions = new RootNameCollector(false, false, false);
 
