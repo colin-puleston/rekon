@@ -161,7 +161,74 @@ class RekonOps {
 
 	private abstract class OWLLinkedClassesGrouper extends OWLClassesGrouper {
 
-		private NameSet mappedDirectsSubset = null;
+		private FreeDirectsHandler freeDirectsHandler = new FreeDirectsHandler();
+
+		private class FreeDirectsHandler {
+
+			private NameSet mappedDirectsSubset = new NameSet();
+
+			boolean checkConfigure(Names names) {
+
+				List<Name> mappedDirects = new ArrayList<Name>();
+
+				for (Name n : names.getNames()) {
+
+					if (n.mapped()) {
+
+						mappedDirects.add(n);
+					}
+				}
+
+				if (mappedDirects.size() != names.size()) {
+
+					mappedDirectsSubset.addAll(mappedDirects);
+
+					return true;
+				}
+
+				return false;
+			}
+
+			void clear() {
+
+				mappedDirectsSubset.clear();
+			}
+
+			void addOWLEntitiesForClosestMapped(Set<OWLClass> entities, Name name) {
+
+				for (Name ln : getDirectlyLinkeds(name).getNames()) {
+
+					if (ln.mapped()) {
+
+						if (!mappedPathToAnyMappedDirect(ln)) {
+
+							addOWLEntity(entities, ln);
+						}
+					}
+					else {
+
+						addOWLEntitiesForClosestMapped(entities, ln);
+					}
+				}
+			}
+
+			private boolean mappedPathToAnyMappedDirect(Name name) {
+
+				for (Name ln : getReverseDirectlyLinkeds(name).getNames()) {
+
+					if (ln.mapped()) {
+
+						if (mappedDirectsSubset.contains(ln)
+							|| mappedPathToAnyMappedDirect(ln)) {
+
+							return true;
+						}
+					}
+				}
+
+				return false;
+			}
+		}
 
 		NodeSet<OWLClass> toEquivGroups(Names names, boolean direct) {
 
@@ -183,10 +250,7 @@ class RekonOps {
 			}
 			else {
 
-				if (mappedDirectsSubset != null) {
-
-					addOWLEntitiesForClosestMapped(entities, name);
-				}
+				freeDirectsHandler.addOWLEntitiesForClosestMapped(entities, name);
 			}
 		}
 
@@ -198,69 +262,16 @@ class RekonOps {
 
 		private Set<Node<OWLClass>> toEquivGroupsSet(Names names, boolean direct) {
 
-			if (direct) {
+			if (direct && freeDirectsHandler.checkConfigure(names)) {
 
-				configureForAnyFreeDirects(names);
+				Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
+
+				freeDirectsHandler.clear();
+
+				return groups;
 			}
 
-			Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
-
-			mappedDirectsSubset = null;
-
-			return groups;
-		}
-
-		private void configureForAnyFreeDirects(Names names) {
-
-			List<Name> mappedDirects = new ArrayList<Name>();
-
-			for (Name n : names.getNames()) {
-
-				if (n.mapped()) {
-
-					mappedDirects.add(n);
-				}
-			}
-
-			if (mappedDirects.size() != names.size()) {
-
-				mappedDirectsSubset = new NameSet(mappedDirects);
-			}
-		}
-
-		private void addOWLEntitiesForClosestMapped(Set<OWLClass> entities, Name name) {
-
-			for (Name ln : getDirectlyLinkeds(name).getNames()) {
-
-				if (ln.mapped()) {
-
-					if (!mappedPathToAnyMappedDirect(ln)) {
-
-						addOWLEntity(entities, ln);
-					}
-				}
-				else {
-
-					addOWLEntitiesForClosestMapped(entities, ln);
-				}
-			}
-		}
-
-		private boolean mappedPathToAnyMappedDirect(Name name) {
-
-			for (Name ln : getReverseDirectlyLinkeds(name).getNames()) {
-
-				if (ln.mapped()) {
-
-					if (mappedDirectsSubset.contains(ln)
-						|| mappedPathToAnyMappedDirect(ln)) {
-
-						return true;
-					}
-				}
-			}
-
-			return false;
+			return toEquivGroupsSet(names);
 		}
 	}
 
