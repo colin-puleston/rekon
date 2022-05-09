@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialSubsumeds extends PotentialNodeMatches {
+class PotentialSubsumeds extends PotentialPatternMatches {
 
 	PotentialSubsumeds(Collection<MatchableNode> allOptions) {
 

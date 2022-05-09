@@ -220,12 +220,12 @@ class DynamicPatternOps {
 
 			NameSet equivs = inferSubsumedClasses(subsumers);
 
-			if (equivs.isEmpty()) {
+			if (!equivs.isEmpty()) {
 
-				return superClassesResolver.resolve(subsumers, direct);
+				return equivs.getFirstName().getSupers(direct);
 			}
 
-			return equivs.getFirstName().getSupers(direct);
+			return superClassesResolver.resolve(subsumers, direct);
 		}
 
 		private Names inferSubs(boolean direct) {
@@ -239,12 +239,12 @@ class DynamicPatternOps {
 
 			Names equivs = inferEquivsForSubsumeds(subsumeds);
 
-			if (equivs.isEmpty()) {
+			if (!equivs.isEmpty()) {
 
-				return subClassesResolver.resolve(subsumeds, direct);
+				return equivs.getFirstName().getSubs(ClassName.class, direct);
 			}
 
-			return equivs.getFirstName().getSubs(ClassName.class, direct);
+			return subClassesResolver.resolve(subsumeds, direct);
 		}
 
 		private Names inferInstances(boolean direct) {

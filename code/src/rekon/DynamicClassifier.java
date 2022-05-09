@@ -33,74 +33,73 @@ class DynamicClassifier extends Classifier {
 
 	private PotentialSubsumers definedsFilter;
 
-	private class CandidateClassifier {
-
-		private Collection<MatchableNode> preFilteredDefineds;
-
-		CandidateClassifier(
-			MatchableNodes dynamicMatchables,
-			Collection<MatchableNode> preFilteredDefineds) {
-
-			this.preFilteredDefineds = preFilteredDefineds;
-
-			for (MatchableNode c : dynamicMatchables.getAll()) {
-
-				classifyCandidate(c);
-			}
-		}
-
-		private void classifyCandidate(MatchableNode c) {
-
-			do {
-
-				checkCandidateSubsumptions(c);
-				c.setNewInferredSubsumptions();
-			}
-			while (checkReclassifiable(c));
-		}
-
-		private boolean checkReclassifiable(MatchableNode c) {
-
-			Name n = c.getName();
-
-			if (n.reclassifiable()) {
-
-				n.getClassifier().resetNewInferredSubsumers();
-				c.resetAllReferences();
-
-				return true;
-			}
-
-			return false;
-		}
-
-		private void checkCandidateSubsumptions(MatchableNode c) {
-
-			for (MatchableNode defined : filterDefinedsFor(c.getProfile())) {
-
-				for (NodePattern defn : defined.getDefinitions()) {
-
-					checkSubsumption(defined, defn, c);
-				}
-			}
-		}
-
-		private Collection<MatchableNode> filterDefinedsFor(NodePattern p) {
-
-			return preFilteredDefineds != null
-					? preFilteredDefineds
-					: definedsFilter.getPotentialsFor(p);
-		}
-
-	}
-
 	DynamicClassifier(Ontology ontology) {
 
 		definedsFilter = new PotentialSubsumers(ontology.getMatchables().getDefineds());
 	}
 
-	void classify(MatchableNodes dynamicMatchables, Collection<MatchableNode> preFilteredDefineds) {
+	void classify(MatchableNodes dynamicMatchables, Collection<MatchableNode> defineds) {
 
-		new CandidateClassifier(dynamicMatchables, preFilteredDefineds);
+		for (MatchableNode c : dynamicMatchables.getAll()) {
+
+			classifyCandidate(c, defineds);
+		}
+	}
+
+	private void classifyCandidate(MatchableNode c, Collection<MatchableNode> defineds) {
+
+		do {
+
+			checkCandidateSubsumptions(c, defineds);
+			c.setNewInferredSubsumptions();
+		}
+		while (checkReclassifiable(c));
+	}
+
+	private void checkCandidateSubsumptions(MatchableNode c, Collection<MatchableNode> defineds) {
+
+		if (defineds == null) {
+
+			defineds = definedsFilter.getPotentialsFor(c.getProfile());
+		}
+
+		for (MatchableNode defined : defineds) {
+
+			checkCandidateSubsumptions(defined, c);
+		}
+	}
+
+	private void checkCandidateSubsumptions(MatchableNode defined, MatchableNode c) {
+
+		for (NodePattern defn : defined.getDefinitions()) {
+
+			checkSubsumptionXXX(defined, defn, c);
+		}
+	}
+
+	static void checkSubsumptionXXX(MatchableNode defined, NodePattern defn, MatchableNode cand) {
+
+		if (cand != defined && !defined.getName().subsumes(cand.getName())) {
+
+			if (defn.subsumes(cand.getProfile())) {
+
+				cand.checkNewInferredSubsumer(defined);
+			}
+		}
+	}
+
+	private boolean checkReclassifiable(MatchableNode c) {
+
+		Name n = c.getName();
+
+		if (n.reclassifiable()) {
+
+			n.getClassifier().resetNewInferredSubsumers();
+			c.resetAllReferences();
+
+			return true;
+		}
+
+		return false;
 	}
 }

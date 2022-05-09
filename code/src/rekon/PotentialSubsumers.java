@@ -34,7 +34,7 @@ class PotentialSubsumers {
 	private SimpleDefPotentials simpleDefPotentials;
 	private NestedDefPotentials nestedDefPotentials;
 
-	private abstract class CategoryPotentials extends PotentialNodeMatches {
+	private abstract class CategoryPotentials extends PotentialPatternMatches {
 
 		CategoryPotentials(Collection<MatchableNode> categoryOptions) {
 

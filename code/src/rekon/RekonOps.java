@@ -49,6 +49,8 @@ class RekonOps {
 	private SameIndividualsChecker sameIndividualsChecker = new SameIndividualsChecker();
 
 	private OWLClassesGrouper owlClassesGrouper;
+	private OWLSuperClassesGrouper owlSuperClassesGrouper;
+	private OWLSubClassesGrouper owlSubClassesGrouper;
 	private OWLIndividualsGrouper owlIndividualsGrouper = new OWLIndividualsGrouper();
 
 	private abstract class OWLGrouper<E extends OWLEntity> {
@@ -96,23 +98,28 @@ class RekonOps {
 
 		abstract NodeSet<E> createGroupsNode(Set<Node<E>> groups);
 
-		void checkAddOWLEntity(Set<E> entities, Name name) {
+		void checkAddOWLEntities(Set<E> entities, Name name) {
 
 			if (name.mapped()) {
 
-				entities.add(name.getOWLEntity(entityType));
+				addOWLEntity(entities, name);
 			}
+		}
+
+		void addOWLEntity(Set<E> entities, Name name) {
+
+			entities.add(name.getOWLEntity(entityType));
 		}
 
 		private void checkAddEquivGroup(Set<Node<E>> groups, Name name, Names equivs) {
 
 			Set<E> entities = new HashSet<E>();
 
-			checkAddOWLEntity(entities, name);
+			checkAddOWLEntities(entities, name);
 
 			for (Name e : equivs.getNames()) {
 
-				checkAddOWLEntity(entities, e);
+				checkAddOWLEntities(entities, e);
 			}
 
 			if (!entities.isEmpty()) {
@@ -135,20 +142,10 @@ class RekonOps {
 
 			for (Name n : equivs.getNames()) {
 
-				checkAddOWLEntity(entities, n);
+				checkAddOWLEntities(entities, n);
 			}
 
 			return new OWLClassNode(entities);
-		}
-
-		NodeSet<OWLClass> toSupersEquivGroups(Names names, boolean direct) {
-
-			return toEquivGroups(names, direct, owlThingAsEquivGroup);
-		}
-
-		NodeSet<OWLClass> toSubsEquivGroups(Names names, boolean direct) {
-
-			return toEquivGroups(names, direct, owlNothingAsEquivGroup);
 		}
 
 		Node<OWLClass> createGroupNode(Set<OWLClass> entities) {
@@ -160,20 +157,146 @@ class RekonOps {
 
 			return new OWLClassNodeSet(groups);
 		}
+	}
 
-		private NodeSet<OWLClass> toEquivGroups(
-										Names names,
-										boolean direct,
-										OWLClassNode defaultGroup) {
+	private abstract class OWLLinkedClassesGrouper extends OWLClassesGrouper {
 
-			Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
+		private NameSet mappedDirectsSubset = null;
+
+		NodeSet<OWLClass> toEquivGroups(Names names, boolean direct) {
+
+			Set<Node<OWLClass>> groups = toEquivGroupsSet(names, direct);
 
 			if (!direct || groups.isEmpty()) {
 
-				groups.add(defaultGroup);
+				groups.add(getDefaultEquivGroup());
 			}
 
 			return new OWLClassNodeSet(groups);
+		}
+
+		void checkAddOWLEntities(Set<OWLClass> entities, Name name) {
+
+			if (name.mapped()) {
+
+				addOWLEntity(entities, name);
+			}
+			else {
+
+				if (mappedDirectsSubset != null) {
+
+					addOWLEntitiesForClosestMapped(entities, name);
+				}
+			}
+		}
+
+		abstract OWLClassNode getDefaultEquivGroup();
+
+		abstract Names getDirectlyLinkeds(Name name);
+
+		abstract Names getReverseDirectlyLinkeds(Name name);
+
+		private Set<Node<OWLClass>> toEquivGroupsSet(Names names, boolean direct) {
+
+			if (direct) {
+
+				configureForAnyFreeDirects(names);
+			}
+
+			Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
+
+			mappedDirectsSubset = null;
+
+			return groups;
+		}
+
+		private void configureForAnyFreeDirects(Names names) {
+
+			List<Name> mappedDirects = new ArrayList<Name>();
+
+			for (Name n : names.getNames()) {
+
+				if (n.mapped()) {
+
+					mappedDirects.add(n);
+				}
+			}
+
+			if (mappedDirects.size() != names.size()) {
+
+				mappedDirectsSubset = new NameSet(mappedDirects);
+			}
+		}
+
+		private void addOWLEntitiesForClosestMapped(Set<OWLClass> entities, Name name) {
+
+			for (Name ln : getDirectlyLinkeds(name).getNames()) {
+
+				if (ln.mapped()) {
+
+					if (!mappedPathToAnyMappedDirect(ln)) {
+
+						addOWLEntity(entities, ln);
+					}
+				}
+				else {
+
+					addOWLEntitiesForClosestMapped(entities, ln);
+				}
+			}
+		}
+
+		private boolean mappedPathToAnyMappedDirect(Name name) {
+
+			for (Name ln : getReverseDirectlyLinkeds(name).getNames()) {
+
+				if (ln.mapped()) {
+
+					if (mappedDirectsSubset.contains(ln)
+						|| mappedPathToAnyMappedDirect(ln)) {
+
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+	}
+
+	private class OWLSuperClassesGrouper extends OWLLinkedClassesGrouper {
+
+		OWLClassNode getDefaultEquivGroup() {
+
+			return owlThingAsEquivGroup;
+		}
+
+		Names getDirectlyLinkeds(Name name) {
+
+			return name.getSupers(true);
+		}
+
+		Names getReverseDirectlyLinkeds(Name name) {
+
+			return name.getSubs(ClassName.class, true);
+		}
+	}
+
+	private class OWLSubClassesGrouper extends OWLLinkedClassesGrouper {
+
+		OWLClassNode getDefaultEquivGroup() {
+
+			return owlNothingAsEquivGroup;
+		}
+
+		Names getDirectlyLinkeds(Name name) {
+
+			return name.getSubs(ClassName.class, true);
+		}
+
+		Names getReverseDirectlyLinkeds(Name name) {
+
+			return name.getSupers(true);
 		}
 	}
 
@@ -240,10 +363,7 @@ class RekonOps {
 
 	RekonOps(OWLOntologyManager manager) {
 
-		Ontology ontology = new Ontology(new Assertions(manager));
-
-		dynamicOps = new DynamicOps(ontology);
-		owlClassesGrouper = new OWLClassesGrouper();
+		dynamicOps = new DynamicOps(new Ontology(new Assertions(manager)));
 
 		OWLDataFactory factory = manager.getOWLDataFactory();
 
@@ -252,6 +372,10 @@ class RekonOps {
 
 		owlThingAsEquivGroup = new OWLClassNode(owlThing);
 		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
+
+		owlClassesGrouper = new OWLClassesGrouper();
+		owlSubClassesGrouper = new OWLSubClassesGrouper();
+		owlSuperClassesGrouper = new OWLSuperClassesGrouper();
 	}
 
 	Node<OWLClass> getEquivalentClasses(OWLClassExpression expr) {
@@ -277,14 +401,14 @@ class RekonOps {
 
 		Names sups = dynamicOps.getSupers(resolveInputExpr(expr), direct);
 
-		return owlClassesGrouper.toSupersEquivGroups(sups, direct);
+		return owlSuperClassesGrouper.toEquivGroups(sups, direct);
 	}
 
 	NodeSet<OWLClass> getSubClasses(OWLClassExpression expr, boolean direct) {
 
 		Names subs = dynamicOps.getSubs(resolveInputExpr(expr), direct);
 
-		return owlClassesGrouper.toSubsEquivGroups(subs, direct);
+		return owlSubClassesGrouper.toEquivGroups(subs, direct);
 	}
 
 	NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression expr, boolean direct) {

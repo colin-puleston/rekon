@@ -33,8 +33,6 @@ abstract class Names {
 
 	static final Names NO_NAMES = new NameList();
 
-	private Boolean singleType = null;
-
 	public String toString() {
 
 		return getClass().getSimpleName() + "(" + getNames() + ")";
@@ -44,7 +42,7 @@ abstract class Names {
 
 	Names filterForType(Class<? extends Name> type) {
 
-		return hasSingleType(type) ? this : deriveForTypeOnly(type);
+		return allOfType(type) ? this : deriveForTypeOnly(type);
 	}
 
 	boolean add(Name name) {
@@ -98,36 +96,17 @@ abstract class Names {
 		return new ArrayList<Name>(getNames());
 	}
 
-	private boolean hasSingleType(Class<? extends Name> type) {
-
-		if (singleType == null) {
-
-			singleType = checkSingleType();
-		}
-
-		return singleType && type.isAssignableFrom(getFirstName().getClass());
-	}
-
-	private boolean checkSingleType() {
-
-		Class<? extends Name> type = null;
+	private boolean allOfType(Class<? extends Name> type) {
 
 		for (Name n : getNames()) {
 
-			if (type == null) {
+			if (!type.isAssignableFrom(n.getClass())) {
 
-				type = n.getClass();
-			}
-			else {
-
-				if (type.isAssignableFrom(n.getClass())) {
-
-					return false;
-				}
+				return false;
 			}
 		}
 
-		return type != null;
+		return true;
 	}
 
 	private NameList deriveForTypeOnly(Class<? extends Name> type) {

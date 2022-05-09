@@ -37,14 +37,11 @@ class NameClassification {
 
 	private Name name;
 
-	private NameSet subsumers;
-	private NameSet subsumeds = new NameSet();
-	private NameSet ancestors = null;
-
 	private NameSet equivalents = new NameSet();
+	private VerticalLinks supers = new Supers();
+	private VerticalLinks subs = new Subs();
 
-	private Supers supers = new Supers();
-	private Subs subs = new Subs();
+	private Initialiser initialiser;
 
 	private abstract class VerticalLinks {
 
@@ -60,7 +57,7 @@ class NameClassification {
 			return hasLinkTo(new NameSet(), n);
 		}
 
-		abstract VerticalLinks getSameLinksFor(Name name);
+		abstract VerticalLinks getSameLinksFor(Name n);
 
 		private Names collectAll(NameSet collected) {
 
@@ -94,72 +91,113 @@ class NameClassification {
 
 	private class Supers extends VerticalLinks {
 
-		void setVerticalLinks() {
+		VerticalLinks getSameLinksFor(Name n) {
 
-			setDirectSupers();
-			setAsDirectSub();
-		}
-
-		VerticalLinks getSameLinksFor(Name name) {
-
-			return getSupers(name);
-		}
-
-		private void setDirectSupers() {
-
-			directs.addAll(ancestors);
-
-			for (Name a : ancestors.getNames()) {
-
-				directs.removeAll(getAncestors(a));
-			}
-		}
-
-		private void setAsDirectSub() {
-
-			for (Name d : directs.getNames()) {
-
-				getSubs(d).directs.add(name);
-			}
+			return n.getClassification().supers;
 		}
 	}
 
 	private class Subs extends VerticalLinks {
 
-		VerticalLinks getSameLinksFor(Name name) {
+		VerticalLinks getSameLinksFor(Name n) {
 
-			return getSubs(name);
+			return n.getClassification().subs;
+		}
+	}
+
+	private class Initialiser {
+
+		private NameSet subsumers;
+		private NameSet subsumeds = new NameSet();
+		private NameSet ancestors = null;
+
+		Initialiser(NameSet subsumers) {
+
+			this.subsumers = subsumers;
+		}
+
+		void performInitialisationOp(int opIndex) {
+
+			switch (opIndex) {
+
+				case 0:
+					setAsSubsumedOfSubsumers();
+					break;
+
+				case 1:
+					setEquivalentsAndAncestors();
+					subsumers = null;
+					subsumeds = null;
+					break;
+
+				case 2:
+					setDirectLinks();
+					break;
+
+				case 3:
+					initialiser = null;
+					break;
+			}
+		}
+
+		private void setAsSubsumedOfSubsumers() {
+
+			for (Name s : subsumers.getNames()) {
+
+				getInitialiserFor(s).subsumeds.add(name);
+			}
+		}
+
+		private void setEquivalentsAndAncestors() {
+
+			equivalents.addAll(subsumers);
+			equivalents.retainAll(subsumeds);
+
+			ancestors = subsumers;
+
+			ancestors.removeAll(equivalents);
+		}
+
+		private void setDirectLinks() {
+
+			setDirectSupers();
+			setAsDirectSub();
+		}
+
+		private void setDirectSupers() {
+
+			supers.directs.addAll(ancestors);
+
+			for (Name a : ancestors.getNames()) {
+
+				supers.directs.removeAll(getInitialiserFor(a).ancestors);
+			}
+		}
+
+		private void setAsDirectSub() {
+
+			for (Name d : supers.directs.getNames()) {
+
+				d.getClassification().subs.directs.add(name);
+			}
+		}
+
+		private Initialiser getInitialiserFor(Name n) {
+
+			return n.getClassification().initialiser;
 		}
 	}
 
 	NameClassification(Name name, NameSet subsumers) {
 
 		this.name = name;
-		this.subsumers = subsumers;
+
+		initialiser = new Initialiser(subsumers);
 	}
 
 	void performInitialisationOp(int opIndex) {
 
-		switch (opIndex) {
-
-			case 0:
-				setAsSubsumedOfSubsumers();
-				break;
-
-			case 1:
-				setEquivalentsAndAncestors();
-				subsumers = null;
-				subsumeds = null;
-				break;
-
-			case 2:
-				supers.setVerticalLinks();
-				break;
-
-			case 3:
-				ancestors = null;
-				break;
-		}
+		initialiser.performInitialisationOp(opIndex);
 	}
 
 	boolean rootName() {
@@ -200,38 +238,5 @@ class NameClassification {
 	Names getSubs(Class<? extends Name> type, boolean direct) {
 
 		return subs.get(direct).filterForType(type);
-	}
-
-	private void setAsSubsumedOfSubsumers() {
-
-		for (Name s : subsumers.getNames()) {
-
-			s.getClassification().subsumeds.add(name);
-		}
-	}
-
-	private void setEquivalentsAndAncestors() {
-
-		equivalents.addAll(subsumers);
-		equivalents.retainAll(subsumeds);
-
-		ancestors = subsumers;
-
-		ancestors.removeAll(equivalents);
-	}
-
-	private Supers getSupers(Name n) {
-
-		return n.getClassification().supers;
-	}
-
-	private Subs getSubs(Name n) {
-
-		return n.getClassification().subs;
-	}
-
-	private NameSet getAncestors(Name n) {
-
-		return n.getClassification().ancestors;
 	}
 }

@@ -29,87 +29,87 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialNodeMatches {
+abstract class PotentialPatternMatches {
 
 	private Collection<MatchableNode> allOptions;
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
-	private class OptionSet {
-
-		private Set<MatchableNode> options = Collections.emptySet();
-		private int components = 0;
-
-		void addOptions(Set<MatchableNode> newOptions) {
-
-			if (components == 0) {
-
-				options = newOptions;
-			}
-			else {
-
-				if (components == 1) {
-
-					options = new HashSet<MatchableNode>(options);
-				}
-
-				options.addAll(newOptions);
-			}
-
-			components++;
-		}
-
-		Set<MatchableNode> getSet() {
-
-			return options;
-		}
-	}
-
 	private abstract class OptionCollector {
 
-		abstract boolean addSet(Set<MatchableNode> options);
+		abstract boolean absorb(Set<MatchableNode> options);
 
-		abstract void addToCollected(List<Set<MatchableNode>> optionSets);
+		abstract void absorbInto(OptionIntersection insect);
 	}
 
-	private class IntersectingOptionCollector extends OptionCollector {
+	private class OptionIntersection extends OptionCollector {
 
-		private List<Set<MatchableNode>> intersectionSets = new ArrayList<Set<MatchableNode>>();
+		private List<Set<MatchableNode>> optionSets = new ArrayList<Set<MatchableNode>>();
 
-		boolean addSet(Set<MatchableNode> set) {
+		boolean absorb(Set<MatchableNode> options) {
 
-			if (set.isEmpty()) {
+			if (options.isEmpty()) {
 
 				return false;
 			}
 
-			intersectionSets.add(set);
+			optionSets.add(options);
 
 			return true;
 		}
 
-		void addToCollected(List<Set<MatchableNode>> collectedSets) {
+		void absorbInto(OptionIntersection insect) {
 
-			collectedSets.addAll(intersectionSets);
+			insect.optionSets.addAll(optionSets);
+		}
+
+		boolean anyComponents() {
+
+			return !optionSets.isEmpty();
+		}
+
+		Set<MatchableNode> getIntersection() {
+
+			return SetIntersector.intersect(optionSets);
 		}
 	}
 
-	private class UnioningOptionCollector extends OptionCollector {
+	private class OptionUnion extends OptionCollector {
 
-		private OptionSet unionSet = new OptionSet();
+		private Set<MatchableNode> union = Collections.emptySet();
+		private int components = 0;
 
-		boolean addSet(Set<MatchableNode> set) {
+		boolean absorb(Set<MatchableNode> options) {
 
-			if (!set.isEmpty()) {
+			if (!options.isEmpty()) {
 
-				unionSet.addOptions(set);
+				if (components == 0) {
+
+					union = options;
+				}
+				else {
+
+					if (components == 1) {
+
+						union = new HashSet<MatchableNode>(union);
+					}
+
+					union.addAll(options);
+				}
+
+				components++;
 			}
 
 			return true;
 		}
 
-		void addToCollected(List<Set<MatchableNode>> collectedSets) {
+		void absorbInto(OptionIntersection insect) {
 
-			collectedSets.add(unionSet.getSet());
+			insect.absorb(union);
+		}
+
+		Set<MatchableNode> getUnion() {
+
+			return union;
 		}
 	}
 
@@ -129,52 +129,21 @@ abstract class PotentialNodeMatches {
 			}
 		}
 
-		boolean collectOptionSetsFor(Names rankNames, List<Set<MatchableNode>> optionSets) {
+		OptionCollector collectOptionsFor(Names rankNames) {
 
-			OptionCollector collector = createOptionCollector();
+			OptionCollector rankOptions = createOptionCollector();
 
 			for (Name n : rankNames.getNames()) {
 
-				OptionSet options = getOptionSetFor(n);
+				OptionUnion options = getOptionsFor(n);
 
-				if (options != null && !collector.addSet(options.getSet())) {
-
-					return false;
-				}
-			}
-
-			collector.addToCollected(optionSets);
-
-			return true;
-		}
-
-		private OptionCollector createOptionCollector() {
-
-			return unionRankOptionsForRetrieval()
-						? new UnioningOptionCollector()
-						: new IntersectingOptionCollector();
-		}
-
-		private OptionSet getOptionSetFor(Name n) {
-
-			OptionSet options = new OptionSet();
-
-			for (Name nr : resolveRetrievalNames(n).getNames()) {
-
-				if (namesCommonToAllOptions.contains(nr)) {
+				if (options != null && !rankOptions.absorb(options.getUnion())) {
 
 					return null;
 				}
-
-				Set<MatchableNode> opts = optionsByName.get(nr);
-
-				if (opts != null) {
-
-					options.addOptions(opts);
-				}
 			}
 
-			return options;
+			return rankOptions;
 		}
 
 		private void registerOptionName(MatchableNode option, Name n) {
@@ -198,9 +167,56 @@ abstract class PotentialNodeMatches {
 
 			options.add(option);
 		}
+
+		private OptionUnion getOptionsFor(Name n) {
+
+			OptionUnion options = new OptionUnion();
+
+			if (!collectDirectOptionsFor(n, options)) {
+
+				return null;
+			}
+
+			if (expandNamesForRetrieval()) {
+
+				for (Name s : n.getSubsumers().getNames()) {
+
+					if (!collectDirectOptionsFor(s, options)) {
+
+						return null;
+					}
+				}
+			}
+
+			return options;
+		}
+
+		private boolean collectDirectOptionsFor(Name n, OptionUnion options) {
+
+			if (namesCommonToAllOptions.contains(n)) {
+
+				return false;
+			}
+
+			Set<MatchableNode> opts = optionsByName.get(n);
+
+			if (opts != null) {
+
+				options.absorb(opts);
+			}
+
+			return true;
+		}
+
+		private OptionCollector createOptionCollector() {
+
+			return unionRankOptionsForRetrieval()
+						? new OptionUnion()
+						: new OptionIntersection();
+		}
 	}
 
-	PotentialNodeMatches(Collection<MatchableNode> allOptions) {
+	PotentialPatternMatches(Collection<MatchableNode> allOptions) {
 
 		this.allOptions = allOptions;
 
@@ -219,7 +235,7 @@ abstract class PotentialNodeMatches {
 			return Collections.emptySet();
 		}
 
-		List<Set<MatchableNode>> optionSets = new ArrayList<Set<MatchableNode>>();
+		OptionIntersection optionsInsect = new OptionIntersection();
 		int rank = 0;
 
 		for (Names rankNames : namesByRank) {
@@ -227,17 +243,20 @@ abstract class PotentialNodeMatches {
 			if (!rankNames.isEmpty()) {
 
 				RankMatches matches = allRankMatches.get(rank);
+				OptionCollector rankOptions = matches.collectOptionsFor(rankNames);
 
-				if (!matches.collectOptionSetsFor(rankNames, optionSets)) {
+				if (rankOptions == null) {
 
 					return Collections.emptySet();
 				}
+
+				rankOptions.absorbInto(optionsInsect);
 			}
 
 			rank++;
 		}
 
-		return optionSets.isEmpty() ? allOptions : SetIntersector.intersect(optionSets);
+		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : allOptions;
 	}
 
 	abstract boolean ignoreRootNamesForRegistration();
@@ -284,12 +303,5 @@ abstract class PotentialNodeMatches {
 	private Names resolveRegistrationNames(Names names) {
 
 		return expandNamesForRegistration() ? names.expandWithSubsumers() : names;
-	}
-
-	private Names resolveRetrievalNames(Name name) {
-
-		Names names = new NameSet(name);
-
-		return expandNamesForRetrieval() ? names.expandWithSubsumers() : names;
 	}
 }
