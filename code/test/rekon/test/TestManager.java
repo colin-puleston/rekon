@@ -32,10 +32,11 @@ import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.util.AutoIRIMapper;
 
 import org.semanticweb.elk.owlapi.ElkReasonerFactory;
-import uk.ac.manchester.cs.factplusplus.owlapiv3.FaCTPlusPlusReasonerFactory;
 import org.semanticweb.HermiT.ReasonerFactory;
 
-import rekon.RekonReasonerFactory;
+import uk.ac.manchester.cs.factplusplus.owlapiv3.FaCTPlusPlusReasonerFactory;
+
+import rekon.owl.RekonReasonerFactory;
 
 class TestManager {
 
