@@ -146,14 +146,14 @@ public class Compare {
 			Collection<OWLClass> clo = orderLinks(cl);
 
 			System.out.println("\nMISMATCH: " + c);
-			System.out.println("Rekon: " + rlo);
-			System.out.println("Control: " + clo);
+			System.out.println("REKON: " + rlo);
+			System.out.println("CONTROL: " + clo);
 
 			rlo.removeAll(cl);
 			clo.removeAll(rl);
 
-			System.out.println("Rekon-only: " + rlo);
-			System.out.println("Control-only: " + clo);
+			System.out.println("REKON-ONLY: " + rlo);
+			System.out.println("CONTROL-ONLY: " + clo);
 		}
 	}
 
