@@ -65,7 +65,7 @@ public class NameList extends Names {
 		names.clear();
 	}
 
-	NameSet toSet() {
+	public NameSet toSet() {
 
 		return new NameSet(names);
 	}

@@ -126,7 +126,7 @@ public class NameSet extends Names {
 		return false;
 	}
 
-	NameSet toSet() {
+	public NameSet toSet() {
 
 		return this;
 	}

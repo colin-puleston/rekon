@@ -67,7 +67,12 @@ public abstract class Names {
 
 	public abstract Collection<Name> getNames();
 
-	abstract NameSet toSet();
+	public Collection<Name> copyNames() {
+
+		return new ArrayList<Name>(getNames());
+	}
+
+	public abstract NameSet toSet();
 
 	Names filterForType(Class<? extends Name> type) {
 
@@ -89,11 +94,6 @@ public abstract class Names {
 	Name getFirstName() {
 
 		return getNames().iterator().next();
-	}
-
-	Collection<Name> copyNames() {
-
-		return new ArrayList<Name>(getNames());
 	}
 
 	private boolean allOfType(Class<? extends Name> type) {

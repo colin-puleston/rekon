@@ -104,13 +104,8 @@ class RekonOps {
 
 			if (name.mapped()) {
 
-				addEntity(entities, name);
+				entities.add(MappedNames.toMappedEntity(name, entityType));
 			}
-		}
-
-		void addEntity(Set<E> entities, Name name) {
-
-			entities.add(MappedNames.toMappedEntity(name, entityType));
 		}
 
 		private void checkAddEquivGroup(Set<Node<E>> groups, Name name, Names equivs) {
@@ -163,84 +158,12 @@ class RekonOps {
 
 	private abstract class LinkedClassesGrouper extends ClassesGrouper {
 
-		private FreeDirectsHandler freeDirectsHandler = new FreeDirectsHandler();
-
-		private class FreeDirectsHandler {
-
-			private NameSet mappedDirectsSubset = null;
-
-			boolean checkConfigure(Names names) {
-
-				List<Name> mappedDirects = new ArrayList<Name>();
-
-				for (Name n : names.getNames()) {
-
-					if (n.mapped()) {
-
-						mappedDirects.add(n);
-					}
-				}
-
-				if (mappedDirects.size() != names.size()) {
-
-					mappedDirectsSubset = new NameSet(mappedDirects);
-
-					return true;
-				}
-
-				return false;
-			}
-
-			void checkAddEntities(Set<OWLClass> entities, Name name) {
-
-				if (mappedDirectsSubset != null) {
-
-					addEntitiesForClosestMapped(entities, name);
-				}
-			}
-
-			void clear() {
-
-				mappedDirectsSubset = null;
-			}
-
-			private void addEntitiesForClosestMapped(Set<OWLClass> entities, Name name) {
-
-				for (Name ln : getDirectlyLinkeds(name).getNames()) {
-
-					if (ln.mapped()) {
-
-						if (!mappedPathToAnyMappedDirect(ln, new NameSet())) {
-
-							addEntity(entities, ln);
-						}
-					}
-					else {
-
-						addEntitiesForClosestMapped(entities, ln);
-					}
-				}
-			}
-
-			private boolean mappedPathToAnyMappedDirect(Name name, NameSet visited) {
-
-				for (Name ln : getReverseDirectlyLinkeds(name).getNames()) {
-
-					if (visited.add(ln) && ln.mapped()) {
-
-						if (mappedDirectsSubset.contains(ln)
-							|| mappedPathToAnyMappedDirect(ln, visited)) {
-
-							return true;
-						}
-					}
-				}
-
-				return false;
-			}
-		}
-
 		NodeSet<OWLClass> toEquivGroups(Names names, boolean direct) {
+
+			if (direct && anyFreeNames(names)) {
+
+				names = resolveForFreeDirects(names);
+			}
 
 			Set<Node<OWLClass>> groups = toEquivGroupsSet(names, direct);
 
@@ -252,36 +175,49 @@ class RekonOps {
 			return new OWLClassNodeSet(groups);
 		}
 
-		void checkAddEntities(Set<OWLClass> entities, Name name) {
-
-			if (name.mapped()) {
-
-				addEntity(entities, name);
-			}
-			else {
-
-				freeDirectsHandler.checkAddEntities(entities, name);
-			}
-		}
-
 		abstract OWLClassNode getDefaultEquivGroup();
 
-		abstract Names getDirectlyLinkeds(Name name);
+		abstract Names getAllLinked(Name name);
 
-		abstract Names getReverseDirectlyLinkeds(Name name);
+		private Names resolveForFreeDirects(Names rawDirects) {
 
-		private Set<Node<OWLClass>> toEquivGroupsSet(Names names, boolean direct) {
+			NameSet resDirects = new NameSet();
 
-			if (direct && freeDirectsHandler.checkConfigure(names)) {
+			for (Name d : rawDirects.getNames()) {
 
-				Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
+				if (d.mapped()) {
 
-				freeDirectsHandler.clear();
+					resDirects.add(d);
+				}
 
-				return groups;
+				for (Name l : getAllLinked(d).getNames()) {
+
+					if (l.mapped()) {
+
+						resDirects.add(l);
+					}
+				}
 			}
 
-			return toEquivGroupsSet(names);
+			for (Name d : resDirects.copyNames()) {
+
+				resDirects.removeAll(getAllLinked(d));
+			}
+
+			return resDirects;
+		}
+
+		private boolean anyFreeNames(Names names) {
+
+			for (Name n : names.getNames()) {
+
+				if (!n.mapped()) {
+
+					return true;
+				}
+			}
+
+			return false;
 		}
 	}
 
@@ -292,14 +228,9 @@ class RekonOps {
 			return owlThingAsEquivGroup;
 		}
 
-		Names getDirectlyLinkeds(Name name) {
+		Names getAllLinked(Name name) {
 
-			return name.getSupers(true);
-		}
-
-		Names getReverseDirectlyLinkeds(Name name) {
-
-			return name.getSubs(ClassName.class, true);
+			return name.getSupers(false);
 		}
 	}
 
@@ -310,14 +241,9 @@ class RekonOps {
 			return owlNothingAsEquivGroup;
 		}
 
-		Names getDirectlyLinkeds(Name name) {
+		Names getAllLinked(Name name) {
 
-			return name.getSubs(ClassName.class, true);
-		}
-
-		Names getReverseDirectlyLinkeds(Name name) {
-
-			return name.getSupers(true);
+			return name.getSubs(ClassName.class, false);
 		}
 	}
 
