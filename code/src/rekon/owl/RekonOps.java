@@ -165,7 +165,7 @@ class RekonOps {
 				names = resolveForFreeDirects(names);
 			}
 
-			Set<Node<OWLClass>> groups = toEquivGroupsSet(names, direct);
+			Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
 
 			if (!direct || groups.isEmpty()) {
 
@@ -177,7 +177,7 @@ class RekonOps {
 
 		abstract OWLClassNode getDefaultEquivGroup();
 
-		abstract Names getAllLinked(Name name);
+		abstract Names getLinked(Name name, boolean direct);
 
 		private Names resolveForFreeDirects(Names rawDirects) {
 
@@ -185,26 +185,28 @@ class RekonOps {
 
 			for (Name d : rawDirects.getNames()) {
 
-				if (d.mapped()) {
-
-					resDirects.add(d);
-				}
-
-				for (Name l : getAllLinked(d).getNames()) {
-
-					if (l.mapped()) {
-
-						resDirects.add(l);
-					}
-				}
+				collectLinkedMappeds(resDirects, d);
 			}
 
 			for (Name d : resDirects.copyNames()) {
 
-				resDirects.removeAll(getAllLinked(d));
+				resDirects.removeAll(getLinked(d, false));
 			}
 
 			return resDirects;
+		}
+
+		private void collectLinkedMappeds(NameSet collected, Name n) {
+
+			if (n.mapped()) {
+
+				collected.add(n);
+			}
+
+			for (Name l : getLinked(n, true).getNames()) {
+
+				collectLinkedMappeds(collected, l);
+			}
 		}
 
 		private boolean anyFreeNames(Names names) {
@@ -228,9 +230,9 @@ class RekonOps {
 			return owlThingAsEquivGroup;
 		}
 
-		Names getAllLinked(Name name) {
+		Names getLinked(Name name, boolean direct) {
 
-			return name.getSupers(false);
+			return name.getSupers(direct);
 		}
 	}
 
@@ -241,9 +243,9 @@ class RekonOps {
 			return owlNothingAsEquivGroup;
 		}
 
-		Names getAllLinked(Name name) {
+		Names getLinked(Name name, boolean direct) {
 
-			return name.getSubs(ClassName.class, false);
+			return name.getSubs(ClassName.class, direct);
 		}
 	}
 
