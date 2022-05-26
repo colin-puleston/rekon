@@ -53,6 +53,11 @@ public class NodeValue extends ObjectValue {
 		return disjuncts;
 	}
 
+	void registerDefinitionNames() {
+
+		disjuncts.registerAsDefinitionNames();
+	}
+
 	void collectNames(NameCollector collector) {
 
 		if (collector.definition()) {
@@ -130,14 +135,12 @@ public class NodeValue extends ObjectValue {
 
 			collector.collectFor(d);
 
-			if (collector.extendedMatch()) {
+			NodePattern p = ((NodeName)d).getProfile();
 
-				NodePattern p = ((NodeName)d).getProfile();
+			if (p != null && collector.startMatchExtension(d)) {
 
-				if (p != null) {
-
-					p.collectNames(collector);
-				}
+				p.collectNames(collector);
+				collector.endMatchExtension();
 			}
 		}
 	}

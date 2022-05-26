@@ -33,16 +33,14 @@ abstract class FreeOntologyClasses extends FreeClasses {
 
 	private Collection<NodeName> ontologyNodes;
 
-	FreeOntologyClasses(MatchableNodes matchables, Collection<NodeName> ontologyNodes) {
-
-		super(matchables);
+	FreeOntologyClasses(Collection<NodeName> ontologyNodes) {
 
 		this.ontologyNodes = ontologyNodes;
 	}
 
-	FreeClassName create(ClassName sup, Collection<NodePattern> defns) {
+	ClassName create(ClassName sup, Collection<NodePattern> defns) {
 
-		FreeClassName n = super.create(sup, defns);
+		ClassName n = super.create(sup, defns);
 
 		ontologyNodes.add(n);
 

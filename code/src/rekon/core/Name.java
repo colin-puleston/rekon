@@ -32,6 +32,8 @@ public abstract class Name {
 	private NameClassifier classifier = new NameClassifier(this);
 	private NameClassification classification = null;
 
+	private boolean definitionName = false;
+
 	public void addSubsumer(Name subsumer) {
 
 		classifier.addAssertedSubsumer(subsumer);
@@ -74,6 +76,16 @@ public abstract class Name {
 		return classifier != null ? classifier.rootName() : classification.rootName();
 	}
 
+	public boolean definitionName() {
+
+		return definitionName;
+	}
+
+	void registerAsDefinitionName() {
+
+		definitionName = true;
+	}
+
 	void completeClassification() {
 
 		classification = classifier.createClassification();
@@ -104,11 +116,6 @@ public abstract class Name {
 	boolean dynamic() {
 
 		return false;
-	}
-
-	void collectNames(NameSet collected) {
-
-		collected.add(this);
 	}
 
 	boolean reclassifiable() {

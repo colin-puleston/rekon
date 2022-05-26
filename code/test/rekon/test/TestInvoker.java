@@ -28,6 +28,8 @@ import java.io.*;
 
 abstract class TestInvoker<O extends TestOpts> {
 
+	private File GENEERAL_TESTS_DIR = new File("test/ontologies/test");
+
 	TestInvoker(String[] args) {
 
 		TestConfig config = new TestConfig(args);
@@ -49,7 +51,7 @@ abstract class TestInvoker<O extends TestOpts> {
 
 	private void runGeneralTests(O customOpts, ReasonerOpt reasonerOpt) {
 
-		for (File file : new File("test").listFiles()) {
+		for (File file : GENEERAL_TESTS_DIR.listFiles()) {
 
 			if (file.getName().endsWith(".owl")) {
 

@@ -74,6 +74,14 @@ public abstract class Names {
 
 	public abstract NameSet toSet();
 
+	void registerAsDefinitionNames() {
+
+		for (Name n : getNames()) {
+
+			n.registerAsDefinitionName();
+		}
+	}
+
 	Names filterForType(Class<? extends Name> type) {
 
 		return allOfType(type) ? this : deriveForTypeOnly(type);
@@ -81,19 +89,35 @@ public abstract class Names {
 
 	NameSet expandWithSubsumers() {
 
-		NameSet expanded = new NameSet(this);
+		return expandWithSubsumers(false);
+	}
 
-		for (Name n : getNames()) {
+	NameSet expandWithDefinitionSubsumers() {
 
-			expanded.addAll(n.getSubsumers().getNames());
-		}
-
-		return expanded;
+		return expandWithSubsumers(true);
 	}
 
 	Name getFirstName() {
 
 		return getNames().iterator().next();
+	}
+
+	private NameSet expandWithSubsumers(boolean defnNamesOnly) {
+
+		NameSet expanded = new NameSet(this);
+
+		for (Name n : getNames()) {
+
+			for (Name s : n.getSubsumers().getNames()) {
+
+				if (!defnNamesOnly || s.definitionName()) {
+
+					expanded.add(s);
+				}
+			}
+		}
+
+		return expanded;
 	}
 
 	private boolean allOfType(Class<? extends Name> type) {

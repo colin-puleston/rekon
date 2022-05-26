@@ -31,22 +31,11 @@ import java.util.*;
  */
 abstract class FreeClasses {
 
-	private MatchableNodes matchables;
 	private int index = 0;
 
-	FreeClasses(MatchableNodes matchables) {
+	ClassName create(ClassName sup, Collection<NodePattern> defns) {
 
-		this.matchables = matchables;
-	}
-
-	FreeClassName create(ClassName sup, NodePattern defn) {
-
-		return create(sup, Collections.singleton(defn));
-	}
-
-	FreeClassName create(ClassName sup, Collection<NodePattern> defns) {
-
-		FreeClassName n = createClassName(index++);
+		ClassName n = createClassName(index++);
 		NameClassifier classifier = n.getClassifier();
 
 		if (sup != null) {
@@ -60,10 +49,9 @@ abstract class FreeClasses {
 		}
 
 		classifier.onPostAssertionAdditions();
-		matchables.addForFreeClass(n, defns);
 
 		return n;
 	}
 
-	abstract FreeClassName createClassName(int index);
+	abstract ClassName createClassName(int index);
 }

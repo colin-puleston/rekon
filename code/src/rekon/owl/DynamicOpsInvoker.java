@@ -37,15 +37,15 @@ class DynamicOpsInvoker {
 
 	private DynamicOps dynamicOps;
 	private MappedNames mappedNames;
-	private PatternComponents patternComponents;
+	private MatchComponents matchComponents;
 
-	private class ExprPatternCreator implements NodePatternCreator {
+	private class ExprPatternCreator implements PatternCreator {
 
 		private OWLClassExpression expr;
 
-		public NodePattern createNestedPatterns(PatternClasses patternClasses) {
+		public NodePattern createNestedPatterns(MatchStructures matchStructures) {
 
-			return createPatternComponents(patternClasses).toNodePattern(expr);
+			return createMatchComponents(matchStructures).toNodePattern(expr);
 		}
 
 		ExprPatternCreator(OWLClassExpression expr) {
@@ -53,20 +53,20 @@ class DynamicOpsInvoker {
 			this.expr = expr;
 		}
 
-		private PatternComponents createPatternComponents(PatternClasses patternClasses) {
+		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
 
-			return new PatternComponents(mappedNames, patternClasses, true);
+			return new MatchComponents(mappedNames, matchStructures, true);
 		}
 	}
 
 	DynamicOpsInvoker(
 		DynamicOps dynamicOps,
 		MappedNames mappedNames,
-		PatternComponents patternComponents) {
+		MatchComponents matchComponents) {
 
 		this.dynamicOps = dynamicOps;
 		this.mappedNames = mappedNames;
-		this.patternComponents = patternComponents;
+		this.matchComponents = matchComponents;
 	}
 
 	Names getEquivalents(OWLClassExpression expr) {

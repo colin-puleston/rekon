@@ -148,6 +148,11 @@ abstract class PotentialPatternMatches {
 
 		private void registerOptionName(MatchableNode option, Name n) {
 
+			if (namesCommonToAllOptions.contains(n)) {
+
+				return;
+			}
+
 			Set<MatchableNode> options = optionsByName.get(n);
 
 			if (options == null) {
@@ -162,6 +167,8 @@ abstract class PotentialPatternMatches {
 
 					optionsByName.remove(n);
 					namesCommonToAllOptions.add(n);
+
+					return;
 				}
 			}
 
@@ -181,7 +188,7 @@ abstract class PotentialPatternMatches {
 
 				for (Name s : n.getSubsumers().getNames()) {
 
-					if (!collectDirectOptionsFor(s, options)) {
+					if (n.definitionName() && !collectDirectOptionsFor(s, options)) {
 
 						return null;
 					}
@@ -302,6 +309,6 @@ abstract class PotentialPatternMatches {
 
 	private Names resolveRegistrationNames(Names names) {
 
-		return expandNamesForRegistration() ? names.expandWithSubsumers() : names;
+		return expandNamesForRegistration() ? names.expandWithDefinitionSubsumers() : names;
 	}
 }

@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class DynamicPatternClasses extends FreeClasses implements PatternClasses {
+class DynamicPatternClasses extends FreeClasses {
 
 	static private class DynamicPatternName extends FreeClassName {
 
@@ -42,17 +42,7 @@ class DynamicPatternClasses extends FreeClasses implements PatternClasses {
 		}
 	}
 
-	public FreeClassName create(NodePattern defn) {
-
-		return create(null, defn);
-	}
-
-	DynamicPatternClasses(MatchableNodes matchables) {
-
-		super(matchables);
-	}
-
-	FreeClassName createClassName(int index) {
+	ClassName createClassName(int index) {
 
 		return new DynamicPatternName(index);
 	}

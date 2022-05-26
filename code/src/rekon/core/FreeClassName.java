@@ -32,7 +32,6 @@ abstract class FreeClassName extends ClassName {
 	static private final String LABEL_FORMAT = "[%s-%d]";
 
 	private int index;
-	private NameSet assertedSubsumers = new NameSet();
 
 	public String getLabel() {
 
@@ -47,16 +46,5 @@ abstract class FreeClassName extends ClassName {
 	FreeClassName(int index) {
 
 		this.index = index;
-	}
-
-	void addAssertedSubsumer(Name subsumer) {
-
-		assertedSubsumers.add(subsumer);
-	}
-
-	void collectNames(NameSet collected) {
-
-		collected.add(this);
-		collected.addAll(assertedSubsumers);
 	}
 }

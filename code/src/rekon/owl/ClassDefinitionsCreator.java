@@ -33,25 +33,24 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class GCIsCreator {
+class ClassDefinitionsCreator {
 
 	private Assertions assertions;
 
 	private MappedNames mappedNames;
-	private PatternComponents patternComponents;
+	private MatchComponents matchComponents;
+	private MatchStructures matchStructures;
 
-	private GCIClasses gciClasses;
-
-	GCIsCreator(
+	ClassDefinitionsCreator(
 		Assertions assertions,
 		MappedNames mappedNames,
-		PatternComponents patternComponents,
-		GCIClasses gciClasses) {
+		MatchComponents matchComponents,
+		MatchStructures matchStructures) {
 
 		this.assertions = assertions;
 		this.mappedNames = mappedNames;
-		this.patternComponents = patternComponents;
-		this.gciClasses = gciClasses;
+		this.matchComponents = matchComponents;
+		this.matchStructures = matchStructures;
 
 		for (OWLEquivalentClassesAxiom ax : getEquivalenceAxioms()) {
 
@@ -72,26 +71,52 @@ class GCIsCreator {
 
 	private boolean createForEquivalents(OWLEquivalentClassesAxiom ax) {
 
-		Set<NodePattern> patterns = new HashSet<NodePattern>();
+		Set<NodePattern> defns = new HashSet<NodePattern>();
+		Set<NodePattern> subs = new HashSet<NodePattern>();
+
+		ClassName equivCls = null;
 
 		for (OWLClassExpression e : ax.getClassExpressions()) {
 
 			if (e instanceof OWLClass) {
 
-				return true;
+				equivCls = mappedNames.get((OWLClass)e);
 			}
+			else {
 
-			NodePattern p = patternComponents.toNodePattern(e);
+				List<NodePattern> djs = matchComponents.toNodePatternDisjunction(e);
 
-			if (p == null) {
+				if (djs == null) {
+
+					return false;
+				}
+
+				if (djs.size() == 1) {
+
+					defns.add(djs.get(0));
+				}
+				else {
+
+					subs.addAll(djs);
+				}
+			}
+		}
+
+		if (equivCls != null) {
+
+			matchStructures.addClassDefinitions(equivCls, defns);
+		}
+		else {
+
+			if (defns.isEmpty()) {
 
 				return false;
 			}
 
-			patterns.add(p);
+			equivCls = matchStructures.addImpliedClass(defns);
 		}
 
-		gciClasses.create(patterns);
+		matchStructures.addImpliedClasses(equivCls, subs);
 
 		return true;
 	}
@@ -105,30 +130,33 @@ class GCIsCreator {
 			return true;
 		}
 
-		NodePattern pSub = patternComponents.toNodePattern(sub);
+		List<NodePattern> pSubs = matchComponents.toNodePatternDisjunction(sub);
 
-		if (pSub == null) {
+		if (pSubs == null) {
 
 			return false;
 		}
 
 		OWLClassExpression sup = ax.getSuperClass();
+		ClassName supCls = null;
 
 		if (sup instanceof OWLClass) {
 
-			gciClasses.create(mappedNames.get((OWLClass)sup), pSub);
+			supCls = mappedNames.get((OWLClass)sup);
 		}
 		else {
 
-			NodePattern pSup = patternComponents.toNodePattern(sup);
+			NodePattern pSup = matchComponents.toNodePattern(sup);
 
 			if (pSup == null) {
 
 				return false;
 			}
 
-			gciClasses.create(gciClasses.create(pSup), pSub);
+			supCls = matchStructures.addImpliedClass(pSup);
 		}
+
+		matchStructures.addImpliedClasses(supCls, pSubs);
 
 		return true;
 	}

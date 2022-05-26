@@ -37,18 +37,29 @@ class OntologyInitialiserImpl implements OntologyInitialiser {
 
 	private Assertions assertions;
 
-	private MappedNames mappedNames;
-	private PatternComponents patternComponents;
+	private MappedNames mappedNames = null;
+	private MatchComponents matchComponents = null;
+	private MatchStructures matchStructures = null;
 
-	OntologyInitialiserImpl(OWLOntologyManager manager) {
+	public void setMatchStructures(MatchStructures matchStructures) {
 
-		assertions = new Assertions(manager);
+		this.matchStructures = matchStructures;
 	}
 
-	public void startInitialisation(PatternClasses patternClasses) {
+	public void createNameHierarchies() {
 
 		mappedNames = new MappedNames(assertions);
-		patternComponents = new PatternComponents(mappedNames, patternClasses, false);
+		matchComponents = new MatchComponents(mappedNames, matchStructures, false);
+	}
+
+	public void createNodeProfiles() {
+
+		new NodeProfilesCreator(assertions, mappedNames, matchComponents, matchStructures);
+	}
+
+	public void createClassDefinitions() {
+
+		new ClassDefinitionsCreator(assertions, mappedNames, matchComponents, matchStructures);
 	}
 
 	public Collection<ClassName> getClassNames() {
@@ -71,28 +82,13 @@ class OntologyInitialiserImpl implements OntologyInitialiser {
 		return mappedNames.getDataPropertyNames();
 	}
 
-	public void createClassMatchables(MatchableNodes matchables) {
+	OntologyInitialiserImpl(OWLOntologyManager manager) {
 
-		ClassMatchablesCreator c = new ClassMatchablesCreator(assertions, patternComponents);
-
-		for (ClassName n : mappedNames.getClassNames()) {
-
-			c.createForClass(n, matchables);
-		}
-
-		for (IndividualName n : mappedNames.getIndividualNames()) {
-
-			c.createForIndividual(n, matchables);
-		}
-	}
-
-	public void createGCIs(GCIClasses gciClasses) {
-
-		new GCIsCreator(assertions, mappedNames, patternComponents, gciClasses);
+		assertions = new Assertions(manager);
 	}
 
 	DynamicOpsInvoker createDynamicOpsInvoker(Ontology ontology) {
 
-		return new DynamicOpsInvoker(ontology.createDynamicOps(), mappedNames, patternComponents);
+		return new DynamicOpsInvoker(ontology.createDynamicOps(), mappedNames, matchComponents);
 	}
 }

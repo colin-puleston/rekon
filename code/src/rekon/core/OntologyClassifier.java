@@ -133,7 +133,7 @@ class OntologyClassifier extends Classifier {
 
 			for (MatchableNode m : reclassifiables) {
 
-				m.resetAllReferences();
+				m.resetSignatureRefs();
 			}
 		}
 	}

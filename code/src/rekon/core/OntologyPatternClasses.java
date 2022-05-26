@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class OntologyPatternClasses extends FreeOntologyClasses implements PatternClasses {
+class OntologyPatternClasses extends FreeOntologyClasses {
 
 	static private class OntologyPatternName extends FreeClassName {
 
@@ -39,17 +39,12 @@ class OntologyPatternClasses extends FreeOntologyClasses implements PatternClass
 		}
 	}
 
-	public FreeClassName create(NodePattern defn) {
+	OntologyPatternClasses(Collection<NodeName> ontologyNodes) {
 
-		return create(null, defn);
+		super(ontologyNodes);
 	}
 
-	OntologyPatternClasses(MatchableNodes matchables, Collection<NodeName> ontologyNodes) {
-
-		super(matchables, ontologyNodes);
-	}
-
-	FreeClassName createClassName(int index) {
+	ClassName createClassName(int index) {
 
 		return new OntologyPatternName(index);
 	}

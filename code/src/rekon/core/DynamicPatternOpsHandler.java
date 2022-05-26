@@ -131,8 +131,8 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private NodePattern pattern;
 
-	private MatchableNodes dynamicMatchables = new MatchableNodes();
-	private DynamicPatternClasses dynamicClasses = new DynamicPatternClasses(dynamicMatchables);
+	private MatchableNodes matchables = new MatchableNodes();
+	private MatchStructures matchStructures;
 
 	public Names getEquivalents() {
 
@@ -157,12 +157,13 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 	DynamicPatternOpsHandler(
 		PatternSubsumptions subsumptions,
 		DynamicClassifier classifier,
-		NodePatternCreator patternCreator) {
+		PatternCreator patternCreator) {
 
 		this.subsumptions = subsumptions;
 		this.classifier = classifier;
 
-		pattern = patternCreator.createNestedPatterns(dynamicClasses);
+		matchStructures = createMatchStructures();
+		pattern = patternCreator.createNestedPatterns(matchStructures);
 	}
 
 	DynamicOpsHandler checkResolveToNodeOpsHandler() {
@@ -282,9 +283,9 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private NameSet inferSubsumers(Collection<MatchableNode> preFilteredDefineds) {
 
-		ClassName n = dynamicClasses.create(pattern);
+		ClassName n = matchStructures.addPatternClass(pattern);
 
-		classifier.classify(dynamicMatchables, preFilteredDefineds);
+		classifier.classify(matchables, preFilteredDefineds);
 
 		return n.getClassifier().getSubsumers();
 	}
@@ -302,5 +303,10 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 	private NameSet inferSubsumedInstances() {
 
 		return subsumptions.inferSubsumedInstances(pattern);
+	}
+
+	private MatchStructures createMatchStructures() {
+
+		return new MatchStructures(matchables, new DynamicPatternClasses());
 	}
 }

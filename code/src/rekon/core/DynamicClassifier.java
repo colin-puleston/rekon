@@ -73,18 +73,7 @@ class DynamicClassifier extends Classifier {
 
 		for (NodePattern defn : defined.getDefinitions()) {
 
-			checkSubsumptionXXX(defined, defn, c);
-		}
-	}
-
-	static void checkSubsumptionXXX(MatchableNode defined, NodePattern defn, MatchableNode cand) {
-
-		if (cand != defined && !defined.getName().subsumes(cand.getName())) {
-
-			if (defn.subsumes(cand.getProfile())) {
-
-				cand.checkNewInferredSubsumer(defined);
-			}
+			checkSubsumption(defined, defn, c);
 		}
 	}
 
@@ -95,7 +84,7 @@ class DynamicClassifier extends Classifier {
 		if (n.reclassifiable()) {
 
 			n.getClassifier().resetNewInferredSubsumers();
-			c.resetAllReferences();
+			c.resetSignatureRefs();
 
 			return true;
 		}

@@ -36,15 +36,16 @@ public class Ontology {
 
 	public Ontology(OntologyInitialiser initialiser) {
 
-		initialiser.startInitialisation(createPatternClasses());
+		initialiser.setMatchStructures(createMatchStructures());
+		initialiser.createNameHierarchies();
 
 		nodeNames.addAll(initialiser.getClassNames());
 		nodeNames.addAll(initialiser.getIndividualNames());
 
 		processMappedNamesPostAdditions(getAllNames(initialiser));
 
-		initialiser.createClassMatchables(matchables);
-		initialiser.createGCIs(createGCIClasses());
+		initialiser.createNodeProfiles();
+		initialiser.createClassDefinitions();
 
 		new OntologyClassifier(this);
 
@@ -101,13 +102,11 @@ public class Ontology {
 		return allNames;
 	}
 
-	private PatternClasses createPatternClasses() {
+	private MatchStructures createMatchStructures() {
 
-		return new OntologyPatternClasses(matchables, nodeNames);
-	}
-
-	private GCIClasses createGCIClasses() {
-
-		return new GCIClasses(matchables, nodeNames);
+		return new MatchStructures(
+						matchables,
+						new OntologyPatternClasses(nodeNames),
+						new ImpliedOntologyClasses(nodeNames));
 	}
 }

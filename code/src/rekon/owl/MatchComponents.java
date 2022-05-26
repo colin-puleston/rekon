@@ -33,10 +33,10 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class PatternComponents {
+class MatchComponents {
 
 	private MappedNames mappedNames;
-	private PatternClasses patternClasses;
+	private MatchStructures matchStructures;
 
 	private NodeName rootNodeName;
 
@@ -51,6 +51,8 @@ class PatternComponents {
 	private DataValueRelations dataValueRelations = new DataValueRelations();
 
 	private DataTypes dataTypes;
+
+	private Map<OWLClassExpression, ClassName> patternClasses = new HashMap<OWLClassExpression, ClassName>();
 
 	private boolean dynamic;
 
@@ -88,56 +90,56 @@ class PatternComponents {
 		}
 	}
 
-	private class NodePatterns extends TypeEntities<OWLClassExpression, NodePattern> {
+	private class NodePatterns extends TypeEntities<NodePatternSpec, NodePattern> {
 
-		NodePattern checkCreate(OWLClassExpression source) {
+		NodePattern get(OWLClassExpression source) {
+
+			return get(new NodePatternSpec(source));
+		}
+
+		NodePattern checkCreate(NodePatternSpec source) {
+
+			List<OWLClassExpression> conjuncts = source.getConjuncts();
+
+			if (conjuncts.size() == 1) {
+
+				return checkCreate(conjuncts.get(0));
+			}
+
+			return checkCreateForConjuncts(conjuncts);
+		}
+
+		private NodePattern checkCreate(OWLClassExpression source) {
 
 			if (source instanceof OWLClass) {
 
 				return new NodePattern(mappedNames.get((OWLClass)source));
 			}
 
-			if (source instanceof OWLObjectOneOf) {
-
-				return checkCreate((OWLObjectOneOf)source);
-			}
-
 			if (source instanceof OWLObjectIntersectionOf) {
 
-				return checkCreate((OWLObjectIntersectionOf)source);
+				return checkCreateForConjuncts(((OWLObjectIntersectionOf)source).getOperands());
+			}
+
+			if (source instanceof OWLObjectOneOf) {
+
+				return checkCreateForIndividuals(((OWLObjectOneOf)source).getIndividuals());
 			}
 
 			if (source instanceof OWLRestriction) {
 
-				return checkCreate((OWLRestriction)source);
+				return checkCreateForRestriction((OWLRestriction)source);
 			}
 
 			return null;
 		}
 
-		private NodePattern checkCreate(OWLObjectOneOf source) {
-
-			Set<OWLIndividual> inds = source.getIndividuals();
-
-			if (inds.size() == 1) {
-
-				OWLIndividual ind = inds.iterator().next();
-
-				if (ind instanceof OWLNamedIndividual) {
-
-					return new NodePattern(mappedNames.get((OWLNamedIndividual)ind));
-				}
-			}
-
-			return null;
-		}
-
-		private NodePattern checkCreate(OWLObjectIntersectionOf source) {
+		private NodePattern checkCreateForConjuncts(Collection<OWLClassExpression> conjuncts) {
 
 			NameSet names = new NameSet();
 			Set<Relation> rels = new HashSet<Relation>();
 
-			for (OWLClassExpression op : source.getOperands()) {
+			for (OWLClassExpression op : conjuncts) {
 
 				if (op instanceof OWLClass) {
 
@@ -164,7 +166,22 @@ class PatternComponents {
 			return new NodePattern(names, rels);
 		}
 
-		private NodePattern checkCreate(OWLRestriction source) {
+		private NodePattern checkCreateForIndividuals(Collection<OWLIndividual> individuals) {
+
+			if (individuals.size() == 1) {
+
+				OWLIndividual ind = individuals.iterator().next();
+
+				if (ind instanceof OWLNamedIndividual) {
+
+					return new NodePattern(mappedNames.get((OWLNamedIndividual)ind));
+				}
+			}
+
+			return null;
+		}
+
+		private NodePattern checkCreateForRestriction(OWLRestriction source) {
 
 			Relation r = toRelation(source);
 
@@ -356,10 +373,152 @@ class PatternComponents {
 		}
 	}
 
-	PatternComponents(MappedNames mappedNames, PatternClasses patternClasses, boolean dynamic) {
+	private class NodePatternSpec {
+
+		private List<OWLClassExpression> conjuncts = new ArrayList<OWLClassExpression>();
+
+		public boolean equals(Object other) {
+
+			return conjuncts.equals(((NodePatternSpec)other).conjuncts);
+		}
+
+		public int hashCode() {
+
+			return conjuncts.hashCode();
+		}
+
+		NodePatternSpec() {
+		}
+
+		NodePatternSpec(OWLClassExpression source) {
+
+			expandFor(source);
+		}
+
+		void expandFor(OWLClassExpression source) {
+
+			if (source instanceof OWLObjectIntersectionOf) {
+
+				conjuncts.addAll(((OWLObjectIntersectionOf)source).getOperands());
+			}
+			else {
+
+				conjuncts.add(source);
+			}
+		}
+
+		NodePatternSpec copyAndExpandFor(OWLClassExpression source) {
+
+			NodePatternSpec copy = new NodePatternSpec(conjuncts);
+
+			copy.expandFor(source);
+
+			return copy;
+		}
+
+		List<OWLClassExpression> getConjuncts() {
+
+			return conjuncts;
+		}
+
+		private NodePatternSpec(List<OWLClassExpression> conjuncts) {
+
+			this.conjuncts.addAll(conjuncts);
+		}
+	}
+
+	private class NodePatternDisjunctionSpec {
+
+		private List<NodePatternSpec> disjuncts = new ArrayList<NodePatternSpec>();
+
+		NodePatternDisjunctionSpec(OWLClassExpression source) {
+
+			if (source instanceof OWLObjectIntersectionOf) {
+
+				addFor((OWLObjectIntersectionOf)source);
+			}
+			else if (source instanceof OWLObjectUnionOf) {
+
+				addFor((OWLObjectUnionOf)source);
+			}
+			else {
+
+				addSimpleDisjunctFor(source);
+			}
+		}
+
+		List<NodePattern> checkCreate() {
+
+			List<NodePattern> patternDisjuncts = new ArrayList<NodePattern>();
+
+			for (NodePatternSpec d : disjuncts) {
+
+				NodePattern pd = nodePatterns.get(d);
+
+				if (pd == null) {
+
+					return null;
+				}
+
+				patternDisjuncts.add(pd);
+			}
+
+			return patternDisjuncts;
+		}
+
+		private void addFor(OWLObjectIntersectionOf source) {
+
+			NodePatternSpec disjunct = new NodePatternSpec();
+			List<OWLObjectUnionOf> unions = new ArrayList<OWLObjectUnionOf>();
+
+			for (OWLClassExpression op : source.getOperands()) {
+
+				if (op instanceof OWLObjectUnionOf) {
+
+					unions.add((OWLObjectUnionOf)op);
+				}
+				else {
+
+					disjunct.expandFor(op);
+				}
+			}
+
+			addForUnions(disjunct, unions, 0);
+		}
+
+		private void addFor(OWLObjectUnionOf source) {
+
+			for (OWLClassExpression op : source.getOperands()) {
+
+				addSimpleDisjunctFor(op);
+			}
+		}
+
+		private void addSimpleDisjunctFor(OWLClassExpression source) {
+
+			disjuncts.add(new NodePatternSpec(source));
+		}
+
+		private void addForUnions(NodePatternSpec disjunct, List<OWLObjectUnionOf> unions, int index) {
+
+			if (index == unions.size()) {
+
+				disjuncts.add(disjunct);
+			}
+			else {
+
+				for (OWLClassExpression op : unions.get(index).getOperands()) {
+
+					addForUnions(disjunct.copyAndExpandFor(op), unions, index + 1);
+				}
+			}
+		}
+	}
+
+	MatchComponents(MappedNames mappedNames, MatchStructures matchStructures, boolean dynamic) {
 
 		this.mappedNames = mappedNames;
-		this.patternClasses = patternClasses;
+		this.matchStructures = matchStructures;
 		this.dynamic = dynamic;
 
 		rootNodeName = mappedNames.getRootClassName();
@@ -369,6 +528,11 @@ class PatternComponents {
 	NodePattern toNodePattern(OWLClassExpression source) {
 
 		return nodePatterns.get(source);
+	}
+
+	List<NodePattern> toNodePatternDisjunction(OWLClassExpression source) {
+
+		return new NodePatternDisjunctionSpec(source).checkCreate();
 	}
 
 	Relation toRelation(OWLClassExpression source) {
@@ -448,8 +612,25 @@ class PatternComponents {
 			return mappedNames.get((OWLClass)v);
 		}
 
-		NodePattern p = nodePatterns.get(v);
+		return valueToPatternClassName(v);
+	}
 
-		return p != null ? patternClasses.create(p) : null;
+	private ClassName valueToPatternClassName(OWLClassExpression v) {
+
+		ClassName pCls = patternClasses.get(v);
+
+		if (pCls == null) {
+
+			NodePattern p = nodePatterns.get(v);
+
+			if (p != null) {
+
+				pCls = matchStructures.addPatternClass(p);
+
+				patternClasses.put(v, pCls);
+			}
+		}
+
+		return pCls;
 	}
 }

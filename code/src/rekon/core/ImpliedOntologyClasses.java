@@ -29,46 +29,25 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class GCIClasses extends FreeOntologyClasses {
+class ImpliedOntologyClasses extends FreeOntologyClasses {
 
-	static private class GCIName extends FreeClassName {
+	static private class AnonName extends FreeClassName {
 
-		GCIName(int index) {
+		AnonName(int index) {
 
 			super(index);
 		}
 	}
 
 	private MatchableNodes matchables;
-	private int index = 0;
 
-	public FreeClassName create(NodePattern defn) {
+	ImpliedOntologyClasses(Collection<NodeName> ontologyNodes) {
 
-		return super.create(null, defn);
+		super(ontologyNodes);
 	}
 
-	public FreeClassName create(Collection<NodePattern> defns) {
+	ClassName createClassName(int index) {
 
-		return super.create(null, defns);
-	}
-
-	public FreeClassName create(ClassName sup, NodePattern defn) {
-
-		return super.create(sup, defn);
-	}
-
-	public FreeClassName create(ClassName sup, Collection<NodePattern> defns) {
-
-		return super.create(sup, defns);
-	}
-
-	GCIClasses(MatchableNodes matchables, Collection<NodeName> ontologyNodes) {
-
-		super(matchables, ontologyNodes);
-	}
-
-	FreeClassName createClassName(int index) {
-
-		return new GCIName(index);
+		return new AnonName(index);
 	}
 }

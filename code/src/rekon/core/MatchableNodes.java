@@ -29,36 +29,44 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class MatchableNodes {
+class MatchableNodes {
 
 	private List<MatchableNode> all = new ArrayList<MatchableNode>();
 	private List<MatchableNode> defineds = new ArrayList<MatchableNode>();
 
 	private List<NodeName> names = new ArrayList<NodeName>();
 
-	public MatchableNode checkAddForClass(
-							ClassName name,
-							Collection<NodePattern> defns,
-							Collection<Relation> relations) {
+	MatchableNode add(NodeName name, NodePattern profile) {
 
-		if (defns.isEmpty()) {
+		MatchableNode m = new MatchableNode(name, profile);
 
-			return checkAddFor(name, relations);
+		all.add(m);
+		names.add(m.getName());
+
+		return m;
+	}
+
+	MatchableNode addDefinitions(ClassName name, Collection<NodePattern> defns) {
+
+		MatchableNode m = name.getMatchable();
+		boolean firstDefns = (m == null) || m.getDefinitions().isEmpty();
+
+		if (m == null) {
+
+			m = add(name, new NodePattern(name));
 		}
 
-		return addDefinition(name, defns, relations);
-	}
+		for (NodePattern defn : defns) {
 
-	public MatchableNode checkAddForIndividual(
-							IndividualName name,
-							Collection<Relation> relations) {
+			m.addDefinition(defn);
+		}
 
-		return checkAddFor(name, relations);
-	}
+		if (firstDefns) {
 
-	MatchableNode addForFreeClass(ClassName name, Collection<NodePattern> defns) {
+			defineds.add(m);
+		}
 
-		return addDefinition(name, defns, Collections.emptySet());
+		return m;
 	}
 
 	Collection<MatchableNode> getAll() {
@@ -79,53 +87,5 @@ public class MatchableNodes {
 	Collection<NodeName> getAllNames() {
 
 		return names;
-	}
-
-	private MatchableNode checkAddFor(NodeName name, Collection<Relation> relations) {
-
-		if (name.getClassifier().multipleAsserteds() || !relations.isEmpty()) {
-
-			return add(name, new NodePattern(name, relations));
-		}
-
-		return null;
-	}
-
-	private MatchableNode addDefinition(
-								ClassName name,
-								Collection<NodePattern> defns,
-								Collection<Relation> relations) {
-
-		MatchableNode m = add(name, createProfile(name, defns, relations));
-
-		m.addDefinitions(defns);
-		defineds.add(m);
-
-		return m;
-	}
-
-	private MatchableNode add(NodeName name, NodePattern profile) {
-
-		MatchableNode m = new MatchableNode(name, profile);
-
-		all.add(m);
-		names.add(m.getName());
-
-		return m;
-	}
-
-	private NodePattern createProfile(
-							ClassName name,
-							Collection<NodePattern> defns,
-							Collection<Relation> relations) {
-
-		NodePattern profile = new NodePattern(name);
-
-		for (NodePattern defn : defns) {
-
-			profile = profile.combineWith(defn);
-		}
-
-		return relations.isEmpty() ? profile : profile.extend(relations);
 	}
 }

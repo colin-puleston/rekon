@@ -33,10 +33,13 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class ClassMatchablesCreator {
+class NodeProfilesCreator {
 
 	private Assertions assertions;
-	private PatternComponents patternComponents;
+
+	private MappedNames mappedNames;
+	private MatchComponents matchComponents;
+	private MatchStructures matchStructures;
 
 	private SupersRelationCreator supersRelations = new SupersRelationCreator();
 	private TypesRelationCreator typesRelations = new TypesRelationCreator();
@@ -91,7 +94,7 @@ class ClassMatchablesCreator {
 
 		Relation toRelation(OWLClassExpression source) {
 
-			return patternComponents.toRelation(source);
+			return matchComponents.toRelation(source);
 		}
 	}
 
@@ -147,7 +150,7 @@ class ClassMatchablesCreator {
 
 		Relation toRelation(ObjectValueAssertion source) {
 
-			return patternComponents.toObjectValueRelation(source);
+			return matchComponents.toObjectValueRelation(source);
 		}
 	}
 
@@ -162,71 +165,53 @@ class ClassMatchablesCreator {
 
 		Relation toRelation(DataValueAssertion source) {
 
-			return patternComponents.toDataValueRelation(source);
+			return matchComponents.toDataValueRelation(source);
 		}
 	}
 
-	ClassMatchablesCreator(Assertions assertions, PatternComponents patternComponents) {
+	NodeProfilesCreator(
+		Assertions assertions,
+		MappedNames mappedNames,
+		MatchComponents matchComponents,
+		MatchStructures matchStructures) {
 
 		this.assertions = assertions;
-		this.patternComponents = patternComponents;
-	}
+		this.mappedNames = mappedNames;
+		this.matchStructures = matchStructures;
+		this.matchComponents = matchComponents;
 
-	void createForClass(ClassName name, MatchableNodes matchables) {
+		for (ClassName n : mappedNames.getClassNames()) {
 
-		OWLClass cls = MappedNames.toMappedEntity(name, OWLClass.class);
-		Set<NodePattern> defns = getDefinitions(cls);
-		Set<Relation> rels = getAssertedRelations(cls);
-
-		matchables.checkAddForClass(name, defns, rels);
-	}
-
-	void createForIndividual(IndividualName name, MatchableNodes matchables) {
-
-		OWLNamedIndividual ind = MappedNames.toMappedEntity(name, OWLNamedIndividual.class);
-		Set<Relation> rels = getAssertedRelations(ind);
-
-		matchables.checkAddForIndividual(name, rels);
-	}
-
-	private Set<NodePattern> getDefinitions(OWLClass cls) {
-
-		Set<NodePattern> defns = new HashSet<NodePattern>();
-
-		for (OWLClassExpression e : assertions.getEquivalentExprs(cls)) {
-
-			if (e instanceof OWLClass) {
-
-				continue;
-			}
-
-			NodePattern d = patternComponents.toNodePattern(e);
-
-			if (d != null) {
-
-				defns.add(d);
-			}
-			else {
-
-				logOutOfScopeRef("CLASS", "DEFINITION", cls, e);
-			}
+			createForClass(n);
 		}
 
-		return defns;
+		for (IndividualName n : mappedNames.getIndividualNames()) {
+
+			createForIndividual(n);
+		}
 	}
 
-	private Set<Relation> getAssertedRelations(OWLClass cls) {
+	private void createForClass(ClassName n) {
 
-		return supersRelations.getAssertedRelations(cls);
+		OWLClass c = MappedNames.toMappedEntity(n, OWLClass.class);
+
+		matchStructures.setNodeProfile(n, supersRelations.getAssertedRelations(c));
 	}
 
-	private Set<Relation> getAssertedRelations(OWLNamedIndividual ind) {
+	private void createForIndividual(IndividualName n) {
+
+		OWLNamedIndividual i = MappedNames.toMappedEntity(n, OWLNamedIndividual.class);
+
+		matchStructures.setNodeProfile(n, getAssertedIndividualRelations(i));
+	}
+
+	private Set<Relation> getAssertedIndividualRelations(OWLNamedIndividual i) {
 
 		Set<Relation> rels = new HashSet<Relation>();
 
-		rels.addAll(typesRelations.getAssertedRelations(ind));
-		rels.addAll(objectValuesRelations.getAssertedRelations(ind));
-		rels.addAll(dataValuesRelations.getAssertedRelations(ind));
+		rels.addAll(typesRelations.getAssertedRelations(i));
+		rels.addAll(objectValuesRelations.getAssertedRelations(i));
+		rels.addAll(dataValuesRelations.getAssertedRelations(i));
 
 		return rels;
 	}

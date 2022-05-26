@@ -90,7 +90,7 @@ public class NodePattern extends Expression {
 		return new NodePattern(names, newRelations);
 	}
 
-	void resetAllReferences() {
+	void resetSignatureRefs() {
 
 		signatureRelations = null;
 	}
@@ -113,6 +113,16 @@ public class NodePattern extends Expression {
 	boolean nestedPattern() {
 
 		return !relations.isEmpty();
+	}
+
+	void registerDefinitionNames() {
+
+		names.registerAsDefinitionNames();
+
+		for (Relation r : relations) {
+
+			r.registerDefinitionNames();
+		}
 	}
 
 	void collectNames(NameCollector collector) {

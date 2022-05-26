@@ -31,7 +31,13 @@ import java.util.*;
  */
 public interface OntologyInitialiser {
 
-	public void startInitialisation(PatternClasses patternClasses);
+	public void setMatchStructures(MatchStructures matchStructures);
+
+	public void createNameHierarchies();
+
+	public void createNodeProfiles();
+
+	public void createClassDefinitions();
 
 	public Collection<ClassName> getClassNames();
 
@@ -40,8 +46,4 @@ public interface OntologyInitialiser {
 	public Collection<ObjectPropertyName> getObjectPropertyNames();
 
 	public Collection<DataPropertyName> getDataPropertyNames();
-
-	public void createClassMatchables(MatchableNodes matchables);
-
-	public void createGCIs(GCIClasses gciClasses);
 }

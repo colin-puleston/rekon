@@ -66,6 +66,9 @@ abstract class Value extends Expression {
 		return v == this || subsumesOther(v);
 	}
 
+	void registerDefinitionNames() {
+	}
+
 	abstract void collectNames(NameCollector collector);
 
 	abstract boolean subsumesOther(Value v);

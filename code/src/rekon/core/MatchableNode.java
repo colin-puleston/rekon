@@ -52,9 +52,13 @@ class MatchableNode {
 		name.setMatchable(this);
 	}
 
-	void addDefinitions(Collection<NodePattern> definitions) {
+	void addDefinition(NodePattern defn) {
 
-		this.definitions.addAll(definitions);
+		definitions.add(defn);
+
+		profile = profile.combineWith(defn);
+
+		defn.registerDefinitionNames();
 	}
 
 	void checkNewInferredSubsumer(MatchableNode m) {
@@ -75,14 +79,9 @@ class MatchableNode {
 		newInferredSubsumers.clear();
 	}
 
-	void resetAllReferences() {
+	void resetSignatureRefs() {
 
-		profile.resetAllReferences();
-
-		for (NodePattern d : definitions) {
-
-			d.resetAllReferences();
-		}
+		profile.resetSignatureRefs();
 	}
 
 	boolean reclassifiable() {

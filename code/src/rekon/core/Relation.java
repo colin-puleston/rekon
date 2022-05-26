@@ -60,6 +60,12 @@ public abstract class Relation extends Expression {
 		return Collections.singleton(this);
 	}
 
+	void registerDefinitionNames() {
+
+		property.registerAsDefinitionName();
+		target.registerDefinitionNames();
+	}
+
 	void collectNames(NameCollector collector) {
 
 		collector.collectFor(property);

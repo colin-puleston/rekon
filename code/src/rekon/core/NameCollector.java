@@ -48,6 +48,8 @@ abstract class NameCollector {
 
 		private boolean ranked = false;
 
+		private Deque<Name> extendedMatchLinks = new ArrayDeque<Name>();
+
 		RootNameCollector(boolean definition, boolean request, boolean extendedMatch) {
 
 			super(new ArrayList<Names>());
@@ -90,6 +92,23 @@ abstract class NameCollector {
 		Names collectUnranked(NodePattern p) {
 
 			return collect(p, false).get(0);
+		}
+
+		boolean startMatchExtension(Name link) {
+
+			if (!extendedMatch || extendedMatchLinks.contains(link)) {
+
+				return false;
+			}
+
+			extendedMatchLinks.push(link);
+
+			return true;
+		}
+
+		void endMatchExtension() {
+
+			extendedMatchLinks.pop();
 		}
 
 		RootNameCollector getRootCollector() {
@@ -136,6 +155,16 @@ abstract class NameCollector {
 		boolean ranked() {
 
 			return rootCollector.ranked();
+		}
+
+		boolean startMatchExtension(Name link) {
+
+			return rootCollector.startMatchExtension(link);
+		}
+
+		void endMatchExtension() {
+
+			rootCollector.endMatchExtension();
 		}
 
 		RootNameCollector getRootCollector() {
@@ -193,7 +222,7 @@ abstract class NameCollector {
 			}
 			else {
 
-				n.collectNames(rankNames);
+				rankNames.add(n);
 			}
 		}
 	}
@@ -221,6 +250,10 @@ abstract class NameCollector {
 			setNonMatchingRank();
 		}
 	}
+
+	abstract boolean startMatchExtension(Name link);
+
+	abstract void endMatchExtension();
 
 	NameCollector forNextRank() {
 

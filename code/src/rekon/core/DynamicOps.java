@@ -37,7 +37,7 @@ public class DynamicOps {
 		return new DynamicNodeOpsHandler(nodeName);
 	}
 
-	public DynamicOpsHandler createHandler(NodePatternCreator patternCreator) {
+	public DynamicOpsHandler createHandler(PatternCreator patternCreator) {
 
 		return createPatternOpsHandler(patternCreator).checkResolveToNodeOpsHandler();
 	}
@@ -48,7 +48,7 @@ public class DynamicOps {
 		classifier = new DynamicClassifier(ontology);
 	}
 
-	private DynamicPatternOpsHandler createPatternOpsHandler(NodePatternCreator patternCreator) {
+	private DynamicPatternOpsHandler createPatternOpsHandler(PatternCreator patternCreator) {
 
 		return new DynamicPatternOpsHandler(patternSubsumptions, classifier, patternCreator);
 	}
