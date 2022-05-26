@@ -298,7 +298,10 @@ public class NodePattern extends Expression {
 
 	private Names getSignatureMatchNames() {
 
-		return NameCollector.signatureOptions.collectUnranked(this).expandWithSubsumers();
+		return NameCollector
+				.signatureOptions
+				.collectUnranked(this)
+				.expandWithNonRootSubsumers();
 	}
 
 	private String namesToString() {

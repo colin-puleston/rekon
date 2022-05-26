@@ -47,7 +47,7 @@ class OntologyClassifier extends Classifier {
 
 			this.passCandidates = passCandidates;
 
-			candidatesFilter = new PotentialSubsumeds(passCandidates);
+			candidatesFilter = new PotentialSubsumeds(passCandidates, false);
 		}
 
 		Collection<MatchableNode> perfomPass() {

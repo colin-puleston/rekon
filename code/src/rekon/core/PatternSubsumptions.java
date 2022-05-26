@@ -61,7 +61,7 @@ class PatternSubsumptions {
 
 		private PotentialSubsumeds createPotentialSubsumeds(MatchableNodes matchables) {
 
-			return new PotentialSubsumedsExtendedMatch(getPotentialCandidates(matchables));
+			return new PotentialSubsumeds(getPotentialCandidates(matchables), true);
 		}
 
 		private List<MatchableNode> getPotentialCandidates(MatchableNodes matchables) {

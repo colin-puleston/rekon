@@ -120,12 +120,9 @@ abstract class PotentialPatternMatches {
 
 		void registerOption(MatchableNode option, Names rankNames) {
 
-			for (Name n : resolveRegistrationNames(rankNames).getNames()) {
+			for (Name n : resolveNamesForRegistration(rankNames).getNames()) {
 
-				if (!ignoreRootNamesForRegistration() || !n.rootName()) {
-
-					registerOptionName(option, n);
-				}
+				registerOptionName(option, n);
 			}
 		}
 
@@ -266,9 +263,7 @@ abstract class PotentialPatternMatches {
 		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : allOptions;
 	}
 
-	abstract boolean ignoreRootNamesForRegistration();
-
-	abstract boolean expandNamesForRegistration();
+	abstract Names resolveNamesForRegistration(Names names);
 
 	abstract boolean expandNamesForRetrieval();
 
@@ -305,10 +300,5 @@ abstract class PotentialPatternMatches {
 		}
 
 		return allRankMatches.get(rank);
-	}
-
-	private Names resolveRegistrationNames(Names names) {
-
-		return expandNamesForRegistration() ? names.expandWithDefinitionSubsumers() : names;
 	}
 }

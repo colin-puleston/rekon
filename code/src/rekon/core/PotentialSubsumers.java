@@ -41,14 +41,9 @@ class PotentialSubsumers {
 			super(categoryOptions);
 		}
 
-		boolean ignoreRootNamesForRegistration() {
+		Names resolveNamesForRegistration(Names names) {
 
-			return false;
-		}
-
-		boolean expandNamesForRegistration() {
-
-			return false;
+			return names;
 		}
 
 		boolean expandNamesForRetrieval() {

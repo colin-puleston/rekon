@@ -87,14 +87,14 @@ public abstract class Names {
 		return allOfType(type) ? this : deriveForTypeOnly(type);
 	}
 
-	NameSet expandWithSubsumers() {
+	NameSet expandWithNonRootSubsumers() {
 
-		return expandWithSubsumers(false);
+		return expandWithNonRootSubsumers(false);
 	}
 
-	NameSet expandWithDefinitionSubsumers() {
+	NameSet expandWithNonRootDefinitionSubsumers() {
 
-		return expandWithSubsumers(true);
+		return expandWithNonRootSubsumers(true);
 	}
 
 	Name getFirstName() {
@@ -102,7 +102,7 @@ public abstract class Names {
 		return getNames().iterator().next();
 	}
 
-	private NameSet expandWithSubsumers(boolean defnNamesOnly) {
+	private NameSet expandWithNonRootSubsumers(boolean defnNamesOnly) {
 
 		NameSet expanded = new NameSet(this);
 
@@ -110,7 +110,7 @@ public abstract class Names {
 
 			for (Name s : n.getSubsumers().getNames()) {
 
-				if (!defnNamesOnly || s.definitionName()) {
+				if (!s.rootName() && (!defnNamesOnly || s.definitionName())) {
 
 					expanded.add(s);
 				}

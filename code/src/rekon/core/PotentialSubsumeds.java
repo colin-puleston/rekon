@@ -31,19 +31,23 @@ import java.util.*;
  */
 class PotentialSubsumeds extends PotentialPatternMatches {
 
-	PotentialSubsumeds(Collection<MatchableNode> allOptions) {
+	private boolean dynamic;
+
+	PotentialSubsumeds(Collection<MatchableNode> allOptions, boolean dynamic) {
 
 		super(allOptions);
+
+		this.dynamic = dynamic;
 	}
 
-	boolean ignoreRootNamesForRegistration() {
+	Names resolveNamesForRegistration(Names names) {
 
-		return true;
-	}
+		if (dynamic) {
 
-	boolean expandNamesForRegistration() {
+			return names.expandWithNonRootSubsumers();
+		}
 
-		return true;
+		return names.expandWithNonRootDefinitionSubsumers();
 	}
 
 	boolean expandNamesForRetrieval() {
@@ -63,10 +67,20 @@ class PotentialSubsumeds extends PotentialPatternMatches {
 
 	List<Names> getOptionMatchNames(NodePattern pattern) {
 
+		if (dynamic) {
+
+			return NameCollector.signatureOptionsExtendedMatch.collectRanked(pattern);
+		}
+
 		return NameCollector.signatureOptions.collectRanked(pattern);
 	}
 
 	List<Names> getRequestMatchNames(NodePattern pattern) {
+
+		if (dynamic) {
+
+			return NameCollector.definitionRequestsExtendedMatch.collectRanked(pattern);
+		}
 
 		return NameCollector.definitionRequests.collectRanked(pattern);
 	}
