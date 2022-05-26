@@ -42,7 +42,7 @@
 		<mkdir dir="${build.classes}"/>
 		<copy todir="${build.lib}" flatten="true">
 			<fileset dir="${src.lib}/">
-                <include name="**/*.jar"/>
+                <include name="**/*"/>
 			</fileset>
 		</copy>
 	</target>
