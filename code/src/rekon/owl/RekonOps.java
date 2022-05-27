@@ -198,14 +198,12 @@ class RekonOps {
 
 		private void collectLinkedMappeds(NameSet collected, Name n) {
 
-			if (n.mapped()) {
+			if (!n.mapped() || collected.add(n)) {
 
-				collected.add(n);
-			}
+				for (Name l : getLinked(n, true).getNames()) {
 
-			for (Name l : getLinked(n, true).getNames()) {
-
-				collectLinkedMappeds(collected, l);
+					collectLinkedMappeds(collected, l);
+				}
 			}
 		}
 
