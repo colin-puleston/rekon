@@ -35,7 +35,7 @@ class DynamicClassifier extends Classifier {
 
 	DynamicClassifier(Ontology ontology) {
 
-		definedsFilter = new PotentialSubsumers(ontology.getMatchables().getDefineds());
+		definedsFilter = new PotentialSubsumers(ontology.getMatchables().getAll());
 	}
 
 	void classify(MatchableNodes dynamicMatchables, Collection<MatchableNode> defineds) {
@@ -60,20 +60,20 @@ class DynamicClassifier extends Classifier {
 
 		if (defineds == null) {
 
-			defineds = definedsFilter.getPotentialsFor(c.getProfile());
+			for (NodeDefinition defn : definedsFilter.getPotentialsFor(c.getProfile())) {
+
+				checkSubsumption(defn, c);
+			}
 		}
+		else {
 
-		for (MatchableNode defined : defineds) {
+			for (MatchableNode defined : defineds) {
 
-			checkCandidateSubsumptions(defined, c);
-		}
-	}
+				for (NodePattern defn : defined.getDefinitions()) {
 
-	private void checkCandidateSubsumptions(MatchableNode defined, MatchableNode c) {
-
-		for (NodePattern defn : defined.getDefinitions()) {
-
-			checkSubsumption(defined, defn, c);
+					checkSubsumption(defined, defn, c);
+				}
+			}
 		}
 	}
 

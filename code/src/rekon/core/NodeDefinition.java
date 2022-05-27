@@ -24,61 +24,27 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-class PotentialEquivalents {
+class NodeDefinition {
 
-	Collection<MatchableNode> getPotentials(NameSet subsumeds) {
+	private NodeName nodeName;
+	private NodePattern definition;
 
-		Set<MatchableNode> potentials = new HashSet<MatchableNode>();
+	NodeDefinition(NodeName nodeName, NodePattern definition) {
 
-		for (Name s : subsumeds.getNames()) {
-
-			findAllFrom((NodeName)s, potentials);
-		}
-
-		return potentials;
+		this.nodeName = nodeName;
+		this.definition = definition;
 	}
 
-	private void findAllFrom(NodeName n, Set<MatchableNode> potentials) {
+	NodeName getNodeName() {
 
-		findFrom(n, potentials);
-
-		for (Name ss : n.getSubs(ClassName.class, false).getNames()) {
-
-			findFrom((NodeName)ss, potentials);
-		}
+		return nodeName;
 	}
 
-	private void findFrom(NodeName n, Set<MatchableNode> potentials) {
+	NodePattern getDefinition() {
 
-		MatchableNode m = n.getMatchable();
-
-		if (m != null && m.hasDefinitions() && potentials.add(m)) {
-
-			findFrom(m, potentials);
-		}
-	}
-
-	private void findFrom(MatchableNode m, Set<MatchableNode> potentials) {
-
-		for (NodePattern d : m.getDefinitions()) {
-
-			for (Name n : getDefinitionMatchNames(d).getNames()) {
-
-				if (n instanceof NodeName) {
-
-					findFrom((NodeName)n, potentials);
-				}
-			}
-		}
-	}
-
-	private Names getDefinitionMatchNames(NodePattern defn) {
-
-		return NameCollector.definitionRequests.collectUnranked(defn);
+		return definition;
 	}
 }

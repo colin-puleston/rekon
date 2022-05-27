@@ -29,15 +29,33 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialSubsumeds extends PotentialPatternMatches {
+class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
+	private Collection<MatchableNode> allOptions;
 	private boolean dynamic;
 
 	PotentialSubsumeds(Collection<MatchableNode> allOptions, boolean dynamic) {
 
-		super(allOptions);
-
+		this.allOptions = allOptions;
 		this.dynamic = dynamic;
+
+		for (MatchableNode o : allOptions) {
+
+			registerOption(o, getRankedProfileNames(o.getProfile()));
+		}
+	}
+
+	Collection<MatchableNode> getPotentialsFor(NodePattern defn) {
+
+		List<Names> defnNames = getRankedDefinitionNames(defn);
+		Collection<MatchableNode> p = getPotentialsOrNull(defn, defnNames);
+
+		return p != null ? p : allOptions;
+	}
+
+	int allOptionsSize() {
+
+		return allOptions.size();
 	}
 
 	Names resolveNamesForRegistration(Names names) {
@@ -60,28 +78,23 @@ class PotentialSubsumeds extends PotentialPatternMatches {
 		return false;
 	}
 
-	Collection<NodePattern> getOptionPatterns(MatchableNode node) {
-
-		return Collections.singleton(node.getProfile());
-	}
-
-	List<Names> getOptionMatchNames(NodePattern pattern) {
+	private List<Names> getRankedProfileNames(NodePattern profile) {
 
 		if (dynamic) {
 
-			return NameCollector.signatureOptionsExtendedMatch.collectRanked(pattern);
+			return NameCollector.signatureOptionsExtendedMatch.collectRanked(profile);
 		}
 
-		return NameCollector.signatureOptions.collectRanked(pattern);
+		return NameCollector.signatureOptions.collectRanked(profile);
 	}
 
-	List<Names> getRequestMatchNames(NodePattern pattern) {
+	private List<Names> getRankedDefinitionNames(NodePattern defn) {
 
 		if (dynamic) {
 
-			return NameCollector.definitionRequestsExtendedMatch.collectRanked(pattern);
+			return NameCollector.definitionRequestsExtendedMatch.collectRanked(defn);
 		}
 
-		return NameCollector.definitionRequests.collectRanked(pattern);
+		return NameCollector.definitionRequests.collectRanked(defn);
 	}
 }

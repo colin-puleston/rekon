@@ -29,14 +29,27 @@ package rekon.core;
  */
 abstract class Classifier {
 
-	static void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode cand) {
+	static void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode candidate) {
 
-		if (cand != defined && !defined.getName().subsumes(cand.getName())) {
+		if (candidate != defined) {
 
-			if (defn.subsumes(cand.getProfile())) {
+			checkSubsumption(defined.getName(), defn, candidate);
+		}
+	}
 
-				cand.checkNewInferredSubsumer(defined);
-			}
+	static void checkSubsumption(NodeDefinition defn, MatchableNode candidate) {
+
+		checkSubsumption(defn.getNodeName(), defn.getDefinition(), candidate);
+	}
+
+	static private void checkSubsumption(
+							NodeName definedName,
+							NodePattern defn,
+							MatchableNode candidate) {
+
+		if (!definedName.subsumes(candidate.getName()) && defn.subsumes(candidate.getProfile())) {
+
+			candidate.checkNewInferredSubsumer(definedName);
 		}
 	}
 }

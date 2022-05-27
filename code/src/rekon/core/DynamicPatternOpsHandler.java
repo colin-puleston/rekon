@@ -181,11 +181,6 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return this;
 	}
 
-	NodeName patternAsNodeName(NodePattern pattern) {
-
-		return pattern.asNodeName();
-	}
-
 	Collection<NodePattern> getProfiles() {
 
 		return pattern != null

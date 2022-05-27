@@ -32,8 +32,6 @@ import java.util.*;
 class MatchableNodes {
 
 	private List<MatchableNode> all = new ArrayList<MatchableNode>();
-	private List<MatchableNode> defineds = new ArrayList<MatchableNode>();
-
 	private List<NodeName> names = new ArrayList<NodeName>();
 
 	MatchableNode add(NodeName name, NodePattern profile) {
@@ -49,7 +47,6 @@ class MatchableNodes {
 	MatchableNode addDefinitions(ClassName name, Collection<NodePattern> defns) {
 
 		MatchableNode m = name.getMatchable();
-		boolean firstDefns = (m == null) || m.getDefinitions().isEmpty();
 
 		if (m == null) {
 
@@ -59,11 +56,6 @@ class MatchableNodes {
 		for (NodePattern defn : defns) {
 
 			m.addDefinition(defn);
-		}
-
-		if (firstDefns) {
-
-			defineds.add(m);
 		}
 
 		return m;
@@ -77,11 +69,6 @@ class MatchableNodes {
 	Collection<MatchableNode> copyAll() {
 
 		return new ArrayList<MatchableNode>(all);
-	}
-
-	Collection<MatchableNode> getDefineds() {
-
-		return defineds;
 	}
 
 	Collection<NodeName> getAllNames() {

@@ -31,14 +31,36 @@ import java.util.*;
  */
 class PotentialSubsumers {
 
+	private Collection<MatchableNode> matchables;
+
 	private SimpleDefPotentials simpleDefPotentials;
 	private NestedDefPotentials nestedDefPotentials;
 
-	private abstract class CategoryPotentials extends PotentialPatternMatches {
+	private abstract class CategoryPotentials extends PotentialPatternMatches<NodeDefinition> {
 
-		CategoryPotentials(Collection<MatchableNode> categoryOptions) {
+		private Collection<NodeDefinition> categoryDefs;
 
-			super(categoryOptions);
+		CategoryPotentials() {
+
+			categoryDefs = getCategoryDefs();
+
+			for (NodeDefinition d : categoryDefs) {
+
+				registerOption(d, getRankedDefinitionNames(d.getDefinition()));
+			}
+		}
+
+		Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {
+
+			List<Names> profNames = getRankedProfileNames(profile);
+			Collection<NodeDefinition> p = getPotentialsOrNull(profile, profNames);
+
+			return p != null ? p : categoryDefs;
+		}
+
+		int allOptionsSize() {
+
+			return categoryDefs.size();
 		}
 
 		Names resolveNamesForRegistration(Names names) {
@@ -56,142 +78,82 @@ class PotentialSubsumers {
 			return true;
 		}
 
-		Collection<NodePattern> getOptionPatterns(MatchableNode node) {
+		abstract boolean nestedPatterns();
 
-			List<NodePattern> categoryDefns = new ArrayList<NodePattern>();
+		abstract List<Names> getRankedDefinitionNames(NodePattern defn);
 
-			for (NodePattern d : node.getDefinitions()) {
+		abstract List<Names> getRankedProfileNames(NodePattern profile);
 
-				if (d.nestedPattern() == nestedPatterns()) {
+		private Collection<NodeDefinition> getCategoryDefs() {
 
-					categoryDefns.add(d);
+			List<NodeDefinition> defs = new ArrayList<NodeDefinition>();
+
+			for (MatchableNode m : matchables) {
+
+				for (NodePattern d : m.getDefinitions()) {
+
+					if (d.nestedPattern() == nestedPatterns()) {
+
+						defs.add(new NodeDefinition(m.getName(), d));
+					}
 				}
 			}
 
-			return categoryDefns;
+			return defs;
 		}
-
-		abstract boolean nestedPatterns();
 	}
 
 	private class SimpleDefPotentials extends CategoryPotentials {
-
-		SimpleDefPotentials(Collection<MatchableNode> categoryOptions) {
-
-			super(categoryOptions);
-		}
-
-		List<Names> getOptionMatchNames(NodePattern pattern) {
-
-			return Collections.singletonList(pattern.getNames());
-		}
-
-		List<Names> getRequestMatchNames(NodePattern pattern) {
-
-			return Collections.singletonList(pattern.getNames());
-		}
 
 		boolean nestedPatterns() {
 
 			return false;
 		}
+
+		List<Names> getRankedDefinitionNames(NodePattern defn) {
+
+			return Collections.singletonList(defn.getNames());
+		}
+
+		List<Names> getRankedProfileNames(NodePattern profile) {
+
+			return Collections.singletonList(profile.getNames());
+		}
 	}
 
 	private class NestedDefPotentials extends CategoryPotentials {
-
-		NestedDefPotentials(Collection<MatchableNode> categoryOptions) {
-
-			super(categoryOptions);
-		}
-
-		List<Names> getOptionMatchNames(NodePattern pattern) {
-
-			return NameCollector.definitionOptions.collectRanked(pattern);
-		}
-
-		List<Names> getRequestMatchNames(NodePattern pattern) {
-
-			return NameCollector.signatureRequests.collectRanked(pattern);
-		}
 
 		boolean nestedPatterns() {
 
 			return true;
 		}
-	}
 
-	private class Initialiser {
+		List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		private List<MatchableNode> simpleDefOpts = new ArrayList<MatchableNode>();
-		private List<MatchableNode> nestedDefOpts = new ArrayList<MatchableNode>();
-
-		Initialiser(Collection<MatchableNode> allOptions) {
-
-			processOptions(allOptions);
-
-			simpleDefPotentials = new SimpleDefPotentials(simpleDefOpts);
-			nestedDefPotentials = new NestedDefPotentials(nestedDefOpts);
+			return NameCollector.definitionOptions.collectRanked(defn);
 		}
 
-		private void processOptions(Collection<MatchableNode> allOptions) {
+		List<Names> getRankedProfileNames(NodePattern profile) {
 
-			for (MatchableNode o : allOptions) {
-
-				processOption(o);
-			}
-		}
-
-		private void processOption(MatchableNode o) {
-
-			boolean simpleDef = false;
-			boolean nestedDef = false;
-
-			for (NodePattern d : o.getDefinitions()) {
-
-				if (d.nestedPattern()) {
-
-					if (!nestedDef) {
-
-						nestedDefOpts.add(o);
-
-						if (simpleDef) {
-
-							break;
-						}
-
-						nestedDef = true;
-					}
-				}
-				else {
-
-					if (!simpleDef) {
-
-						simpleDefOpts.add(o);
-
-						if (nestedDef) {
-
-							break;
-						}
-
-						simpleDef = true;
-					}
-				}
-			}
+			return NameCollector.signatureRequests.collectRanked(profile);
 		}
 	}
 
-	PotentialSubsumers(Collection<MatchableNode> allOptions) {
+	PotentialSubsumers(Collection<MatchableNode> matchables) {
 
-		new Initialiser(allOptions);
+		this.matchables = matchables;
+
+		simpleDefPotentials = new SimpleDefPotentials();
+		nestedDefPotentials = new NestedDefPotentials();
 	}
 
-	Collection<MatchableNode> getPotentialsFor(NodePattern request) {
+	Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {
 
-		List<MatchableNode> allPotentials = new ArrayList<MatchableNode>();
+		List<NodeDefinition> all = new ArrayList<NodeDefinition>();
 
-		allPotentials.addAll(simpleDefPotentials.getPotentialsFor(request));
-		allPotentials.addAll(nestedDefPotentials.getPotentialsFor(request));
+		all.addAll(simpleDefPotentials.getPotentialsFor(profile));
+		all.addAll(nestedDefPotentials.getPotentialsFor(profile));
 
-		return allPotentials;
+		return all;
 	}
 }
