@@ -58,7 +58,7 @@ class Assertions {
 
 		for (OWLOntology ont : allOntologies) {
 
-			all.addAll(ont.getAxioms(axiomType, Imports.INCLUDED));
+			all.addAll(ont.getAxioms(axiomType, Imports.EXCLUDED));
 		}
 
 		return all;
