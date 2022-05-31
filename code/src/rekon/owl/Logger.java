@@ -31,11 +31,18 @@ class Logger {
 
 	static final Logger SINGLETON = new Logger();
 
+	static private final String LOGGING_SYSTEM_PROPERTY = "rekon.logging";
+
 	static private boolean loggingOn = false;
+
+	static {
+
+		loggingOn = Boolean.valueOf(System.getProperty(LOGGING_SYSTEM_PROPERTY));
+	}
 
 	void logOutOfScopeWarningLine(String entityDesc) {
 
-		logLine("\nWARNING: " + entityDesc + " out of scope...");
+		logLine("\nREKON WARNING: " + entityDesc + " out of scope...");
 	}
 
 	void logLine(String line) {
