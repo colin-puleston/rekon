@@ -31,46 +31,132 @@ import java.util.*;
  */
 class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
+	private Config config;
 	private Collection<MatchableNode> allOptions;
-	private boolean dynamic;
+
+	private abstract class Config {
+
+		abstract void initialise();
+
+		abstract Names resolveNamesForRegistration(Names names);
+
+		abstract Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn);
+
+		abstract void configureNameCollector(NameCollector collector);
+	}
+
+	private class OntologyConfig extends Config {
+
+		void initialise() {
+
+			for (MatchableNode o : allOptions) {
+
+				registerOption(o, getRankedProfileNames(o.getProfile()));
+			}
+		}
+
+		Names resolveNamesForRegistration(Names names) {
+
+			return names.expandWithNonRootDefinitionSubsumers();
+		}
+
+		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
+
+			return getPotentialsOrNull(defn, getRankedDefinitionNames(defn));
+		}
+
+		void configureNameCollector(NameCollector collector) {
+		}
+	}
+
+	private class DynamicConfig extends Config {
+
+		private int nextOptionRegRank = 0;
+		private boolean optionRegComplete = false;
+
+		void initialise() {
+		}
+
+		Names resolveNamesForRegistration(Names names) {
+
+			return names.expandWithNonRootSubsumers();
+		}
+
+		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
+
+			List<Names> defnNames = getRankedDefinitionNames(defn);
+			int endRank = defnNames.size() - 1;
+
+			if (!optionRegComplete && endRank >= nextOptionRegRank) {
+
+				registerOptionsRanks(nextOptionRegRank, endRank);
+
+				nextOptionRegRank = endRank + 1;
+			}
+
+			return getPotentialsOrNull(defn, defnNames);
+		}
+
+		void configureNameCollector(NameCollector collector) {
+
+			collector.setLinkedCollection();
+		}
+
+		private void registerOptionsRanks(int start, int end) {
+
+			boolean incompleteReg = false;
+
+			for (MatchableNode o : allOptions) {
+
+				List<Names> rankedNames = getRankedProfileNames(o.getProfile());
+
+				if (rankedNames.size() > start) {
+
+					registerOptionRanks(o, rankedNames, start, end);
+
+					if (!incompleteReg && rankedNames.size() > end + 1) {
+
+						incompleteReg = true;
+					}
+				}
+			}
+
+			if (!incompleteReg) {
+
+				optionRegComplete = true;
+			}
+		}
+	}
 
 	PotentialSubsumeds(Collection<MatchableNode> allOptions, boolean dynamic) {
 
 		this.allOptions = allOptions;
-		this.dynamic = dynamic;
 
-		for (MatchableNode o : allOptions) {
+		config = dynamic ? new DynamicConfig() : new OntologyConfig();
 
-			registerOption(o, getRankedProfileNames(o.getProfile()));
-		}
+		config.initialise();
 	}
 
 	Collection<MatchableNode> getPotentialsFor(NodePattern defn) {
 
-		List<Names> defnNames = getRankedDefinitionNames(defn);
-		Collection<MatchableNode> p = getPotentialsOrNull(defn, defnNames);
+		Collection<MatchableNode> potentials = config.getPotentialsForOrNull(defn);
 
-		return p != null ? p : allOptions;
+		return potentials != null ? potentials : allOptions;
 	}
 
-	int allOptionsSize() {
+	int optionsSize() {
 
 		return allOptions.size();
 	}
 
 	Names resolveNamesForRegistration(Names names) {
 
-		if (dynamic) {
-
-			return names.expandWithNonRootSubsumers();
-		}
-
-		return names.expandWithNonRootDefinitionSubsumers();
+		return config.resolveNamesForRegistration(names);
 	}
 
-	boolean expandNamesForRetrieval() {
+	Names resolveNamesForRetrieval(Names names) {
 
-		return false;
+		return names;
 	}
 
 	boolean unionRankOptionsForRetrieval() {
@@ -80,21 +166,18 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 	private List<Names> getRankedProfileNames(NodePattern profile) {
 
-		if (dynamic) {
-
-			return NameCollector.signatureOptionsExtendedMatch.collectRanked(profile);
-		}
-
-		return NameCollector.signatureOptions.collectRanked(profile);
+		return collectNames(NameCollector.signatureOptions, profile);
 	}
 
 	private List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		if (dynamic) {
+		return collectNames(NameCollector.definitionRequests, defn);
+	}
 
-			return NameCollector.definitionRequestsExtendedMatch.collectRanked(defn);
-		}
+	private List<Names> collectNames(NameCollector collector, NodePattern p) {
 
-		return NameCollector.definitionRequests.collectRanked(defn);
+		config.configureNameCollector(collector);
+
+		return collector.collectRanked(p);
 	}
 }

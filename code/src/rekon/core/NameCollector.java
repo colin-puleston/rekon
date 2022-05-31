@@ -29,34 +29,56 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class NameCollector {
+class NameCollector {
 
-	static final NameCollector definitionRequests = new RootNameCollector(true, true, false);
-	static final NameCollector signatureOptions = new RootNameCollector(false, false, false);
+	static final NameCollector definitionRequests = new NameCollector(true, true);
+	static final NameCollector signatureOptions = new NameCollector(false, false);
 
-	static final NameCollector definitionRequestsExtendedMatch = new RootNameCollector(true, true, true);
-	static final NameCollector signatureOptionsExtendedMatch = new RootNameCollector(false, false, true);
+	static final NameCollector signatureRequests = new NameCollector(false, false);
+	static final NameCollector definitionOptions = new NameCollector(true, false);
 
-	static final NameCollector signatureRequests = new RootNameCollector(false, false, false);
-	static final NameCollector definitionOptions = new RootNameCollector(true, false, false);
-
-	static private class RootNameCollector extends NameCollector {
+	static private class Config {
 
 		private boolean definition;
 		private boolean request;
-		private boolean extendedMatch;
 
+		private boolean linkedCollection = false;
 		private boolean ranked = false;
 
-		private Deque<Name> extendedMatchLinks = new ArrayDeque<Name>();
+		private int startRank = 0;
+		private int endRank = -1;
 
-		RootNameCollector(boolean definition, boolean request, boolean extendedMatch) {
-
-			super(new ArrayList<Names>());
+		Config(boolean definition, boolean request) {
 
 			this.definition = definition;
 			this.request = request;
-			this.extendedMatch = extendedMatch;
+		}
+
+		void setLinkedCollection() {
+
+			linkedCollection = true;
+		}
+
+		void setRanked() {
+
+			ranked = true;
+		}
+
+		void setRanked(int startRank, int endRank) {
+
+			ranked = true;
+
+			this.startRank = startRank;
+			this.endRank = endRank;
+		}
+
+		void reset() {
+
+			linkedCollection = false;
+			ranked = false;
+
+			startRank = 0;
+			endRank = -1;
 		}
 
 		boolean definition() {
@@ -69,9 +91,9 @@ abstract class NameCollector {
 			return request;
 		}
 
-		boolean extendedMatch() {
+		boolean linkedCollection() {
 
-			return extendedMatch;
+			return linkedCollection;
 		}
 
 		boolean ranked() {
@@ -79,137 +101,49 @@ abstract class NameCollector {
 			return ranked;
 		}
 
-		List<Names> collectRanked(NodePattern p) {
+		private int startRank() {
 
-			return collect(p, true);
+			return startRank;
 		}
 
-		List<Names> collectOneRank(NodePattern p) {
+		private int endRank() {
 
-			return collect(p, false);
-		}
-
-		Names collectUnranked(NodePattern p) {
-
-			return collect(p, false).get(0);
-		}
-
-		boolean startMatchExtension(Name link) {
-
-			if (!extendedMatch || extendedMatchLinks.contains(link)) {
-
-				return false;
-			}
-
-			extendedMatchLinks.push(link);
-
-			return true;
-		}
-
-		void endMatchExtension() {
-
-			extendedMatchLinks.pop();
-		}
-
-		RootNameCollector getRootCollector() {
-
-			return this;
-		}
-
-		private List<Names> collect(NodePattern p, boolean ranked) {
-
-			this.ranked = ranked;
-
-			p.collectNames(this);
-
-			return clearAllRanks();
+			return endRank;
 		}
 	}
 
-	static private class NestedNameCollector extends NameCollector {
-
-		private RootNameCollector rootCollector;
-
-		NestedNameCollector(RootNameCollector rootCollector) {
-
-			super(rootCollector);
-
-			this.rootCollector = rootCollector;
-		}
-
-		boolean definition() {
-
-			return rootCollector.definition();
-		}
-
-		boolean request() {
-
-			return rootCollector.request();
-		}
-
-		boolean extendedMatch() {
-
-			return rootCollector.extendedMatch();
-		}
-
-		boolean ranked() {
-
-			return rootCollector.ranked();
-		}
-
-		boolean startMatchExtension(Name link) {
-
-			return rootCollector.startMatchExtension(link);
-		}
-
-		void endMatchExtension() {
-
-			rootCollector.endMatchExtension();
-		}
-
-		RootNameCollector getRootCollector() {
-
-			return rootCollector;
-		}
-	}
+	private Config config;
 
 	private List<Names> allNames;
+	private Deque<Name> linkNames;
+
 	private NameSet rankNames = new NameSet();
 	private NameCollector nextRankCollector = null;
 
 	private boolean nonMatchingRank = false;
 
-	abstract boolean definition();
+	void setLinkedCollection() {
 
-	boolean signature() {
-
-		return !definition();
+		config.setLinkedCollection();
 	}
-
-	abstract boolean request();
-
-	boolean option() {
-
-		return !request();
-	}
-
-	abstract boolean extendedMatch();
-
-	abstract boolean ranked();
 
 	List<Names> collectRanked(NodePattern p) {
 
-		throw new Error("Method should never be invoked!");
+		config.setRanked();
+
+		return collect(p);
 	}
 
-	List<Names> collectOneRank(NodePattern p) {
+	List<Names> collectRanked(NodePattern p, int startRank, int endRank) {
 
-		throw new Error("Method should never be invoked!");
+		config.setRanked(startRank, endRank);
+
+		return collect(p);
 	}
 
 	Names collectUnranked(NodePattern p) {
 
-		throw new Error("Method should never be invoked!");
+		return collect(p).get(0);
 	}
 
 	void collectFor(Name n) {
@@ -251,10 +185,6 @@ abstract class NameCollector {
 		}
 	}
 
-	abstract boolean startMatchExtension(Name link);
-
-	abstract void endMatchExtension();
-
 	NameCollector forNextRank() {
 
 		if (!ranked()) {
@@ -264,40 +194,99 @@ abstract class NameCollector {
 
 		if (nextRankCollector == null) {
 
-			nextRankCollector = new NestedNameCollector(getRootCollector());
+			nextRankCollector = new NameCollector(config, allNames, linkNames);
 		}
 
 		return nextRankCollector;
 	}
 
-	List<Names> clearAllRanks() {
+	boolean startLinkedSection(Name linkName) {
+
+		if (!linkedCollection() || linkNames.contains(linkName)) {
+
+			return false;
+		}
+
+		linkNames.push(linkName);
+
+		return true;
+	}
+
+	void endLinkedSection() {
+
+		linkNames.pop();
+	}
+
+	boolean definition() {
+
+		return config.definition();
+	}
+
+	boolean signature() {
+
+		return !config.definition();
+	}
+
+	boolean request() {
+
+		return config.request();
+	}
+
+	boolean option() {
+
+		return !config.request();
+	}
+
+	boolean linkedCollection() {
+
+		return config.linkedCollection();
+	}
+
+	boolean ranked() {
+
+		return config.ranked();
+	}
+
+	boolean lastRequiredRank() {
+
+		return currentRank() == config.endRank();
+	}
+
+	private NameCollector(boolean definition, boolean request) {
+
+		this(new Config(definition, request), new ArrayList<Names>(), new ArrayDeque<Name>());
+	}
+
+	private NameCollector(Config config, List<Names> allNames, Deque<Name> linkNames) {
+
+		this.config = config;
+		this.allNames = allNames;
+		this.linkNames = linkNames;
+
+		allNames.add(rankNames);
+
+		if (currentRank() < config.startRank()) {
+
+			nonMatchingRank = true;
+		}
+	}
+
+	private List<Names> collect(NodePattern p) {
+
+		p.collectNames(this);
+
+		config.reset();
+
+		return clearAllRanks();
+	}
+
+	private List<Names> clearAllRanks() {
 
 		List<Names> allNamesCopy = new ArrayList<Names>();
 
 		clearRanks(allNamesCopy);
 
 		return allNamesCopy;
-	}
-
-	abstract RootNameCollector getRootCollector();
-
-	private NameCollector(NameCollector rootCollector) {
-
-		this(rootCollector.allNames);
-	}
-
-	private NameCollector(List<Names> allNames) {
-
-		this.allNames = allNames;
-
-		allNames.add(rankNames);
-	}
-
-	private void setNonMatchingRank() {
-
-		rankNames.clear();
-
-		nonMatchingRank = true;
 	}
 
 	private void clearRanks(List<Names> allNamesCopy) {
@@ -326,6 +315,18 @@ abstract class NameCollector {
 
 			nextRankCollector.clearRanks(allNamesCopy);
 		}
+	}
+
+	private void setNonMatchingRank() {
+
+		rankNames.clear();
+
+		nonMatchingRank = true;
+	}
+
+	private int currentRank() {
+
+		return allNames.size() - 1;
 	}
 }
 

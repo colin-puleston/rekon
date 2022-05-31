@@ -111,7 +111,7 @@ public class NodeValue extends ObjectValue {
 
 		if (n != null) {
 
-			if (collector.extendedMatch() && n.dynamic()) {
+			if (n.dynamic() && collector.linkedCollection()) {
 
 				for (NodePattern d : n.getDefinitions()) {
 
@@ -137,10 +137,10 @@ public class NodeValue extends ObjectValue {
 
 			NodePattern p = ((NodeName)d).getProfile();
 
-			if (p != null && collector.startMatchExtension(d)) {
+			if (p != null && collector.startLinkedSection(d)) {
 
 				p.collectNames(collector);
-				collector.endMatchExtension();
+				collector.endLinkedSection();
 			}
 		}
 	}

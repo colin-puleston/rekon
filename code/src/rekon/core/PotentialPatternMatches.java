@@ -159,7 +159,7 @@ abstract class PotentialPatternMatches<O> {
 			}
 			else {
 
-				if (options.size() == allOptionsSize() - 1) {
+				if (options.size() == optionsSize() - 1) {
 
 					optionsByName.remove(n);
 					namesCommonToAllOptions.add(n);
@@ -175,19 +175,11 @@ abstract class PotentialPatternMatches<O> {
 
 			OptionUnion options = new OptionUnion();
 
-			if (!collectDirectOptionsFor(n, options)) {
+			for (Name rn : resolveNamesForRetrieval(new NameSet(n)).getNames()) {
 
-				return null;
-			}
+				if (!collectDirectOptionsFor(rn, options)) {
 
-			if (expandNamesForRetrieval()) {
-
-				for (Name s : n.getSubsumers().getNames()) {
-
-					if (n.definitionName() && !collectDirectOptionsFor(s, options)) {
-
-						return null;
-					}
+					return null;
 				}
 			}
 
@@ -221,11 +213,21 @@ abstract class PotentialPatternMatches<O> {
 
 	void registerOption(O option, List<Names> matchNamesByRank) {
 
-		int rank = 0;
+		registerOptionRanks(option, matchNamesByRank, 0, -1);
+	}
 
-		for (Names rankNames : matchNamesByRank) {
+	void registerOptionRanks(O option, List<Names> matchNamesByRank, int start, int end) {
 
-			resolveRankMatches(rank++).registerOption(option, rankNames);
+		for (int rank = start ; rank < matchNamesByRank.size() ; rank++) {
+
+			Names rankNames = matchNamesByRank.get(rank);
+
+			resolveRankMatches(rank).registerOption(option, rankNames);
+
+			if (rank == end) {
+
+				break;
+			}
 		}
 	}
 
@@ -260,11 +262,11 @@ abstract class PotentialPatternMatches<O> {
 		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : null;
 	}
 
-	abstract int allOptionsSize();
+	abstract int optionsSize();
 
 	abstract Names resolveNamesForRegistration(Names names);
 
-	abstract boolean expandNamesForRetrieval();
+	abstract Names resolveNamesForRetrieval(Names names);
 
 	abstract boolean unionRankOptionsForRetrieval();
 

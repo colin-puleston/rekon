@@ -33,32 +33,24 @@ class PotentialSubsumers {
 
 	private Collection<MatchableNode> matchables;
 
-	private SimpleDefPotentials simpleDefPotentials;
-	private NestedDefPotentials nestedDefPotentials;
+	private SimpleDefPotentials simpleDefPotentials = new SimpleDefPotentials();
+	private NestedDefPotentials nestedDefPotentials = new NestedDefPotentials();
 
 	private abstract class CategoryPotentials extends PotentialPatternMatches<NodeDefinition> {
 
-		private Collection<NodeDefinition> categoryDefs;
-
-		CategoryPotentials() {
-
-			categoryDefs = getCategoryDefs();
-
-			for (NodeDefinition d : categoryDefs) {
-
-				registerOption(d, getRankedDefinitionNames(d.getDefinition()));
-			}
-		}
+		private Collection<NodeDefinition> categoryDefs = null;
 
 		Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {
 
-			List<Names> profNames = getRankedProfileNames(profile);
-			Collection<NodeDefinition> p = getPotentialsOrNull(profile, profNames);
+			checkInitialised();
 
-			return p != null ? p : categoryDefs;
+			List<Names> profNames = getRankedProfileNames(profile);
+			Collection<NodeDefinition> potentials = getPotentialsOrNull(profile, profNames);
+
+			return potentials != null ? potentials : categoryDefs;
 		}
 
-		int allOptionsSize() {
+		int optionsSize() {
 
 			return categoryDefs.size();
 		}
@@ -68,9 +60,9 @@ class PotentialSubsumers {
 			return names;
 		}
 
-		boolean expandNamesForRetrieval() {
+		Names resolveNamesForRetrieval(Names names) {
 
-			return true;
+			return names.expandWithNonRootDefinitionSubsumers();
 		}
 
 		boolean unionRankOptionsForRetrieval() {
@@ -84,9 +76,18 @@ class PotentialSubsumers {
 
 		abstract List<Names> getRankedProfileNames(NodePattern profile);
 
-		private Collection<NodeDefinition> getCategoryDefs() {
+		private void checkInitialised() {
 
-			List<NodeDefinition> defs = new ArrayList<NodeDefinition>();
+			if (categoryDefs == null) {
+
+				categoryDefs = new ArrayList<NodeDefinition>();
+
+				collectCategoryDefs();
+				registerCategoryOptions();
+			}
+		}
+
+		private void collectCategoryDefs() {
 
 			for (MatchableNode m : matchables) {
 
@@ -94,12 +95,18 @@ class PotentialSubsumers {
 
 					if (d.nestedPattern() == nestedPatterns()) {
 
-						defs.add(new NodeDefinition(m.getName(), d));
+						categoryDefs.add(new NodeDefinition(m.getName(), d));
 					}
 				}
 			}
+		}
 
-			return defs;
+		private void registerCategoryOptions() {
+
+			for (NodeDefinition d : categoryDefs) {
+
+				registerOption(d, getRankedDefinitionNames(d.getDefinition()));
+			}
 		}
 	}
 
@@ -142,9 +149,6 @@ class PotentialSubsumers {
 	PotentialSubsumers(Collection<MatchableNode> matchables) {
 
 		this.matchables = matchables;
-
-		simpleDefPotentials = new SimpleDefPotentials();
-		nestedDefPotentials = new NestedDefPotentials();
 	}
 
 	Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {

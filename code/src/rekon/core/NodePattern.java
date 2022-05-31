@@ -129,9 +129,12 @@ public class NodePattern extends Expression {
 
 		collector.collectForAll(names);
 
-		for (Relation r : getRelations(collector.signature())) {
+		if (!collector.lastRequiredRank()) {
 
-			r.collectNames(collector.forNextRank());
+			for (Relation r : getRelations(collector.signature())) {
+
+				r.collectNames(collector.forNextRank());
+			}
 		}
 	}
 
