@@ -50,9 +50,14 @@ class PotentialSubsumers {
 			return potentials != null ? potentials : categoryDefs;
 		}
 
-		int optionsSize() {
+		int totalOptions() {
 
 			return categoryDefs.size();
+		}
+
+		List<Names> getOptionMatchNames(NodeDefinition option) {
+
+			return getRankedDefinitionNames(option.getDefinition());
 		}
 
 		Names resolveNamesForRegistration(Names names) {
@@ -103,10 +108,7 @@ class PotentialSubsumers {
 
 		private void registerCategoryOptions() {
 
-			for (NodeDefinition d : categoryDefs) {
-
-				registerOption(d, getRankedDefinitionNames(d.getDefinition()));
-			}
+			registerOptions(categoryDefs);
 		}
 	}
 
@@ -137,12 +139,12 @@ class PotentialSubsumers {
 
 		List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-			return NameCollector.definitionOptions.collectRanked(defn);
+			return new NameCollector(true).collectRanked(defn);
 		}
 
 		List<Names> getRankedProfileNames(NodePattern profile) {
 
-			return NameCollector.signatureRequests.collectRanked(profile);
+			return new NameCollector(false).collectRanked(profile);
 		}
 	}
 

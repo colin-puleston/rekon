@@ -36,9 +36,6 @@ class MatchableNode {
 	private NodePattern profile;
 	private Set<NodePattern> definitions = new HashSet<NodePattern>();
 
-	private Set<NodeName> newInferredSubsumers = new HashSet<NodeName>();
-	private Set<NodeName> allInferredSubsumers = new HashSet<NodeName>();
-
 	public String toString() {
 
 		return getClass().getSimpleName() + "(" + name.getLabel() + ")";
@@ -59,24 +56,6 @@ class MatchableNode {
 		profile = profile.combineWith(defn);
 
 		defn.registerDefinitionNames();
-	}
-
-	void checkNewInferredSubsumer(NodeName subsumer) {
-
-		if (allInferredSubsumers.add(subsumer)) {
-
-			newInferredSubsumers.add(subsumer);
-		}
-	}
-
-	void setNewInferredSubsumptions() {
-
-		for (NodeName subsumer : newInferredSubsumers) {
-
-			name.getClassifier().checkAddInferredSubsumer(subsumer);
-		}
-
-		newInferredSubsumers.clear();
 	}
 
 	void resetSignatureRefs() {

@@ -33,33 +33,61 @@ class OntologyClassifier extends Classifier {
 
 	private Ontology ontology;
 
-	private Collection<NodeName> allNodes;
+	private List<NodeName> allNodes;
 	private MatchableNodes matchables;
 
 	private class ClassificationPass {
 
-		private Collection<MatchableNode> passCandidates;
+		private List<MatchableNode> passCandidates;
 		private PotentialSubsumeds candidatesFilter;
 
 		private List<MatchableNode> reclassifiables = new ArrayList<MatchableNode>();
 
-		ClassificationPass(Collection<MatchableNode> passCandidates) {
+		private class SubsumptionsChecker extends MultiThreadListProcessor<MatchableNode> {
+
+			SubsumptionsChecker() {
+
+				invokeListProcesses(matchables.getAll());
+			}
+
+			void processElement(MatchableNode m) {
+
+				if (m.hasDefinitions()) {
+
+					checkDefinedSubsumptions(m);
+				}
+			}
+		}
+
+		private class NewInferredSubsumptionsExpander extends MultiThreadListProcessor<NodeName> {
+
+			NewInferredSubsumptionsExpander() {
+
+				invokeListProcesses(allNodes);
+			}
+
+			void processElement(NodeName n) {
+
+				n.getClassifier().expandLatestNewInferredSubsumers();
+			}
+		}
+
+		ClassificationPass(List<MatchableNode> passCandidates) {
 
 			this.passCandidates = passCandidates;
 
 			candidatesFilter = new PotentialSubsumeds(passCandidates, false);
 		}
 
-		Collection<MatchableNode> perfomPass() {
+		List<MatchableNode> perfomPass() {
 
-			checkSubsumptions();
+			new SubsumptionsChecker();
 
-			setNewInferredSubsumptions();
 			expandNewInferredSubsumptions();
 
 			findAnyReclassifiables();
 
-			resetNewInferredSubsumptions();
+			absorbNewInferredSubsumptions();
 			resetAllReclassifiablesReferences();
 
 			return reclassifiables;
@@ -87,29 +115,32 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private void setNewInferredSubsumptions() {
-
-			for (MatchableNode c : passCandidates) {
-
-				c.setNewInferredSubsumptions();
-			}
-		}
-
 		private void expandNewInferredSubsumptions() {
 
-			while (true) {
+			do{
 
-				boolean expansions = false;
+				new NewInferredSubsumptionsExpander();
+			}
+			while(resetInferredSubsumerExpansions());
+		}
 
-				for (NodeName c : allNodes) {
+		private boolean resetInferredSubsumerExpansions() {
 
-					expansions |= c.getClassifier().expandNewInferredSubsumers();
-				}
+			boolean expansions = false;
 
-				if (!expansions) {
+			for (NodeName n : allNodes) {
 
-					break;
-				}
+				expansions |= n.getClassifier().resetInferredSubsumerExpansions();
+			}
+
+			return expansions;
+		}
+
+		private void absorbNewInferredSubsumptions() {
+
+			for (NodeName n : allNodes) {
+
+				n.getClassifier().absorbNewInferredSubsumers();
 			}
 		}
 
@@ -121,14 +152,6 @@ class OntologyClassifier extends Classifier {
 
 					reclassifiables.add(c);
 				}
-			}
-		}
-
-		private void resetNewInferredSubsumptions() {
-
-			for (Name n : allNodes) {
-
-				n.getClassifier().resetNewInferredSubsumers();
 			}
 		}
 
@@ -151,7 +174,7 @@ class OntologyClassifier extends Classifier {
 
 	private void classify() {
 
-		Collection<MatchableNode> passCandidates = matchables.getAll();
+		List<MatchableNode> passCandidates = matchables.getAll();
 
 		do {
 

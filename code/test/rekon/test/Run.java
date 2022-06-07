@@ -61,7 +61,7 @@ public class Run {
 	private OWLDataFactory factory;
 	private OWLReasoner reasoner;
 
-	private RunOpts runOpts;
+	private boolean terseOutput = false;
 
 	private abstract class Tester {
 
@@ -87,12 +87,12 @@ public class Run {
 
 			void printCount() {
 
-				System.out.println("  " + op + ": " + count);
+				showGeneralInfo("  " + op + ": " + count);
 			}
 
 			void printTime() {
 
-				System.out.println("  " + op + ": " + timeInSecs);
+				showTimingInfo("  " + op + ": " + timeInSecs);
 			}
 
 			void test(OWLClassExpression c) {
@@ -182,7 +182,7 @@ public class Run {
 
 			long startTime = System.currentTimeMillis();
 
-			System.out.println("TESTING-" + opGroup + "...");
+			showGeneralInfo("TESTING-" + opGroup + "...");
 
 			new EquivsTester();
 			new AllSubsTester();
@@ -192,25 +192,26 @@ public class Run {
 
 			long timeInSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-			System.out.println("");
-			System.out.println("COUNTS:");
+			showGeneralInfo("");
+			showGeneralInfo("COUNTS:");
 
 			for (OpTester opTester : opTesters) {
 
 				opTester.printCount();
 			}
 
-			System.out.println("");
-			System.out.println("TIME:");
+			showTimingInfo("");
+			showTimingInfo("TIME:");
 
 			for (OpTester opTester : opTesters) {
 
 				opTester.printTime();
 			}
 
-			System.out.println("");
-			System.out.println("TOTAL-TIME: " + timeInSecs);
-			System.out.println("\n");
+			showTimingInfo("");
+			showTimingInfo("TOTAL-TIME: " + timeInSecs);
+
+			showGeneralInfo("\n");
 		}
 
 		abstract void testOp(OpTester opTester, OWLOntology o);
@@ -269,9 +270,11 @@ public class Run {
 		factory = manager.getFactory();
 		reasoner = manager.createReasoner(ontology, reasonerOpt);
 
-		System.out.println("\nONTOLOGY: " + ontologyFile);
-		System.out.println("REASONER: " + reasoner.getClass().getSimpleName());
-		System.out.println("");
+		terseOutput = runOpts.terseOutput();
+
+		showGeneralInfo("\nONTOLOGY: " + ontologyFile);
+		showGeneralInfo("REASONER: " + reasoner.getClass().getSimpleName());
+		showGeneralInfo("");
 
 		precomputeInferences();
 
@@ -294,7 +297,20 @@ public class Run {
 
 		long timeInSecs = (System.currentTimeMillis() - startTime) / 1000;
 
-		System.out.println("PRECOMPUTE-TIME: " + timeInSecs);
-		System.out.println("");
+		showTimingInfo("PRECOMPUTE-TIME: " + timeInSecs);
+		showTimingInfo("");
+	}
+
+	private void showGeneralInfo(String info) {
+
+		System.out.println(info);
+	}
+
+	private void showTimingInfo(String info) {
+
+		if (!terseOutput) {
+
+			System.out.println(info);
+		}
 	}
 }

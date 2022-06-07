@@ -159,7 +159,7 @@ abstract class PotentialPatternMatches<O> {
 			}
 			else {
 
-				if (options.size() == optionsSize() - 1) {
+				if (options.size() == totalOptions() - 1) {
 
 					optionsByName.remove(n);
 					namesCommonToAllOptions.add(n);
@@ -211,24 +211,97 @@ abstract class PotentialPatternMatches<O> {
 		}
 	}
 
-	void registerOption(O option, List<Names> matchNamesByRank) {
+	private class MultiOptionRegistrar extends MultiThreadProcessor<Names> {
 
-		registerOptionRanks(option, matchNamesByRank, 0, -1);
-	}
+		static private final int DEFAULT_RANKS = 3;
 
-	void registerOptionRanks(O option, List<Names> matchNamesByRank, int start, int end) {
+		private Collection<O> options;
+		private int startRank;
+		private int stopRank;
 
-		for (int rank = start ; rank < matchNamesByRank.size() ; rank++) {
+		private List<OptionReg> optionRegs = new ArrayList<OptionReg>();
+		private boolean completedReg = true;
 
-			Names rankNames = matchNamesByRank.get(rank);
+		private class OptionReg {
 
-			resolveRankMatches(rank).registerOption(option, rankNames);
+			private O option;
+			private List<Names> rankedNames;
 
-			if (rank == end) {
+			OptionReg(O option) {
 
-				break;
+				this.option = option;
+
+				rankedNames = getOptionMatchNames(option);
+			}
+
+			void checkRegister(int rank) {
+
+				int regRanks = rankedNames.size();
+
+				if (regRanks > rank) {
+
+					allRankMatches.get(rank).registerOption(option, rankedNames.get(rank));
+
+					completedReg &= (regRanks <= stopRank);
+				}
 			}
 		}
+
+		MultiOptionRegistrar(Collection<O> options) {
+
+			this(options, 0, DEFAULT_RANKS);
+		}
+
+		MultiOptionRegistrar(Collection<O> options, int startRank, int stopRank) {
+
+			this.options = options;
+			this.startRank = startRank;
+			this.stopRank = stopRank;
+
+			ensureRankMatches(stopRank);
+			setMaxProcesses(stopRank - startRank);
+
+			for (O option : options) {
+
+				optionRegs.add(new OptionReg(option));
+			}
+
+			execProcesses();
+		}
+
+		boolean completedReg() {
+
+			return completedReg;
+		}
+
+		void execThreadProcess(int totalThreads, int threadIndex) {
+
+			for (OptionReg optReg : optionRegs) {
+
+				optReg.checkRegister(startRank + threadIndex);
+			}
+		}
+
+		void execAllInSingleThread() {
+
+			for (OptionReg optReg : optionRegs) {
+
+				for (int rank = startRank ; rank < stopRank ; rank++) {
+
+					optReg.checkRegister(rank);
+				}
+			}
+		}
+	}
+
+	void registerOptions(Collection<O> options) {
+
+		new MultiOptionRegistrar(options);
+	}
+
+	boolean registerOptionRanks(Collection<O> options, int startRank, int stopRank) {
+
+		return new MultiOptionRegistrar(options, startRank, stopRank).completedReg();
 	}
 
 	Collection<O> getPotentialsOrNull(NodePattern request, List<Names> namesByRank) {
@@ -262,7 +335,9 @@ abstract class PotentialPatternMatches<O> {
 		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : null;
 	}
 
-	abstract int optionsSize();
+	abstract int totalOptions();
+
+	abstract List<Names> getOptionMatchNames(O option);
 
 	abstract Names resolveNamesForRegistration(Names names);
 
@@ -270,17 +345,11 @@ abstract class PotentialPatternMatches<O> {
 
 	abstract boolean unionRankOptionsForRetrieval();
 
-	private RankMatches resolveRankMatches(int rank) {
+	private void ensureRankMatches(int count) {
 
-		if (allRankMatches.size() == rank) {
+		for (int i = allRankMatches.size() ; i < count ; i++) {
 
-			RankMatches rankMatches = new RankMatches();
-
-			allRankMatches.add(rankMatches);
-
-			return rankMatches;
+			allRankMatches.add(new RankMatches());
 		}
-
-		return allRankMatches.get(rank);
 	}
 }

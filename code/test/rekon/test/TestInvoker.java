@@ -51,6 +51,8 @@ abstract class TestInvoker<O extends TestOpts> {
 
 	private void runGeneralTests(O customOpts, ReasonerOpt reasonerOpt) {
 
+		customOpts.setTerseOutput();
+
 		for (File file : GENEERAL_TESTS_DIR.listFiles()) {
 
 			if (file.getName().endsWith(".owl")) {

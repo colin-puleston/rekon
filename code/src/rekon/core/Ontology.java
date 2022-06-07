@@ -62,7 +62,7 @@ public class Ontology {
 		return matchables;
 	}
 
-	Collection<NodeName> getNodeNames() {
+	List<NodeName> getNodeNames() {
 
 		return nodeNames;
 	}
@@ -75,20 +75,9 @@ public class Ontology {
 		}
 	}
 
-	private void processNamesPostClassification(Collection<Name> allNames) {
+	private void processNamesPostClassification(List<Name> allNames) {
 
-		for (Name n : allNames) {
-
-			n.completeClassification();
-		}
-
-		for (int i = 0 ; i < NameClassification.INITIALISATION_OPS ; i++) {
-
-			for (Name n : allNames) {
-
-				n.getClassification().performInitialisationOp(i);
-			}
-		}
+		NameClassification.completeClassifications(allNames);
 	}
 
 	private List<Name> getAllNames(OntologyInitialiser initialiser) {

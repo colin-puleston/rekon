@@ -36,7 +36,10 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 	private abstract class Config {
 
-		abstract void initialise();
+		Config() {
+
+			config = this;
+		}
 
 		abstract Names resolveNamesForRegistration(Names names);
 
@@ -47,12 +50,9 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 	private class OntologyConfig extends Config {
 
-		void initialise() {
+		OntologyConfig() {
 
-			for (MatchableNode o : allOptions) {
-
-				registerOption(o, getRankedProfileNames(o.getProfile()));
-			}
+			registerOptions(allOptions);
 		}
 
 		Names resolveNamesForRegistration(Names names) {
@@ -74,9 +74,6 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		private int nextOptionRegRank = 0;
 		private boolean optionRegComplete = false;
 
-		void initialise() {
-		}
-
 		Names resolveNamesForRegistration(Names names) {
 
 			return names.expandWithNonRootSubsumers();
@@ -85,13 +82,13 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
 
 			List<Names> defnNames = getRankedDefinitionNames(defn);
-			int endRank = defnNames.size() - 1;
+			int stopRank = defnNames.size();
 
-			if (!optionRegComplete && endRank >= nextOptionRegRank) {
+			if (!optionRegComplete && stopRank > nextOptionRegRank) {
 
-				registerOptionsRanks(nextOptionRegRank, endRank);
+				registerOptionRanks(allOptions, nextOptionRegRank, stopRank);
 
-				nextOptionRegRank = endRank + 1;
+				nextOptionRegRank = stopRank;
 			}
 
 			return getPotentialsOrNull(defn, defnNames);
@@ -101,40 +98,20 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 			collector.setLinkedCollection();
 		}
-
-		private void registerOptionsRanks(int start, int end) {
-
-			boolean incompleteReg = false;
-
-			for (MatchableNode o : allOptions) {
-
-				List<Names> rankedNames = getRankedProfileNames(o.getProfile());
-
-				if (rankedNames.size() > start) {
-
-					registerOptionRanks(o, rankedNames, start, end);
-
-					if (!incompleteReg && rankedNames.size() > end + 1) {
-
-						incompleteReg = true;
-					}
-				}
-			}
-
-			if (!incompleteReg) {
-
-				optionRegComplete = true;
-			}
-		}
 	}
 
 	PotentialSubsumeds(Collection<MatchableNode> allOptions, boolean dynamic) {
 
 		this.allOptions = allOptions;
 
-		config = dynamic ? new DynamicConfig() : new OntologyConfig();
+		if (dynamic) {
 
-		config.initialise();
+			new DynamicConfig();
+		}
+		else {
+
+			new OntologyConfig();
+		}
 	}
 
 	Collection<MatchableNode> getPotentialsFor(NodePattern defn) {
@@ -144,9 +121,14 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		return potentials != null ? potentials : allOptions;
 	}
 
-	int optionsSize() {
+	int totalOptions() {
 
 		return allOptions.size();
+	}
+
+	List<Names> getOptionMatchNames(MatchableNode option) {
+
+		return collectNames(false, option.getProfile());
 	}
 
 	Names resolveNamesForRegistration(Names names) {
@@ -164,17 +146,14 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		return false;
 	}
 
-	private List<Names> getRankedProfileNames(NodePattern profile) {
-
-		return collectNames(NameCollector.signatureOptions, profile);
-	}
-
 	private List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		return collectNames(NameCollector.definitionRequests, defn);
+		return collectNames(true, defn);
 	}
 
-	private List<Names> collectNames(NameCollector collector, NodePattern p) {
+	private List<Names> collectNames(boolean definition, NodePattern p) {
+
+		NameCollector collector = new NameCollector(definition);
 
 		config.configureNameCollector(collector);
 

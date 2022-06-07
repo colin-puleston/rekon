@@ -51,7 +51,6 @@ class DynamicClassifier extends Classifier {
 		do {
 
 			checkCandidateSubsumptions(c, defineds);
-			c.setNewInferredSubsumptions();
 		}
 		while (checkReclassifiable(c));
 	}
@@ -83,7 +82,7 @@ class DynamicClassifier extends Classifier {
 
 		if (n.reclassifiable()) {
 
-			n.getClassifier().resetNewInferredSubsumers();
+			n.getClassifier().absorbNewInferredSubsumers();
 			c.resetSignatureRefs();
 
 			return true;

@@ -61,17 +61,17 @@ class MatchableNodes {
 		return m;
 	}
 
-	Collection<MatchableNode> getAll() {
+	List<MatchableNode> getAll() {
 
 		return all;
 	}
 
-	Collection<MatchableNode> copyAll() {
+	List<MatchableNode> copyAll() {
 
 		return new ArrayList<MatchableNode>(all);
 	}
 
-	Collection<NodeName> getAllNames() {
+	List<NodeName> getAllNames() {
 
 		return names;
 	}

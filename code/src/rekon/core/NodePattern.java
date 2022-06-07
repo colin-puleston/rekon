@@ -131,7 +131,7 @@ public class NodePattern extends Expression {
 
 		if (!collector.lastRequiredRank()) {
 
-			for (Relation r : getRelations(collector.signature())) {
+			for (Relation r : getCollectorRelations(collector)) {
 
 				r.collectNames(collector.forNextRank());
 			}
@@ -145,9 +145,17 @@ public class NodePattern extends Expression {
 
 	boolean reclassifiable() {
 
-		for (Name name : getSignatureMatchNames().getNames()) {
+		for (Name name : names.getNames()) {
 
 			if (name.reclassifiable()) {
+
+				return true;
+			}
+		}
+
+		for (Relation r : getSignatureRelations()) {
+
+			if (r.getTarget().reclassifiable()) {
 
 				return true;
 			}
@@ -294,17 +302,14 @@ public class NodePattern extends Expression {
 		}
 	}
 
-	private Collection<Relation> getRelations(boolean signature) {
+	private Collection<Relation> getCollectorRelations(NameCollector collector) {
 
-		return signature ? getSignatureRelations() : relations;
+		return collector.signature() ? getSignatureRelations() : relations;
 	}
 
 	private Names getSignatureMatchNames() {
 
-		return NameCollector
-				.signatureOptions
-				.collectUnranked(this)
-				.expandWithNonRootSubsumers();
+		return new NameCollector(false).collectUnranked(this).expandWithNonRootSubsumers();
 	}
 
 	private String namesToString() {

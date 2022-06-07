@@ -47,9 +47,11 @@ abstract class Classifier {
 							NodePattern defn,
 							MatchableNode candidate) {
 
-		if (!definedName.subsumes(candidate.getName()) && defn.subsumes(candidate.getProfile())) {
+		NodeName cn = candidate.getName();
 
-			candidate.checkNewInferredSubsumer(definedName);
+		if (!definedName.subsumes(cn) && defn.subsumes(candidate.getProfile())) {
+
+			cn.getClassifier().checkNewInferredSubsumer(definedName);
 		}
 	}
 }

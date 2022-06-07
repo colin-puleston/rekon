@@ -73,5 +73,10 @@ abstract class Value extends Expression {
 
 	abstract boolean subsumesOther(Value v);
 
+	boolean reclassifiable() {
+
+		return false;
+	}
+
 	abstract void render(PatternRenderer r);
 }

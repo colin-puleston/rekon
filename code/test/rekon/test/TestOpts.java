@@ -26,6 +26,18 @@ package rekon.test;
 
 class TestOpts {
 
+	private boolean terseOutput = false;
+
+	void setTerseOutput() {
+
+		terseOutput = true;
+	}
+
+	boolean terseOutput() {
+
+		return terseOutput;
+	}
+
 	String[] parseArg(String arg, int minLen, int maxLen) {
 
 		String[] vals = arg.split(":");

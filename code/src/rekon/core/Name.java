@@ -86,7 +86,7 @@ public abstract class Name {
 		definitionName = true;
 	}
 
-	void completeClassification() {
+	void setClassification() {
 
 		classification = classifier.createClassification();
 
@@ -120,7 +120,7 @@ public abstract class Name {
 
 	boolean reclassifiable() {
 
-		return classifier != null && classifier.newInferredSubsumers();
+		return classifier != null && classifier.anyNewInferredSubsumers();
 	}
 
 	Names getSubsumers() {

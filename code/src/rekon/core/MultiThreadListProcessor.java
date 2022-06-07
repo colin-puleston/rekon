@@ -29,56 +29,32 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialEquivalents {
+abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E> {
 
-	Collection<MatchableNode> getPotentials(NameSet subsumeds) {
+	private List<E> list = null;
 
-		Set<MatchableNode> potentials = new HashSet<MatchableNode>();
+	void invokeListProcesses(List<E> list) {
 
-		for (Name s : subsumeds.getNames()) {
+		this.list = list;
 
-			findAllFrom((NodeName)s, potentials);
-		}
-
-		return potentials;
+		execProcesses();
 	}
 
-	private void findAllFrom(NodeName n, Set<MatchableNode> potentials) {
+	void execThreadProcess(int totalThreads, int threadIndex) {
 
-		findFrom(n, potentials);
+		for (int i = threadIndex ; i < list.size() ; i += totalThreads) {
 
-		for (Name ss : n.getSubs(ClassName.class, false).getNames()) {
-
-			findFrom((NodeName)ss, potentials);
+			processElement(list.get(i));
 		}
 	}
 
-	private void findFrom(NodeName n, Set<MatchableNode> potentials) {
+	void execAllInSingleThread() {
 
-		MatchableNode m = n.getMatchable();
+		for (E e : list) {
 
-		if (m != null && m.hasDefinitions() && potentials.add(m)) {
-
-			findFrom(m, potentials);
+			processElement(e);
 		}
 	}
 
-	private void findFrom(MatchableNode m, Set<MatchableNode> potentials) {
-
-		for (NodePattern d : m.getDefinitions()) {
-
-			for (Name n : getDefinitionMatchNames(d).getNames()) {
-
-				if (n instanceof NodeName) {
-
-					findFrom((NodeName)n, potentials);
-				}
-			}
-		}
-	}
-
-	private Names getDefinitionMatchNames(NodePattern defn) {
-
-		return new NameCollector(true).collectUnranked(defn);
-	}
+	abstract void processElement(E e);
 }

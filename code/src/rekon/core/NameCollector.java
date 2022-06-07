@@ -31,16 +31,9 @@ import java.util.*;
  */
 class NameCollector {
 
-	static final NameCollector definitionRequests = new NameCollector(true, true);
-	static final NameCollector signatureOptions = new NameCollector(false, false);
-
-	static final NameCollector signatureRequests = new NameCollector(false, false);
-	static final NameCollector definitionOptions = new NameCollector(true, false);
-
 	static private class Config {
 
 		private boolean definition;
-		private boolean request;
 
 		private boolean linkedCollection = false;
 		private boolean ranked = false;
@@ -48,10 +41,9 @@ class NameCollector {
 		private int startRank = 0;
 		private int endRank = -1;
 
-		Config(boolean definition, boolean request) {
+		Config(boolean definition) {
 
 			this.definition = definition;
-			this.request = request;
 		}
 
 		void setLinkedCollection() {
@@ -86,11 +78,6 @@ class NameCollector {
 			return definition;
 		}
 
-		boolean request() {
-
-			return request;
-		}
-
 		boolean linkedCollection() {
 
 			return linkedCollection;
@@ -121,6 +108,11 @@ class NameCollector {
 	private NameCollector nextRankCollector = null;
 
 	private boolean nonMatchingRank = false;
+
+	NameCollector(boolean definition) {
+
+		this(new Config(definition), new ArrayList<Names>(), new ArrayDeque<Name>());
+	}
 
 	void setLinkedCollection() {
 
@@ -227,16 +219,6 @@ class NameCollector {
 		return !config.definition();
 	}
 
-	boolean request() {
-
-		return config.request();
-	}
-
-	boolean option() {
-
-		return !config.request();
-	}
-
 	boolean linkedCollection() {
 
 		return config.linkedCollection();
@@ -250,11 +232,6 @@ class NameCollector {
 	boolean lastRequiredRank() {
 
 		return currentRank() == config.endRank();
-	}
-
-	private NameCollector(boolean definition, boolean request) {
-
-		this(new Config(definition, request), new ArrayList<Names>(), new ArrayDeque<Name>());
 	}
 
 	private NameCollector(Config config, List<Names> allNames, Deque<Name> linkNames) {

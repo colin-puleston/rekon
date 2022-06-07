@@ -24,8 +24,6 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
@@ -34,8 +32,11 @@ class NameClassifier {
 	private Name name;
 	private NameSet subsumers = new NameSet();
 
+	private NameSet allNewInferredSubsumers = new NameSet();
+	private NameSet latestInferredSubsumers = new NameSet();
+	private NameSet inferredSubsumerExpansions = new NameSet();
+
 	private boolean multipleAsserteds = false;
-	private boolean newInferredSubsumers = false;
 
 	NameClassifier(Name name) {
 
@@ -49,12 +50,15 @@ class NameClassifier {
 
 	void addAssertedSubsumer(Name subsumer) {
 
-		checkAddSubsumer(subsumer);
+		checkAddAssertedSubsumer(subsumer);
 	}
 
 	void addAssertedSubsumers(Names subsumers) {
 
-		checkAddSubsumers(subsumers);
+		for (Name s : subsumers.getNames()) {
+
+			checkAddAssertedSubsumer(s);
+		}
 	}
 
 	void addAssertedEquivalent(Name equiv) {
@@ -77,40 +81,45 @@ class NameClassifier {
 		}
 	}
 
-	void checkAddInferredSubsumer(Name subsumer) {
+	void checkNewInferredSubsumer(Name subsumer) {
 
-		if (checkAddSubsumer(subsumer)) {
+		checkAddInferredSubsumer(latestInferredSubsumers, subsumer);
+	}
 
-			checkAddSubsumers(subsumer.getSubsumers());
+	void expandLatestNewInferredSubsumers() {
 
-			newInferredSubsumers = true;
+		for (Name s : latestInferredSubsumers.getNames()) {
+
+			addInferredSubsumerExpansions(s.getSubsumers());
+			addInferredSubsumerExpansions(s.getClassifier().latestInferredSubsumers);
 		}
 	}
 
-	boolean expandNewInferredSubsumers() {
+	boolean resetInferredSubsumerExpansions() {
 
-		boolean expansions = false;
+		latestInferredSubsumers.clear();
 
-		for (Name subsumer : subsumers.copyNames()) {
+		if (inferredSubsumerExpansions.isEmpty()) {
 
-			if (subsumer.getClassifier().newInferredSubsumers()) {
-
-				for (Name subsSubsumer : subsumer.getSubsumers().getNames()) {
-
-					if (checkAddSubsumer(subsSubsumer)) {
-
-						expansions = true;
-					}
-				}
-			}
+			return false;
 		}
 
-		return expansions;
+		latestInferredSubsumers = inferredSubsumerExpansions;
+		inferredSubsumerExpansions = new NameSet();
+
+		return true;
 	}
 
-	void resetNewInferredSubsumers() {
+	boolean anyNewInferredSubsumers() {
 
-		newInferredSubsumers = false;
+		return !allNewInferredSubsumers.isEmpty();
+	}
+
+	void absorbNewInferredSubsumers() {
+
+		subsumers.addAll(allNewInferredSubsumers);
+
+		allNewInferredSubsumers.clear();
 	}
 
 	boolean rootName() {
@@ -121,11 +130,6 @@ class NameClassifier {
 	boolean multipleAsserteds() {
 
 		return multipleAsserteds;
-	}
-
-	boolean newInferredSubsumers() {
-
-		return newInferredSubsumers;
 	}
 
 	boolean isSubsumer(Name test) {
@@ -142,23 +146,34 @@ class NameClassifier {
 
 		for (Name next : current.getSubsumers().getNames()) {
 
-			if (checkAddSubsumer(next)) {
+			if (checkAddAssertedSubsumer(next)) {
 
 				expandAssertedsFrom(next);
 			}
 		}
 	}
 
-	private void checkAddSubsumers(Names subsumers) {
+	private boolean checkAddAssertedSubsumer(Name subsumer) {
 
-		for (Name s : subsumers.getNames()) {
+		return subsumer != name && subsumers.add(subsumer);
+	}
 
-			checkAddSubsumer(s);
+	private void addInferredSubsumerExpansions(Names subsumerExps) {
+
+		for (Name s : subsumerExps.getNames()) {
+
+			checkAddInferredSubsumer(inferredSubsumerExpansions, s);
 		}
 	}
 
-	private boolean checkAddSubsumer(Name subsumer) {
+	private void checkAddInferredSubsumer(Names targetInferreds, Name subsumer) {
 
-		return subsumer != name && subsumers.add(subsumer);
+		if (subsumer != name && !subsumers.contains(subsumer)) {
+
+			if (allNewInferredSubsumers.add(subsumer)) {
+
+				targetInferreds.add(subsumer);
+			}
+		}
 	}
 }

@@ -31,7 +31,58 @@ import java.util.*;
  */
 class NameClassification {
 
-	static final int INITIALISATION_OPS = 4;
+	static private class BasicLinksSetter extends MultiThreadListProcessor<Name> {
+
+		BasicLinksSetter(List<Name> allNames) {
+
+			invokeListProcesses(allNames);
+		}
+
+		void processElement(Name n) {
+
+			getInitialiserFor(n).setBasicLinks();
+		}
+	}
+
+	static void completeClassifications(List<Name> allNames) {
+
+		for (Name n : allNames) {
+
+			n.setClassification();
+		}
+
+		initialiseClassifications(allNames);
+
+		for (Name n : allNames) {
+
+			n.getClassification().endInitialisation();
+		}
+	}
+
+	static private void initialiseClassifications(List<Name> allNames) {
+
+		for (Name n : allNames) {
+
+			getInitialiserFor(n).setAsSubsumedOfSubsumers();
+		}
+
+		for (Name n : allNames) {
+
+			getInitialiserFor(n).setAsSubsumedOfSubsumers();
+		}
+
+		new BasicLinksSetter(allNames);
+
+		for (Name n : allNames) {
+
+			getInitialiserFor(n).setDirectLinks();
+		}
+	}
+
+	static private Initialiser getInitialiserFor(Name n) {
+
+		return n.getClassification().initialiser;
+	}
 
 	private Name name;
 
@@ -114,31 +165,7 @@ class NameClassification {
 			this.subsumers = subsumers;
 		}
 
-		void performInitialisationOp(int opIndex) {
-
-			switch (opIndex) {
-
-				case 0:
-					setAsSubsumedOfSubsumers();
-					break;
-
-				case 1:
-					setEquivalentsAndAncestors();
-					subsumers = null;
-					subsumeds = null;
-					break;
-
-				case 2:
-					setDirectLinks();
-					break;
-
-				case 3:
-					initialiser = null;
-					break;
-			}
-		}
-
-		private void setAsSubsumedOfSubsumers() {
+		void setAsSubsumedOfSubsumers() {
 
 			for (Name s : subsumers.getNames()) {
 
@@ -146,7 +173,7 @@ class NameClassification {
 			}
 		}
 
-		private void setEquivalentsAndAncestors() {
+		void setBasicLinks() {
 
 			equivalents.addAll(subsumers);
 			equivalents.retainAll(subsumeds);
@@ -156,7 +183,7 @@ class NameClassification {
 			ancestors.removeAll(equivalents);
 		}
 
-		private void setDirectLinks() {
+		void setDirectLinks() {
 
 			setDirectSupers();
 			setAsDirectSub();
@@ -179,11 +206,6 @@ class NameClassification {
 				d.getClassification().subs.directs.add(name);
 			}
 		}
-
-		private Initialiser getInitialiserFor(Name n) {
-
-			return n.getClassification().initialiser;
-		}
 	}
 
 	NameClassification(Name name, NameSet subsumers) {
@@ -191,11 +213,6 @@ class NameClassification {
 		this.name = name;
 
 		initialiser = new Initialiser(subsumers);
-	}
-
-	void performInitialisationOp(int opIndex) {
-
-		initialiser.performInitialisationOp(opIndex);
 	}
 
 	boolean rootName() {
@@ -231,5 +248,10 @@ class NameClassification {
 	Names getSubs(Class<? extends Name> type, boolean direct) {
 
 		return subs.get(direct).filterForType(type);
+	}
+
+	private void endInitialisation() {
+
+		initialiser = null;
 	}
 }

@@ -84,6 +84,19 @@ public class NodeValue extends ObjectValue {
 		return n != null && subsumesNodeValue(n);
 	}
 
+	boolean reclassifiable() {
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (d.reclassifiable()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void render(PatternRenderer r) {
 
 		NodeName n = checkSimpleNodeValue();

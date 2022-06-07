@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class Timer {
+public class Timer {
 
 	static private Map<String, Instance> instances = new HashMap<String, Instance>();
 
@@ -69,29 +69,29 @@ class Timer {
 		}
 	}
 
-	static void start(String prefix) {
+	static public void start(String prefix) {
 
 		new Instance(prefix);
 	}
 
-	static void show(String prefix) {
+	static public void show(String prefix) {
 
 		instances.get(prefix).show();
 	}
 
-	static void show(String prefix, String suffix) {
+	static public void show(String prefix, String suffix) {
 
 		instances.get(prefix).show(suffix);
 	}
 
-	static void stop(String prefix) {
+	static public void stop(String prefix) {
 
 		show(prefix);
 
 		instances.remove(prefix);
 	}
 
-	static void stop(String prefix, String suffix) {
+	static public void stop(String prefix, String suffix) {
 
 		show(prefix, suffix);
 
