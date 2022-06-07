@@ -66,11 +66,6 @@ class NameClassification {
 			getInitialiserFor(n).setAsSubsumedOfSubsumers();
 		}
 
-		for (Name n : allNames) {
-
-			getInitialiserFor(n).setAsSubsumedOfSubsumers();
-		}
-
 		new BasicLinksSetter(allNames);
 
 		for (Name n : allNames) {
