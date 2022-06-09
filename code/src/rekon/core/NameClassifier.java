@@ -32,11 +32,85 @@ class NameClassifier {
 	private Name name;
 	private NameSet subsumers = new NameSet();
 
-	private NameSet allNewInferredSubsumers = new NameSet();
-	private NameSet latestInferredSubsumers = new NameSet();
-	private NameSet inferredSubsumerExpansions = new NameSet();
-
 	private boolean multipleAsserteds = false;
+
+	private InferredSubsumers inferredSubsumers = new InferredSubsumers();
+
+	private class InferredSubsumers {
+
+		private NameSet collected = new NameSet();
+		private NameSet latest = new NameSet();
+		private NameSet expansions = new NameSet();
+
+		void checkAddDirectlyInferred(Name subsumer) {
+
+			if (newSubsumer(subsumer) && collected.add(subsumer)) {
+
+				latest.add(subsumer);
+			}
+		}
+
+		void expandLatest() {
+
+			expandLatest(subsumers);
+			expandLatest(latest);
+		}
+
+		boolean configureForNextExpansion() {
+
+			collected.addAll(latest);
+			latest.clear();
+
+			if (expansions.isEmpty()) {
+
+				return false;
+			}
+
+			latest = expansions;
+			expansions = new NameSet();
+
+			return true;
+		}
+
+		void absorbCollected() {
+
+			subsumers.addAll(collected);
+
+			collected.clear();
+		}
+
+		boolean anyInferences() {
+
+			return !collected.isEmpty();
+		}
+
+		private void expandLatest(NameSet sourceSubsumers) {
+
+			for (Name s : sourceSubsumers.getNames()) {
+
+				if (sourceSubsumers == latest) {
+
+					addExpansions(s.getSubsumers());
+				}
+
+				InferredSubsumers si = s.getClassifier().inferredSubsumers;
+
+				addExpansions(si.collected);
+				addExpansions(si.latest);
+			}
+		}
+
+		private void addExpansions(Names subsumerExps) {
+
+			for (Name s : subsumerExps.getNames()) {
+
+				if (newSubsumer(s) && !collected.contains(s) && !latest.contains(s)) {
+
+					expansions.add(s);
+				}
+			}
+		}
+	}
 
 	NameClassifier(Name name) {
 
@@ -83,43 +157,27 @@ class NameClassifier {
 
 	void checkNewInferredSubsumer(Name subsumer) {
 
-		checkAddInferredSubsumer(latestInferredSubsumers, subsumer);
+		inferredSubsumers.checkAddDirectlyInferred(subsumer);
 	}
 
-	void expandLatestNewInferredSubsumers() {
+	void expandLatestInferences() {
 
-		for (Name s : subsumers.getNames()) {
-
-			addInferredSubsumerExpansions(s.getSubsumers());
-			addInferredSubsumerExpansions(s.getClassifier().latestInferredSubsumers);
-		}
+		inferredSubsumers.expandLatest();
 	}
 
-	boolean resetInferredSubsumerExpansions() {
+	boolean configureForNextInferenceExpansion() {
 
-		latestInferredSubsumers.clear();
-
-		if (inferredSubsumerExpansions.isEmpty()) {
-
-			return false;
-		}
-
-		latestInferredSubsumers = inferredSubsumerExpansions;
-		inferredSubsumerExpansions = new NameSet();
-
-		return true;
+		return inferredSubsumers.configureForNextExpansion();
 	}
 
-	boolean anyNewInferredSubsumers() {
+	void absorbNewInferences() {
 
-		return !allNewInferredSubsumers.isEmpty();
+		inferredSubsumers.absorbCollected();
 	}
 
-	void absorbNewInferredSubsumers() {
+	boolean anyNewInferences() {
 
-		subsumers.addAll(allNewInferredSubsumers);
-
-		allNewInferredSubsumers.clear();
+		return inferredSubsumers.anyInferences();
 	}
 
 	boolean rootName() {
@@ -158,22 +216,8 @@ class NameClassifier {
 		return subsumer != name && subsumers.add(subsumer);
 	}
 
-	private void addInferredSubsumerExpansions(Names subsumerExps) {
+	private boolean newSubsumer(Name subsumer) {
 
-		for (Name s : subsumerExps.getNames()) {
-
-			checkAddInferredSubsumer(inferredSubsumerExpansions, s);
-		}
-	}
-
-	private void checkAddInferredSubsumer(Names targetInferreds, Name subsumer) {
-
-		if (subsumer != name && !subsumers.contains(subsumer)) {
-
-			if (allNewInferredSubsumers.add(subsumer)) {
-
-				targetInferreds.add(subsumer);
-			}
-		}
+		return subsumer != name && !subsumers.contains(subsumer);
 	}
 }

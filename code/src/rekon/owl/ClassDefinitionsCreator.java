@@ -116,7 +116,10 @@ class ClassDefinitionsCreator {
 			equivCls = matchStructures.addImpliedClass(defns);
 		}
 
-		matchStructures.addImpliedClasses(equivCls, subs);
+		if (!subs.isEmpty()) {
+
+			matchStructures.addImpliedClasses(equivCls, subs);
+		}
 
 		return true;
 	}

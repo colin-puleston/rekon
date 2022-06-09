@@ -59,16 +59,16 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private class NewInferredSubsumptionsExpander extends MultiThreadListProcessor<NodeName> {
+		private class NewInferenceExpander extends MultiThreadListProcessor<NodeName> {
 
-			NewInferredSubsumptionsExpander() {
+			NewInferenceExpander() {
 
 				invokeListProcesses(allNodes);
 			}
 
 			void processElement(NodeName n) {
 
-				n.getClassifier().expandLatestNewInferredSubsumers();
+				n.getClassifier().expandLatestInferences();
 			}
 		}
 
@@ -83,12 +83,10 @@ class OntologyClassifier extends Classifier {
 
 			new SubsumptionsChecker();
 
-			expandNewInferredSubsumptions();
-
-			findAnyReclassifiables();
-
-			absorbNewInferredSubsumptions();
-			resetAllReclassifiablesReferences();
+			expandNewInferences();
+			findReclassifiables();
+			absorbNewInferences();
+			resetReclassifiables();
 
 			return reclassifiables;
 		}
@@ -115,36 +113,36 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private void expandNewInferredSubsumptions() {
+		private void expandNewInferences() {
 
-			do{
+			do {
 
-				new NewInferredSubsumptionsExpander();
+				new NewInferenceExpander();
 			}
-			while(resetInferredSubsumerExpansions());
+			while(configureForNextInferenceExpansion());
 		}
 
-		private boolean resetInferredSubsumerExpansions() {
+		private boolean configureForNextInferenceExpansion() {
 
 			boolean expansions = false;
 
 			for (NodeName n : allNodes) {
 
-				expansions |= n.getClassifier().resetInferredSubsumerExpansions();
+				expansions |= n.getClassifier().configureForNextInferenceExpansion();
 			}
 
 			return expansions;
 		}
 
-		private void absorbNewInferredSubsumptions() {
+		private void absorbNewInferences() {
 
 			for (NodeName n : allNodes) {
 
-				n.getClassifier().absorbNewInferredSubsumers();
+				n.getClassifier().absorbNewInferences();
 			}
 		}
 
-		private void findAnyReclassifiables() {
+		private void findReclassifiables() {
 
 			for (MatchableNode c : matchables.getAll()) {
 
@@ -155,7 +153,7 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private void resetAllReclassifiablesReferences() {
+		private void resetReclassifiables() {
 
 			for (MatchableNode m : reclassifiables) {
 

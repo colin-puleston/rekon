@@ -120,7 +120,7 @@ public abstract class Name {
 
 	boolean reclassifiable() {
 
-		return classifier != null && classifier.anyNewInferredSubsumers();
+		return classifier != null && classifier.anyNewInferences();
 	}
 
 	Names getSubsumers() {
