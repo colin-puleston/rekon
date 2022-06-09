@@ -24,28 +24,40 @@
 
 package rekon.test;
 
+import java.util.*;
+
 class CompareOpts extends TestOpts {
 
-	final General general;
-	final Specific specific;
+	final Input input;
+	final Output output;
 	final int maxQueries;
 
-	enum General {
+	enum Input {
 
-		RETRIEVE, QUERY;
+		CLASS, QUERY;
 	}
 
-	enum Specific {
+	enum Output {
 
-		EQUIVS, SUPS, SUBS, ANCS, DECS;
+		EQUIVS, SUPS, SUBS, ANCS, DECS, ALL;
+
+		Output[] toAtoms() {
+
+			if (this == ALL) {
+
+				return Arrays.copyOf(values(), values().length - 1);
+			}
+
+			return new Output[]{this};
+		}
 	}
 
 	CompareOpts(String arg) {
 
 		String[] vals = parseArg(arg, 2, 3);
 
-		general = General.valueOf(vals[0]);
-		specific = Specific.valueOf(vals[1]);
+		input = Input.valueOf(vals[0]);
+		output = Output.valueOf(vals[1]);
 		maxQueries = vals.length == 3 ? parseInt(vals[2]) : -1;
 	}
 }

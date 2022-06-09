@@ -26,16 +26,16 @@ package rekon.test;
 
 class TestOpts {
 
-	private boolean terseOutput = false;
+	private boolean runningGeneralTests = false;
 
-	void setTerseOutput() {
+	void setRunningGeneralTests() {
 
-		terseOutput = true;
+		runningGeneralTests = true;
 	}
 
-	boolean terseOutput() {
+	boolean runningGeneralTests() {
 
-		return terseOutput;
+		return runningGeneralTests;
 	}
 
 	String[] parseArg(String arg, int minLen, int maxLen) {

@@ -217,11 +217,11 @@ public class Run {
 		abstract void testOp(OpTester opTester, OWLOntology o);
 	}
 
-	private class RetrieveTester extends Tester {
+	private class ClassOpTester extends Tester {
 
-		RetrieveTester() {
+		ClassOpTester() {
 
-			run("RETRIEVE");
+			run("CLASS");
 		}
 
 		void testOp(OpTester opTester, OWLOntology o) {
@@ -233,11 +233,11 @@ public class Run {
 		}
 	}
 
-	private class QueryTester extends Tester {
+	private class QueryOpTester extends Tester {
 
 		private int maxQueries;
 
-		QueryTester(int maxQueries) {
+		QueryOpTester(int maxQueries) {
 
 			this.maxQueries = maxQueries;
 
@@ -270,7 +270,7 @@ public class Run {
 		factory = manager.getFactory();
 		reasoner = manager.createReasoner(ontology, reasonerOpt);
 
-		terseOutput = runOpts.terseOutput();
+		terseOutput = runOpts.runningGeneralTests();
 
 		showGeneralInfo("\nONTOLOGY: " + ontologyFile);
 		showGeneralInfo("REASONER: " + reasoner.getClass().getSimpleName());
@@ -280,12 +280,12 @@ public class Run {
 
 		for (int i = 0 ; i < runOpts.retrieveRuns ; i++) {
 
-			new RetrieveTester();
+			new ClassOpTester();
 		}
 
 		for (int i = 0 ; i < runOpts.queryRuns ; i++) {
 
-			new QueryTester(runOpts.maxQueries);
+			new QueryOpTester(runOpts.maxQueries);
 		}
 	}
 

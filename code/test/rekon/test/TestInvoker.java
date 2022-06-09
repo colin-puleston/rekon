@@ -51,7 +51,7 @@ abstract class TestInvoker<O extends TestOpts> {
 
 	private void runGeneralTests(O customOpts, ReasonerOpt reasonerOpt) {
 
-		customOpts.setTerseOutput();
+		customOpts.setRunningGeneralTests();
 
 		for (File file : GENEERAL_TESTS_DIR.listFiles()) {
 

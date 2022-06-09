@@ -88,37 +88,40 @@ public class Compare {
 		rekon = startReasoner(ReasonerOpt.REKON);
 		control = startReasoner(reasonerOpt);
 
-		doCompare();
+		for (CompareOpts.Output output : compareOpts.output.toAtoms()) {
+
+			compare(output);
+		}
 	}
 
-	private void doCompare() {
+	private void compare(CompareOpts.Output output) {
 
-		System.out.println("\nSTART COMPARE " + compareOpts.specific + "...");
+		System.out.println("\nSTART COMPARE " + output + "...");
 
 		for (OWLOntology o : manager.manager.getOntologies()) {
 
-			if (compareOpts.general == CompareOpts.General.RETRIEVE) {
+			if (compareOpts.input == CompareOpts.Input.CLASS) {
 
-				compareRetrieve(o);
+				compareClassOp(o, output);
 			}
 			else {
 
-				compareQuery(o);
+				compareQueryOp(o, output);
 			}
 		}
 
-		System.out.println("\nDONE COMPARE!");
+		System.out.println("DONE COMPARE " + output);
 	}
 
-	private void compareRetrieve(OWLOntology o) {
+	private void compareClassOp(OWLOntology o, CompareOpts.Output output) {
 
 		for (OWLClass c : o.getClassesInSignature()) {
 
-			compare(c);
+			compare(c, output);
 		}
 	}
 
-	private void compareQuery(OWLOntology o) {
+	private void compareQueryOp(OWLOntology o, CompareOpts.Output output) {
 
 		QueryGenerator generator = new QueryGenerator(o, factory, compareOpts.maxQueries);
 
@@ -131,14 +134,14 @@ public class Compare {
 				break;
 			}
 
-			compare(next);
+			compare(next, output);
 		}
 	}
 
-	private void compare(OWLClassExpression c) {
+	private void compare(OWLClassExpression c, CompareOpts.Output output) {
 
-		Set<OWLClass> rl = getLinks(rekon, c);
-		Set<OWLClass> cl = getLinks(control, c);
+		Set<OWLClass> rl = getLinks(rekon, c, output);
+		Set<OWLClass> cl = getLinks(control, c, output);
 
 		if (!rl.equals(cl)) {
 
@@ -146,20 +149,23 @@ public class Compare {
 			Collection<OWLClass> clo = orderLinks(cl);
 
 			System.out.println("\nMISMATCH: " + c);
-			System.out.println("REKON: " + rlo);
-			System.out.println("CONTROL: " + clo);
+			System.out.println("Rekon: " + rlo);
+			System.out.println("Control: " + clo);
 
 			rlo.removeAll(cl);
 			clo.removeAll(rl);
 
-			System.out.println("REKON-ONLY: " + rlo);
-			System.out.println("CONTROL-ONLY: " + clo);
+			System.out.println("Rekon Only: " + rlo);
+			System.out.println("Control Only: " + clo);
 		}
 	}
 
-	private Set<OWLClass> getLinks(OWLReasoner reasoner, OWLClassExpression e) {
+	private Set<OWLClass> getLinks(
+							OWLReasoner reasoner,
+							OWLClassExpression e,
+							CompareOpts.Output output) {
 
-		switch (compareOpts.specific) {
+		switch (output) {
 
 			case EQUIVS:
 				return reasoner.getEquivalentClasses(e).getEntities();
@@ -177,7 +183,7 @@ public class Compare {
 				return reasoner.getSubClasses(e, false).getFlattened();
 		}
 
-		throw new Error("Unrecognised compare option: " + compareOpts.specific);
+		throw new Error("Unrecognised compare option: " + compareOpts.output);
 	}
 
 	private Set<OWLClass> orderLinks(Collection<OWLClass> links) {
