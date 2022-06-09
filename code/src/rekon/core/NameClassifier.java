@@ -88,7 +88,7 @@ class NameClassifier {
 
 	void expandLatestNewInferredSubsumers() {
 
-		for (Name s : latestInferredSubsumers.getNames()) {
+		for (Name s : subsumers.getNames()) {
 
 			addInferredSubsumerExpansions(s.getSubsumers());
 			addInferredSubsumerExpansions(s.getClassifier().latestInferredSubsumers);
