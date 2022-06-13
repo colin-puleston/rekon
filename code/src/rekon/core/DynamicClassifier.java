@@ -82,7 +82,7 @@ class DynamicClassifier extends Classifier {
 
 		if (n.reclassifiable()) {
 
-			n.getClassifier().absorbNewInferredSubsumers();
+			n.getClassifier().absorbNewInferences();
 			c.resetSignatureRefs();
 
 			return true;
