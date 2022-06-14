@@ -31,19 +31,6 @@ import java.util.*;
  */
 class NameClassification {
 
-	static private class BasicLinksSetter extends MultiThreadListProcessor<Name> {
-
-		BasicLinksSetter(List<Name> allNames) {
-
-			invokeListProcesses(allNames);
-		}
-
-		void processElement(Name n) {
-
-			getInitialiserFor(n).setBasicLinks();
-		}
-	}
-
 	static void completeClassifications(List<Name> allNames) {
 
 		for (Name n : allNames) {
@@ -63,10 +50,8 @@ class NameClassification {
 
 		for (Name n : allNames) {
 
-			getInitialiserFor(n).setAsSubsumedOfSubsumers();
+			getInitialiserFor(n).resolveBasicLinksWithSubsumers();
 		}
-
-		new BasicLinksSetter(allNames);
 
 		for (Name n : allNames) {
 
@@ -151,37 +136,41 @@ class NameClassification {
 
 	private class Initialiser {
 
-		private NameSet subsumers;
-		private NameSet subsumeds = new NameSet();
-		private NameSet ancestors = null;
+		private NameSet ancestors;
 
 		Initialiser(NameSet subsumers) {
 
-			this.subsumers = subsumers;
-		}
-
-		void setAsSubsumedOfSubsumers() {
-
-			for (Name s : subsumers.getNames()) {
-
-				getInitialiserFor(s).subsumeds.add(name);
-			}
-		}
-
-		void setBasicLinks() {
-
-			equivalents.addAll(subsumers);
-			equivalents.retainAll(subsumeds);
-
 			ancestors = subsumers;
+		}
 
-			ancestors.removeAll(equivalents);
+		void resolveBasicLinksWithSubsumers() {
+
+			for (Name s : ancestors.copyNames()) {
+
+				if (getInitialiserFor(s).checkSubsumedToEquiv(name)) {
+
+					ancestors.remove(s);
+					equivalents.add(s);
+				}
+			}
 		}
 
 		void setDirectLinks() {
 
 			setDirectSupers();
 			setAsDirectSub();
+		}
+
+		private boolean checkSubsumedToEquiv(Name subsumed) {
+
+			if (ancestors.remove(subsumed)) {
+
+				equivalents.add(subsumed);
+
+				return true;
+			}
+
+			return false;
 		}
 
 		private void setDirectSupers() {
