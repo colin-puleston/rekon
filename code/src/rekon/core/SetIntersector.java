@@ -31,15 +31,15 @@ import java.util.*;
  */
 class SetIntersector {
 
-	static private class SmallestFirstComparator<E> implements Comparator<Set<E>> {
+	static private class SmallestFirstComparator<E> implements Comparator<Collection<E>> {
 
-		public int compare(Set<E> first, Set<E> second) {
+		public int compare(Collection<E> first, Collection<E> second) {
 
 			return first.size() - second.size();
 		}
 	}
 
-	static <E>Set<E> intersect(Collection<? extends Set<E>> sets) {
+	static <E>Collection<E> intersect(Collection<? extends Collection<E>> sets) {
 
 		if (sets.size() == 1) {
 
@@ -48,7 +48,7 @@ class SetIntersector {
 
 		Set<E> intersection = new HashSet<E>();
 
-		for (Set<E> set : sort(sets)) {
+		for (Collection<E> set : sort(sets)) {
 
 			if (intersection.isEmpty()) {
 
@@ -68,9 +68,9 @@ class SetIntersector {
 		return intersection;
 	}
 
-	static private <E>Set<Set<E>> sort(Collection<? extends Set<E>> in) {
+	static private <E>Collection<Collection<E>> sort(Collection<? extends Collection<E>> in) {
 
-		Set<Set<E>> out = new TreeSet<Set<E>>(new SmallestFirstComparator<E>());
+		Collection<Collection<E>> out = new TreeSet<Collection<E>>(new SmallestFirstComparator<E>());
 
 		out.addAll(in);
 

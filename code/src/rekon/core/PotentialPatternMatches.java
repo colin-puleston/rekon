@@ -35,16 +35,16 @@ abstract class PotentialPatternMatches<O> {
 
 	private abstract class OptionCollector {
 
-		abstract boolean absorb(Set<O> options);
+		abstract boolean absorb(Collection<O> options);
 
 		abstract void absorbInto(OptionIntersection insect);
 	}
 
 	private class OptionIntersection extends OptionCollector {
 
-		private List<Set<O>> optionSets = new ArrayList<Set<O>>();
+		private List<Collection<O>> optionSets = new ArrayList<Collection<O>>();
 
-		boolean absorb(Set<O> options) {
+		boolean absorb(Collection<O> options) {
 
 			if (options.isEmpty()) {
 
@@ -66,7 +66,7 @@ abstract class PotentialPatternMatches<O> {
 			return !optionSets.isEmpty();
 		}
 
-		Set<O> getIntersection() {
+		Collection<O> getIntersection() {
 
 			return SetIntersector.intersect(optionSets);
 		}
@@ -74,10 +74,10 @@ abstract class PotentialPatternMatches<O> {
 
 	private class OptionUnion extends OptionCollector {
 
-		private Set<O> union = Collections.emptySet();
+		private Collection<O> union = Collections.emptySet();
 		private int components = 0;
 
-		boolean absorb(Set<O> options) {
+		boolean absorb(Collection<O> options) {
 
 			if (!options.isEmpty()) {
 
@@ -106,7 +106,7 @@ abstract class PotentialPatternMatches<O> {
 			insect.absorb(union);
 		}
 
-		Set<O> getUnion() {
+		Collection<O> getUnion() {
 
 			return union;
 		}
@@ -114,8 +114,8 @@ abstract class PotentialPatternMatches<O> {
 
 	private class RankMatches {
 
-		private Map<Name, Set<O>> optionsByName = new HashMap<Name, Set<O>>();
-		private Set<Name> namesCommonToAllOptions = new HashSet<Name>();
+		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
+		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
 		void registerOption(O option, Names rankNames) {
 
@@ -123,6 +123,35 @@ abstract class PotentialPatternMatches<O> {
 
 				registerOptionName(option, n);
 			}
+		}
+
+		private void registerOptionName(O option, Name n) {
+
+			if (refNamesCommonToAllOptions.contains(n)) {
+
+				return;
+			}
+
+			Set<O> options = optionsByRefName.get(n);
+
+			if (options == null) {
+
+				options = new HashSet<O>();
+
+				optionsByRefName.put(n, options);
+			}
+			else {
+
+				if (options.size() == totalOptions() - 1) {
+
+					optionsByRefName.remove(n);
+					refNamesCommonToAllOptions.add(n);
+
+					return;
+				}
+			}
+
+			options.add(option);
 		}
 
 		OptionCollector collectOptionsFor(Names rankNames) {
@@ -142,35 +171,6 @@ abstract class PotentialPatternMatches<O> {
 			return rankOptions;
 		}
 
-		private void registerOptionName(O option, Name n) {
-
-			if (namesCommonToAllOptions.contains(n)) {
-
-				return;
-			}
-
-			Set<O> options = optionsByName.get(n);
-
-			if (options == null) {
-
-				options = new HashSet<O>();
-
-				optionsByName.put(n, options);
-			}
-			else {
-
-				if (options.size() == totalOptions() - 1) {
-
-					optionsByName.remove(n);
-					namesCommonToAllOptions.add(n);
-
-					return;
-				}
-			}
-
-			options.add(option);
-		}
-
 		private OptionUnion getOptionsFor(Name n) {
 
 			OptionUnion options = new OptionUnion();
@@ -188,12 +188,12 @@ abstract class PotentialPatternMatches<O> {
 
 		private boolean collectDirectOptionsFor(Name n, OptionUnion options) {
 
-			if (namesCommonToAllOptions.contains(n)) {
+			if (refNamesCommonToAllOptions.contains(n)) {
 
 				return false;
 			}
 
-			Set<O> opts = optionsByName.get(n);
+			Set<O> opts = optionsByRefName.get(n);
 
 			if (opts != null) {
 
@@ -215,7 +215,6 @@ abstract class PotentialPatternMatches<O> {
 
 		static private final int DEFAULT_RANKS = 3;
 
-		private Collection<O> options;
 		private int startRank;
 		private int stopRank;
 
@@ -234,34 +233,33 @@ abstract class PotentialPatternMatches<O> {
 				rankedNames = getOptionMatchNames(option);
 			}
 
-			void checkRegister(int rank) {
+			void checkRegister(RankMatches rankMatches, int rank) {
 
 				int regRanks = rankedNames.size();
 
 				if (regRanks > rank) {
 
-					allRankMatches.get(rank).registerOption(option, rankedNames.get(rank));
+					rankMatches.registerOption(option, rankedNames.get(rank));
 
 					completedReg &= (regRanks <= stopRank);
 				}
 			}
 		}
 
-		MultiOptionRegistrar(Collection<O> options) {
+		MultiOptionRegistrar() {
 
-			this(options, 0, DEFAULT_RANKS);
+			this(0, DEFAULT_RANKS);
 		}
 
-		MultiOptionRegistrar(Collection<O> options, int startRank, int stopRank) {
+		MultiOptionRegistrar(int startRank, int stopRank) {
 
-			this.options = options;
 			this.startRank = startRank;
 			this.stopRank = stopRank;
 
 			ensureRankMatches(stopRank);
 			setMaxProcesses(stopRank - startRank);
 
-			for (O option : options) {
+			for (O option : getAllOptions()) {
 
 				optionRegs.add(new OptionReg(option));
 			}
@@ -276,32 +274,36 @@ abstract class PotentialPatternMatches<O> {
 
 		void execThreadProcess(int totalThreads, int threadIndex) {
 
-			for (OptionReg optReg : optionRegs) {
-
-				optReg.checkRegister(startRank + threadIndex);
-			}
+			registerRank(startRank + threadIndex);
 		}
 
 		void execAllInSingleThread() {
 
+			for (int rank = startRank ; rank < stopRank ; rank++) {
+
+				registerRank(rank);
+			}
+		}
+
+		private void registerRank(int rank) {
+
+			RankMatches rankMatches = allRankMatches.get(rank);
+
 			for (OptionReg optReg : optionRegs) {
 
-				for (int rank = startRank ; rank < stopRank ; rank++) {
-
-					optReg.checkRegister(rank);
-				}
+				optReg.checkRegister(rankMatches, rank);
 			}
 		}
 	}
 
-	void registerOptions(Collection<O> options) {
+	void registerAllOptionRanks() {
 
-		new MultiOptionRegistrar(options);
+		new MultiOptionRegistrar();
 	}
 
-	boolean registerOptionRanks(Collection<O> options, int startRank, int stopRank) {
+	boolean registerOptionRanks(int startRank, int stopRank) {
 
-		return new MultiOptionRegistrar(options, startRank, stopRank).completedReg();
+		return new MultiOptionRegistrar(startRank, stopRank).completedReg();
 	}
 
 	Collection<O> getPotentialsOrNull(NodePattern request, List<Names> namesByRank) {
@@ -335,7 +337,7 @@ abstract class PotentialPatternMatches<O> {
 		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : null;
 	}
 
-	abstract int totalOptions();
+	abstract List<O> getAllOptions();
 
 	abstract List<Names> getOptionMatchNames(O option);
 
@@ -351,5 +353,10 @@ abstract class PotentialPatternMatches<O> {
 
 			allRankMatches.add(new RankMatches());
 		}
+	}
+
+	private int totalOptions() {
+
+		return getAllOptions().size();
 	}
 }

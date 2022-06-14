@@ -32,7 +32,7 @@ import java.util.*;
 class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 	private Config config;
-	private Collection<MatchableNode> allOptions;
+	private List<MatchableNode> allOptions;
 
 	private abstract class Config {
 
@@ -52,7 +52,7 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 		OntologyConfig() {
 
-			registerOptions(allOptions);
+			registerAllOptionRanks();
 		}
 
 		Names resolveNamesForRegistration(Names names) {
@@ -86,7 +86,7 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 			if (!optionRegComplete && stopRank > nextOptionRegRank) {
 
-				registerOptionRanks(allOptions, nextOptionRegRank, stopRank);
+				registerOptionRanks(nextOptionRegRank, stopRank);
 
 				nextOptionRegRank = stopRank;
 			}
@@ -100,7 +100,7 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		}
 	}
 
-	PotentialSubsumeds(Collection<MatchableNode> allOptions, boolean dynamic) {
+	PotentialSubsumeds(List<MatchableNode> allOptions, boolean dynamic) {
 
 		this.allOptions = allOptions;
 
@@ -121,9 +121,9 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		return potentials != null ? potentials : allOptions;
 	}
 
-	int totalOptions() {
+	List<MatchableNode> getAllOptions() {
 
-		return allOptions.size();
+		return allOptions;
 	}
 
 	List<Names> getOptionMatchNames(MatchableNode option) {

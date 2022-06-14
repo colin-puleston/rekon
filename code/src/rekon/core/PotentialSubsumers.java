@@ -38,7 +38,7 @@ class PotentialSubsumers {
 
 	private abstract class CategoryPotentials extends PotentialPatternMatches<NodeDefinition> {
 
-		private Collection<NodeDefinition> categoryDefs = null;
+		private List<NodeDefinition> categoryDefs = null;
 
 		Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {
 
@@ -50,9 +50,9 @@ class PotentialSubsumers {
 			return potentials != null ? potentials : categoryDefs;
 		}
 
-		int totalOptions() {
+		List<NodeDefinition> getAllOptions() {
 
-			return categoryDefs.size();
+			return categoryDefs;
 		}
 
 		List<Names> getOptionMatchNames(NodeDefinition option) {
@@ -88,7 +88,7 @@ class PotentialSubsumers {
 				categoryDefs = new ArrayList<NodeDefinition>();
 
 				collectCategoryDefs();
-				registerCategoryOptions();
+				registerAllOptionRanks();
 			}
 		}
 
@@ -104,11 +104,6 @@ class PotentialSubsumers {
 					}
 				}
 			}
-		}
-
-		private void registerCategoryOptions() {
-
-			registerOptions(categoryDefs);
 		}
 	}
 
