@@ -24,6 +24,8 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -38,13 +40,13 @@ class NameClassifier {
 
 	private class InferredSubsumers {
 
-		private NameSet collected = new NameSet();
+		private NameSet all = new NameSet();
 		private NameSet latest = new NameSet();
 		private NameSet expansions = new NameSet();
 
 		void checkAddDirectlyInferred(Name subsumer) {
 
-			if (newSubsumer(subsumer) && collected.add(subsumer)) {
+			if (newSubsumer(subsumer) && all.add(subsumer)) {
 
 				latest.add(subsumer);
 			}
@@ -58,7 +60,7 @@ class NameClassifier {
 
 		boolean configureForNextExpansion() {
 
-			collected.addAll(latest);
+			all.addAll(latest);
 			latest.clear();
 
 			if (expansions.isEmpty()) {
@@ -72,16 +74,78 @@ class NameClassifier {
 			return true;
 		}
 
-		void absorbCollected() {
+		void absorbAll() {
 
-			subsumers.addAll(collected);
+			subsumers.addAll(all);
 
-			collected.clear();
+			all.clear();
 		}
 
-		boolean anyInferences() {
+		boolean anySubsumers() {
 
-			return !collected.isEmpty();
+			return !all.isEmpty();
+		}
+
+		boolean anyDefinitionRefedSubsumers() {
+
+			for (Name s : all.getNames()) {
+
+				if (s.definitionRefed()) {
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		boolean anySubsumersWithRelations() {
+
+			for (Name s : all.getNames()) {
+
+				if (s instanceof NodeName) {
+
+					MatchableNode m = ((NodeName)s).getMatchable();
+
+					if (m != null && !m.getProfile().getSignatureRelations().isEmpty()) {
+
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		boolean anySubsumersWithRelationsFor(Name prop) {
+
+			for (Name s : all.getNames()) {
+
+				if (s instanceof NodeName) {
+
+					MatchableNode m = ((NodeName)s).getMatchable();
+
+					if (m != null && anyRelationsFor(m.getProfile().getSignatureRelations(), prop)) {
+
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private boolean anyRelationsFor(Collection<Relation> rels, Name prop) {
+
+			for (Relation r : rels) {
+
+				if (r.getProperty() == prop) {
+
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private void expandLatest(NameSet sourceSubsumers) {
@@ -95,7 +159,7 @@ class NameClassifier {
 
 				InferredSubsumers si = s.getClassifier().inferredSubsumers;
 
-				addExpansions(si.collected);
+				addExpansions(si.all);
 				addExpansions(si.latest);
 			}
 		}
@@ -104,7 +168,7 @@ class NameClassifier {
 
 			for (Name s : subsumerExps.getNames()) {
 
-				if (newSubsumer(s) && !collected.contains(s) && !latest.contains(s)) {
+				if (newSubsumer(s) && !all.contains(s) && !latest.contains(s)) {
 
 					expansions.add(s);
 				}
@@ -172,12 +236,27 @@ class NameClassifier {
 
 	void absorbNewInferences() {
 
-		inferredSubsumers.absorbCollected();
+		inferredSubsumers.absorbAll();
 	}
 
-	boolean anyNewInferences() {
+	boolean newSubsumers() {
 
-		return inferredSubsumers.anyInferences();
+		return inferredSubsumers.anySubsumers();
+	}
+
+	boolean newDefinitionRefedSubsumers() {
+
+		return inferredSubsumers.anyDefinitionRefedSubsumers();
+	}
+
+	boolean newSubsumersWithRelations() {
+
+		return inferredSubsumers.anySubsumersWithRelations();
+	}
+
+	boolean newSubsumersWithRelationsFor(Name prop) {
+
+		return inferredSubsumers.anySubsumersWithRelationsFor(prop);
 	}
 
 	boolean rootName() {

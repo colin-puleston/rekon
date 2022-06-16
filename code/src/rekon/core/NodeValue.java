@@ -53,9 +53,9 @@ public class NodeValue extends ObjectValue {
 		return disjuncts;
 	}
 
-	void registerDefinitionNames() {
+	void registerDefinitionRefedNames() {
 
-		disjuncts.registerAsDefinitionNames();
+		disjuncts.registerAsDefinitionRefed();
 	}
 
 	void collectNames(NameCollector collector) {
@@ -84,11 +84,37 @@ public class NodeValue extends ObjectValue {
 		return n != null && subsumesNodeValue(n);
 	}
 
-	boolean reclassifiable() {
+	boolean newDefinitionRefedSubsumers() {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (d.reclassifiable()) {
+			if (d.newDefinitionRefedSubsumers()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	boolean newSubsumersWithRelations() {
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (d.newSubsumersWithRelations()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	boolean newSubsumersWithRelationsFor(Name prop) {
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (d.newSubsumersWithRelationsFor(prop)) {
 
 				return true;
 			}

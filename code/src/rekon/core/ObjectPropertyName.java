@@ -45,6 +45,11 @@ public abstract class ObjectPropertyName extends PropertyName {
 		chains.add(chain);
 	}
 
+	boolean transitive() {
+
+		return transitive;
+	}
+
 	ObjectPropertyName lookForMostGeneralTransitiveProperty() {
 
 		ObjectPropertyName mostGeneral = null;
@@ -63,6 +68,24 @@ public abstract class ObjectPropertyName extends PropertyName {
 		}
 
 		return mostGeneral != null ? mostGeneral : (transitive ? this : null);
+	}
+
+	boolean anyChains() {
+
+		if (!chains.isEmpty()) {
+
+			return true;
+		}
+
+		for (Name s : getSubsumers().getNames()) {
+
+			if (!((ObjectPropertyName)s).chains.isEmpty()) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	List<PropertyChain> getAllChains() {

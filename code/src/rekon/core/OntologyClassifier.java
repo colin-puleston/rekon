@@ -85,8 +85,8 @@ class OntologyClassifier extends Classifier {
 
 			expandNewInferences();
 			findReclassifiables();
+			checkResetSignatureRefs();
 			absorbNewInferences();
-			resetReclassifiables();
 
 			return reclassifiables;
 		}
@@ -144,20 +144,30 @@ class OntologyClassifier extends Classifier {
 
 		private void findReclassifiables() {
 
-			for (MatchableNode c : matchables.getAll()) {
+			for (MatchableNode m : matchables.getAll()) {
 
-				if (c.reclassifiable()) {
+				if (m.getProfile().reclassifiable()) {
 
-					reclassifiables.add(c);
+					reclassifiables.add(m);
 				}
 			}
 		}
 
-		private void resetReclassifiables() {
+		private void checkResetSignatureRefs() {
 
-			for (MatchableNode m : reclassifiables) {
+			List<MatchableNode> potentiallyUpdateds = new ArrayList<MatchableNode>();
 
-				m.resetSignatureRefs();
+			for (MatchableNode m : matchables.getAll()) {
+
+				if (m.getProfile().potentialSignatureUpdates()) {
+
+					potentiallyUpdateds.add(m);
+				}
+			}
+
+			for (MatchableNode m : potentiallyUpdateds) {
+
+				m.getProfile().resetSignatureRefs();
 			}
 		}
 	}

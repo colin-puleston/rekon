@@ -74,11 +74,11 @@ public abstract class Names {
 
 	public abstract NameSet toSet();
 
-	void registerAsDefinitionNames() {
+	void registerAsDefinitionRefed() {
 
 		for (Name n : getNames()) {
 
-			n.registerAsDefinitionName();
+			n.registerAsDefinitionRefed();
 		}
 	}
 
@@ -102,7 +102,7 @@ public abstract class Names {
 		return getNames().iterator().next();
 	}
 
-	private NameSet expandWithNonRootSubsumers(boolean defnNamesOnly) {
+	private NameSet expandWithNonRootSubsumers(boolean defnRefedOnly) {
 
 		NameSet expanded = new NameSet(this);
 
@@ -110,7 +110,7 @@ public abstract class Names {
 
 			for (Name s : n.getSubsumers().getNames()) {
 
-				if (!s.rootName() && (!defnNamesOnly || s.definitionName())) {
+				if (!s.rootName() && (!defnRefedOnly || s.definitionRefed())) {
 
 					expanded.add(s);
 				}

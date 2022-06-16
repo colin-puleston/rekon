@@ -33,4 +33,14 @@ public abstract class ObjectRelation extends Relation {
 
 		super(property, target);
 	}
+
+	ObjectPropertyName getObjectProperty() {
+
+		return (ObjectPropertyName)getProperty();
+	}
+
+	ObjectValue getObjectTarget() {
+
+		return (ObjectValue)getTarget();
+	}
 }

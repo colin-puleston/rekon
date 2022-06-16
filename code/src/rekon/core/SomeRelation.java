@@ -35,20 +35,23 @@ public class SomeRelation extends ObjectRelation {
 
 		private Set<Relation> allExpansions = new HashSet<Relation>();
 
-		private List<Relation> passExpansions = new ArrayList<Relation>();
-		private List<Relation> lastPassExpansions = new ArrayList<Relation>();
+		private List<SomeRelation> passExpansions = new ArrayList<SomeRelation>();
+		private List<SomeRelation> lastPassExpansions = new ArrayList<SomeRelation>();
 
 		private abstract class ExpansionCollector {
 
-			void collectFromNested(Relation current) {
+			void collectFromNested(SomeRelation current) {
 
 				for (Relation r : current.getTarget().getSignatureRelations()) {
 
-					collectFrom(r);
+					if (r instanceof SomeRelation) {
+
+						collectFrom((SomeRelation)r);
+					}
 				}
 			}
 
-			abstract void collectFrom(Relation current);
+			abstract void collectFrom(SomeRelation current);
 		}
 
 		private class TransitivityBasedCollector extends ExpansionCollector {
@@ -60,7 +63,7 @@ public class SomeRelation extends ObjectRelation {
 				this.transProp = transProp;
 			}
 
-			void collectFrom(Relation current) {
+			void collectFrom(SomeRelation current) {
 
 				if (transProp.subsumes(current.getProperty())) {
 
@@ -79,7 +82,7 @@ public class SomeRelation extends ObjectRelation {
 				this.chain = chain;
 			}
 
-			void collectFrom(Relation current) {
+			void collectFrom(SomeRelation current) {
 
 				if (chain.hasTailSub(current.getProperty(), tailsSubsIndex)) {
 
@@ -96,9 +99,9 @@ public class SomeRelation extends ObjectRelation {
 				}
 			}
 
-			private SomeRelation createLinkRelation(Relation endSub) {
+			private SomeRelation createLinkRelation(SomeRelation endSub) {
 
-				return chain.createLinkRelation((ObjectValue)endSub.getTarget());
+				return chain.createLinkRelation(endSub.getObjectTarget());
 			}
 		}
 
@@ -126,7 +129,7 @@ public class SomeRelation extends ObjectRelation {
 
 				for (ExpansionCollector collector : collectors) {
 
-					for (Relation r : lastPassExpansions) {
+					for (SomeRelation r : lastPassExpansions) {
 
 						collector.collectFromNested(r);
 					}
@@ -138,7 +141,7 @@ public class SomeRelation extends ObjectRelation {
 				}
 
 				lastPassExpansions = passExpansions;
-				passExpansions = new ArrayList<Relation>();
+				passExpansions = new ArrayList<SomeRelation>();
 			}
 		}
 
@@ -160,7 +163,7 @@ public class SomeRelation extends ObjectRelation {
 			return collectors;
 		}
 
-		private void addExpansion(Relation relation) {
+		private void addExpansion(SomeRelation relation) {
 
 			if (allExpansions.add(relation)) {
 
@@ -179,6 +182,18 @@ public class SomeRelation extends ObjectRelation {
 		return new Expander(this).expand();
 	}
 
+	boolean potentialNewSignatureRelations() {
+
+		ObjectPropertyName prop = getObjectProperty();
+
+		if (prop.transitive() || prop.anyChains()) {
+
+			return getTarget().newSubsumersWithRelationsFor(prop);
+		}
+
+		return false;
+	}
+
 	private ObjectPropertyName lookForMostGeneralTransitiveProperty() {
 
 		return getObjectProperty().lookForMostGeneralTransitiveProperty();
@@ -187,10 +202,5 @@ public class SomeRelation extends ObjectRelation {
 	private List<PropertyChain> getAllChains() {
 
 		return getObjectProperty().getAllChains();
-	}
-
-	private ObjectPropertyName getObjectProperty() {
-
-		return (ObjectPropertyName)getProperty();
 	}
 }

@@ -66,14 +66,24 @@ abstract class Value extends Expression {
 		return v == this || subsumesOther(v);
 	}
 
-	void registerDefinitionNames() {
+	void registerDefinitionRefedNames() {
 	}
 
 	abstract void collectNames(NameCollector collector);
 
 	abstract boolean subsumesOther(Value v);
 
-	boolean reclassifiable() {
+	boolean newDefinitionRefedSubsumers() {
+
+		return false;
+	}
+
+	boolean newSubsumersWithRelations() {
+
+		return false;
+	}
+
+	boolean newSubsumersWithRelationsFor(Name prop) {
 
 		return false;
 	}

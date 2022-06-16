@@ -55,17 +55,7 @@ class MatchableNode {
 
 		profile = profile.combineWith(defn);
 
-		defn.registerDefinitionNames();
-	}
-
-	void resetSignatureRefs() {
-
-		profile.resetSignatureRefs();
-	}
-
-	boolean reclassifiable() {
-
-		return name.reclassifiable() || profile.reclassifiable();
+		defn.registerDefinitionRefedNames();
 	}
 
 	NodeName getName() {

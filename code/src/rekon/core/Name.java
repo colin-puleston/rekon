@@ -32,7 +32,7 @@ public abstract class Name {
 	private NameClassifier classifier = new NameClassifier(this);
 	private NameClassification classification = null;
 
-	private boolean definitionName = false;
+	private boolean definitionRefed = false;
 
 	public void addSubsumer(Name subsumer) {
 
@@ -76,14 +76,14 @@ public abstract class Name {
 		return classifier != null ? classifier.rootName() : classification.rootName();
 	}
 
-	public boolean definitionName() {
+	public boolean definitionRefed() {
 
-		return definitionName;
+		return definitionRefed;
 	}
 
-	void registerAsDefinitionName() {
+	void registerAsDefinitionRefed() {
 
-		definitionName = true;
+		definitionRefed = true;
 	}
 
 	void setClassification() {
@@ -118,11 +118,6 @@ public abstract class Name {
 		return false;
 	}
 
-	boolean reclassifiable() {
-
-		return classifier != null && classifier.anyNewInferences();
-	}
-
 	Names getSubsumers() {
 
 		return classifier != null ? classifier.getSubsumers() : classification.getSubsumers();
@@ -131,6 +126,26 @@ public abstract class Name {
 	boolean subsumes(Name name) {
 
 		return name == this || name.hasSubsumer(this);
+	}
+
+	boolean newSubsumers() {
+
+		return classifier != null && classifier.newSubsumers();
+	}
+
+	boolean newDefinitionRefedSubsumers() {
+
+		return classifier != null && classifier.newDefinitionRefedSubsumers();
+	}
+
+	boolean newSubsumersWithRelations() {
+
+		return classifier != null && classifier.newSubsumersWithRelations();
+	}
+
+	boolean newSubsumersWithRelationsFor(Name prop) {
+
+		return classifier != null && classifier.newSubsumersWithRelationsFor(prop);
 	}
 
 	private boolean hasSubsumer(Name name) {

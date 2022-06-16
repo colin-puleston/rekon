@@ -90,11 +90,6 @@ public class NodePattern extends Expression {
 		return new NodePattern(names, newRelations);
 	}
 
-	void resetSignatureRefs() {
-
-		signatureRelations = null;
-	}
-
 	NodeName asNodeName() {
 
 		if (names.size() == 1 && relations.isEmpty()) {
@@ -115,13 +110,13 @@ public class NodePattern extends Expression {
 		return !relations.isEmpty();
 	}
 
-	void registerDefinitionNames() {
+	void registerDefinitionRefedNames() {
 
-		names.registerAsDefinitionNames();
+		names.registerAsDefinitionRefed();
 
 		for (Relation r : relations) {
 
-			r.registerDefinitionNames();
+			r.registerDefinitionRefedNames();
 		}
 	}
 
@@ -147,7 +142,7 @@ public class NodePattern extends Expression {
 
 		for (Name name : names.getNames()) {
 
-			if (name.reclassifiable()) {
+			if (name.newDefinitionRefedSubsumers()) {
 
 				return true;
 			}
@@ -155,7 +150,28 @@ public class NodePattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getTarget().reclassifiable()) {
+			if (r.getTarget().newDefinitionRefedSubsumers()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	boolean potentialSignatureUpdates() {
+
+		for (Name name : names.getNames()) {
+
+			if (name.newSubsumersWithRelations()) {
+
+				return true;
+			}
+		}
+
+		for (Relation r : getSignatureRelations()) {
+
+			if (r.potentialNewSignatureRelations()) {
 
 				return true;
 			}
@@ -179,6 +195,11 @@ public class NodePattern extends Expression {
 		}
 
 		return signatureRelations;
+	}
+
+	void resetSignatureRefs() {
+
+		signatureRelations = null;
 	}
 
 	void render(PatternRenderer r) {

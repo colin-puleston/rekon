@@ -55,15 +55,10 @@ public abstract class Relation extends Expression {
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
 	}
 
-	Collection<Relation> expandForSignature() {
+	void registerDefinitionRefedNames() {
 
-		return Collections.singleton(this);
-	}
-
-	void registerDefinitionNames() {
-
-		property.registerAsDefinitionName();
-		target.registerDefinitionNames();
+		property.registerAsDefinitionRefed();
+		target.registerDefinitionRefedNames();
 	}
 
 	void collectNames(NameCollector collector) {
@@ -71,6 +66,16 @@ public abstract class Relation extends Expression {
 		collector.collectFor(property);
 
 		target.collectNames(collector.forNextRank());
+	}
+
+	Collection<Relation> expandForSignature() {
+
+		return Collections.singleton(this);
+	}
+
+	boolean potentialNewSignatureRelations() {
+
+		return false;
 	}
 
 	void render(PatternRenderer r) {
