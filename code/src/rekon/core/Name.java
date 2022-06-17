@@ -76,11 +76,6 @@ public abstract class Name {
 		return classifier != null ? classifier.rootName() : classification.rootName();
 	}
 
-	public boolean definitionRefed() {
-
-		return definitionRefed;
-	}
-
 	void registerAsDefinitionRefed() {
 
 		definitionRefed = true;
@@ -116,6 +111,11 @@ public abstract class Name {
 	boolean dynamic() {
 
 		return false;
+	}
+
+	boolean definitionRefed() {
+
+		return definitionRefed;
 	}
 
 	Names getSubsumers() {

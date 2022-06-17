@@ -27,31 +27,15 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class Classifier {
+abstract class InferredSubsumers {
 
-	static void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode candidate) {
+	abstract void checkAddDirectlyInferred(Name subsumer) ;
 
-		if (candidate != defined) {
+	abstract void expandLatestInferences();
 
-			checkSubsumption(defined.getName(), defn, candidate);
-		}
-	}
+	abstract boolean configureForNextExpansion();
 
-	static void checkSubsumption(NodeDefinition defn, MatchableNode candidate) {
+	abstract void addAllToClassifier();
 
-		checkSubsumption(defn.getNodeName(), defn.getDefinition(), candidate);
-	}
-
-	static private void checkSubsumption(
-							NodeName definedName,
-							NodePattern defn,
-							MatchableNode candidate) {
-
-		NodeName cn = candidate.getName();
-
-		if (!definedName.subsumes(cn) && defn.subsumes(candidate.getProfile())) {
-
-			cn.getInferredSubsumers().checkAddDirectlyInferred(definedName);
-		}
-	}
+	abstract boolean anyNewMatches(NodeMatcher matcher);
 }

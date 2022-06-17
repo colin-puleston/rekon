@@ -88,7 +88,7 @@ public class NodeValue extends ObjectValue {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (d.getClassifier().newSubsumers(matcher)) {
+			if (((NodeName)d).getInferredSubsumers().anyNewMatches(matcher)) {
 
 				return true;
 			}

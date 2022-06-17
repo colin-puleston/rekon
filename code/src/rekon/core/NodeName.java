@@ -52,4 +52,9 @@ public abstract class NodeName extends Name {
 
 		return matchable != null ? matchable.getDefinitions() : Collections.emptySet();
 	}
+
+	InferredSubsumers getInferredSubsumers() {
+
+		return getClassifier().getInferredSubsumers();
+	}
 }

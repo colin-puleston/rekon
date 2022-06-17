@@ -68,7 +68,7 @@ class OntologyClassifier extends Classifier {
 
 			void processElement(NodeName n) {
 
-				n.getClassifier().expandLatestInferences();
+				n.getInferredSubsumers().expandLatestInferences();
 			}
 		}
 
@@ -128,7 +128,7 @@ class OntologyClassifier extends Classifier {
 
 			for (NodeName n : allNodes) {
 
-				expansions |= n.getClassifier().configureForNextInferenceExpansion();
+				expansions |= n.getInferredSubsumers().configureForNextExpansion();
 			}
 
 			return expansions;
@@ -138,7 +138,7 @@ class OntologyClassifier extends Classifier {
 
 			for (NodeName n : allNodes) {
 
-				n.getClassifier().absorbNewInferences();
+				n.getInferredSubsumers().addAllToClassifier();
 			}
 		}
 

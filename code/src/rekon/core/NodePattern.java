@@ -142,7 +142,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (n.getClassifier().newSubsumers(NodeMatcher.DEFINITION_REFED)) {
+			if (newSubsumersForName(n, NodeMatcher.DEFINITION_REFED)) {
 
 				return true;
 			}
@@ -163,7 +163,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (n.getClassifier().newSubsumers(NodeMatcher.WITH_SIGNATURE_RELS)) {
+			if (newSubsumersForName(n, NodeMatcher.WITH_SIGNATURE_RELS)) {
 
 				return true;
 			}
@@ -331,6 +331,16 @@ public class NodePattern extends Expression {
 	private Names getSignatureMatchNames() {
 
 		return new NameCollector(false).collectUnranked(this).expandWithNonRootSubsumers();
+	}
+
+	private boolean newSubsumersForName(Name n, NodeMatcher matcher) {
+
+		if (n instanceof NodeName) {
+
+			return ((NodeName)n).getInferredSubsumers().anyNewMatches(matcher);
+		}
+
+		return false;
 	}
 
 	private String namesToString() {

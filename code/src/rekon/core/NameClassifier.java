@@ -24,8 +24,6 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
@@ -36,69 +34,70 @@ class NameClassifier {
 
 	private boolean multipleAsserteds = false;
 
-	private InferredSubsumers inferredSubsumers = new InferredSubsumers();
+	private InferredSubsumersImpl inferredSubsumers = null;
 
-	private class InferredSubsumers {
+	private class InferredSubsumersImpl extends InferredSubsumers {
 
-		private NameSet all = new NameSet();
-		private NameSet latest = new NameSet();
-		private NameSet expansions = new NameSet();
+		private NameSet allNewInfs = new NameSet();
+		private NameSet latestInfs = new NameSet();
+		private NameSet latestExpansions = new NameSet();
 
 		void checkAddDirectlyInferred(Name subsumer) {
 
-			if (newSubsumer(subsumer) && all.add(subsumer)) {
+			if (newSubsumer(subsumer)) {
 
-				latest.add(subsumer);
+				allNewInfs.add(subsumer);
+				latestInfs.add(subsumer);
 			}
 		}
 
-		void expandLatest() {
+		void expandLatestInferences() {
 
-			expandLatest(subsumers);
-			expandLatest(latest);
+			expandLatestInferences(subsumers);
+			expandLatestInferences(latestInfs);
 		}
 
 		boolean configureForNextExpansion() {
 
-			all.addAll(latest);
-			latest.clear();
+			allNewInfs.addAll(latestInfs);
+			latestInfs.clear();
 
-			if (expansions.isEmpty()) {
+			if (latestExpansions.isEmpty()) {
 
 				return false;
 			}
 
-			latest = expansions;
-			expansions = new NameSet();
+			latestInfs = latestExpansions;
+			latestExpansions = new NameSet();
 
 			return true;
 		}
 
-		void absorbAll() {
+		void addAllToClassifier() {
 
-			subsumers.addAll(all);
+			subsumers.addAll(allNewInfs);
 
-			all.clear();
+			allNewInfs.clear();
 		}
 
-		boolean anySubsumers(NodeMatcher matcher) {
+		boolean anyNewMatches(NodeMatcher matcher) {
 
-			return matcher.anyMatches(all);
+			return matcher.anyMatches(allNewInfs);
 		}
 
-		private void expandLatest(NameSet sourceSubsumers) {
+		private void expandLatestInferences(NameSet sourceSubsumers) {
 
 			for (Name s : sourceSubsumers.getNames()) {
 
-				if (sourceSubsumers == latest) {
+				if (sourceSubsumers == latestInfs) {
 
 					addExpansions(s.getSubsumers());
 				}
 
-				InferredSubsumers si = s.getClassifier().inferredSubsumers;
+				InferredSubsumersImpl sa = s.getClassifier().getInferredSubsumersImpl();
 
-				addExpansions(si.all);
-				addExpansions(si.latest);
+				addExpansions(sa.allNewInfs);
+				addExpansions(sa.latestInfs);
 			}
 		}
 
@@ -106,22 +105,27 @@ class NameClassifier {
 
 			for (Name s : subsumerExps.getNames()) {
 
-				if (newSubsumer(s) && !all.contains(s) && !latest.contains(s)) {
+				if (newSubsumer(s) && !allNewInfs.contains(s) && !latestInfs.contains(s)) {
 
-					expansions.add(s);
+					latestExpansions.add(s);
 				}
 			}
 		}
 
-		private boolean newSubsumer(Name subsumer) {
+		private boolean newSubsumer(Name s) {
 
-			return subsumer != name && !subsumers.contains(subsumer);
+			return s != name && !isSubsumer(s);
 		}
 	}
 
 	NameClassifier(Name name) {
 
 		this.name = name;
+	}
+
+	InferredSubsumers getInferredSubsumers() {
+
+		return getInferredSubsumersImpl();
 	}
 
 	NameClassification createClassification() {
@@ -162,31 +166,6 @@ class NameClassifier {
 		}
 	}
 
-	void checkAddInferredSubsumer(Name subsumer) {
-
-		inferredSubsumers.checkAddDirectlyInferred(subsumer);
-	}
-
-	void expandLatestInferences() {
-
-		inferredSubsumers.expandLatest();
-	}
-
-	boolean configureForNextInferenceExpansion() {
-
-		return inferredSubsumers.configureForNextExpansion();
-	}
-
-	void absorbNewInferences() {
-
-		inferredSubsumers.absorbAll();
-	}
-
-	boolean newSubsumers(NodeMatcher matcher) {
-
-		return inferredSubsumers.anySubsumers(matcher);
-	}
-
 	boolean rootName() {
 
 		return subsumers.isEmpty();
@@ -197,14 +176,29 @@ class NameClassifier {
 		return multipleAsserteds;
 	}
 
-	boolean isSubsumer(Name test) {
+	Name getName() {
 
-		return subsumers.contains(test);
+		return name;
 	}
 
 	NameSet getSubsumers() {
 
 		return subsumers;
+	}
+
+	boolean isSubsumer(Name test) {
+
+		return subsumers.contains(test);
+	}
+
+	private InferredSubsumersImpl getInferredSubsumersImpl() {
+
+		if (inferredSubsumers == null) {
+
+			inferredSubsumers = new InferredSubsumersImpl();
+		}
+
+		return inferredSubsumers;
 	}
 
 	private void expandAssertedsFrom(Name current) {
