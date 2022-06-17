@@ -81,71 +81,9 @@ class NameClassifier {
 			all.clear();
 		}
 
-		boolean anySubsumers() {
+		boolean anySubsumers(NodeMatcher matcher) {
 
-			return !all.isEmpty();
-		}
-
-		boolean anyDefinitionRefedSubsumers() {
-
-			for (Name s : all.getNames()) {
-
-				if (s.definitionRefed()) {
-
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		boolean anySubsumersWithRelations() {
-
-			for (Name s : all.getNames()) {
-
-				if (s instanceof NodeName) {
-
-					MatchableNode m = ((NodeName)s).getMatchable();
-
-					if (m != null && !m.getProfile().getSignatureRelations().isEmpty()) {
-
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-		boolean anySubsumersWithRelationsFor(Name prop) {
-
-			for (Name s : all.getNames()) {
-
-				if (s instanceof NodeName) {
-
-					MatchableNode m = ((NodeName)s).getMatchable();
-
-					if (m != null && anyRelationsFor(m.getProfile().getSignatureRelations(), prop)) {
-
-						return true;
-					}
-				}
-			}
-
-			return false;
-		}
-
-		private boolean anyRelationsFor(Collection<Relation> rels, Name prop) {
-
-			for (Relation r : rels) {
-
-				if (r.getProperty() == prop) {
-
-					return true;
-				}
-			}
-
-			return false;
+			return matcher.anyMatches(all);
 		}
 
 		private void expandLatest(NameSet sourceSubsumers) {
@@ -173,6 +111,11 @@ class NameClassifier {
 					expansions.add(s);
 				}
 			}
+		}
+
+		private boolean newSubsumer(Name subsumer) {
+
+			return subsumer != name && !subsumers.contains(subsumer);
 		}
 	}
 
@@ -219,7 +162,7 @@ class NameClassifier {
 		}
 	}
 
-	void checkNewInferredSubsumer(Name subsumer) {
+	void checkAddInferredSubsumer(Name subsumer) {
 
 		inferredSubsumers.checkAddDirectlyInferred(subsumer);
 	}
@@ -239,24 +182,9 @@ class NameClassifier {
 		inferredSubsumers.absorbAll();
 	}
 
-	boolean newSubsumers() {
+	boolean newSubsumers(NodeMatcher matcher) {
 
-		return inferredSubsumers.anySubsumers();
-	}
-
-	boolean newDefinitionRefedSubsumers() {
-
-		return inferredSubsumers.anyDefinitionRefedSubsumers();
-	}
-
-	boolean newSubsumersWithRelations() {
-
-		return inferredSubsumers.anySubsumersWithRelations();
-	}
-
-	boolean newSubsumersWithRelationsFor(Name prop) {
-
-		return inferredSubsumers.anySubsumersWithRelationsFor(prop);
+		return inferredSubsumers.anySubsumers(matcher);
 	}
 
 	boolean rootName() {
@@ -293,10 +221,5 @@ class NameClassifier {
 	private boolean checkAddAssertedSubsumer(Name subsumer) {
 
 		return subsumer != name && subsumers.add(subsumer);
-	}
-
-	private boolean newSubsumer(Name subsumer) {
-
-		return subsumer != name && !subsumers.contains(subsumer);
 	}
 }

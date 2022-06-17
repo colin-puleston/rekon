@@ -73,17 +73,7 @@ abstract class Value extends Expression {
 
 	abstract boolean subsumesOther(Value v);
 
-	boolean newDefinitionRefedSubsumers() {
-
-		return false;
-	}
-
-	boolean newSubsumersWithRelations() {
-
-		return false;
-	}
-
-	boolean newSubsumersWithRelationsFor(Name prop) {
+	boolean newSubsumers(NodeMatcher matcher) {
 
 		return false;
 	}

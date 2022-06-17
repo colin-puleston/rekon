@@ -128,26 +128,6 @@ public abstract class Name {
 		return name == this || name.hasSubsumer(this);
 	}
 
-	boolean newSubsumers() {
-
-		return classifier != null && classifier.newSubsumers();
-	}
-
-	boolean newDefinitionRefedSubsumers() {
-
-		return classifier != null && classifier.newDefinitionRefedSubsumers();
-	}
-
-	boolean newSubsumersWithRelations() {
-
-		return classifier != null && classifier.newSubsumersWithRelations();
-	}
-
-	boolean newSubsumersWithRelationsFor(Name prop) {
-
-		return classifier != null && classifier.newSubsumersWithRelationsFor(prop);
-	}
-
 	private boolean hasSubsumer(Name name) {
 
 		return classifier != null

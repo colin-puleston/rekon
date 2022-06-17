@@ -84,37 +84,11 @@ public class NodeValue extends ObjectValue {
 		return n != null && subsumesNodeValue(n);
 	}
 
-	boolean newDefinitionRefedSubsumers() {
+	boolean newSubsumers(NodeMatcher matcher) {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (d.newDefinitionRefedSubsumers()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	boolean newSubsumersWithRelations() {
-
-		for (Name d : disjuncts.getNames()) {
-
-			if (d.newSubsumersWithRelations()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	boolean newSubsumersWithRelationsFor(Name prop) {
-
-		for (Name d : disjuncts.getNames()) {
-
-			if (d.newSubsumersWithRelationsFor(prop)) {
+			if (d.getClassifier().newSubsumers(matcher)) {
 
 				return true;
 			}

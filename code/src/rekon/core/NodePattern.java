@@ -140,9 +140,9 @@ public class NodePattern extends Expression {
 
 	boolean reclassifiable() {
 
-		for (Name name : names.getNames()) {
+		for (Name n : names.getNames()) {
 
-			if (name.newDefinitionRefedSubsumers()) {
+			if (n.getClassifier().newSubsumers(NodeMatcher.DEFINITION_REFED)) {
 
 				return true;
 			}
@@ -150,7 +150,7 @@ public class NodePattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getTarget().newDefinitionRefedSubsumers()) {
+			if (r.getTarget().newSubsumers(NodeMatcher.DEFINITION_REFED)) {
 
 				return true;
 			}
@@ -161,9 +161,9 @@ public class NodePattern extends Expression {
 
 	boolean potentialSignatureUpdates() {
 
-		for (Name name : names.getNames()) {
+		for (Name n : names.getNames()) {
 
-			if (name.newSubsumersWithRelations()) {
+			if (n.getClassifier().newSubsumers(NodeMatcher.WITH_SIGNATURE_RELS)) {
 
 				return true;
 			}
@@ -188,9 +188,9 @@ public class NodePattern extends Expression {
 
 			addSignatureRelations(this);
 
-			for (Name name : names.getNames()) {
+			for (Name n : names.getNames()) {
 
-				addAllImpliedSignatureRelations((NodeName)name);
+				addAllImpliedSignatureRelations((NodeName)n);
 			}
 		}
 
