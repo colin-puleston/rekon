@@ -31,6 +31,19 @@ import java.util.*;
  */
 class NameClassification {
 
+	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
+
+		DirectSupersSetter(List<Name> allNames) {
+
+			invokeListProcesses(allNames);
+		}
+
+		void processElement(Name n) {
+
+			getInitialiserFor(n).setDirectSupers();
+		}
+	}
+
 	static void completeClassifications(List<Name> allNames) {
 
 		for (Name n : allNames) {
@@ -53,9 +66,11 @@ class NameClassification {
 			getInitialiserFor(n).resolveBasicLinksWithSubsumers();
 		}
 
+		new DirectSupersSetter(allNames);
+
 		for (Name n : allNames) {
 
-			getInitialiserFor(n).setDirectLinks();
+			getInitialiserFor(n).setAsDirectSub();
 		}
 	}
 
@@ -153,12 +168,6 @@ class NameClassification {
 					equivalents.add(s);
 				}
 			}
-		}
-
-		void setDirectLinks() {
-
-			setDirectSupers();
-			setAsDirectSub();
 		}
 
 		private boolean checkSubsumedToEquiv(Name subsumed) {
