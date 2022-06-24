@@ -35,61 +35,59 @@ import rekon.core.*;
  */
 class ClassDefinitionsCreator {
 
-	private Assertions assertions;
+	static private final String EQUIV_AXIOM_DESCRIPTION = "EQUIVALENT-CLASSES";
+	static private final String SUBCLASS_AXIOM_DESCRIPTION = "SUB-CLASS-OF";
 
 	private MappedNames mappedNames;
 	private MatchComponents matchComponents;
 	private MatchStructures matchStructures;
 
-	ClassDefinitionsCreator(
-		Assertions assertions,
-		MappedNames mappedNames,
-		MatchComponents matchComponents,
-		MatchStructures matchStructures) {
+	private abstract class EquivsBasedCreator {
 
-		this.assertions = assertions;
-		this.mappedNames = mappedNames;
-		this.matchComponents = matchComponents;
-		this.matchStructures = matchStructures;
+		private Set<NodePattern> defns = new HashSet<NodePattern>();
+		private Set<NodePattern> subs = new HashSet<NodePattern>();
 
-		for (OWLEquivalentClassesAxiom ax : getEquivalenceAxioms()) {
+		boolean create(Collection<OWLClassExpression> equivs) {
 
-			if (!createForEquivalents(ax)) {
+			for (OWLClassExpression e : equivs) {
 
-				logOutOfScopeAxiom("EQUIVALENT-CLASSES", ax);
-			}
-		}
-
-		for (OWLSubClassOfAxiom ax : getSubClassAxioms()) {
-
-			if (!createForSubClass(ax)) {
-
-				logOutOfScopeAxiom("SUB-CLASS", ax);
-			}
-		}
-	}
-
-	private boolean createForEquivalents(OWLEquivalentClassesAxiom ax) {
-
-		Set<NodePattern> defns = new HashSet<NodePattern>();
-		Set<NodePattern> subs = new HashSet<NodePattern>();
-
-		ClassName equivCls = null;
-
-		for (OWLClassExpression e : ax.getClassExpressions()) {
-
-			if (e instanceof OWLClass) {
-
-				equivCls = mappedNames.get((OWLClass)e);
-			}
-			else {
-
-				List<NodePattern> djs = matchComponents.toNodePatternDisjunction(e);
-
-				if (djs == null) {
+				if (!absorbEquiv(e)) {
 
 					return false;
 				}
+			}
+
+			ClassName c = resolveDefinedClass(defns);
+
+			if (c != null) {
+
+				if (!subs.isEmpty()) {
+
+					matchStructures.addImpliedClasses(c, subs);
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
+		abstract boolean handleOutOfScopeEquiv(OWLClassExpression equiv);
+
+		abstract ClassName resolveDefinedClass(Set<NodePattern> defns);
+
+		private boolean absorbEquiv(OWLClassExpression equiv) {
+
+			List<NodePattern> djs = matchComponents.toNodePatternDisjunction(equiv);
+
+			if (djs == null) {
+
+				if (!handleOutOfScopeEquiv(equiv)) {
+
+					return false;
+				}
+			}
+			else {
 
 				if (djs.size() == 1) {
 
@@ -100,78 +98,135 @@ class ClassDefinitionsCreator {
 					subs.addAll(djs);
 				}
 			}
+
+			return true;
 		}
-
-		if (equivCls != null) {
-
-			matchStructures.addClassDefinitions(equivCls, defns);
-		}
-		else {
-
-			if (defns.isEmpty()) {
-
-				return false;
-			}
-
-			equivCls = matchStructures.addImpliedClass(defns);
-		}
-
-		if (!subs.isEmpty()) {
-
-			matchStructures.addImpliedClasses(equivCls, subs);
-		}
-
-		return true;
 	}
 
-	private boolean createForSubClass(OWLSubClassOfAxiom ax) {
+	private class ClassEquivsBasedCreator extends EquivsBasedCreator {
 
-		OWLClassExpression sub = ax.getSubClass();
+		private AssertedClass assertCls;
 
-		if (sub instanceof OWLClass) {
+		ClassEquivsBasedCreator(AssertedClass assertCls) {
+
+			this.assertCls = assertCls;
+
+			create(assertCls.getEquivExprs());
+		}
+
+		boolean handleOutOfScopeEquiv(OWLClassExpression equiv) {
+
+			logOutOfScopeAxiom(EQUIV_AXIOM_DESCRIPTION, assertCls.equivExprToAxiom(equiv));
 
 			return true;
 		}
 
-		List<NodePattern> pSubs = matchComponents.toNodePatternDisjunction(sub);
+		ClassName resolveDefinedClass(Set<NodePattern> defns) {
 
-		if (pSubs == null) {
+			ClassName cls = mappedNames.get(assertCls.getEntity());
+
+			if (!defns.isEmpty()) {
+
+				matchStructures.addClassDefinitions(cls, defns);
+			}
+
+			return cls;
+		}
+	}
+
+	private class GCIEquivsBasedCreator extends EquivsBasedCreator {
+
+		GCIEquivsBasedCreator(OWLEquivalentClassesAxiom ax) {
+
+			if (!create(ax.getClassExpressions())) {
+
+				logOutOfScopeAxiom(SUBCLASS_AXIOM_DESCRIPTION, ax);
+			}
+		}
+
+		boolean handleOutOfScopeEquiv(OWLClassExpression equiv) {
 
 			return false;
 		}
 
-		OWLClassExpression sup = ax.getSuperClass();
-		ClassName supCls = null;
+		ClassName resolveDefinedClass(Set<NodePattern> defns) {
 
-		if (sup instanceof OWLClass) {
-
-			supCls = mappedNames.get((OWLClass)sup);
+			return defns.isEmpty() ? null : matchStructures.addImpliedClass(defns);
 		}
-		else {
+	}
 
-			NodePattern pSup = matchComponents.toNodePattern(sup);
+	private class GCISuperBasedCreator {
 
-			if (pSup == null) {
+		private OWLClassExpression sup;
+		private OWLClassExpression sub;
 
-				return false;
+		GCISuperBasedCreator(OWLSubClassOfAxiom ax) {
+
+			sup = ax.getSuperClass();
+			sub = ax.getSubClass();
+
+			if (!create()) {
+
+				logOutOfScopeAxiom(EQUIV_AXIOM_DESCRIPTION, ax);
+			}
+		}
+
+		private boolean create() {
+
+			List<NodePattern> pSubs = matchComponents.toNodePatternDisjunction(sub);
+
+			if (pSubs != null) {
+
+				ClassName supCls = resolveSuperClass();
+
+				if (supCls != null) {
+
+					matchStructures.addImpliedClasses(supCls, pSubs);
+
+					return true;
+				}
 			}
 
-			supCls = matchStructures.addImpliedClass(pSup);
+			return false;
 		}
 
-		matchStructures.addImpliedClasses(supCls, pSubs);
+		private ClassName resolveSuperClass() {
 
-		return true;
+			if (sup instanceof OWLClass) {
+
+				return mappedNames.get((OWLClass)sup);
+			}
+
+			NodePattern p = matchComponents.toNodePattern(sup);
+
+			return p != null ? matchStructures.addImpliedClass(p) : null;
+		}
 	}
 
-	private Collection<OWLEquivalentClassesAxiom> getEquivalenceAxioms() {
+	ClassDefinitionsCreator(
+		Assertions assertions,
+		MappedNames mappedNames,
+		MatchComponents matchComponents,
+		MatchStructures matchStructures) {
 
-		return assertions.getAxioms(AxiomType.EQUIVALENT_CLASSES);
-	}
+		this.mappedNames = mappedNames;
+		this.matchComponents = matchComponents;
+		this.matchStructures = matchStructures;
 
-	private Collection<OWLSubClassOfAxiom> getSubClassAxioms() {
+		for (AssertedClass c : assertions.getClasses()) {
 
-		return assertions.getAxioms(AxiomType.SUBCLASS_OF);
+			new ClassEquivsBasedCreator(c);
+		}
+
+		for (OWLEquivalentClassesAxiom ax : assertions.getEquivGCIs()) {
+
+			new GCIEquivsBasedCreator(ax);
+		}
+
+		for (OWLSubClassOfAxiom ax :  assertions.getSuperGCIs()) {
+
+			new GCISuperBasedCreator(ax);
+		}
 	}
 
 	private void logOutOfScopeAxiom(String axiomDesc, OWLAxiom axiom) {

@@ -32,23 +32,23 @@ import org.semanticweb.owlapi.search.EntitySearcher;
 /**
  * @author Colin Puleston
  */
-class DataValueAssertions
+class AssertedDataValues
 			extends
-				ValueAssertions
+				AssertedValues
 					<OWLDataProperty,
 					OWLDataPropertyExpression,
 					OWLLiteral,
-					DataValueAssertion> {
+					AssertedDataValue> {
 
-	DataValueAssertions(OWLNamedIndividual source, Set<OWLOntology> allOntologies) {
+	AssertedDataValues(OWLNamedIndividual source, Set<OWLOntology> allOntologies) {
 
 		super(
 			EntitySearcher.getDataPropertyValues(source, allOntologies).asMap(),
 			OWLDataProperty.class);
 	}
 
-	DataValueAssertion create(OWLDataProperty property, OWLLiteral value) {
+	AssertedDataValue create(OWLDataProperty property, OWLLiteral value) {
 
-		return new DataValueAssertion(property, value);
+		return new AssertedDataValue(property, value);
 	}
 }

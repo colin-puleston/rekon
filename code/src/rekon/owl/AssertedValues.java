@@ -24,15 +24,39 @@
 
 package rekon.owl;
 
+import java.util.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-class DataValueAssertion extends ValueAssertion<OWLDataProperty, OWLLiteral> {
+abstract class AssertedValues
+					<P extends OWLProperty,
+					PE extends OWLPropertyExpression,
+					V extends OWLObject,
+					A extends AssertedValue<P, V>> {
 
-	DataValueAssertion(OWLDataProperty property, OWLLiteral value) {
+	private List<A> assertions = new ArrayList<A>();
 
-		super(property, value);
+	AssertedValues(Map<PE, Collection<V>> byPropertyExpr, Class<P> propertyCls) {
+
+		for (PE pe : byPropertyExpr.keySet()) {
+
+			if (propertyCls.isAssignableFrom(pe.getClass())) {
+
+				for (V v : byPropertyExpr.get(pe)) {
+
+					assertions.add(create(propertyCls.cast(pe), v));
+				}
+			}
+		}
 	}
+
+	List<A> getAll() {
+
+		return assertions;
+	}
+
+	abstract A create(P property, V value);
 }

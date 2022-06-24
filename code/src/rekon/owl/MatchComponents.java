@@ -333,9 +333,9 @@ class MatchComponents {
 		}
 	}
 
-	private class ObjectValueRelations extends TypeEntities<ObjectValueAssertion, Relation> {
+	private class ObjectValueRelations extends TypeEntities<AssertedObjectValue, Relation> {
 
-		Relation checkCreate(ObjectValueAssertion source) {
+		Relation checkCreate(AssertedObjectValue source) {
 
 			OWLIndividual v = source.getValue();
 
@@ -358,9 +358,9 @@ class MatchComponents {
 		}
 	}
 
-	private class DataValueRelations extends TypeEntities<DataValueAssertion, Relation> {
+	private class DataValueRelations extends TypeEntities<AssertedDataValue, Relation> {
 
-		Relation checkCreate(DataValueAssertion source) {
+		Relation checkCreate(AssertedDataValue source) {
 
 			DataValue target = DataTypes.toDataValueExpression(source.getValue());
 
@@ -540,12 +540,12 @@ class MatchComponents {
 		return toRelation(source, false);
 	}
 
-	Relation toObjectValueRelation(ObjectValueAssertion source) {
+	Relation toObjectValueRelation(AssertedObjectValue source) {
 
 		return objectValueRelations.checkCreate(source);
 	}
 
-	Relation toDataValueRelation(DataValueAssertion source) {
+	Relation toDataValueRelation(AssertedDataValue source) {
 
 		return dataValueRelations.checkCreate(source);
 	}

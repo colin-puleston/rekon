@@ -24,31 +24,31 @@
 
 package rekon.owl;
 
-import java.util.*;
-
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.search.EntitySearcher;
 
 /**
  * @author Colin Puleston
  */
-class ObjectValueAssertions
-			extends
-				ValueAssertions
-					<OWLObjectProperty,
-					OWLObjectPropertyExpression,
-					OWLIndividual,
-					ObjectValueAssertion> {
+class AssertedDataProperty extends AssertedHierarchyEntity<OWLDataProperty> {
 
-	ObjectValueAssertions(OWLNamedIndividual source, Set<OWLOntology> allOntologies) {
+	AssertedDataProperty(OWLDataProperty entity) {
 
-		super(
-			EntitySearcher.getObjectPropertyValues(source, allOntologies).asMap(),
-			OWLObjectProperty.class);
+		super(entity);
 	}
 
-	ObjectValueAssertion create(OWLObjectProperty property, OWLIndividual value) {
+	void checkAddEquiv(OWLDataPropertyExpression equiv) {
 
-		return new ObjectValueAssertion(property, value);
+		if (equiv instanceof OWLDataProperty) {
+
+			addEquiv((OWLDataProperty)equiv);
+		}
+	}
+
+	void checkAddSuper(OWLDataPropertyExpression sup) {
+
+		if (sup instanceof OWLDataProperty) {
+
+			addSuper((OWLDataProperty)sup);
+		}
 	}
 }

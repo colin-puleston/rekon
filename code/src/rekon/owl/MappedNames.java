@@ -45,9 +45,7 @@ class MappedNames {
 		public OWLEntity toMappedEntity();
 	}
 
-	static private class MappedClassName
-							extends ClassName
-							implements MappedName {
+	static private class MappedClassName extends ClassName implements MappedName {
 
 		private OWLClass entity;
 
@@ -67,9 +65,7 @@ class MappedNames {
 		}
 	}
 
-	static private class MappedIndividualName
-							extends IndividualName
-							implements MappedName {
+	static private class MappedIndividualName extends IndividualName implements MappedName {
 
 		private OWLNamedIndividual entity;
 
@@ -89,9 +85,7 @@ class MappedNames {
 		}
 	}
 
-	static private class MappedObjectPropertyName
-							extends ObjectPropertyName
-							implements MappedName {
+	static private class MappedObjectPropertyName extends ObjectPropertyName implements MappedName {
 
 		private OWLObjectProperty entity;
 
@@ -105,17 +99,13 @@ class MappedNames {
 			return NameRenderer.SINGLETON.render(entity);
 		}
 
-		MappedObjectPropertyName(OWLObjectProperty entity, boolean transitive) {
-
-			super(transitive);
+		MappedObjectPropertyName(OWLObjectProperty entity) {
 
 			this.entity = entity;
 		}
 	}
 
-	static private class MappedDataPropertyName
-							extends DataPropertyName
-							implements MappedName {
+	static private class MappedDataPropertyName extends DataPropertyName implements MappedName {
 
 		private OWLDataProperty entity;
 
@@ -140,7 +130,10 @@ class MappedNames {
 	private ObjectPropertyNames objectProperties;
 	private DataPropertyNames dataProperties;
 
-	private abstract class TypeNames<E extends OWLEntity, N extends Name> {
+	private abstract class TypeNames
+								<E extends OWLEntity,
+								AE extends AssertedEntity<E>,
+								N extends Name> {
 
 		private Map<E, N> names = new HashMap<E, N>();
 
@@ -148,52 +141,49 @@ class MappedNames {
 
 			final Assertions assertions;
 
-			TypeNamesInitialiser(Assertions assertions) {
+			TypeNamesInitialiser(Assertions assertions, Collection<AE> entityities) {
 
 				this.assertions = assertions;
 
-				addNames();
-				addAssertedLinks();
+				for (AE ae : entityities) {
+
+					addName(ae.getEntity());
+				}
+
+				for (AE ae : entityities) {
+
+					configureName(ae);
+				}
 			}
-
-			abstract Collection<E> getAssertedEntities();
-
-			abstract Collection<E> getAssertedEquivalents(E entity);
 
 			abstract N createName(E entity);
 
-			void onNameAdded(N name, E entity) {
+			N addName(E entity) {
+
+				N n = createName(entity);
+
+				names.put(entity, n);
+
+				return n;
 			}
 
-			abstract void addAssertedSupers(N name, E entity);
+			N configureName(AE entity) {
 
-			private void addNames() {
+				N n = names.get(entity.getEntity());
 
-				for (E e : getAssertedEntities()) {
+				addAssertedEquivalents(entity, n);
+				addAssertedSupers(entity, n);
 
-					N n = createName(e);
-
-					names.put(e, n);
-					onNameAdded(n, e);
-				}
+				return n;
 			}
 
-			private void addAssertedLinks() {
+			abstract void addAssertedSupers(AE entity, N name);
 
-				for (E e : getAssertedEntities()) {
+			private void addAssertedEquivalents(AE entity, N name) {
 
-					N n = names.get(e);
+				for (E e : entity.getEquivs()) {
 
-					addAssertedEquivalents(n, e);
-					addAssertedSupers(n, e);
-				}
-			}
-
-			private void addAssertedEquivalents(N n, E e) {
-
-				for (E eq : getAssertedEquivalents(e)) {
-
-					n.addEquivalent(names.get(eq));
+					name.addEquivalent(names.get(e));
 				}
 			}
 		}
@@ -209,30 +199,36 @@ class MappedNames {
 		}
 	}
 
-	private abstract class HierarchyNames<E extends OWLEntity, N extends Name> extends TypeNames<E, N> {
+	private abstract class HierarchyNames
+								<E extends OWLEntity,
+								AE extends AssertedHierarchyEntity<E>,
+								N extends Name>
+								extends TypeNames<E, AE, N> {
 
 		private N rootName;
 
 		abstract class HierarchyNamesInitialiser extends TypeNamesInitialiser {
 
-			HierarchyNamesInitialiser(Assertions assertions) {
+			HierarchyNamesInitialiser(Assertions assertions, Collection<AE> entityities) {
 
-				super(assertions);
+				super(assertions, entityities);
 			}
 
-			void onNameAdded(N name, E entity) {
+			N addName(E entity) {
+
+				N n = super.addName(entity);
 
 				if (rootEntity(entity)) {
 
-					rootName = name;
+					rootName = n;
 				}
+
+				return n;
 			}
 
-			void addAssertedSupers(N name, E entity) {
+			void addAssertedSupers(AE entity, N name) {
 
-				Collection<E> sups = getAssertedSupers(entity);
-
-				for (E s : sups) {
+				for (E s : entity.getSupers()) {
 
 					name.addSubsumer(getName(s));
 				}
@@ -242,8 +238,6 @@ class MappedNames {
 					name.addSubsumer(rootName);
 				}
 			}
-
-			abstract Collection<E> getAssertedSupers(E entity);
 
 			abstract boolean rootEntity(E entity);
 		}
@@ -259,28 +253,13 @@ class MappedNames {
 		}
 	}
 
-	private class ClassNames extends HierarchyNames<OWLClass, ClassName> {
+	private class ClassNames extends HierarchyNames<OWLClass, AssertedClass, ClassName> {
 
 		private class Initialiser extends HierarchyNamesInitialiser {
 
 			Initialiser(Assertions assertions) {
 
-				super(assertions);
-			}
-
-			Collection<OWLClass> getAssertedEntities() {
-
-				return assertions.getAllClasses();
-			}
-
-			Collection<OWLClass> getAssertedEquivalents(OWLClass entity) {
-
-				return assertions.getEquivalentClasses(entity);
-			}
-
-			Collection<OWLClass> getAssertedSupers(OWLClass entity) {
-
-				return assertions.getSuperClasses(entity);
+				super(assertions, assertions.getClasses());
 			}
 
 			boolean rootEntity(OWLClass entity) {
@@ -300,23 +279,15 @@ class MappedNames {
 		}
 	}
 
-	private class IndividualNames extends TypeNames<OWLNamedIndividual, IndividualName> {
+	private class IndividualNames
+					extends
+						TypeNames<OWLNamedIndividual, AssertedIndividual, IndividualName> {
 
 		private class Initialiser extends TypeNamesInitialiser {
 
 			Initialiser(Assertions assertions) {
 
-				super(assertions);
-			}
-
-			Collection<OWLNamedIndividual> getAssertedEntities() {
-
-				return assertions.getAllIndividuals();
-			}
-
-			Collection<OWLNamedIndividual> getAssertedEquivalents(OWLNamedIndividual entity) {
-
-				return assertions.getSameIndividuals(entity);
+				super(assertions, assertions.getIndividuals());
 			}
 
 			IndividualName createName(OWLNamedIndividual entity) {
@@ -324,9 +295,9 @@ class MappedNames {
 				return new MappedIndividualName(entity);
 			}
 
-			void addAssertedSupers(IndividualName name, OWLNamedIndividual entity) {
+			void addAssertedSupers(AssertedIndividual entity, IndividualName name) {
 
-				for (OWLClass c : assertions.getTypes(entity)) {
+				for (OWLClass c : entity.getTypes()) {
 
 					name.addSubsumer(classes.getName(c));
 				}
@@ -339,30 +310,32 @@ class MappedNames {
 		}
 	}
 
-	private class ObjectPropertyNames extends HierarchyNames<OWLObjectProperty, ObjectPropertyName> {
+	private class ObjectPropertyNames
+						extends
+							HierarchyNames
+								<OWLObjectProperty,
+								AssertedObjectProperty,
+								ObjectPropertyName> {
 
 		private class Initialiser extends HierarchyNamesInitialiser {
 
 			Initialiser(Assertions assertions) {
 
-				super(assertions);
-
-				addChains();
+				super(assertions, assertions.getObjectProperties());
 			}
 
-			Collection<OWLObjectProperty> getAssertedEntities() {
+			ObjectPropertyName configureName(AssertedObjectProperty entity) {
 
-				return assertions.getAllObjectProperties();
-			}
+				ObjectPropertyName n = super.configureName(entity);
 
-			Collection<OWLObjectProperty> getAssertedEquivalents(OWLObjectProperty entity) {
+				addChains(entity, n);
 
-				return assertions.getEquivalentProperties(entity);
-			}
+				if (entity.transitive()) {
 
-			Collection<OWLObjectProperty> getAssertedSupers(OWLObjectProperty entity) {
+					n.setTransitive();
+				}
 
-				return assertions.getSuperProperties(entity);
+				return n;
 			}
 
 			boolean rootEntity(OWLObjectProperty entity) {
@@ -372,59 +345,27 @@ class MappedNames {
 
 			ObjectPropertyName createName(OWLObjectProperty entity) {
 
-				return new MappedObjectPropertyName(entity, assertions.isTransitive(entity));
+				return new MappedObjectPropertyName(entity);
 			}
 
-			private void addChains() {
+			private void addChains(AssertedObjectProperty entity, ObjectPropertyName name) {
 
-				for (OWLSubPropertyChainOfAxiom ax : getChainAxioms()) {
+				for (List<OWLObjectProperty> chain : entity.getChains()) {
 
-					checkAddChain(ax);
+					new PropertyChain(name, toNames(chain));
 				}
 			}
 
-			private void checkAddChain(OWLSubPropertyChainOfAxiom ax) {
-
-				ObjectPropertyName sup = toName(ax.getSuperProperty());
-
-				if (sup != null) {
-
-					List<ObjectPropertyName> subs = toNames(ax.getPropertyChain());
-
-					if (subs != null) {
-
-						new PropertyChain(sup, subs);
-					}
-				}
-			}
-
-			private List<ObjectPropertyName> toNames(List<OWLObjectPropertyExpression> exprs) {
+			private List<ObjectPropertyName> toNames(List<OWLObjectProperty> props) {
 
 				List<ObjectPropertyName> names = new ArrayList<ObjectPropertyName>();
 
-				for (OWLObjectPropertyExpression e : exprs) {
+				for (OWLObjectProperty p : props) {
 
-					ObjectPropertyName n = toName(e);
-
-					if (n == null) {
-
-						return null;
-					}
-
-					names.add(n);
+					names.add(getName(p));
 				}
 
 				return names;
-			}
-
-			private ObjectPropertyName toName(OWLObjectPropertyExpression e) {
-
-				return e instanceof OWLObjectProperty ? getName((OWLObjectProperty)e) : null;
-			}
-
-			private Collection<OWLSubPropertyChainOfAxiom> getChainAxioms() {
-
-				return assertions.getAxioms(AxiomType.SUB_PROPERTY_CHAIN_OF);
 			}
 		}
 
@@ -434,28 +375,18 @@ class MappedNames {
 		}
 	}
 
-	private class DataPropertyNames extends HierarchyNames<OWLDataProperty, DataPropertyName> {
+	private class DataPropertyNames
+						extends
+							HierarchyNames
+								<OWLDataProperty,
+								AssertedDataProperty,
+								DataPropertyName> {
 
 		private class Initialiser extends HierarchyNamesInitialiser {
 
 			Initialiser(Assertions assertions) {
 
-				super(assertions);
-			}
-
-			Collection<OWLDataProperty> getAssertedEntities() {
-
-				return assertions.getAllDataProperties();
-			}
-
-			Collection<OWLDataProperty> getAssertedEquivalents(OWLDataProperty entity) {
-
-				return assertions.getEquivalentProperties(entity);
-			}
-
-			Collection<OWLDataProperty> getAssertedSupers(OWLDataProperty entity) {
-
-				return assertions.getSuperProperties(entity);
+				super(assertions, assertions.getDataProperties());
 			}
 
 			boolean rootEntity(OWLDataProperty entity) {

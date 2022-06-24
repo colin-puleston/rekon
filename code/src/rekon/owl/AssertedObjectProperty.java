@@ -24,15 +24,56 @@
 
 package rekon.owl;
 
+import java.util.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-class ObjectValueAssertion extends ValueAssertion<OWLObjectProperty, OWLIndividual> {
+class AssertedObjectProperty extends AssertedHierarchyEntity<OWLObjectProperty> {
 
-	ObjectValueAssertion(OWLObjectProperty property, OWLIndividual value) {
+	private Set<List<OWLObjectProperty>> chains = new HashSet<List<OWLObjectProperty>>();
+	private boolean transitive = false;
 
-		super(property, value);
+	AssertedObjectProperty(OWLObjectProperty entity) {
+
+		super(entity);
+	}
+
+	void checkAddEquiv(OWLObjectPropertyExpression equiv) {
+
+		if (equiv instanceof OWLObjectProperty) {
+
+			addEquiv((OWLObjectProperty)equiv);
+		}
+	}
+
+	void checkAddSuper(OWLObjectPropertyExpression sup) {
+
+		if (sup instanceof OWLObjectProperty) {
+
+			addSuper((OWLObjectProperty)sup);
+		}
+	}
+
+	void addChain(List<OWLObjectProperty> chain) {
+
+		chains.add(chain);
+	}
+
+	void setTransitive() {
+
+		transitive = true;
+	}
+
+	Collection<List<OWLObjectProperty>> getChains() {
+
+		return chains;
+	}
+
+	boolean transitive() {
+
+		return transitive;
 	}
 }

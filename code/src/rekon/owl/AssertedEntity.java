@@ -22,80 +22,37 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
 
 import java.util.*;
+
+import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-public abstract class ObjectPropertyName extends PropertyName {
+abstract class AssertedEntity<E extends OWLEntity> {
 
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
-	private boolean transitive = false;
+	private E entity;
+	private Set<E> equivs = new HashSet<E>();
 
-	public void addChain(PropertyChain chain) {
+	AssertedEntity(E entity) {
 
-		chains.add(chain);
+		this.entity = entity;
 	}
 
-	public void setTransitive() {
+	void addEquiv(E equiv) {
 
-		transitive = true;
+		equivs.add(equiv);
 	}
 
-	boolean anyChains() {
+	E getEntity() {
 
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers().getNames()) {
-
-			if (!((ObjectPropertyName)s).chains.isEmpty()) {
-
-				return true;
-			}
-		}
-
-		return false;
+		return entity;
 	}
 
-	List<PropertyChain> getAllChains() {
+	Collection<E> getEquivs() {
 
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
-
-		for (Name s : getSubsumers().getNames()) {
-
-			allChains.addAll(((ObjectPropertyName)s).chains);
-		}
-
-		return allChains;
-	}
-
-	boolean transitive() {
-
-		return transitive;
-	}
-
-	ObjectPropertyName lookForMostGeneralTransitiveProperty() {
-
-		ObjectPropertyName mostGeneral = null;
-
-		for (Name s : getSubsumers().getNames()) {
-
-			ObjectPropertyName os = (ObjectPropertyName)s;
-
-			if (os.transitive) {
-
-				if (mostGeneral == null || os.subsumes(mostGeneral)) {
-
-					mostGeneral = os;
-				}
-			}
-		}
-
-		return mostGeneral != null ? mostGeneral : (transitive ? this : null);
+		return equivs;
 	}
 }

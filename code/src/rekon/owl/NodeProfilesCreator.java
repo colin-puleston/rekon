@@ -37,7 +37,6 @@ class NodeProfilesCreator {
 
 	private Assertions assertions;
 
-	private MappedNames mappedNames;
 	private MatchComponents matchComponents;
 	private MatchStructures matchStructures;
 
@@ -46,18 +45,13 @@ class NodeProfilesCreator {
 	private ObjectValuesRelationCreator objectValuesRelations = new ObjectValuesRelationCreator();
 	private DataValuesRelationCreator dataValuesRelations = new DataValuesRelationCreator();
 
-	private abstract class RelationCreator<E extends OWLEntity, S> {
+	private abstract class RelationCreator<E extends AssertedEntity<?>, S> {
 
 		Set<Relation> getAssertedRelations(E entity) {
 
 			Set<Relation> rels = new HashSet<Relation>();
 
 			for (S s : getRelationSources(entity)) {
-
-				if (excludedRelationSource(s)) {
-
-					continue;
-				}
 
 				Relation r = toRelation(s);
 
@@ -76,21 +70,14 @@ class NodeProfilesCreator {
 
 		abstract Collection<S> getRelationSources(E entity);
 
-		abstract boolean excludedRelationSource(S source);
-
 		abstract Relation toRelation(S source);
 
 		abstract void logOutOfScope(E entity, S source);
 	}
 
 	private abstract class ClassesRelationCreator
-								<E extends OWLEntity>
+								<E extends AssertedEntity<?>>
 								extends RelationCreator<E, OWLClassExpression> {
-
-		boolean excludedRelationSource(OWLClassExpression source) {
-
-			return source instanceof OWLClass;
-		}
 
 		Relation toRelation(OWLClassExpression source) {
 
@@ -98,42 +85,37 @@ class NodeProfilesCreator {
 		}
 	}
 
-	private class SupersRelationCreator extends ClassesRelationCreator<OWLClass> {
+	private class SupersRelationCreator extends ClassesRelationCreator<AssertedClass> {
 
-		Collection<OWLClassExpression> getRelationSources(OWLClass entity) {
+		Collection<OWLClassExpression> getRelationSources(AssertedClass entity) {
 
-			return assertions.getSuperExprs(entity);
+			return entity.getSuperExprs();
 		}
 
-		void logOutOfScope(OWLClass entity, OWLClassExpression source) {
+		void logOutOfScope(AssertedClass entity, OWLClassExpression source) {
 
 			logOutOfScopeRef("CLASS", "SUPER", entity, source);
 		}
 	}
 
-	private class TypesRelationCreator extends ClassesRelationCreator<OWLNamedIndividual> {
+	private class TypesRelationCreator extends ClassesRelationCreator<AssertedIndividual> {
 
-		Collection<OWLClassExpression> getRelationSources(OWLNamedIndividual entity) {
+		Collection<OWLClassExpression> getRelationSources(AssertedIndividual entity) {
 
-			return assertions.getTypeExprs(entity);
+			return entity.getTypeExprs();
 		}
 
-		void logOutOfScope(OWLNamedIndividual entity, OWLClassExpression source) {
+		void logOutOfScope(AssertedIndividual entity, OWLClassExpression source) {
 
 			logOutOfScopeRef("INDIVIDUAL", "TYPE", entity, source);
 		}
 	}
 
 	private abstract class ValuesRelationCreator
-								<S extends ValueAssertion<?, ?>>
-								extends RelationCreator<OWLNamedIndividual, S> {
+								<S extends AssertedValue<?, ?>>
+								extends RelationCreator<AssertedIndividual, S> {
 
-		boolean excludedRelationSource(S source) {
-
-			return false;
-		}
-
-		void logOutOfScope(OWLNamedIndividual entity, S source) {
+		void logOutOfScope(AssertedIndividual entity, S source) {
 
 			logOutOfScopeRef("INDIVIDUAL", "VALUE", entity, source.getValue());
 		}
@@ -141,14 +123,14 @@ class NodeProfilesCreator {
 
 	private class ObjectValuesRelationCreator
 					extends
-						ValuesRelationCreator<ObjectValueAssertion> {
+						ValuesRelationCreator<AssertedObjectValue> {
 
-		Collection<ObjectValueAssertion> getRelationSources(OWLNamedIndividual entity) {
+		Collection<AssertedObjectValue> getRelationSources(AssertedIndividual entity) {
 
-			return assertions.getObjectValues(entity);
+			return entity.getObjectValues();
 		}
 
-		Relation toRelation(ObjectValueAssertion source) {
+		Relation toRelation(AssertedObjectValue source) {
 
 			return matchComponents.toObjectValueRelation(source);
 		}
@@ -156,14 +138,14 @@ class NodeProfilesCreator {
 
 	private class DataValuesRelationCreator
 						extends
-							ValuesRelationCreator<DataValueAssertion> {
+							ValuesRelationCreator<AssertedDataValue> {
 
-		Collection<DataValueAssertion> getRelationSources(OWLNamedIndividual entity) {
+		Collection<AssertedDataValue> getRelationSources(AssertedIndividual entity) {
 
-			return assertions.getDataValues(entity);
+			return entity.getDataValues();
 		}
 
-		Relation toRelation(DataValueAssertion source) {
+		Relation toRelation(AssertedDataValue source) {
 
 			return matchComponents.toDataValueRelation(source);
 		}
@@ -175,37 +157,31 @@ class NodeProfilesCreator {
 		MatchComponents matchComponents,
 		MatchStructures matchStructures) {
 
-		this.assertions = assertions;
-		this.mappedNames = mappedNames;
 		this.matchStructures = matchStructures;
 		this.matchComponents = matchComponents;
 
-		for (ClassName n : mappedNames.getClassNames()) {
+		for (AssertedClass c : assertions.getClasses()) {
 
-			createForClass(n);
+			createForClass(c, mappedNames.get(c.getEntity()));
 		}
 
-		for (IndividualName n : mappedNames.getIndividualNames()) {
+		for (AssertedIndividual i : assertions.getIndividuals()) {
 
-			createForIndividual(n);
+			createForIndividual(i, mappedNames.get(i.getEntity()));
 		}
 	}
 
-	private void createForClass(ClassName n) {
-
-		OWLClass c = MappedNames.toMappedEntity(n, OWLClass.class);
+	private void createForClass(AssertedClass c, ClassName n) {
 
 		matchStructures.setNodeProfile(n, supersRelations.getAssertedRelations(c));
 	}
 
-	private void createForIndividual(IndividualName n) {
-
-		OWLNamedIndividual i = MappedNames.toMappedEntity(n, OWLNamedIndividual.class);
+	private void createForIndividual(AssertedIndividual i, IndividualName n) {
 
 		matchStructures.setNodeProfile(n, getAssertedIndividualRelations(i));
 	}
 
-	private Set<Relation> getAssertedIndividualRelations(OWLNamedIndividual i) {
+	private Set<Relation> getAssertedIndividualRelations(AssertedIndividual i) {
 
 		Set<Relation> rels = new HashSet<Relation>();
 
@@ -219,13 +195,13 @@ class NodeProfilesCreator {
 	private void logOutOfScopeRef(
 					String referDesc,
 					String refedDesc,
-					OWLEntity refer,
+					AssertedEntity<?> refer,
 					OWLObject refed) {
 
 		Logger logger = Logger.SINGLETON;
 
 		logger.logOutOfScopeWarningLine(referDesc + " " + refedDesc);
-		logger.logLine(referDesc + ": " + refer);
+		logger.logLine(referDesc + ": " + refer.getEntity());
 		logger.logLine(refedDesc + ": " + refed);
 	}
 }

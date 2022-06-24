@@ -28,7 +28,6 @@ import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.*;
-import org.semanticweb.owlapi.search.EntitySearcher;
 
 /**
  * @author Colin Puleston
@@ -39,249 +38,663 @@ class Assertions {
 	final OWLObjectProperty owlTopObjectProperty;
 	final OWLDataProperty owlTopDataProperty;
 
-	private Set<OWLOntology> allOntologies;
-	private OWLDataFactory factory;
+	private Map<OWLClass, AssertedClass> classes = new HashMap<OWLClass, AssertedClass>();
+	private Map<OWLNamedIndividual, AssertedIndividual> individuals = new HashMap<OWLNamedIndividual, AssertedIndividual>();
+	private Map<OWLObjectProperty, AssertedObjectProperty> objectProperties = new HashMap<OWLObjectProperty, AssertedObjectProperty>();
+	private Map<OWLDataProperty, AssertedDataProperty> dataProperties = new HashMap<OWLDataProperty, AssertedDataProperty>();
+
+	private Set<OWLEquivalentClassesAxiom> equivGCIs = new HashSet<OWLEquivalentClassesAxiom>();
+	private Set<OWLSubClassOfAxiom> superGCIs = new HashSet<OWLSubClassOfAxiom>();
+
+	private class AxiomProcessingInitialiser {
+
+		private OWLDataFactory factory;
+
+		private List<ProcessorGroup> processorGroups = new ArrayList<ProcessorGroup>();
+		private Set<Class<? extends OWLAxiom>> outOfScopeAxiomTypes = new HashSet<Class<? extends OWLAxiom>>();
+
+		private abstract class ProcessorGroup {
+
+			private List<Processor<?>> processors = new ArrayList<Processor<?>>();
+
+			abstract class Processor<A extends OWLAxiom> {
+
+				Processor() {
+
+					processors.add(this);
+				}
+
+				boolean checkProcess(OWLAxiom axiom) {
+
+					Class<? extends OWLAxiom> type = axiom.getClass();
+					Class<A> pType = getProcessAxiomType();
+
+					return pType.isAssignableFrom(type) && checkTypeProcess(pType.cast(axiom));
+				}
+
+				abstract Class<A> getProcessAxiomType();
+
+				abstract boolean checkTypeProcess(A axiom);
+			}
+
+			ProcessorGroup() {
+
+				processorGroups.add(this);
+			}
+
+			boolean checkProcess(OWLAxiom axiom) {
+
+				for (Processor<?> ap : processors) {
+
+					if (ap.checkProcess(axiom)) {
+
+						return true;
+					}
+				}
+
+				return false;
+			}
+		}
+
+		private class GCIExtractors extends ProcessorGroup {
+
+			private class EquivsExtractor extends Processor<OWLEquivalentClassesAxiom> {
+
+				Class<OWLEquivalentClassesAxiom> getProcessAxiomType() {
+
+					return OWLEquivalentClassesAxiom.class;
+				}
+
+				boolean checkTypeProcess(OWLEquivalentClassesAxiom axiom) {
+
+					if (!anyOfType(axiom.getClassExpressions(), OWLClass.class)) {
+
+						equivGCIs.add(axiom);
+
+						return true;
+					}
+
+					return false;
+				}
+			}
+
+			private class SuperExtractor extends Processor<OWLSubClassOfAxiom> {
+
+				Class<OWLSubClassOfAxiom> getProcessAxiomType() {
+
+					return OWLSubClassOfAxiom.class;
+				}
+
+				boolean checkTypeProcess(OWLSubClassOfAxiom axiom) {
+
+					if (axiom.getSubClass() instanceof OWLClass) {
+
+						return false;
+					}
+
+					superGCIs.add(axiom);
+
+					return true;
+				}
+			}
+
+			GCIExtractors() {
+
+				new EquivsExtractor();
+				new SuperExtractor();
+			}
+		}
+
+		private abstract class EntityAspectExtractors
+									<E extends OWLEntity,
+									AE extends AssertedEntity<?>>
+									extends ProcessorGroup {
+
+			abstract class AspectExtractor<A extends OWLAxiom> extends Processor<A> {
+
+				boolean checkTypeProcess(A axiom) {
+
+					E e = getEntityOrNull(axiom);
+
+					if (e != null) {
+
+						process(axiom, ensureAssertedEntity(e));
+
+						return true;
+					}
+
+					return false;
+				}
+
+				abstract E getEntityOrNull(A axiom);
+
+				abstract void process(A axiom, AE ae);
+			}
+
+			private class DeclarationExtractor extends AspectExtractor<OWLDeclarationAxiom> {
+
+				Class<OWLDeclarationAxiom> getProcessAxiomType() {
+
+					return OWLDeclarationAxiom.class;
+				}
+
+				E getEntityOrNull(OWLDeclarationAxiom axiom) {
+
+					OWLEntity e = axiom.getEntity();
+					Class<E> pType = getProcessEntityType();
+
+					return pType.isAssignableFrom(e.getClass()) ? pType.cast(e) : null;
+				}
+
+				void process(OWLDeclarationAxiom axiom, AE ae) {
+				}
+			}
+
+			EntityAspectExtractors() {
+
+				new DeclarationExtractor();
+			}
+
+			AE ensureAssertedEntity(E entity) {
+
+				Map<E, AE> map = getEntitiesMap();
+				AE ae = map.get(entity);
+
+				if (ae == null) {
+
+					ae = createAssertedEntity(entity);
+
+					map.put(entity, ae);
+				}
+
+				return ae;
+			}
+
+			abstract Class<E> getProcessEntityType();
+
+			abstract Map<E, AE> getEntitiesMap();
+
+			abstract AE createAssertedEntity(E entity);
+		}
+
+		private class ClassAspectExtractors
+							extends
+								EntityAspectExtractors<OWLClass, AssertedClass> {
+
+			private class EquivsExtractor extends AspectExtractor<OWLEquivalentClassesAxiom> {
+
+				Class<OWLEquivalentClassesAxiom> getProcessAxiomType() {
+
+					return OWLEquivalentClassesAxiom.class;
+				}
+
+				OWLClass getEntityOrNull(OWLEquivalentClassesAxiom axiom) {
+
+					return getAnyOfTypeOrNull(axiom.getClassExpressions(), OWLClass.class);
+				}
+
+				void process(OWLEquivalentClassesAxiom axiom, AssertedClass ae) {
+
+					for (OWLClassExpression e : axiom.getClassExpressionsMinus(ae.getEntity())) {
+
+						ae.addEquivExpr(e);
+					}
+				}
+			}
+
+			private class SuperExtractor extends AspectExtractor<OWLSubClassOfAxiom> {
+
+				Class<OWLSubClassOfAxiom> getProcessAxiomType() {
+
+					return OWLSubClassOfAxiom.class;
+				}
+
+				OWLClass getEntityOrNull(OWLSubClassOfAxiom axiom) {
+
+					return toTypeOrNull(axiom.getSubClass(), OWLClass.class);
+				}
+
+				void process(OWLSubClassOfAxiom axiom, AssertedClass ae) {
+
+					ae.addSuperExpr(axiom.getSuperClass());
+				}
+			}
+
+			ClassAspectExtractors() {
+
+				ensureAssertedEntity(owlThing);
+
+				new EquivsExtractor();
+				new SuperExtractor();
+			}
+
+			Class<OWLClass> getProcessEntityType() {
+
+				return OWLClass.class;
+			}
+
+			Map<OWLClass, AssertedClass> getEntitiesMap() {
+
+				return classes;
+			}
+
+			AssertedClass createAssertedEntity(OWLClass entity) {
+
+				return new AssertedClass(entity, factory);
+			}
+		}
+
+		private class IndividualAspectExtractors
+							extends
+								EntityAspectExtractors<OWLNamedIndividual, AssertedIndividual> {
+
+			private class EquivsExtractor extends AspectExtractor<OWLSameIndividualAxiom> {
+
+				Class<OWLSameIndividualAxiom> getProcessAxiomType() {
+
+					return OWLSameIndividualAxiom.class;
+				}
+
+				OWLNamedIndividual getEntityOrNull(OWLSameIndividualAxiom axiom) {
+
+					return getAnyOfTypeOrNull(axiom.getIndividuals(), OWLNamedIndividual.class);
+				}
+
+				void process(OWLSameIndividualAxiom axiom, AssertedIndividual ae) {
+
+					for (OWLIndividual i : axiom.getIndividuals()) {
+
+						OWLNamedIndividual ni = toTypeOrNull(i, OWLNamedIndividual.class);
+
+						if (ni != null && ni != ae.getEntity()) {
+
+							ae.addEquiv(ni);
+						}
+					}
+				}
+			}
+
+			private class TypeExtractor extends AspectExtractor<OWLClassAssertionAxiom> {
+
+				Class<OWLClassAssertionAxiom> getProcessAxiomType() {
+
+					return OWLClassAssertionAxiom.class;
+				}
+
+				OWLNamedIndividual getEntityOrNull(OWLClassAssertionAxiom axiom) {
+
+					return toTypeOrNull(axiom.getIndividual(), OWLNamedIndividual.class);
+				}
+
+				void process(OWLClassAssertionAxiom axiom, AssertedIndividual ae) {
+
+					ae.addTypeExpr(axiom.getClassExpression());
+				}
+			}
+
+			private class ObjectValueExtractor extends AspectExtractor<OWLObjectPropertyAssertionAxiom> {
+
+				Class<OWLObjectPropertyAssertionAxiom> getProcessAxiomType() {
+
+					return OWLObjectPropertyAssertionAxiom.class;
+				}
+
+				OWLNamedIndividual getEntityOrNull(OWLObjectPropertyAssertionAxiom axiom) {
+
+					return toTypeOrNull(axiom.getSubject(), OWLNamedIndividual.class);
+				}
+
+				void process(OWLObjectPropertyAssertionAxiom axiom, AssertedIndividual ae) {
+
+					OWLObjectProperty p = toTypeOrNull(axiom.getProperty(), OWLObjectProperty.class);
+
+					if (p != null) {
+
+						ae.addObjectValue(new AssertedObjectValue(p, axiom.getObject()));
+					}
+				}
+			}
+
+			private class DataValueExtractor extends AspectExtractor<OWLDataPropertyAssertionAxiom> {
+
+				Class<OWLDataPropertyAssertionAxiom> getProcessAxiomType() {
+
+					return OWLDataPropertyAssertionAxiom.class;
+				}
+
+				OWLNamedIndividual getEntityOrNull(OWLDataPropertyAssertionAxiom axiom) {
+
+					return toTypeOrNull(axiom.getSubject(), OWLNamedIndividual.class);
+				}
+
+				void process(OWLDataPropertyAssertionAxiom axiom, AssertedIndividual ae) {
+
+					OWLDataProperty p = toTypeOrNull(axiom.getProperty(), OWLDataProperty.class);
+
+					if (p != null) {
+
+						ae.addDataValue(new AssertedDataValue(p, axiom.getObject()));
+					}
+				}
+			}
+
+			IndividualAspectExtractors() {
+
+				new EquivsExtractor();
+				new TypeExtractor();
+				new ObjectValueExtractor();
+				new DataValueExtractor();
+			}
+
+			Class<OWLNamedIndividual> getProcessEntityType() {
+
+				return OWLNamedIndividual.class;
+			}
+
+			Map<OWLNamedIndividual, AssertedIndividual> getEntitiesMap() {
+
+				return individuals;
+			}
+
+			AssertedIndividual createAssertedEntity(OWLNamedIndividual entity) {
+
+				return new AssertedIndividual(entity);
+			}
+		}
+
+		private class ObjectPropertyAspectExtractors
+							extends
+								EntityAspectExtractors<OWLObjectProperty, AssertedObjectProperty> {
+
+			private class EquivsExtractor extends AspectExtractor<OWLEquivalentObjectPropertiesAxiom> {
+
+				Class<OWLEquivalentObjectPropertiesAxiom> getProcessAxiomType() {
+
+					return OWLEquivalentObjectPropertiesAxiom.class;
+				}
+
+				OWLObjectProperty getEntityOrNull(OWLEquivalentObjectPropertiesAxiom axiom) {
+
+					return getAnyOfTypeOrNull(axiom.getProperties(), OWLObjectProperty.class);
+				}
+
+				void process(OWLEquivalentObjectPropertiesAxiom axiom, AssertedObjectProperty ae) {
+
+					for (OWLObjectPropertyExpression e : axiom.getPropertiesMinus(ae.getEntity())) {
+
+						ae.checkAddEquiv(e);
+					}
+				}
+			}
+
+			private class SuperExtractor extends AspectExtractor<OWLSubObjectPropertyOfAxiom> {
+
+				Class<OWLSubObjectPropertyOfAxiom> getProcessAxiomType() {
+
+					return OWLSubObjectPropertyOfAxiom.class;
+				}
+
+				OWLObjectProperty getEntityOrNull(OWLSubObjectPropertyOfAxiom axiom) {
+
+					return toTypeOrNull(axiom.getSubProperty(), OWLObjectProperty.class);
+				}
+
+				void process(OWLSubObjectPropertyOfAxiom axiom, AssertedObjectProperty ae) {
+
+					ae.checkAddSuper(axiom.getSuperProperty());
+				}
+			}
+
+			private class ChainExtractor extends AspectExtractor<OWLSubPropertyChainOfAxiom> {
+
+				Class<OWLSubPropertyChainOfAxiom> getProcessAxiomType() {
+
+					return OWLSubPropertyChainOfAxiom.class;
+				}
+
+				OWLObjectProperty getEntityOrNull(OWLSubPropertyChainOfAxiom axiom) {
+
+					return toTypeOrNull(axiom.getSuperProperty(), OWLObjectProperty.class);
+				}
+
+				void process(OWLSubPropertyChainOfAxiom axiom, AssertedObjectProperty ae) {
+
+					List<OWLObjectProperty> chain = allToTypeOrNull(
+														axiom.getPropertyChain(),
+														OWLObjectProperty.class);
+					if (chain != null) {
+
+						ae.addChain(chain);
+					}
+				}
+			}
+
+			private class TransitivityExtractor extends AspectExtractor<OWLTransitiveObjectPropertyAxiom> {
+
+				Class<OWLTransitiveObjectPropertyAxiom> getProcessAxiomType() {
+
+					return OWLTransitiveObjectPropertyAxiom.class;
+				}
+
+				OWLObjectProperty getEntityOrNull(OWLTransitiveObjectPropertyAxiom axiom) {
+
+					return toTypeOrNull(axiom.getProperty(), OWLObjectProperty.class);
+				}
+
+				void process(OWLTransitiveObjectPropertyAxiom axiom, AssertedObjectProperty ae) {
+
+					ae.setTransitive();
+				}
+			}
+
+			ObjectPropertyAspectExtractors() {
+
+				ensureAssertedEntity(owlTopObjectProperty);
+
+				new EquivsExtractor();
+				new SuperExtractor();
+				new ChainExtractor();
+				new TransitivityExtractor();
+			}
+
+			Class<OWLObjectProperty> getProcessEntityType() {
+
+				return OWLObjectProperty.class;
+			}
+
+			Map<OWLObjectProperty, AssertedObjectProperty> getEntitiesMap() {
+
+				return objectProperties;
+			}
+
+			AssertedObjectProperty createAssertedEntity(OWLObjectProperty entity) {
+
+				return new AssertedObjectProperty(entity);
+			}
+		}
+
+		private class DataPropertyAspectExtractors
+							extends
+								EntityAspectExtractors<OWLDataProperty, AssertedDataProperty> {
+
+			private class EquivsExtractor extends AspectExtractor<OWLEquivalentDataPropertiesAxiom> {
+
+				Class<OWLEquivalentDataPropertiesAxiom> getProcessAxiomType() {
+
+					return OWLEquivalentDataPropertiesAxiom.class;
+				}
+
+				OWLDataProperty getEntityOrNull(OWLEquivalentDataPropertiesAxiom axiom) {
+
+					return getAnyOfTypeOrNull(axiom.getProperties(), OWLDataProperty.class);
+				}
+
+				void process(OWLEquivalentDataPropertiesAxiom axiom, AssertedDataProperty ae) {
+
+					for (OWLDataPropertyExpression e : axiom.getPropertiesMinus(ae.getEntity())) {
+
+						ae.checkAddEquiv(e);
+					}
+				}
+			}
+
+			private class SuperExtractor extends AspectExtractor<OWLSubDataPropertyOfAxiom> {
+
+				Class<OWLSubDataPropertyOfAxiom> getProcessAxiomType() {
+
+					return OWLSubDataPropertyOfAxiom.class;
+				}
+
+				OWLDataProperty getEntityOrNull(OWLSubDataPropertyOfAxiom axiom) {
+
+					return toTypeOrNull(axiom.getSubProperty(), OWLDataProperty.class);
+				}
+
+				void process(OWLSubDataPropertyOfAxiom axiom, AssertedDataProperty entity) {
+
+					entity.checkAddSuper(axiom.getSuperProperty());
+				}
+			}
+
+			DataPropertyAspectExtractors() {
+
+				ensureAssertedEntity(owlTopDataProperty);
+
+				new EquivsExtractor();
+				new SuperExtractor();
+			}
+
+			Class<OWLDataProperty> getProcessEntityType() {
+
+				return OWLDataProperty.class;
+			}
+
+			Map<OWLDataProperty, AssertedDataProperty> getEntitiesMap() {
+
+				return dataProperties;
+			}
+
+			AssertedDataProperty createAssertedEntity(OWLDataProperty entity) {
+
+				return new AssertedDataProperty(entity);
+			}
+		}
+
+		AxiomProcessingInitialiser(OWLOntologyManager manager) {
+
+			factory = manager.getOWLDataFactory();
+
+			new GCIExtractors();
+			new ClassAspectExtractors();
+			new IndividualAspectExtractors();
+			new ObjectPropertyAspectExtractors();
+			new DataPropertyAspectExtractors();
+
+			for (OWLOntology ont : manager.getOntologies()) {
+
+				for (OWLAxiom ax : ont.getAxioms(Imports.EXCLUDED)) {
+
+					process(ax);
+				}
+			}
+		}
+
+		private void process(OWLAxiom ax) {
+
+			for (ProcessorGroup p : processorGroups) {
+
+				if (p.checkProcess(ax)) {
+
+					return;
+				}
+			}
+
+			outOfScopeAxiomTypes.add(ax.getClass());
+		}
+
+		private <T>T toTypeOrNull(Object obj, Class<T> type) {
+
+			return type.isAssignableFrom(obj.getClass()) ? type.cast(obj) : null;
+		}
+
+		private <T>List<T> allToTypeOrNull(List<?> objs, Class<T> type) {
+
+			List<T> typeObjs = new ArrayList<T>();
+
+			for (Object obj : objs) {
+
+				T typeObj = toTypeOrNull(obj, type);
+
+				if (typeObj == null) {
+
+					return null;
+				}
+
+				typeObjs.add(typeObj);
+			}
+
+			return typeObjs;
+		}
+
+		private <T>T getAnyOfTypeOrNull(Collection<?> objs, Class<T> type) {
+
+			for (Object obj : objs) {
+
+				T typeObj = toTypeOrNull(obj, type);
+
+				if (typeObj != null) {
+
+					return typeObj;
+				}
+			}
+
+			return null;
+		}
+
+		private <T>boolean anyOfType(Collection<?> objs, Class<T> type) {
+
+			return getAnyOfTypeOrNull(objs, type) != null;
+		}
+	}
 
 	Assertions(OWLOntologyManager manager) {
 
-		allOntologies = manager.getOntologies();
-		factory = manager.getOWLDataFactory();
+		OWLDataFactory factory = manager.getOWLDataFactory();
 
 		owlThing = factory.getOWLThing();
 		owlTopObjectProperty = factory.getOWLTopObjectProperty();
 		owlTopDataProperty = factory.getOWLTopDataProperty();
+
+		new AxiomProcessingInitialiser(manager);
 	}
 
-	<T extends OWLAxiom>Collection<T> getAxioms(AxiomType<T> axiomType) {
+	Collection<AssertedClass> getClasses() {
 
-		Set<T> all = new HashSet<T>();
-
-		for (OWLOntology ont : allOntologies) {
-
-			all.addAll(ont.getAxioms(axiomType, Imports.EXCLUDED));
-		}
-
-		return all;
+		return classes.values();
 	}
 
-	Collection<OWLClass> getAllClasses() {
+	Collection<AssertedIndividual> getIndividuals() {
 
-		Set<OWLClass> all = new HashSet<OWLClass>();
-
-		all.add(owlThing);
-
-		for (OWLOntology ont : allOntologies) {
-
-			all.addAll(ont.getClassesInSignature());
-		}
-
-		return all;
+		return individuals.values();
 	}
 
-	Collection<OWLObjectProperty> getAllObjectProperties() {
+	Collection<AssertedObjectProperty> getObjectProperties() {
 
-		Set<OWLObjectProperty> all = new HashSet<OWLObjectProperty>();
-
-		all.add(owlTopObjectProperty);
-
-		for (OWLOntology ont : allOntologies) {
-
-			all.addAll(ont.getObjectPropertiesInSignature());
-		}
-
-		return all;
+		return objectProperties.values();
 	}
 
-	Collection<OWLDataProperty> getAllDataProperties() {
+	Collection<AssertedDataProperty> getDataProperties() {
 
-		Set<OWLDataProperty> all = new HashSet<OWLDataProperty>();
-
-		all.add(owlTopDataProperty);
-
-		for (OWLOntology ont : allOntologies) {
-
-			all.addAll(ont.getDataPropertiesInSignature());
-		}
-
-		return all;
+		return dataProperties.values();
 	}
 
-	Collection<OWLNamedIndividual> getAllIndividuals() {
+	Collection<OWLEquivalentClassesAxiom> getEquivGCIs() {
 
-		Set<OWLNamedIndividual> all = new HashSet<OWLNamedIndividual>();
-
-		for (OWLOntology ont : allOntologies) {
-
-			all.addAll(ont.getIndividualsInSignature());
-		}
-
-		return all;
+		return equivGCIs;
 	}
 
-	Collection<OWLClass> getEquivalentClasses(OWLClass entity) {
+	Collection<OWLSubClassOfAxiom> getSuperGCIs() {
 
-		return filterForType(getEquivalentExprs(entity), OWLClass.class);
-	}
-
-	Collection<OWLClassExpression> getEquivalentExprs(OWLClass entity) {
-
-		Collection<OWLClassExpression> equivs = getEquivalentsGroup(entity);
-
-		equivs.remove(entity);
-
-		return equivs;
-	}
-
-	Collection<OWLObjectProperty> getEquivalentProperties(OWLObjectProperty entity) {
-
-		Collection<OWLObjectPropertyExpression> equivs = getEquivalentsGroup(entity);
-
-		equivs.remove(entity);
-
-		return filterForType(equivs, OWLObjectProperty.class);
-	}
-
-	Collection<OWLDataProperty> getEquivalentProperties(OWLDataProperty entity) {
-
-		Collection<OWLDataPropertyExpression> equivs = getEquivalentsGroup(entity);
-
-		equivs.remove(entity);
-
-		return filterForType(equivs, OWLDataProperty.class);
-	}
-
-	Collection<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual entity) {
-
-		Collection<OWLIndividual> equivs = getSameIndividualsGroup(entity);
-
-		equivs.remove(entity);
-
-		return filterForType(equivs, OWLNamedIndividual.class);
-	}
-
-	Collection<OWLClass> getSuperClasses(OWLClass entity) {
-
-		Collection<OWLClassExpression> supers = getSuperExprs(entity);
-
-		resolveIntersections(getEquivalentExprs(entity), supers, true);
-
-		return filterForType(supers, OWLClass.class);
-	}
-
-	Collection<OWLClassExpression> getSuperExprs(OWLClass entity) {
-
-		Set<OWLClassExpression> supers = new HashSet<OWLClassExpression>();
-
-		resolveIntersections(getRawSuperExprs(entity), supers, false);
-
-		return supers;
-	}
-
-	Collection<OWLObjectProperty> getSuperProperties(OWLObjectProperty entity) {
-
-		return filterForType(getSuperExprs(entity), OWLObjectProperty.class);
-	}
-
-	Collection<OWLDataProperty> getSuperProperties(OWLDataProperty entity) {
-
-		return filterForType(getSuperExprs(entity), OWLDataProperty.class);
-	}
-
-	boolean isTransitive(OWLObjectProperty entity) {
-
-		return EntitySearcher.isTransitive(entity, allOntologies);
-	}
-
-	Collection<OWLClass> getTypes(OWLNamedIndividual entity) {
-
-		return filterForType(getTypeExprs(entity), OWLClass.class);
-	}
-
-	Collection<OWLClassExpression> getTypeExprs(OWLNamedIndividual entity) {
-
-		return EntitySearcher.getTypes(entity, allOntologies);
-	}
-
-	Collection<ObjectValueAssertion> getObjectValues(OWLNamedIndividual entity) {
-
-		return new ObjectValueAssertions(entity, allOntologies).getAll();
-	}
-
-	Collection<DataValueAssertion> getDataValues(OWLNamedIndividual entity) {
-
-		return new DataValueAssertions(entity, allOntologies).getAll();
-	}
-
-	private Collection<OWLClassExpression> getRawSuperExprs(OWLClass entity) {
-
-		return EntitySearcher.getSuperClasses(entity, allOntologies);
-	}
-
-	private Collection<OWLObjectPropertyExpression> getSuperExprs(OWLObjectProperty entity) {
-
-		return EntitySearcher.getSuperProperties(entity, allOntologies);
-	}
-
-	private Collection<OWLDataPropertyExpression> getSuperExprs(OWLDataProperty entity) {
-
-		return EntitySearcher.getSuperProperties(entity, allOntologies);
-	}
-
-	private Collection<OWLClassExpression> getEquivalentsGroup(OWLClass entity) {
-
-		return EntitySearcher.getEquivalentClasses(entity, allOntologies);
-	}
-
-	private Collection<OWLObjectPropertyExpression> getEquivalentsGroup(OWLObjectProperty entity) {
-
-		return EntitySearcher.getEquivalentProperties(entity, allOntologies);
-	}
-
-	private Collection<OWLDataPropertyExpression> getEquivalentsGroup(OWLDataProperty entity) {
-
-		return EntitySearcher.getEquivalentProperties(entity, allOntologies);
-	}
-
-	private Collection<OWLIndividual> getSameIndividualsGroup(OWLNamedIndividual entity) {
-
-		return EntitySearcher.getSameIndividuals(entity, allOntologies);
-	}
-
-	private void resolveIntersections(
-					Collection<OWLClassExpression> ins,
-					Collection<OWLClassExpression> outs,
-					boolean nestedOnly) {
-
-		for (OWLClassExpression in : ins) {
-
-			if (in instanceof OWLObjectIntersectionOf) {
-
-				OWLObjectIntersectionOf i = (OWLObjectIntersectionOf)in;
-
-				resolveIntersections(i.getOperands(), outs, false);
-			}
-			else {
-
-				if (!nestedOnly) {
-
-					outs.add(in);
-				}
-			}
-		}
-	}
-
-	private <I, O extends I>Collection<O> filterForType(Collection<I> ins, Class<O> outType) {
-
-		Set<O> outs = new HashSet<O>();
-
-		for (I in : ins) {
-
-			if (outType.isAssignableFrom(in.getClass())) {
-
-				outs.add(outType.cast(in));
-			}
-		}
-
-		return outs;
+		return superGCIs;
 	}
 }

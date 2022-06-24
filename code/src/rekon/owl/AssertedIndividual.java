@@ -24,29 +24,65 @@
 
 package rekon.owl;
 
+import java.util.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class ValueAssertion<P extends OWLProperty, V extends OWLObject> {
+class AssertedIndividual extends AssertedEntity<OWLNamedIndividual> {
 
-	private P property;
-	private V value;
+	private Set<OWLClass> types = new HashSet<OWLClass>();
+	private Set<OWLClassExpression> typeExprs = new HashSet<OWLClassExpression>();
 
-	ValueAssertion(P property, V value) {
+	private Set<AssertedObjectValue> objectValues = new HashSet<AssertedObjectValue>();
+	private Set<AssertedDataValue> dataValues = new HashSet<AssertedDataValue>();
 
-		this.property = property;
-		this.value = value;
+	AssertedIndividual(OWLNamedIndividual entity) {
+
+		super(entity);
 	}
 
-	P getProperty() {
+	void addTypeExpr(OWLClassExpression type) {
 
-		return property;
+		if (type instanceof OWLClass) {
+
+			types.add((OWLClass)type);
+		}
+		else {
+
+			typeExprs.add(type);
+		}
 	}
 
-	V getValue() {
+	void addObjectValue(AssertedObjectValue value) {
 
-		return value;
+		objectValues.add(value);
+	}
+
+	void addDataValue(AssertedDataValue value) {
+
+		dataValues.add(value);
+	}
+
+	Collection<OWLClass> getTypes() {
+
+		return types;
+	}
+
+	Collection<OWLClassExpression> getTypeExprs() {
+
+		return typeExprs;
+	}
+
+	Collection<AssertedObjectValue> getObjectValues() {
+
+		return objectValues;
+	}
+
+	Collection<AssertedDataValue> getDataValues() {
+
+		return dataValues;
 	}
 }

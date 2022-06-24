@@ -24,39 +24,29 @@
 
 package rekon.owl;
 
-import java.util.*;
-
 import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class ValueAssertions
-					<P extends OWLProperty,
-					PE extends OWLPropertyExpression,
-					V extends OWLObject,
-					A extends ValueAssertion<P, V>> {
+abstract class AssertedValue<P extends OWLProperty, V extends OWLObject> {
 
-	private List<A> assertions = new ArrayList<A>();
+	private P property;
+	private V value;
 
-	ValueAssertions(Map<PE, Collection<V>> byPropertyExpr, Class<P> propertyCls) {
+	AssertedValue(P property, V value) {
 
-		for (PE pe : byPropertyExpr.keySet()) {
-
-			if (propertyCls.isAssignableFrom(pe.getClass())) {
-
-				for (V v : byPropertyExpr.get(pe)) {
-
-					assertions.add(create(propertyCls.cast(pe), v));
-				}
-			}
-		}
+		this.property = property;
+		this.value = value;
 	}
 
-	List<A> getAll() {
+	P getProperty() {
 
-		return assertions;
+		return property;
 	}
 
-	abstract A create(P property, V value);
+	V getValue() {
+
+		return value;
+	}
 }
