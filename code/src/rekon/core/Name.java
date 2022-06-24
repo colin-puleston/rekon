@@ -108,6 +108,11 @@ public abstract class Name {
 		return classification;
 	}
 
+	boolean classified() {
+
+		return classification != null;
+	}
+
 	boolean dynamic() {
 
 		return false;

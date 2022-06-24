@@ -57,4 +57,9 @@ public abstract class NodeName extends Name {
 
 		return getClassifier().getInferredSubsumers();
 	}
+
+	boolean newSubsumers(NodeMatcher matcher) {
+
+		return !classified() && getInferredSubsumers().anyNewMatches(matcher);
+	}
 }

@@ -35,7 +35,9 @@ class SetIntersector {
 
 		public int compare(Collection<E> first, Collection<E> second) {
 
-			return first.size() - second.size();
+			int diff = first.size() - second.size();
+
+			return diff != 0 ? diff : 1;
 		}
 	}
 
