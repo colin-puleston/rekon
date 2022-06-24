@@ -51,7 +51,7 @@ class Assertions {
 		private OWLDataFactory factory;
 
 		private List<ProcessorGroup> processorGroups = new ArrayList<ProcessorGroup>();
-		private Set<Class<? extends OWLAxiom>> outOfScopeAxiomTypes = new HashSet<Class<? extends OWLAxiom>>();
+		private Set<AxiomType<?>> outOfScopeAxiomTypes = new HashSet<AxiomType<?>>();
 
 		private abstract class ProcessorGroup {
 
@@ -614,7 +614,7 @@ class Assertions {
 				}
 			}
 
-			outOfScopeAxiomTypes.add(ax.getClass());
+			outOfScopeAxiomTypes.add(ax.getAxiomType());
 		}
 
 		private void logOutOfScopeAxiomTypes() {
@@ -623,7 +623,7 @@ class Assertions {
 
 			logger.logOutOfScopeWarningLine("Axiom-types");
 
-			for (Class<? extends OWLAxiom> axType : outOfScopeAxiomTypes) {
+			for (AxiomType<?> axType : outOfScopeAxiomTypes) {
 
 				logger.logLine("AXIOM-TYPE: " + axType);
 			}
