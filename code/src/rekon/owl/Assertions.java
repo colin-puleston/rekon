@@ -597,6 +597,11 @@ class Assertions {
 					process(ax);
 				}
 			}
+
+			if (!outOfScopeAxiomTypes.isEmpty()) {
+
+				logOutOfScopeAxiomTypes();
+			}
 		}
 
 		private void process(OWLAxiom ax) {
@@ -610,6 +615,18 @@ class Assertions {
 			}
 
 			outOfScopeAxiomTypes.add(ax.getClass());
+		}
+
+		private void logOutOfScopeAxiomTypes() {
+
+			Logger logger = Logger.SINGLETON;
+
+			logger.logOutOfScopeWarningLine("Axiom-types");
+
+			for (Class<? extends OWLAxiom> axType : outOfScopeAxiomTypes) {
+
+				logger.logLine("AXIOM-TYPE: " + axType);
+			}
 		}
 
 		private <T>T toTypeOrNull(Object obj, Class<T> type) {
