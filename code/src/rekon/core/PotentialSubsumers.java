@@ -60,14 +60,14 @@ class PotentialSubsumers {
 			return getRankedDefinitionNames(option.getDefinition());
 		}
 
-		Names resolveNamesForRegistration(Names names) {
+		Names resolveNamesForRegistration(Names names, int rank) {
 
 			return names;
 		}
 
-		Names resolveNamesForRetrieval(Names names) {
+		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return names.expandWithNonRootDefinitionSubsumers();
+			return names.expandWithNonRootDefnSubsumers(PatternNameRole.rankToRole(rank));
 		}
 
 		boolean unionRankOptionsForRetrieval() {

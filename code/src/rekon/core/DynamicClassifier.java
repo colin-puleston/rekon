@@ -78,14 +78,14 @@ class DynamicClassifier extends Classifier {
 
 	private boolean checkReclassifiable(MatchableNode c) {
 
-		InferredSubsumers subsumerAdder = c.getName().getInferredSubsumers();
+		InferredSubsumers infSubsumers = c.getName().getInferredSubsumers();
 		boolean reclassify = false;
 
-		if (subsumerAdder.anyNewMatches(NodeMatcher.ANY)) {
+		if (infSubsumers.anyMatches(NodeMatcher.ANY)) {
 
-			reclassify = subsumerAdder.anyNewMatches(NodeMatcher.DEFINITION_REFED);
+			reclassify = infSubsumers.anyMatches(NodeMatcher.ANY);
 
-			subsumerAdder.addAllToClassifier();
+			infSubsumers.absorbIntoClassifier();
 
 			NodePattern p = c.getProfile();
 

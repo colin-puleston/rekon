@@ -73,16 +73,16 @@ class NameClassifier {
 			return true;
 		}
 
-		void addAllToClassifier() {
+		boolean anyMatches(NodeMatcher matcher) {
+
+			return matcher.anyMatches(allNewInfs);
+		}
+
+		void absorbIntoClassifier() {
 
 			subsumers.addAll(allNewInfs);
 
 			allNewInfs.clear();
-		}
-
-		boolean anyNewMatches(NodeMatcher matcher) {
-
-			return matcher.anyMatches(allNewInfs);
 		}
 
 		private void expandLatestInferences(NameSet sourceSubsumers) {

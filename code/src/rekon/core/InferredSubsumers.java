@@ -35,7 +35,7 @@ abstract class InferredSubsumers {
 
 	abstract boolean configureForNextExpansion();
 
-	abstract void addAllToClassifier();
+	abstract boolean anyMatches(NodeMatcher matcher);
 
-	abstract boolean anyNewMatches(NodeMatcher matcher);
+	abstract void absorbIntoClassifier();
 }

@@ -24,70 +24,15 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public abstract class Relation extends Expression {
+enum PatternNameRole {
 
-	private PropertyName property;
-	private Value target;
+	ROOT, RELATION, VALUE;
 
-	Relation(PropertyName property, Value target) {
+	static PatternNameRole rankToRole(int rank) {
 
-		if (property == null) throw new Error("BLAH!");
-		this.property = property;
-		this.target = target;
-	}
-
-	PropertyName getProperty() {
-
-		return property;
-	}
-
-	Value getTarget() {
-
-		return target;
-	}
-
-	boolean subsumes(Relation r) {
-
-		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
-	}
-
-	void registerDefinitionRefedNames() {
-
-		property.registerAsDefinitionRefed(PatternNameRole.RELATION);
-		target.registerDefinitionRefedNames();
-	}
-
-	void collectNames(NameCollector collector) {
-
-		collector.collectFor(property);
-
-		target.collectNames(collector.forNextRank());
-	}
-
-	Collection<Relation> expandForSignature() {
-
-		return Collections.singleton(this);
-	}
-
-	boolean potentialNewSignatureRelations() {
-
-		return false;
-	}
-
-	void render(PatternRenderer r) {
-
-		r.addLine(property.getLabel());
-
-		target.render(r.nextLevel());
-	}
-
-	private boolean subsumesOtherOfType(Relation r) {
-
-		return property.subsumes(r.property) && target.subsumes(r.target);
+		return values()[rank];
 	}
 }

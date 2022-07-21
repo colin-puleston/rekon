@@ -24,6 +24,8 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -32,7 +34,7 @@ public abstract class Name {
 	private NameClassifier classifier = new NameClassifier(this);
 	private NameClassification classification = null;
 
-	private boolean definitionRefed = false;
+	private Set<PatternNameRole> definitionRoles = new HashSet<PatternNameRole>();
 
 	public void addSubsumer(Name subsumer) {
 
@@ -76,9 +78,9 @@ public abstract class Name {
 		return classifier != null ? classifier.rootName() : classification.rootName();
 	}
 
-	void registerAsDefinitionRefed() {
+	void registerAsDefinitionRefed(PatternNameRole role) {
 
-		definitionRefed = true;
+		definitionRoles.add(role);
 	}
 
 	void setClassification() {
@@ -120,7 +122,12 @@ public abstract class Name {
 
 	boolean definitionRefed() {
 
-		return definitionRefed;
+		return !definitionRoles.isEmpty();
+	}
+
+	boolean definitionRefed(PatternNameRole role) {
+
+		return definitionRoles.contains(role);
 	}
 
 	Names getSubsumers() {
@@ -131,6 +138,11 @@ public abstract class Name {
 	boolean subsumes(Name name) {
 
 		return name == this || name.hasSubsumer(this);
+	}
+
+	boolean newSubsumers(NodeMatcher matcher) {
+
+		return false;
 	}
 
 	private boolean hasSubsumer(Name name) {

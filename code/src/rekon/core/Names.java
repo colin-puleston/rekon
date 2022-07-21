@@ -74,11 +74,11 @@ public abstract class Names {
 
 	public abstract NameSet toSet();
 
-	void registerAsDefinitionRefed() {
+	void registerAsDefinitionRefed(PatternNameRole role) {
 
 		for (Name n : getNames()) {
 
-			n.registerAsDefinitionRefed();
+			n.registerAsDefinitionRefed(role);
 		}
 	}
 
@@ -89,12 +89,12 @@ public abstract class Names {
 
 	NameSet expandWithNonRootSubsumers() {
 
-		return expandWithNonRootSubsumers(false);
+		return expandWithNonRootSubsumers(null);
 	}
 
-	NameSet expandWithNonRootDefinitionSubsumers() {
+	NameSet expandWithNonRootDefnSubsumers(PatternNameRole role) {
 
-		return expandWithNonRootSubsumers(true);
+		return expandWithNonRootSubsumers(role);
 	}
 
 	Name getFirstName() {
@@ -102,7 +102,7 @@ public abstract class Names {
 		return getNames().iterator().next();
 	}
 
-	private NameSet expandWithNonRootSubsumers(boolean defnRefedOnly) {
+	private NameSet expandWithNonRootSubsumers(PatternNameRole defnRole) {
 
 		NameSet expanded = new NameSet(this);
 
@@ -110,7 +110,7 @@ public abstract class Names {
 
 			for (Name s : n.getSubsumers().getNames()) {
 
-				if (!s.rootName() && (!defnRefedOnly || s.definitionRefed())) {
+				if (!s.rootName() && (defnRole == null || s.definitionRefed(defnRole))) {
 
 					expanded.add(s);
 				}

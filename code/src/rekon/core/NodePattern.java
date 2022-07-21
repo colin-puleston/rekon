@@ -112,7 +112,7 @@ public class NodePattern extends Expression {
 
 	void registerDefinitionRefedNames() {
 
-		names.registerAsDefinitionRefed();
+		names.registerAsDefinitionRefed(PatternNameRole.ROOT);
 
 		for (Relation r : relations) {
 
@@ -142,7 +142,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (newSubsumersForName(n, NodeMatcher.DEFINITION_REFED)) {
+			if (n.newSubsumers(NodeMatcher.ANY)) {
 
 				return true;
 			}
@@ -150,7 +150,7 @@ public class NodePattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getTarget().newSubsumers(NodeMatcher.DEFINITION_REFED)) {
+			if (r.getTarget().newSubsumers(NodeMatcher.ANY)) {
 
 				return true;
 			}
@@ -163,7 +163,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (newSubsumersForName(n, NodeMatcher.WITH_SIGNATURE_RELS)) {
+			if (n.newSubsumers(NodeMatcher.STRUCTURED)) {
 
 				return true;
 			}
@@ -331,16 +331,6 @@ public class NodePattern extends Expression {
 	private Names getSignatureMatchNames() {
 
 		return new NameCollector(false).collectUnranked(this).expandWithNonRootSubsumers();
-	}
-
-	private boolean newSubsumersForName(Name n, NodeMatcher matcher) {
-
-		if (n instanceof NodeName) {
-
-			return ((NodeName)n).getInferredSubsumers().anyNewMatches(matcher);
-		}
-
-		return false;
 	}
 
 	private String namesToString() {

@@ -55,7 +55,7 @@ public class NodeValue extends ObjectValue {
 
 	void registerDefinitionRefedNames() {
 
-		disjuncts.registerAsDefinitionRefed();
+		disjuncts.registerAsDefinitionRefed(PatternNameRole.VALUE);
 	}
 
 	void collectNames(NameCollector collector) {

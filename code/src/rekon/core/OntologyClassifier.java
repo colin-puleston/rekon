@@ -138,7 +138,7 @@ class OntologyClassifier extends Classifier {
 
 			for (NodeName n : allNodes) {
 
-				n.getInferredSubsumers().addAllToClassifier();
+				n.getInferredSubsumers().absorbIntoClassifier();
 			}
 		}
 

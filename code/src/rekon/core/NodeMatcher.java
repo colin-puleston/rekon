@@ -32,28 +32,40 @@ import java.util.*;
 abstract class NodeMatcher {
 
 	static final NodeMatcher ANY = new Any();
-	static final NodeMatcher DEFINITION_REFED = new DefinitionRefed();
-	static final NodeMatcher WITH_SIGNATURE_RELS = new WithSignatureRelations();
+	static final NodeMatcher STRUCTURED = new Structured();
 
-	static NodeMatcher withSignatureRelsFor(PropertyName property) {
+	static NodeMatcher structureFor(PropertyName property) {
 
-		return new WithSignatureRelationsFor(property);
+		return new StructureFor(property);
 	}
 
 	static private class Any extends NodeMatcher {
 
 		boolean anyMatches(Names nodes) {
 
-			return true;
-		}
-
-		boolean match(NodeName node) {
-
-			throw new Error("Method should never be invoked!");
+			return !nodes.isEmpty();
 		}
 	}
 
-	static abstract private class SignatureRelationsMatcher extends NodeMatcher {
+	static abstract private class SelectiveNodeMatcher extends NodeMatcher {
+
+		boolean anyMatches(Names nodes) {
+
+			for (Name n : nodes.getNames()) {
+
+				if (match((NodeName)n)) {
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		abstract boolean match(NodeName node);
+	}
+
+	static abstract private class StructuredNodeMatcher extends SelectiveNodeMatcher {
 
 		boolean match(NodeName node) {
 
@@ -65,15 +77,7 @@ abstract class NodeMatcher {
 		abstract boolean match(Collection<Relation> rels);
 	}
 
-	static private class DefinitionRefed extends NodeMatcher {
-
-		boolean match(NodeName node) {
-
-			return node.definitionRefed();
-		}
-	}
-
-	static private class WithSignatureRelations extends SignatureRelationsMatcher {
+	static private class Structured extends StructuredNodeMatcher {
 
 		boolean match(Collection<Relation> rels) {
 
@@ -81,11 +85,11 @@ abstract class NodeMatcher {
 		}
 	}
 
-	static private class WithSignatureRelationsFor extends SignatureRelationsMatcher {
+	static private class StructureFor extends StructuredNodeMatcher {
 
 		private PropertyName property;
 
-		WithSignatureRelationsFor(PropertyName property) {
+		StructureFor(PropertyName property) {
 
 			this.property = property;
 		}
@@ -104,18 +108,5 @@ abstract class NodeMatcher {
 		}
 	}
 
-	boolean anyMatches(Names nodes) {
-
-		for (Name n : nodes.getNames()) {
-
-			if (match((NodeName)n)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	abstract boolean match(NodeName node);
+	abstract boolean anyMatches(Names nodes);
 }

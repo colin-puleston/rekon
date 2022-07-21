@@ -60,6 +60,6 @@ public abstract class NodeName extends Name {
 
 	boolean newSubsumers(NodeMatcher matcher) {
 
-		return !classified() && getInferredSubsumers().anyNewMatches(matcher);
+		return !classified() && getInferredSubsumers().anyMatches(matcher);
 	}
 }

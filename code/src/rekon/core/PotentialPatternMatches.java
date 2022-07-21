@@ -114,12 +114,14 @@ abstract class PotentialPatternMatches<O> {
 
 	private class RankMatches {
 
+		private int rank = allRankMatches.size();
+
 		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
 		void registerOption(O option, Names rankNames) {
 
-			for (Name n : resolveNamesForRegistration(rankNames).getNames()) {
+			for (Name n : resolveNamesForRegistration(rankNames, rank).getNames()) {
 
 				registerOptionName(option, n);
 			}
@@ -175,7 +177,7 @@ abstract class PotentialPatternMatches<O> {
 
 			OptionUnion options = new OptionUnion();
 
-			for (Name rn : resolveNamesForRetrieval(new NameSet(n)).getNames()) {
+			for (Name rn : resolveNamesForRetrieval(new NameSet(n), rank).getNames()) {
 
 				if (!collectDirectOptionsFor(rn, options)) {
 
@@ -341,9 +343,9 @@ abstract class PotentialPatternMatches<O> {
 
 	abstract List<Names> getOptionMatchNames(O option);
 
-	abstract Names resolveNamesForRegistration(Names names);
+	abstract Names resolveNamesForRegistration(Names names, int rank);
 
-	abstract Names resolveNamesForRetrieval(Names names);
+	abstract Names resolveNamesForRetrieval(Names names, int rank);
 
 	abstract boolean unionRankOptionsForRetrieval();
 

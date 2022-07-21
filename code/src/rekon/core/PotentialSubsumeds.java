@@ -41,7 +41,7 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 			config = this;
 		}
 
-		abstract Names resolveNamesForRegistration(Names names);
+		abstract Names resolveNamesForRegistration(Names names, int rank);
 
 		abstract Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn);
 
@@ -55,9 +55,9 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 			registerAllOptionRanks();
 		}
 
-		Names resolveNamesForRegistration(Names names) {
+		Names resolveNamesForRegistration(Names names, int rank) {
 
-			return names.expandWithNonRootDefinitionSubsumers();
+			return names.expandWithNonRootDefnSubsumers(PatternNameRole.rankToRole(rank));
 		}
 
 		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
@@ -74,7 +74,7 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		private int nextOptionRegRank = 0;
 		private boolean optionRegComplete = false;
 
-		Names resolveNamesForRegistration(Names names) {
+		Names resolveNamesForRegistration(Names names, int rank) {
 
 			return names.expandWithNonRootSubsumers();
 		}
@@ -131,12 +131,12 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		return collectNames(false, option.getProfile());
 	}
 
-	Names resolveNamesForRegistration(Names names) {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return config.resolveNamesForRegistration(names);
+		return config.resolveNamesForRegistration(names, rank);
 	}
 
-	Names resolveNamesForRetrieval(Names names) {
+	Names resolveNamesForRetrieval(Names names, int rank) {
 
 		return names;
 	}
