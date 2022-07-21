@@ -35,7 +35,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 	static private SubClassesResolver subClassesResolver = new SubClassesResolver();
 	static private InstancesResolver instancesResolver = new InstancesResolver();
 
-	static private PotentialEquivalents potentialEquivalents = new PotentialEquivalents();
+	static private EquivCheckDefineds equivCheckDefineds = new EquivCheckDefineds();
 
 	static private abstract class ResultsResolver {
 
@@ -123,6 +123,60 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		Class<? extends NodeName> getNodeType() {
 
 			return IndividualName.class;
+		}
+	}
+
+	static private class EquivCheckDefineds {
+
+		Collection<MatchableNode> deriveFromSubsumeds(NameSet subsumeds) {
+
+			Set<MatchableNode> potentials = new HashSet<MatchableNode>();
+
+			for (Name s : subsumeds.getNames()) {
+
+				findAllFrom((NodeName)s, potentials);
+			}
+
+			return potentials;
+		}
+
+		private void findAllFrom(NodeName n, Set<MatchableNode> potentials) {
+
+			findFrom(n, potentials);
+
+			for (Name ss : n.getSubs(ClassName.class, false).getNames()) {
+
+				findFrom((NodeName)ss, potentials);
+			}
+		}
+
+		private void findFrom(NodeName n, Set<MatchableNode> potentials) {
+
+			MatchableNode m = n.getMatchable();
+
+			if (m != null && m.hasDefinitions() && potentials.add(m)) {
+
+				findFrom(m, potentials);
+			}
+		}
+
+		private void findFrom(MatchableNode m, Set<MatchableNode> potentials) {
+
+			for (NodePattern d : m.getDefinitions()) {
+
+				for (Name n : getDefinitionMatchNames(d).getNames()) {
+
+					if (n instanceof NodeName) {
+
+						findFrom((NodeName)n, potentials);
+					}
+				}
+			}
+		}
+
+		private Names getDefinitionMatchNames(NodePattern defn) {
+
+			return new NameCollector(true).collectUnranked(defn);
 		}
 	}
 
@@ -273,7 +327,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private Names inferSubsumersForSubsumeds(NameSet subsumeds) {
 
-		return inferSubsumers(potentialEquivalents.getPotentials(subsumeds));
+		return inferSubsumers(equivCheckDefineds.deriveFromSubsumeds(subsumeds));
 	}
 
 	private NameSet inferSubsumers(Collection<MatchableNode> preFilteredDefineds) {
