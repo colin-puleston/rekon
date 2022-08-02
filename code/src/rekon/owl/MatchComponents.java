@@ -173,18 +173,18 @@ class MatchComponents {
 
 		NodeValue checkCreate(OWLObjectUnionOf source) {
 
-			Set<ClassName> disjuncts = new HashSet<ClassName>();
+			Set<NodeName> disjuncts = new HashSet<NodeName>();
 
 			for (OWLClassExpression op : source.getOperands()) {
 
-				ClassName n = valueToClassName(op);
+				Set<? extends NodeName> djs = valueToNodeDisjuncts(op);
 
-				if (n == null) {
+				if (djs == null) {
 
 					return null;
 				}
 
-				disjuncts.add(n);
+				disjuncts.addAll(djs);
 			}
 
 			return new NodeValue(disjuncts);
@@ -249,9 +249,9 @@ class MatchComponents {
 				return disjunctions.get((OWLObjectUnionOf)filler);
 			}
 
-			NodeName n = valueToNodeName(filler);
+			Set<? extends NodeName> djs = valueToNodeDisjuncts(filler);
 
-			return n != null ? new NodeValue(n) : null;
+			return djs != null ? new NodeValue(djs) : null;
 		}
 	}
 
@@ -585,14 +585,16 @@ class MatchComponents {
 		return DataTypes.toDataValueExpression(source.getFiller());
 	}
 
-	private NodeName valueToNodeName(OWLClassExpression v) {
+	private Set<? extends NodeName> valueToNodeDisjuncts(OWLClassExpression v) {
 
 		if (v instanceof OWLObjectOneOf) {
 
-			return valueToIndividualName((OWLObjectOneOf)v);
+			return valueToIndividualDisjuncts((OWLObjectOneOf)v);
 		}
 
-		return valueToClassName(v);
+		ClassName cn = valueToClassName(v);
+
+		return cn != null ? Collections.singleton(cn) : null;
 	}
 
 	private ClassName valueToClassName(OWLClassExpression v) {
@@ -624,20 +626,20 @@ class MatchComponents {
 		return pCls;
 	}
 
-	private IndividualName valueToIndividualName(OWLObjectOneOf v) {
+	private Set<IndividualName> valueToIndividualDisjuncts(OWLObjectOneOf v) {
 
-		Collection<OWLIndividual> inds = v.getIndividuals();
+		Set<IndividualName> disjuncts = new HashSet<IndividualName>();
 
-		if (inds.size() == 1) {
+		for (OWLIndividual i : v.getIndividuals()) {
 
-			OWLIndividual ind = inds.iterator().next();
+			if (!(i instanceof OWLNamedIndividual)) {
 
-			if (ind instanceof OWLNamedIndividual) {
-
-				return mappedNames.get((OWLNamedIndividual)ind);
+				return null;
 			}
+
+			disjuncts.add(mappedNames.get((OWLNamedIndividual)i));
 		}
 
-		return null;
+		return disjuncts;
 	}
 }
