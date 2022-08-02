@@ -121,11 +121,6 @@ class MatchComponents {
 				return checkCreateForConjuncts(((OWLObjectIntersectionOf)source).getOperands());
 			}
 
-			if (source instanceof OWLObjectOneOf) {
-
-				return checkCreateForIndividuals(((OWLObjectOneOf)source).getIndividuals());
-			}
-
 			if (source instanceof OWLRestriction) {
 
 				return checkCreateForRestriction((OWLRestriction)source);
@@ -164,21 +159,6 @@ class MatchComponents {
 			}
 
 			return new NodePattern(names, rels);
-		}
-
-		private NodePattern checkCreateForIndividuals(Collection<OWLIndividual> individuals) {
-
-			if (individuals.size() == 1) {
-
-				OWLIndividual ind = individuals.iterator().next();
-
-				if (ind instanceof OWLNamedIndividual) {
-
-					return new NodePattern(mappedNames.get((OWLNamedIndividual)ind));
-				}
-			}
-
-			return null;
 		}
 
 		private NodePattern checkCreateForRestriction(OWLRestriction source) {
@@ -269,7 +249,7 @@ class MatchComponents {
 				return disjunctions.get((OWLObjectUnionOf)filler);
 			}
 
-			ClassName n = valueToClassName(filler);
+			NodeName n = valueToNodeName(filler);
 
 			return n != null ? new NodeValue(n) : null;
 		}
@@ -605,6 +585,16 @@ class MatchComponents {
 		return DataTypes.toDataValueExpression(source.getFiller());
 	}
 
+	private NodeName valueToNodeName(OWLClassExpression v) {
+
+		if (v instanceof OWLObjectOneOf) {
+
+			return valueToIndividualName((OWLObjectOneOf)v);
+		}
+
+		return valueToClassName(v);
+	}
+
 	private ClassName valueToClassName(OWLClassExpression v) {
 
 		if (v instanceof OWLClass) {
@@ -632,5 +622,22 @@ class MatchComponents {
 		}
 
 		return pCls;
+	}
+
+	private IndividualName valueToIndividualName(OWLObjectOneOf v) {
+
+		Collection<OWLIndividual> inds = v.getIndividuals();
+
+		if (inds.size() == 1) {
+
+			OWLIndividual ind = inds.iterator().next();
+
+			if (ind instanceof OWLNamedIndividual) {
+
+				return mappedNames.get((OWLNamedIndividual)ind);
+			}
+		}
+
+		return null;
 	}
 }

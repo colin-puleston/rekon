@@ -276,12 +276,17 @@ abstract class PotentialPatternMatches<O> {
 
 		void execThreadProcess(int totalThreads, int threadIndex) {
 
-			registerRank(startRank + threadIndex);
+			registerRanks(totalThreads, threadIndex);
 		}
 
 		void execAllInSingleThread() {
 
-			for (int rank = startRank ; rank < stopRank ; rank++) {
+			registerRanks(1, 0);
+		}
+
+		private void registerRanks(int totalThreads, int threadIndex) {
+
+			for (int rank = startRank + threadIndex ; rank < stopRank ; rank += totalThreads) {
 
 				registerRank(rank);
 			}

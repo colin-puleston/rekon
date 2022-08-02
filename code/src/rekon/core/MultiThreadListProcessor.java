@@ -37,6 +37,7 @@ abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E> {
 
 		this.list = list;
 
+		setMaxProcesses(list.size());
 		execProcesses();
 	}
 
