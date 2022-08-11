@@ -43,9 +43,9 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 		abstract Names resolveNamesForRegistration(Names names, int rank);
 
-		abstract Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn);
+		abstract List<Names> getOptionMatchNames(NodePattern profile, int startRank, int stopRank);
 
-		abstract void configureNameCollector(NameCollector collector);
+		abstract Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn);
 	}
 
 	private class OntologyConfig extends Config {
@@ -60,12 +60,19 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 			return names.expandWithNonRootDefnSubsumers(PatternNameRole.rankToRole(rank));
 		}
 
-		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
+		List<Names> getOptionMatchNames(NodePattern profile, int startRank, int stopRank) {
 
-			return getPotentialsOrNull(defn, getRankedDefinitionNames(defn));
+			return collectRankedNames(profile, false);
 		}
 
-		void configureNameCollector(NameCollector collector) {
+		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
+
+			return getPotentialsOrNull(defn, collectRankedNames(defn, true));
+		}
+
+		private List<Names> collectRankedNames(NodePattern p, boolean definition) {
+
+			return new NameCollector(definition, false).collectRanked(p);
 		}
 	}
 
@@ -81,7 +88,8 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 
 		Collection<MatchableNode> getPotentialsForOrNull(NodePattern defn) {
 
-			List<Names> defnNames = getRankedDefinitionNames(defn);
+			List<Names> defnNames = new NameCollector(true, true).collectRanked(defn);
+
 			int stopRank = defnNames.size();
 
 			if (!optionRegComplete && stopRank > nextOptionRegRank) {
@@ -94,9 +102,9 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 			return getPotentialsOrNull(defn, defnNames);
 		}
 
-		void configureNameCollector(NameCollector collector) {
+		List<Names> getOptionMatchNames(NodePattern profile, int startRank, int stopRank) {
 
-			collector.setLinkedCollection();
+			return new NameCollector(false, true).collectRanked(profile, startRank, stopRank);
 		}
 	}
 
@@ -126,9 +134,9 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 		return allOptions;
 	}
 
-	List<Names> getOptionMatchNames(MatchableNode option) {
+	List<Names> getOptionMatchNames(MatchableNode option, int startRank, int stopRank) {
 
-		return collectNames(false, option.getProfile());
+		return config.getOptionMatchNames(option.getProfile(), startRank, stopRank);
 	}
 
 	Names resolveNamesForRegistration(Names names, int rank) {
@@ -144,19 +152,5 @@ class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
 	boolean unionRankOptionsForRetrieval() {
 
 		return false;
-	}
-
-	private List<Names> getRankedDefinitionNames(NodePattern defn) {
-
-		return collectNames(true, defn);
-	}
-
-	private List<Names> collectNames(boolean definition, NodePattern p) {
-
-		NameCollector collector = new NameCollector(definition);
-
-		config.configureNameCollector(collector);
-
-		return collector.collectRanked(p);
 	}
 }

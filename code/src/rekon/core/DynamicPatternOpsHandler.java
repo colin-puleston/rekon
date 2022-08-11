@@ -176,7 +176,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		private Names getDefinitionMatchNames(NodePattern defn) {
 
-			return new NameCollector(true).collectUnranked(defn);
+			return new NameCollector(true, false).collectUnranked(defn);
 		}
 	}
 

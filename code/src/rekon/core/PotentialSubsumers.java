@@ -55,7 +55,7 @@ class PotentialSubsumers {
 			return categoryDefs;
 		}
 
-		List<Names> getOptionMatchNames(NodeDefinition option) {
+		List<Names> getOptionMatchNames(NodeDefinition option, int startRank, int stopRank) {
 
 			return getRankedDefinitionNames(option.getDefinition());
 		}
@@ -134,12 +134,17 @@ class PotentialSubsumers {
 
 		List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-			return new NameCollector(true).collectRanked(defn);
+			return collectRankedNames(defn, true);
 		}
 
 		List<Names> getRankedProfileNames(NodePattern profile) {
 
-			return new NameCollector(false).collectRanked(profile);
+			return collectRankedNames(profile, false);
+		}
+
+		private List<Names> collectRankedNames(NodePattern p, boolean definition) {
+
+			return new NameCollector(definition, false).collectRanked(p);
 		}
 	}
 

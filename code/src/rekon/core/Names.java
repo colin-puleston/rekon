@@ -33,6 +33,16 @@ public abstract class Names {
 
 	static public final Names NO_NAMES = new NameList();
 
+	public boolean equals(Object other) {
+
+		return getClass() == other.getClass() && equalsNames(getClass().cast(other));
+	}
+
+	public int hashCode() {
+
+		return getNames().hashCode();
+	}
+
 	public String toString() {
 
 		return getClass().getSimpleName() + "(" + getNames() + ")";
@@ -100,6 +110,11 @@ public abstract class Names {
 	Name getFirstName() {
 
 		return getNames().iterator().next();
+	}
+
+	private boolean equalsNames(Names other) {
+
+		return getNames().equals(other.getNames());
 	}
 
 	private NameSet expandWithNonRootSubsumers(PatternNameRole defnRole) {

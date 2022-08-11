@@ -328,11 +328,6 @@ public class NodePattern extends Expression {
 		return collector.signature() ? getSignatureRelations() : relations;
 	}
 
-	private Names getSignatureMatchNames() {
-
-		return new NameCollector(false).collectUnranked(this).expandWithNonRootSubsumers();
-	}
-
 	private String namesToString() {
 
 		if (names.size() == 1) {

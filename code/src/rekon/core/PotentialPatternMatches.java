@@ -31,6 +31,9 @@ import java.util.*;
  */
 abstract class PotentialPatternMatches<O> {
 
+	static private final int DEFAULT_START_RANK = 0;
+	static private final int DEFAULT_STOP_RANK = 3;
+
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
 	private abstract class OptionCollector {
@@ -215,8 +218,6 @@ abstract class PotentialPatternMatches<O> {
 
 	private class MultiOptionRegistrar extends MultiThreadProcessor<Names> {
 
-		static private final int DEFAULT_RANKS = 3;
-
 		private int startRank;
 		private int stopRank;
 
@@ -232,7 +233,7 @@ abstract class PotentialPatternMatches<O> {
 
 				this.option = option;
 
-				rankedNames = getOptionMatchNames(option);
+				rankedNames = getOptionMatchNames(option, startRank, stopRank);
 			}
 
 			void checkRegister(RankMatches rankMatches, int rank) {
@@ -250,7 +251,7 @@ abstract class PotentialPatternMatches<O> {
 
 		MultiOptionRegistrar() {
 
-			this(0, DEFAULT_RANKS);
+			this(DEFAULT_START_RANK, DEFAULT_STOP_RANK);
 		}
 
 		MultiOptionRegistrar(int startRank, int stopRank) {
@@ -346,7 +347,7 @@ abstract class PotentialPatternMatches<O> {
 
 	abstract List<O> getAllOptions();
 
-	abstract List<Names> getOptionMatchNames(O option);
+	abstract List<Names> getOptionMatchNames(O option, int startRank, int stopRank);
 
 	abstract Names resolveNamesForRegistration(Names names, int rank);
 
