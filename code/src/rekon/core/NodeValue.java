@@ -124,17 +124,7 @@ public class NodeValue extends ObjectValue {
 
 		if (n != null) {
 
-			if (n.dynamic() && collector.linkedCollection()) {
-
-				for (NodePattern d : n.getDefinitions()) {
-
-					d.collectNames(collector);
-				}
-			}
-			else {
-
-				collector.collectFor(n);
-			}
+			collector.collectForDefinitionValue(n);
 		}
 		else {
 
@@ -146,15 +136,7 @@ public class NodeValue extends ObjectValue {
 
 		for (Name d : disjuncts.getNames()) {
 
-			collector.collectFor(d);
-
-			NodePattern p = ((NodeName)d).getProfile();
-
-			if (p != null && collector.startLinkedSection(d)) {
-
-				p.collectNames(collector);
-				collector.endLinkedSection();
-			}
+			collector.collectForSignatureValue((NodeName)d);
 		}
 	}
 

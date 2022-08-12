@@ -128,17 +128,39 @@ class NameCollector {
 		return !config.definition();
 	}
 
-	boolean linkedCollection() {
+	void collectForDefinitionValue(NodeName n) {
 
-		return config.linkedCollection();
+		if (n.dynamic() && config.linkedCollection() && !config.lastRequiredRank(rank)) {
+
+			for (NodePattern d : n.getDefinitions()) {
+
+				d.collectNames(this);
+			}
+		}
+		else {
+
+			collectName(n);
+		}
 	}
 
-	boolean lastRequiredRank() {
+	void collectForSignatureValue(NodeName n) {
 
-		return config.lastRequiredRank(rank);
+		collectName(n);
+
+		if (config.linkedCollection() && !linkNames.contains(n)) {
+
+			NodePattern p = n.getProfile();
+
+			if (p != null) {
+
+				linkNames.push(n);
+				p.collectNames(this);
+				linkNames.pop();
+			}
+		}
 	}
 
-	void collectFor(Name n) {
+	void collectName(Name n) {
 
 		if (rankStatus == RankStatus.COLLECT) {
 
@@ -153,13 +175,13 @@ class NameCollector {
 		}
 	}
 
-	void collectForAll(Names ns) {
+	void collectNames(Names ns) {
 
 		if (rankStatus == RankStatus.COLLECT) {
 
 			for (Name n : ns.getNames()) {
 
-				collectFor(n);
+				collectName(n);
 
 				if (rankStatus == RankStatus.ROOT_COLLECTED) {
 
@@ -190,23 +212,6 @@ class NameCollector {
 		}
 
 		return nextRankCollector;
-	}
-
-	boolean startLinkedSection(Name linkName) {
-
-		if (!linkedCollection() || linkNames.contains(linkName)) {
-
-			return false;
-		}
-
-		linkNames.push(linkName);
-
-		return true;
-	}
-
-	void endLinkedSection() {
-
-		linkNames.pop();
 	}
 
 	private NameCollector(Config config, List<Names> allNames, Deque<Name> linkNames) {

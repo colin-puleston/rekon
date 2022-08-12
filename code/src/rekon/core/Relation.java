@@ -64,7 +64,7 @@ public abstract class Relation extends Expression {
 
 	void collectNames(NameCollector collector) {
 
-		collector.collectFor(property);
+		collector.collectName(property);
 
 		target.collectNames(collector.forNextRank());
 	}
