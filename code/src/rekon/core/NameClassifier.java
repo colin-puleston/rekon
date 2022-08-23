@@ -46,8 +46,7 @@ class NameClassifier {
 
 			if (newSubsumer(subsumer)) {
 
-				allNewInfs.add(subsumer);
-				latestInfs.add(subsumer);
+				addDirectlyInferred(subsumer);
 			}
 		}
 
@@ -83,6 +82,12 @@ class NameClassifier {
 			subsumers.addAll(allNewInfs);
 
 			allNewInfs.clear();
+		}
+
+		private synchronized void addDirectlyInferred(Name subsumer) {
+
+			allNewInfs.add(subsumer);
+			latestInfs.add(subsumer);
 		}
 
 		private void expandLatestInferences(NameSet sourceSubsumers) {

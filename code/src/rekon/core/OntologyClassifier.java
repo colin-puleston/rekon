@@ -91,17 +91,6 @@ class OntologyClassifier extends Classifier {
 			return reclassifiables;
 		}
 
-		private void checkSubsumptions() {
-
-			for (MatchableNode m : matchables.getAll()) {
-
-				if (m.hasDefinitions()) {
-
-					checkDefinedSubsumptions(m);
-				}
-			}
-		}
-
 		private void checkDefinedSubsumptions(MatchableNode defined) {
 
 			for (NodePattern defn : defined.getDefinitions()) {
