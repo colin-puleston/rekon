@@ -29,41 +29,32 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
+class PotentialOntologySubsumeds extends PotentialSubsumeds {
 
-	private List<MatchableNode> allOptions;
+	PotentialOntologySubsumeds(List<MatchableNode> allOptions) {
 
-	PotentialSubsumeds(List<MatchableNode> allOptions) {
+		super(allOptions);
 
-		this.allOptions = allOptions;
+		registerDefaultNestedOptionRanks();
 	}
 
-	Collection<MatchableNode> getPotentialsFor(NodePattern request) {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return getPotentialsFor(request, getRankedDefinitionNames(request));
+		return names.expandWithNonRootDefnSubsumers(PatternNameRole.rankToRole(rank));
 	}
 
-	List<MatchableNode> getAllOptions() {
+	List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		return allOptions;
+		return getRankedNames(defn, true);
 	}
 
-	List<Names> getOptionMatchNames(MatchableNode option, int startRank, int stopRank) {
+	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
 
-		return getRankedProfileNames(option.getProfile(), startRank, stopRank);
+		return getRankedNames(profile, false);
 	}
 
-	Names resolveNamesForRetrieval(Names names, int rank) {
+	private List<Names> getRankedNames(NodePattern p, boolean definition) {
 
-		return names;
+		return new NameCollector(definition, false).collectRanked(p);
 	}
-
-	boolean unionRankOptionsForRetrieval() {
-
-		return false;
-	}
-
-	abstract List<Names> getRankedDefinitionNames(NodePattern defn);
-
-	abstract List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank);
 }

@@ -47,4 +47,9 @@ abstract class FreeClassName extends ClassName {
 
 		this.index = index;
 	}
+
+	boolean patternComponent() {
+
+		return true;
+	}
 }

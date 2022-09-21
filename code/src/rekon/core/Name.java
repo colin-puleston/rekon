@@ -68,9 +68,14 @@ public abstract class Name {
 		return getClassification().getSupers(direct);
 	}
 
+	public Names getSubs(boolean direct) {
+
+		return getClassification().getSubs(direct);
+	}
+
 	public Names getSubs(Class<? extends Name> type, boolean direct) {
 
-		return getClassification().getSubs(type, direct);
+		return getSubs(direct).filterForType(type);
 	}
 
 	public boolean rootName() {

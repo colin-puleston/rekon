@@ -29,35 +29,32 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialSubsumers {
+class PotentialDynamicSubsumers {
 
 	private Collection<MatchableNode> matchables;
 
-	private SimpleDefPotentials simpleDefPotentials = new SimpleDefPotentials();
-	private NestedDefPotentials nestedDefPotentials = new NestedDefPotentials();
+	private SimplePotentials simplePotentials = new SimplePotentials();
+	private NestedPotentials nestedPotentials = new NestedPotentials();
 
 	private abstract class CategoryPotentials extends PotentialPatternMatches<NodeDefinition> {
 
-		private List<NodeDefinition> categoryDefs = null;
+		private List<NodeDefinition> categoryOptions = null;
 
-		Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {
+		Collection<NodeDefinition> getPotentialsFor(NodePattern request) {
 
 			checkInitialised();
 
-			List<Names> profNames = getRankedProfileNames(profile);
-			Collection<NodeDefinition> potentials = getPotentialsOrNull(profile, profNames);
-
-			return potentials != null ? potentials : categoryDefs;
+			return getPotentialsFor(request, getRankedNames(request, false));
 		}
 
 		List<NodeDefinition> getAllOptions() {
 
-			return categoryDefs;
+			return categoryOptions;
 		}
 
 		List<Names> getOptionMatchNames(NodeDefinition option, int startRank, int stopRank) {
 
-			return getRankedDefinitionNames(option.getDefinition());
+			return getRankedNames(option.getDefinition(), true);
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -75,90 +72,89 @@ class PotentialSubsumers {
 			return true;
 		}
 
+		abstract void initialiseOptionRanks();
+
 		abstract boolean nestedPatterns();
 
-		abstract List<Names> getRankedDefinitionNames(NodePattern defn);
+		abstract List<Names> getRankedNames(NodePattern p, boolean definition);
 
-		abstract List<Names> getRankedProfileNames(NodePattern profile);
+		private synchronized void checkInitialised() {
 
-		private void checkInitialised() {
+			if (categoryOptions == null) {
 
-			if (categoryDefs == null) {
+				categoryOptions = new ArrayList<NodeDefinition>();
 
-				categoryDefs = new ArrayList<NodeDefinition>();
-
-				collectCategoryDefs();
-				registerAllOptionRanks();
+				addCategoryOptions();
+				initialiseOptionRanks();
 			}
 		}
 
-		private void collectCategoryDefs() {
+		private void addCategoryOptions() {
 
 			for (MatchableNode m : matchables) {
 
 				for (NodePattern d : m.getDefinitions()) {
 
-					if (d.nestedPattern() == nestedPatterns()) {
+					if (d.nestedPattern(false) == nestedPatterns()) {
 
-						categoryDefs.add(new NodeDefinition(m.getName(), d));
+						categoryOptions.add(new NodeDefinition(m.getName(), d));
 					}
 				}
 			}
 		}
 	}
 
-	private class SimpleDefPotentials extends CategoryPotentials {
+	private class SimplePotentials extends CategoryPotentials {
 
 		boolean nestedPatterns() {
 
 			return false;
 		}
 
-		List<Names> getRankedDefinitionNames(NodePattern defn) {
+		void initialiseOptionRanks() {
 
-			return Collections.singletonList(defn.getNames());
+			registerSingleOptionRank();
 		}
 
-		List<Names> getRankedProfileNames(NodePattern profile) {
+		List<Names> getRankedNames(NodePattern p, boolean definition) {
 
-			return Collections.singletonList(profile.getNames());
+			return Collections.singletonList(p.getNames());
 		}
 	}
 
-	private class NestedDefPotentials extends CategoryPotentials {
+	private class NestedPotentials extends CategoryPotentials {
 
 		boolean nestedPatterns() {
 
 			return true;
 		}
 
-		List<Names> getRankedDefinitionNames(NodePattern defn) {
+		void initialiseOptionRanks() {
 
-			return collectRankedNames(defn, true);
+			registerDefaultNestedOptionRanks();
 		}
 
-		List<Names> getRankedProfileNames(NodePattern profile) {
-
-			return collectRankedNames(profile, false);
-		}
-
-		private List<Names> collectRankedNames(NodePattern p, boolean definition) {
+		List<Names> getRankedNames(NodePattern p, boolean definition) {
 
 			return new NameCollector(definition, false).collectRanked(p);
 		}
 	}
 
-	PotentialSubsumers(Collection<MatchableNode> matchables) {
+	PotentialDynamicSubsumers(Collection<MatchableNode> matchables) {
 
 		this.matchables = matchables;
 	}
 
-	Collection<NodeDefinition> getPotentialsFor(NodePattern profile) {
+	Collection<NodeDefinition> getPotentialsFor(NodePattern request) {
 
 		List<NodeDefinition> all = new ArrayList<NodeDefinition>();
 
-		all.addAll(simpleDefPotentials.getPotentialsFor(profile));
-		all.addAll(nestedDefPotentials.getPotentialsFor(profile));
+		all.addAll(simplePotentials.getPotentialsFor(request));
+
+		if (request.nestedPattern(true)) {
+
+			all.addAll(nestedPotentials.getPotentialsFor(request));
+		}
 
 		return all;
 	}

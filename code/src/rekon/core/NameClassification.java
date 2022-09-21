@@ -238,9 +238,9 @@ class NameClassification {
 		return supers.get(direct);
 	}
 
-	Names getSubs(Class<? extends Name> type, boolean direct) {
+	Names getSubs(boolean direct) {
 
-		return subs.get(direct).filterForType(type);
+		return subs.get(direct);
 	}
 
 	private void endInitialisation() {

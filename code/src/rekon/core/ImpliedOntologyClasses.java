@@ -31,11 +31,16 @@ import java.util.*;
  */
 class ImpliedOntologyClasses extends FreeOntologyClasses {
 
-	static private class AnonName extends FreeClassName {
+	static private class ImpliedOntologyName extends FreeClassName {
 
-		AnonName(int index) {
+		ImpliedOntologyName(int index) {
 
 			super(index);
+		}
+
+		boolean patternComponent() {
+
+			return false;
 		}
 	}
 
@@ -48,6 +53,6 @@ class ImpliedOntologyClasses extends FreeOntologyClasses {
 
 	ClassName createClassName(int index) {
 
-		return new AnonName(index);
+		return new ImpliedOntologyName(index);
 	}
 }

@@ -31,11 +31,11 @@ import java.util.*;
  */
 class DynamicClassifier extends Classifier {
 
-	private PotentialSubsumers definedsFilter;
+	private PotentialDynamicSubsumers definedsFilter;
 
 	DynamicClassifier(Ontology ontology) {
 
-		definedsFilter = new PotentialSubsumers(ontology.getMatchables().getAll());
+		definedsFilter = new PotentialDynamicSubsumers(ontology.getMatchables().getAll());
 	}
 
 	void classify(MatchableNodes dynamicMatchables, Collection<MatchableNode> defineds) {

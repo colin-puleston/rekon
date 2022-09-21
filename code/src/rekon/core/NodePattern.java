@@ -105,9 +105,9 @@ public class NodePattern extends Expression {
 		return names;
 	}
 
-	boolean nestedPattern() {
+	boolean nestedPattern(boolean signature) {
 
-		return !relations.isEmpty();
+		return !getRelations(signature).isEmpty();
 	}
 
 	void registerDefinitionRefedNames() {
@@ -124,7 +124,7 @@ public class NodePattern extends Expression {
 
 		collector.collectNames(names);
 
-		for (Relation r : getCollectorRelations(collector)) {
+		for (Relation r : getRelations(collector.signature())) {
 
 			r.collectNames(collector.forNextRank());
 		}
@@ -320,9 +320,9 @@ public class NodePattern extends Expression {
 		}
 	}
 
-	private Collection<Relation> getCollectorRelations(NameCollector collector) {
+	private Collection<Relation> getRelations(boolean signature) {
 
-		return collector.signature() ? getSignatureRelations() : relations;
+		return signature ? getSignatureRelations() : relations;
 	}
 
 	private String namesToString() {

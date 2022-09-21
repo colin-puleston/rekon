@@ -29,41 +29,44 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialSubsumeds extends PotentialPatternMatches<MatchableNode> {
+class PotentialDynamicSubsumeds extends PotentialSubsumeds {
 
-	private List<MatchableNode> allOptions;
+	private int nextOptionRegRank = 0;
+	private boolean optionRegComplete = false;
 
-	PotentialSubsumeds(List<MatchableNode> allOptions) {
+	PotentialDynamicSubsumeds(List<MatchableNode> allOptions) {
 
-		this.allOptions = allOptions;
+		super(allOptions);
 	}
 
-	Collection<MatchableNode> getPotentialsFor(NodePattern request) {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return getPotentialsFor(request, getRankedDefinitionNames(request));
+		return names.expandWithNonRootSubsumers();
 	}
 
-	List<MatchableNode> getAllOptions() {
+	List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		return allOptions;
+		List<Names> defnNames = new NameCollector(true, true).collectRanked(defn);
+
+		checkExpandOptionRanksRegister(defnNames);
+
+		return defnNames;
 	}
 
-	List<Names> getOptionMatchNames(MatchableNode option, int startRank, int stopRank) {
+	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
 
-		return getRankedProfileNames(option.getProfile(), startRank, stopRank);
+		return new NameCollector(false, true).collectRanked(profile, startRank, stopRank);
 	}
 
-	Names resolveNamesForRetrieval(Names names, int rank) {
+	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
 
-		return names;
+		int stopRank = defnNames.size();
+
+		if (!optionRegComplete && stopRank > nextOptionRegRank) {
+
+			registerOptionRanks(nextOptionRegRank, stopRank);
+
+			nextOptionRegRank = stopRank;
+		}
 	}
-
-	boolean unionRankOptionsForRetrieval() {
-
-		return false;
-	}
-
-	abstract List<Names> getRankedDefinitionNames(NodePattern defn);
-
-	abstract List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank);
 }

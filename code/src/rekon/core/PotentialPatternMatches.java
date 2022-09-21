@@ -31,9 +31,6 @@ import java.util.*;
  */
 abstract class PotentialPatternMatches<O> {
 
-	static private final int DEFAULT_START_RANK = 0;
-	static private final int DEFAULT_STOP_RANK = 3;
-
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
 	private abstract class OptionCollector {
@@ -121,6 +118,15 @@ abstract class PotentialPatternMatches<O> {
 
 		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
+
+		int XXX() {
+
+			int YYY = 0;
+			for (Set<O> VVV : optionsByRefName.values()) {
+				YYY += VVV.size();
+			}
+			return YYY;
+		}
 
 		void registerOption(O option, Names rankNames) {
 
@@ -249,11 +255,6 @@ abstract class PotentialPatternMatches<O> {
 			}
 		}
 
-		MultiOptionRegistrar() {
-
-			this(DEFAULT_START_RANK, DEFAULT_STOP_RANK);
-		}
-
 		MultiOptionRegistrar(int startRank, int stopRank) {
 
 			this.startRank = startRank;
@@ -304,9 +305,16 @@ abstract class PotentialPatternMatches<O> {
 		}
 	}
 
-	void registerAllOptionRanks() {
+	abstract Collection<O> getPotentialsFor(NodePattern request);
 
-		new MultiOptionRegistrar();
+	void registerSingleOptionRank() {
+
+		new MultiOptionRegistrar(0, 1);
+	}
+
+	void registerDefaultNestedOptionRanks() {
+
+		new MultiOptionRegistrar(0, 3);
 	}
 
 	boolean registerOptionRanks(int startRank, int stopRank) {
@@ -314,7 +322,17 @@ abstract class PotentialPatternMatches<O> {
 		return new MultiOptionRegistrar(startRank, stopRank).completedReg();
 	}
 
-	Collection<O> getPotentialsOrNull(NodePattern request, List<Names> namesByRank) {
+	abstract List<O> getAllOptions();
+
+	abstract List<Names> getOptionMatchNames(O option, int startRank, int stopRank);
+
+	abstract Names resolveNamesForRegistration(Names names, int rank);
+
+	abstract Names resolveNamesForRetrieval(Names names, int rank);
+
+	abstract boolean unionRankOptionsForRetrieval();
+
+	Collection<O> getPotentialsFor(NodePattern request, List<Names> namesByRank) {
 
 		if (namesByRank.size() > allRankMatches.size()) {
 
@@ -342,18 +360,8 @@ abstract class PotentialPatternMatches<O> {
 			rank++;
 		}
 
-		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : null;
+		return optionsInsect.anyComponents() ? optionsInsect.getIntersection() : getAllOptions();
 	}
-
-	abstract List<O> getAllOptions();
-
-	abstract List<Names> getOptionMatchNames(O option, int startRank, int stopRank);
-
-	abstract Names resolveNamesForRegistration(Names names, int rank);
-
-	abstract Names resolveNamesForRetrieval(Names names, int rank);
-
-	abstract boolean unionRankOptionsForRetrieval();
 
 	private void ensureRankMatches(int count) {
 
