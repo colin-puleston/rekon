@@ -33,6 +33,8 @@ abstract class NodeMatcher {
 
 	static final NodeMatcher ANY = new Any();
 	static final NodeMatcher STRUCTURED = new Structured();
+	static final NodeMatcher RECLASSIFY_ROOT = new Reclassify(PatternNameRole.ROOT);
+	static final NodeMatcher RECLASSIFY_VALUE = new Reclassify(PatternNameRole.VALUE);
 
 	static NodeMatcher structureFor(PropertyName property) {
 
@@ -105,6 +107,21 @@ abstract class NodeMatcher {
 			}
 
 			return false;
+		}
+	}
+
+	static private class Reclassify extends Structured {
+
+		private PatternNameRole role;
+
+		Reclassify(PatternNameRole role) {
+
+			this.role = role;
+		}
+
+		boolean match(NodeName node) {
+
+			return node.definitionRefed(role) || super.match(node);
 		}
 	}
 

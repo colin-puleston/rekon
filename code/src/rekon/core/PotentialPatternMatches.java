@@ -119,15 +119,6 @@ abstract class PotentialPatternMatches<O> {
 		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
-		int XXX() {
-
-			int YYY = 0;
-			for (Set<O> VVV : optionsByRefName.values()) {
-				YYY += VVV.size();
-			}
-			return YYY;
-		}
-
 		void registerOption(O option, Names rankNames) {
 
 			for (Name n : resolveNamesForRegistration(rankNames, rank).getNames()) {

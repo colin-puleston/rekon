@@ -139,7 +139,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (n.newSubsumers(NodeMatcher.ANY)) {
+			if (n.newSubsumers(NodeMatcher.RECLASSIFY_ROOT)) {
 
 				return true;
 			}
@@ -147,7 +147,7 @@ public class NodePattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getTarget().newSubsumers(NodeMatcher.ANY)) {
+			if (r.getTarget().newSubsumers(NodeMatcher.RECLASSIFY_VALUE)) {
 
 				return true;
 			}
