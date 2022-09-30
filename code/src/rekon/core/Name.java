@@ -145,7 +145,20 @@ public abstract class Name {
 		return name == this || name.hasSubsumer(this);
 	}
 
-	boolean newSubsumers(NodeMatcher matcher) {
+	boolean anyDefinitionRefs() {
+
+		if (definitionRefed()) {
+
+			return true;
+		}
+
+		for (Name s : getSubsumers().getNames()) {
+
+			if (s.definitionRefed()) {
+
+				return true;
+			}
+		}
 
 		return false;
 	}

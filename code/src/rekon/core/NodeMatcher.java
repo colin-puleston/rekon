@@ -33,8 +33,8 @@ abstract class NodeMatcher {
 
 	static final NodeMatcher ANY = new Any();
 	static final NodeMatcher STRUCTURED = new Structured();
-	static final NodeMatcher RECLASSIFY_ROOT = new Reclassify(PatternNameRole.ROOT);
-	static final NodeMatcher RECLASSIFY_VALUE = new Reclassify(PatternNameRole.VALUE);
+	static final NodeMatcher CLASSIFY_TARGET_ROOT = new ClassifyTarget(PatternNameRole.ROOT);
+	static final NodeMatcher CLASSIFY_TARGET_VALUE = new ClassifyTarget(PatternNameRole.VALUE);
 
 	static NodeMatcher structureFor(PropertyName property) {
 
@@ -42,6 +42,11 @@ abstract class NodeMatcher {
 	}
 
 	static private class Any extends NodeMatcher {
+
+		boolean match(NodeName node) {
+
+			return true;
+		}
 
 		boolean anyMatches(Names nodes) {
 
@@ -63,8 +68,6 @@ abstract class NodeMatcher {
 
 			return false;
 		}
-
-		abstract boolean match(NodeName node);
 	}
 
 	static abstract private class StructuredNodeMatcher extends SelectiveNodeMatcher {
@@ -110,11 +113,11 @@ abstract class NodeMatcher {
 		}
 	}
 
-	static private class Reclassify extends Structured {
+	static private class ClassifyTarget extends Structured {
 
 		private PatternNameRole role;
 
-		Reclassify(PatternNameRole role) {
+		ClassifyTarget(PatternNameRole role) {
 
 			this.role = role;
 		}
@@ -123,7 +126,27 @@ abstract class NodeMatcher {
 
 			return node.definitionRefed(role) || super.match(node);
 		}
+
+		boolean match(Collection<Relation> rels) {
+
+			for (Relation r : rels) {
+
+				if (r instanceof ObjectRelation && targetFor((ObjectRelation)r)) {
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private boolean targetFor(ObjectRelation rel) {
+
+			return rel.getObjectProperty().definitionRefed();
+		}
 	}
+
+	abstract boolean match(NodeName node);
 
 	abstract boolean anyMatches(Names nodes);
 }

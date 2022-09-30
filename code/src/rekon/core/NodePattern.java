@@ -135,11 +135,11 @@ public class NodePattern extends Expression {
 		return subsumesAllNames(p) && allRelationsSubsumeSignatureRelations(p);
 	}
 
-	boolean reclassifiable() {
+	boolean classifiable(boolean initialPass) {
 
 		for (Name n : names.getNames()) {
 
-			if (n.newSubsumers(NodeMatcher.RECLASSIFY_ROOT)) {
+			if (((NodeName)n).classifyTargetRoot(initialPass)) {
 
 				return true;
 			}
@@ -147,7 +147,7 @@ public class NodePattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getTarget().newSubsumers(NodeMatcher.RECLASSIFY_VALUE)) {
+			if (r.classifyTarget(initialPass)) {
 
 				return true;
 			}
@@ -160,7 +160,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (n.newSubsumers(NodeMatcher.STRUCTURED)) {
+			if (((NodeName)n).newSubsumers(NodeMatcher.STRUCTURED)) {
 
 				return true;
 			}

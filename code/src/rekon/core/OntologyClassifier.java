@@ -41,8 +41,6 @@ class OntologyClassifier extends Classifier {
 		private List<MatchableNode> passCandidates;
 		private PotentialSubsumeds candidatesFilter;
 
-		private List<MatchableNode> reclassifiables = new ArrayList<MatchableNode>();
-
 		private class SubsumptionsChecker extends MultiThreadListProcessor<MatchableNode> {
 
 			SubsumptionsChecker() {
@@ -82,13 +80,14 @@ class OntologyClassifier extends Classifier {
 		List<MatchableNode> perfomPass() {
 
 			new SubsumptionsChecker();
-
 			expandNewInferences();
-			findReclassifiables();
+
+			List<MatchableNode> nextPassCandidates = findClassifiables(false);
+
 			checkResetSignatureRefs();
 			absorbNewInferences();
 
-			return reclassifiables;
+			return nextPassCandidates;
 		}
 
 		private void checkDefinedSubsumptions(MatchableNode defined) {
@@ -131,17 +130,6 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private void findReclassifiables() {
-
-			for (MatchableNode m : matchables.getAll()) {
-
-				if (m.getProfile().reclassifiable()) {
-
-					reclassifiables.add(m);
-				}
-			}
-		}
-
 		private void checkResetSignatureRefs() {
 
 			List<MatchableNode> potentiallyUpdateds = new ArrayList<MatchableNode>();
@@ -171,12 +159,27 @@ class OntologyClassifier extends Classifier {
 
 	private void classify() {
 
-		List<MatchableNode> passCandidates = matchables.getAll();
+		List<MatchableNode> passCandidates = findClassifiables(true);
 
 		do {
 
 			passCandidates = new ClassificationPass(passCandidates).perfomPass();
 		}
 		while (!passCandidates.isEmpty());
+	}
+
+	private List<MatchableNode> findClassifiables(boolean initialPass) {
+
+		List<MatchableNode> classifiables = new ArrayList<MatchableNode>();
+
+		for (MatchableNode m : matchables.getAll()) {
+
+			if (m.getProfile().classifiable(initialPass)) {
+
+				classifiables.add(m);
+			}
+		}
+
+		return classifiables;
 	}
 }

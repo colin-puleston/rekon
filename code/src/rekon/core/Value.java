@@ -73,6 +73,11 @@ abstract class Value extends Expression {
 
 	abstract boolean subsumesOther(Value v);
 
+	boolean classifyTarget(boolean initialPass) {
+
+		return initialPass;
+	}
+
 	boolean newSubsumers(NodeMatcher matcher) {
 
 		return false;

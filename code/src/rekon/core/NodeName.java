@@ -58,8 +58,28 @@ public abstract class NodeName extends Name {
 		return getClassifier().getInferredSubsumers();
 	}
 
+	boolean classifyTargetRoot(boolean initialPass) {
+
+		return classifyTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_ROOT);
+	}
+
+	boolean classifyTargetValue(boolean initialPass) {
+
+		return classifyTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_VALUE);
+	}
+
 	boolean newSubsumers(NodeMatcher matcher) {
 
 		return !classified() && getInferredSubsumers().anyMatches(matcher);
+	}
+
+	private boolean classifyTarget(boolean initialPass, NodeMatcher matcher) {
+
+		return initialPass ? anyMatches(matcher) : newSubsumers(matcher);
+	}
+
+	private boolean anyMatches(NodeMatcher matcher) {
+
+		return matcher.match(this) || matcher.anyMatches(getSubsumers());
 	}
 }

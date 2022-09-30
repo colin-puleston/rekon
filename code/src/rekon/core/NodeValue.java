@@ -84,6 +84,19 @@ public class NodeValue extends ObjectValue {
 		return n != null && subsumesNodeValue(n);
 	}
 
+	boolean classifyTarget(boolean initialPass) {
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (((NodeName)d).classifyTargetValue(initialPass)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	boolean newSubsumers(NodeMatcher matcher) {
 
 		for (Name d : disjuncts.getNames()) {

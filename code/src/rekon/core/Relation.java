@@ -36,7 +36,6 @@ public abstract class Relation extends Expression {
 
 	Relation(PropertyName property, Value target) {
 
-		if (property == null) throw new Error("BLAH!");
 		this.property = property;
 		this.target = target;
 	}
@@ -54,6 +53,11 @@ public abstract class Relation extends Expression {
 	boolean subsumes(Relation r) {
 
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
+	}
+
+	boolean classifyTarget(boolean initialPass) {
+
+		return property.anyDefinitionRefs() && target.classifyTarget(initialPass);
 	}
 
 	void registerDefinitionRefedNames() {
