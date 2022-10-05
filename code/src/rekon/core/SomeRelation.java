@@ -33,6 +33,8 @@ public class SomeRelation extends ObjectRelation {
 
 	static private class Expander {
 
+		private NameSet visitedNodes;
+
 		private Set<Relation> allExpansions = new HashSet<Relation>();
 
 		private List<SomeRelation> passExpansions = new ArrayList<SomeRelation>();
@@ -42,7 +44,7 @@ public class SomeRelation extends ObjectRelation {
 
 			void collectFromNested(SomeRelation current) {
 
-				for (Relation r : current.getTarget().getSignatureRelations()) {
+				for (Relation r : current.getTarget().collectSignatureRelations(visitedNodes)) {
 
 					if (r instanceof SomeRelation) {
 
@@ -105,7 +107,9 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		Expander(SomeRelation relation) {
+		Expander(SomeRelation relation, NameSet visitedNodes) {
+
+			this.visitedNodes = visitedNodes;
 
 			allExpansions.add(relation);
 			lastPassExpansions.add(relation);
@@ -177,9 +181,9 @@ public class SomeRelation extends ObjectRelation {
 		super(property, target);
 	}
 
-	Collection<Relation> expandForSignature() {
+	Collection<Relation> expandForSignature(NameSet visitedNodes) {
 
-		return new Expander(this).expand();
+		return new Expander(this, visitedNodes).expand();
 	}
 
 	boolean potentialNewSignatureRelations() {

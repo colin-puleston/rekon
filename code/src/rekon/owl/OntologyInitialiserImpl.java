@@ -26,8 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import org.semanticweb.owlapi.model.*;
-
 import rekon.core.*;
 
 /**
@@ -82,9 +80,9 @@ class OntologyInitialiserImpl implements OntologyInitialiser {
 		return mappedNames.getDataPropertyNames();
 	}
 
-	OntologyInitialiserImpl(OWLOntologyManager manager) {
+	OntologyInitialiserImpl(Assertions assertions) {
 
-		assertions = new Assertions(manager);
+		this.assertions = assertions;
 	}
 
 	DynamicOpsInvoker createDynamicOpsInvoker(Ontology ontology) {

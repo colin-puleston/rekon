@@ -45,14 +45,15 @@ class RekonOps {
 
 	private OWLClassNodeSet emptyEquivClassGroups = new OWLClassNodeSet();
 
+	private Names mappedClassNames;
 	private DynamicOpsInvoker dynamicOps;
 
 	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
 	private SameIndividualsChecker sameIndividualsChecker = new SameIndividualsChecker();
 
-	private ClassesGrouper classesGrouper;
-	private SuperClassesGrouper superClassesGrouper;
-	private SubClassesGrouper subClassesGrouper;
+	private ClassesGrouper classesGrouper = new ClassesGrouper();
+	private SuperClassesGrouper superClassesGrouper = new SuperClassesGrouper();
+	private SubClassesGrouper subClassesGrouper = new SubClassesGrouper();
 	private IndividualsGrouper individualsGrouper = new IndividualsGrouper();
 
 	private abstract class EntitiesGrouper<E extends OWLEntity> {
@@ -310,11 +311,6 @@ class RekonOps {
 
 	RekonOps(OWLOntologyManager manager) {
 
-		OntologyInitialiserImpl ontologyInit = new OntologyInitialiserImpl(manager);
-		Ontology ontology = new Ontology(ontologyInit);
-
-		dynamicOps = ontologyInit.createDynamicOpsInvoker(ontology);
-
 		OWLDataFactory factory = manager.getOWLDataFactory();
 
 		owlThing = factory.getOWLThing();
@@ -323,9 +319,12 @@ class RekonOps {
 		owlThingAsEquivGroup = new OWLClassNode(owlThing);
 		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
 
-		classesGrouper = new ClassesGrouper();
-		subClassesGrouper = new SubClassesGrouper();
-		superClassesGrouper = new SuperClassesGrouper();
+		Assertions assertions = new Assertions(manager);
+		OntologyInitialiserImpl ontoInit = new OntologyInitialiserImpl(assertions);
+		Ontology ontology = new Ontology(ontoInit);
+
+		mappedClassNames = new NameList(ontoInit.getClassNames());
+		dynamicOps = ontoInit.createDynamicOpsInvoker(ontology);
 	}
 
 	Node<OWLClass> getEquivalentClasses(OWLClassExpression expr) {
@@ -333,6 +332,11 @@ class RekonOps {
 		if (expr.equals(owlThing)) {
 
 			return owlThingAsEquivGroup;
+		}
+
+		if (expr.equals(owlNothing)) {
+
+			return owlNothingAsEquivGroup;
 		}
 
 		expr = resolveInputExpr(expr);
@@ -349,16 +353,17 @@ class RekonOps {
 			return emptyEquivClassGroups;
 		}
 
-		Names sups = dynamicOps.getSupers(resolveInputExpr(expr), direct);
-
-		return superClassesGrouper.toEquivGroups(sups, direct);
+		return superClassesGrouper.toEquivGroups(getSuperNames(expr, direct), direct);
 	}
 
 	NodeSet<OWLClass> getSubClasses(OWLClassExpression expr, boolean direct) {
 
-		Names subs = dynamicOps.getSubs(resolveInputExpr(expr), direct);
+		if (expr.equals(owlNothing)) {
 
-		return subClassesGrouper.toEquivGroups(subs, direct);
+			return emptyEquivClassGroups;
+		}
+
+		return subClassesGrouper.toEquivGroups(getSubNames(expr, direct), direct);
 	}
 
 	NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression expr, boolean direct) {
@@ -491,5 +496,35 @@ class RekonOps {
 		Set<OWLClassExpression> ops = expr.getOperands();
 
 		return ops.size() == 1 ? ops.iterator().next() : expr;
+	}
+
+	private Names getSuperNames(OWLClassExpression expr, boolean direct) {
+
+		if (expr.equals(owlNothing)) {
+
+			return direct ? getLeafClassNames() : mappedClassNames;
+		}
+
+		return dynamicOps.getSupers(resolveInputExpr(expr), direct);
+	}
+
+	private Names getSubNames(OWLClassExpression expr, boolean direct) {
+
+		return dynamicOps.getSubs(resolveInputExpr(expr), direct);
+	}
+
+	private Names getLeafClassNames() {
+
+		NameSet leafs = new NameSet();
+
+		for (Name n : mappedClassNames.getNames()) {
+
+			if (n.getSubs(ClassName.class, true).isEmpty()) {
+
+				leafs.add(n);
+			}
+		}
+
+		return leafs;
 	}
 }

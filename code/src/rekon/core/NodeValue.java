@@ -70,11 +70,21 @@ public class NodeValue extends ObjectValue {
 		}
 	}
 
-	Collection<Relation> getSignatureRelations() {
+	Collection<Relation> collectSignatureRelations(NameSet visitedNodes) {
 
-		NodePattern p = extractSingleNodeProfile();
+		NodeName n = checkSimpleNodeValue();
 
-		return p != null ? p.getSignatureRelations() : Collections.emptySet();
+		if (n != null) {
+
+			NodePattern p = n.getProfile();
+
+			if (p != null && visitedNodes.add(n)) {
+
+				return p.resolveSignatureRelations(visitedNodes);
+			}
+		}
+
+		return Collections.emptySet();
 	}
 
 	boolean subsumesOther(Value v) {
@@ -202,13 +212,6 @@ public class NodeValue extends ObjectValue {
 		}
 
 		return false;
-	}
-
-	private NodePattern extractSingleNodeProfile() {
-
-		NodeName n = checkSimpleNodeValue();
-
-		return n != null ? n.getProfile() : null;
 	}
 
 	private NodeName checkSimpleNodeValue() {

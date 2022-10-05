@@ -73,7 +73,7 @@ public abstract class Relation extends Expression {
 		target.collectNames(collector.forNextRank());
 	}
 
-	Collection<Relation> expandForSignature() {
+	Collection<Relation> expandForSignature(NameSet visitedNodes) {
 
 		return Collections.singleton(this);
 	}

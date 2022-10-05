@@ -36,6 +36,79 @@ public class NodePattern extends Expression {
 	private Set<Relation> relations = new HashSet<Relation>();
 	private Set<Relation> signatureRelations = null;
 
+	private class SignatureRelationCollector {
+
+		private NameSet visitedNodes;
+
+		SignatureRelationCollector() {
+
+			this(new NameSet());
+		}
+
+		SignatureRelationCollector(NameSet visitedNodes) {
+
+			this.visitedNodes = visitedNodes;
+
+			signatureRelations = new HashSet<Relation>();
+
+			addFor(NodePattern.this);
+
+			for (Name n : names.getNames()) {
+
+				addAllImpliedFor((NodeName)n);
+			}
+		}
+
+		private void addAllImpliedFor(NodeName name) {
+
+			addFor(name);
+
+			for (Name sn : name.getSubsumers().getNames()) {
+
+				addFor((NodeName)sn);
+			}
+		}
+
+		private void addFor(NodeName name) {
+
+			NodePattern p = name.getProfile();
+
+			if (p != null && p != NodePattern.this) {
+
+				addFor(p);
+			}
+		}
+
+		private void addFor(NodePattern p) {
+
+			for (Relation r : p.relations) {
+
+				for (Relation sr : r.expandForSignature(visitedNodes)) {
+
+					checkAdd(sr);
+				}
+			}
+		}
+
+		private void checkAdd(Relation r) {
+
+			for (Relation sr : new HashSet<Relation>(signatureRelations)) {
+
+				if (r.subsumes(sr)) {
+
+					return;
+				}
+
+				if (sr.subsumes(r)) {
+
+					signatureRelations.remove(sr);
+				}
+			}
+
+			signatureRelations.add(r);
+		}
+	}
+
 	public NodePattern(NodeName name) {
 
 		names.add(name);
@@ -181,14 +254,17 @@ public class NodePattern extends Expression {
 
 		if (signatureRelations == null) {
 
-			signatureRelations = new HashSet<Relation>();
+			new SignatureRelationCollector();
+		}
 
-			addSignatureRelations(this);
+		return signatureRelations;
+	}
 
-			for (Name n : names.getNames()) {
+	Collection<Relation> resolveSignatureRelations(NameSet visitedNodes) {
 
-				addAllImpliedSignatureRelations((NodeName)n);
-			}
+		if (signatureRelations == null) {
+
+			new SignatureRelationCollector(visitedNodes);
 		}
 
 		return signatureRelations;
@@ -261,55 +337,6 @@ public class NodePattern extends Expression {
 		}
 
 		return false;
-	}
-
-	private void addAllImpliedSignatureRelations(NodeName name) {
-
-		addSignatureRelations(name);
-
-		for (Name sn : name.getSubsumers().getNames()) {
-
-			addSignatureRelations((NodeName)sn);
-		}
-	}
-
-	private void addSignatureRelations(NodeName name) {
-
-		NodePattern p = name.getProfile();
-
-		if (p != null && p != this) {
-
-			addSignatureRelations(p);
-		}
-	}
-
-	private void addSignatureRelations(NodePattern p) {
-
-		for (Relation r : p.relations) {
-
-			for (Relation sr : r.expandForSignature()) {
-
-				checkAddSignatureRelation(sr);
-			}
-		}
-	}
-
-	private void checkAddSignatureRelation(Relation r) {
-
-		for (Relation sr : new HashSet<Relation>(signatureRelations)) {
-
-			if (r.subsumes(sr)) {
-
-				return;
-			}
-
-			if (sr.subsumes(r)) {
-
-				signatureRelations.remove(sr);
-			}
-		}
-
-		signatureRelations.add(r);
 	}
 
 	private void purgeSubsumers(NameSet target, Names purger) {
