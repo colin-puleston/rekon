@@ -328,11 +328,17 @@ class MappedNames {
 
 				ObjectPropertyName n = super.configureName(entity);
 
+				addInverses(entity, n);
 				addChains(entity, n);
 
 				if (entity.transitive()) {
 
 					n.setTransitive();
+				}
+
+				if (entity.symmetric()) {
+
+					n.setSymmetric();
 				}
 
 				return n;
@@ -348,6 +354,11 @@ class MappedNames {
 				return new MappedObjectPropertyName(entity);
 			}
 
+			private void addInverses(AssertedObjectProperty entity, ObjectPropertyName name) {
+
+				name.addInverses(toNames(entity.getInverses()));
+			}
+
 			private void addChains(AssertedObjectProperty entity, ObjectPropertyName name) {
 
 				for (List<OWLObjectProperty> chain : entity.getChains()) {
@@ -356,7 +367,7 @@ class MappedNames {
 				}
 			}
 
-			private List<ObjectPropertyName> toNames(List<OWLObjectProperty> props) {
+			private List<ObjectPropertyName> toNames(Collection<OWLObjectProperty> props) {
 
 				List<ObjectPropertyName> names = new ArrayList<ObjectPropertyName>();
 

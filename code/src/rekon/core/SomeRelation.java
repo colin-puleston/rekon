@@ -186,6 +186,11 @@ public class SomeRelation extends ObjectRelation {
 		return new Expander(this, visitedNodes).expand();
 	}
 
+	NodeValue getNodeTarget() {
+
+		return (NodeValue)getTarget();
+	}
+
 	boolean potentialNewSignatureRelations() {
 
 		ObjectPropertyName prop = getObjectProperty();
@@ -203,7 +208,7 @@ public class SomeRelation extends ObjectRelation {
 		return getObjectProperty().lookForMostGeneralTransitiveProperty();
 	}
 
-	private List<PropertyChain> getAllChains() {
+	private Collection<PropertyChain> getAllChains() {
 
 		return getObjectProperty().getAllChains();
 	}

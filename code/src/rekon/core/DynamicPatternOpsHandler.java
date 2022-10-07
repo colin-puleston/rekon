@@ -218,6 +218,8 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		matchStructures = createMatchStructures();
 		pattern = patternCreator.createNestedPatterns(matchStructures);
+
+		matchables.addAllInverseRelations();
 	}
 
 	DynamicOpsHandler checkResolveToNodeOpsHandler() {

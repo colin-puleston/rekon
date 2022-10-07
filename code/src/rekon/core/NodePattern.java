@@ -154,11 +154,20 @@ public class NodePattern extends Expression {
 		return new NodePattern(newNames, newRelations);
 	}
 
-	NodePattern extend(Collection<Relation> otherRelations) {
+	NodePattern extend(Relation extraRelation) {
 
 		Set<Relation> newRelations = new HashSet<Relation>(relations);
 
-		newRelations.addAll(otherRelations);
+		newRelations.add(extraRelation);
+
+		return new NodePattern(names, newRelations);
+	}
+
+	NodePattern extend(Collection<Relation> extraRelations) {
+
+		Set<Relation> newRelations = new HashSet<Relation>(relations);
+
+		newRelations.addAll(extraRelations);
 
 		return new NodePattern(names, newRelations);
 	}
@@ -248,6 +257,11 @@ public class NodePattern extends Expression {
 		}
 
 		return false;
+	}
+
+	Collection<Relation> getDirectRelations() {
+
+		return relations;
 	}
 
 	Collection<Relation> getSignatureRelations() {

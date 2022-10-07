@@ -34,7 +34,9 @@ class OntologyClassifier extends Classifier {
 	private Ontology ontology;
 
 	private List<NodeName> allNodes;
+
 	private MatchableNodes matchables;
+	private List<MatchableNode> definedMatchables = new ArrayList<MatchableNode>();
 
 	private class ClassificationPass {
 
@@ -45,15 +47,12 @@ class OntologyClassifier extends Classifier {
 
 			SubsumptionsChecker() {
 
-				invokeListProcesses(matchables.getAll());
+				invokeListProcesses(definedMatchables);
 			}
 
 			void processElement(MatchableNode m) {
 
-				if (m.hasDefinitions()) {
-
-					checkDefinedSubsumptions(m);
-				}
+				checkDefinedSubsumptions(m);
 			}
 		}
 
@@ -153,6 +152,14 @@ class OntologyClassifier extends Classifier {
 
 		allNodes = ontology.getNodeNames();
 		matchables = ontology.getMatchables();
+
+		for (MatchableNode m : matchables.getAll()) {
+
+			if (m.hasDefinitions()) {
+
+				definedMatchables.add(m);
+			}
+		}
 
 		classify();
 	}

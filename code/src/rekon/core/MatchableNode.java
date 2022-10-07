@@ -58,6 +58,11 @@ class MatchableNode {
 		defn.registerDefinitionRefedNames();
 	}
 
+	void addProfileRelation(Relation relation) {
+
+		profile = profile.extend(relation);
+	}
+
 	NodeName getName() {
 
 		return name;

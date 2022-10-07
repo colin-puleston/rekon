@@ -140,7 +140,7 @@ class ClassDefinitionsCreator {
 
 			if (!create(ax.getClassExpressions())) {
 
-				logOutOfScopeAxiom(SUBCLASS_AXIOM_DESCRIPTION, ax);
+				logOutOfScopeAxiom(EQUIV_AXIOM_DESCRIPTION, ax);
 			}
 		}
 
@@ -167,7 +167,7 @@ class ClassDefinitionsCreator {
 
 			if (!create()) {
 
-				logOutOfScopeAxiom(EQUIV_AXIOM_DESCRIPTION, ax);
+				logOutOfScopeAxiom(SUBCLASS_AXIOM_DESCRIPTION, ax);
 			}
 		}
 
@@ -235,5 +235,6 @@ class ClassDefinitionsCreator {
 
 		logger.logOutOfScopeWarningLine(axiomDesc);
 		logger.logLine("AXIOM: " + axiom);
+		logger.logSeparatorLine();
 	}
 }

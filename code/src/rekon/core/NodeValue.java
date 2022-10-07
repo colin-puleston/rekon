@@ -48,6 +48,16 @@ public class NodeValue extends ObjectValue {
 		return this;
 	}
 
+	NodeName asNodeName() {
+
+		if (disjuncts.size() == 1) {
+
+			return (NodeName)disjuncts.getFirstName();
+		}
+
+		return null;
+	}
+
 	Names getDisjuncts() {
 
 		return disjuncts;
@@ -72,7 +82,7 @@ public class NodeValue extends ObjectValue {
 
 	Collection<Relation> collectSignatureRelations(NameSet visitedNodes) {
 
-		NodeName n = checkSimpleNodeValue();
+		NodeName n = asNodeName();
 
 		if (n != null) {
 
@@ -122,7 +132,7 @@ public class NodeValue extends ObjectValue {
 
 	void render(PatternRenderer r) {
 
-		NodeName n = checkSimpleNodeValue();
+		NodeName n = asNodeName();
 
 		if (n != null) {
 
@@ -143,7 +153,7 @@ public class NodeValue extends ObjectValue {
 
 	private void collectDefinitionNames(NameCollector collector) {
 
-		NodeName n = checkSimpleNodeValue();
+		NodeName n = asNodeName();
 
 		if (n != null) {
 
@@ -212,15 +222,5 @@ public class NodeValue extends ObjectValue {
 		}
 
 		return false;
-	}
-
-	private NodeName checkSimpleNodeValue() {
-
-		if (disjuncts.size() == 1) {
-
-			return (NodeName)disjuncts.getFirstName();
-		}
-
-		return null;
 	}
 }

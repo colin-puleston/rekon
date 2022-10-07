@@ -33,8 +33,11 @@ import org.semanticweb.owlapi.model.*;
  */
 class AssertedObjectProperty extends AssertedHierarchyEntity<OWLObjectProperty> {
 
+	private Set<OWLObjectProperty> inverses = new HashSet<OWLObjectProperty>();
 	private Set<List<OWLObjectProperty>> chains = new HashSet<List<OWLObjectProperty>>();
+
 	private boolean transitive = false;
+	private boolean symmetric = false;
 
 	AssertedObjectProperty(OWLObjectProperty entity) {
 
@@ -57,6 +60,11 @@ class AssertedObjectProperty extends AssertedHierarchyEntity<OWLObjectProperty> 
 		}
 	}
 
+	void addToInverses(Collection<OWLObjectProperty> invs) {
+
+		inverses.addAll(invs);
+	}
+
 	void addChain(List<OWLObjectProperty> chain) {
 
 		chains.add(chain);
@@ -67,6 +75,16 @@ class AssertedObjectProperty extends AssertedHierarchyEntity<OWLObjectProperty> 
 		transitive = true;
 	}
 
+	void setSymmetric() {
+
+		symmetric = true;
+	}
+
+	Collection<OWLObjectProperty> getInverses() {
+
+		return inverses;
+	}
+
 	Collection<List<OWLObjectProperty>> getChains() {
 
 		return chains;
@@ -75,5 +93,10 @@ class AssertedObjectProperty extends AssertedHierarchyEntity<OWLObjectProperty> 
 	boolean transitive() {
 
 		return transitive;
+	}
+
+	boolean symmetric() {
+
+		return symmetric;
 	}
 }

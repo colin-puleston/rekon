@@ -203,5 +203,6 @@ class NodeProfilesCreator {
 		logger.logOutOfScopeWarningLine(referDesc + " " + refedDesc);
 		logger.logLine(referDesc + ": " + refer.getEntity());
 		logger.logLine(refedDesc + ": " + refed);
+		logger.logSeparatorLine();
 	}
 }

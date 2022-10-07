@@ -42,7 +42,12 @@ class Logger {
 
 	void logOutOfScopeWarningLine(String entityDesc) {
 
-		logLine("\nREKON WARNING: " + entityDesc + " out of scope...");
+		logLine("REKON WARNING: " + entityDesc + " out of scope...");
+	}
+
+	void logSeparatorLine() {
+
+		logLine("");
 	}
 
 	void logLine(String line) {

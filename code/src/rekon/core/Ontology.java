@@ -47,6 +47,8 @@ public class Ontology {
 		initialiser.createNodeProfiles();
 		initialiser.createClassDefinitions();
 
+		matchables.addAllInverseRelations();
+
 		new OntologyClassifier(this);
 
 		processNamesPostClassification(getAllNames(initialiser));

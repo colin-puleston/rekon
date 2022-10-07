@@ -31,17 +31,76 @@ import java.util.*;
  */
 class MatchableNodes {
 
-	private List<MatchableNode> all = new ArrayList<MatchableNode>();
+	private List<MatchableNode> matchables = new ArrayList<MatchableNode>();
 	private List<NodeName> names = new ArrayList<NodeName>();
+
+	private class InverseRelationsAdder {
+
+		private List<MatchableNode> newMatchables = new ArrayList<MatchableNode>();
+
+		InverseRelationsAdder() {
+
+			for (MatchableNode m : matchables) {
+
+				addAnyFor(m);
+			}
+
+			for (MatchableNode m : newMatchables) {
+
+				add(m);
+			}
+		}
+
+		private void addAnyFor(MatchableNode m) {
+
+			for (Relation r : m.getProfile().getDirectRelations()) {
+
+				if (r instanceof SomeRelation) {
+
+					addAnyFor(m.getName(), (SomeRelation)r);
+				}
+			}
+		}
+
+		private void addAnyFor(NodeName forwardSource, SomeRelation forwardRel) {
+
+			Collection<ObjectPropertyName> ips = forwardRel.getObjectProperty().getInverses();
+
+			if (!ips.isEmpty()) {
+
+				NodeName invSource = forwardRel.getNodeTarget().asNodeName();
+
+				if (invSource != null) {
+
+					MatchableNode m = resolveMatchable(invSource);
+					NodeValue invTarget = new NodeValue(forwardSource);
+
+					for (ObjectPropertyName ip : ips) {
+
+						m.addProfileRelation(new SomeRelation(ip, invTarget));
+					}
+				}
+			}
+		}
+
+		private MatchableNode resolveMatchable(NodeName name) {
+
+			MatchableNode m = name.getMatchable();
+
+			if (m == null) {
+
+				m = new MatchableNode(name, new NodePattern(name));
+
+				newMatchables.add(m);
+			}
+
+			return m;
+		}
+	}
 
 	MatchableNode add(NodeName name, NodePattern profile) {
 
-		MatchableNode m = new MatchableNode(name, profile);
-
-		all.add(m);
-		names.add(m.getName());
-
-		return m;
+		return add(new MatchableNode(name, profile));
 	}
 
 	MatchableNode addDefinitions(ClassName name, Collection<NodePattern> defns) {
@@ -61,18 +120,31 @@ class MatchableNodes {
 		return m;
 	}
 
+	void addAllInverseRelations() {
+
+		new InverseRelationsAdder();
+	}
+
 	List<MatchableNode> getAll() {
 
-		return all;
+		return matchables;
 	}
 
 	List<MatchableNode> copyAll() {
 
-		return new ArrayList<MatchableNode>(all);
+		return new ArrayList<MatchableNode>(matchables);
 	}
 
 	List<NodeName> getAllNames() {
 
 		return names;
+	}
+
+	private MatchableNode add(MatchableNode m) {
+
+		matchables.add(m);
+		names.add(m.getName());
+
+		return m;
 	}
 }

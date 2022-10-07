@@ -445,6 +445,30 @@ class Assertions {
 				}
 			}
 
+			private class InverseExtractor extends AspectExtractor<OWLInverseObjectPropertiesAxiom> {
+
+				Class<OWLInverseObjectPropertiesAxiom> getProcessAxiomType() {
+
+					return OWLInverseObjectPropertiesAxiom.class;
+				}
+
+				OWLObjectProperty getEntityOrNull(OWLInverseObjectPropertiesAxiom axiom) {
+
+					return toTypeOrNull(axiom.getFirstProperty(), OWLObjectProperty.class);
+				}
+
+				void process(OWLInverseObjectPropertiesAxiom axiom, AssertedObjectProperty ae) {
+
+					Set<OWLObjectPropertyExpression> expInvs = axiom.getPropertiesMinus(ae.getEntity());
+					List<OWLObjectProperty> invs = allToTypeOrNull(expInvs, OWLObjectProperty.class);
+
+					if (invs != null) {
+
+						ae.addToInverses(invs);
+					}
+				}
+			}
+
 			private class ChainExtractor extends AspectExtractor<OWLSubPropertyChainOfAxiom> {
 
 				Class<OWLSubPropertyChainOfAxiom> getProcessAxiomType() {
@@ -459,9 +483,9 @@ class Assertions {
 
 				void process(OWLSubPropertyChainOfAxiom axiom, AssertedObjectProperty ae) {
 
-					List<OWLObjectProperty> chain = allToTypeOrNull(
-														axiom.getPropertyChain(),
-														OWLObjectProperty.class);
+					List<OWLObjectPropertyExpression> expChain = axiom.getPropertyChain();
+					List<OWLObjectProperty> chain = allToTypeOrNull(expChain, OWLObjectProperty.class);
+
 					if (chain != null) {
 
 						ae.addChain(chain);
@@ -487,14 +511,34 @@ class Assertions {
 				}
 			}
 
+			private class SymmetryExtractor extends AspectExtractor<OWLSymmetricObjectPropertyAxiom> {
+
+				Class<OWLSymmetricObjectPropertyAxiom> getProcessAxiomType() {
+
+					return OWLSymmetricObjectPropertyAxiom.class;
+				}
+
+				OWLObjectProperty getEntityOrNull(OWLSymmetricObjectPropertyAxiom axiom) {
+
+					return toTypeOrNull(axiom.getProperty(), OWLObjectProperty.class);
+				}
+
+				void process(OWLSymmetricObjectPropertyAxiom axiom, AssertedObjectProperty ae) {
+
+					ae.setSymmetric();
+				}
+			}
+
 			ObjectPropertyAspectExtractors() {
 
 				ensureAssertedEntity(owlTopObjectProperty);
 
 				new EquivsExtractor();
 				new SuperExtractor();
+				new InverseExtractor();
 				new ChainExtractor();
 				new TransitivityExtractor();
+				new SymmetryExtractor();
 			}
 
 			Class<OWLObjectProperty> getProcessEntityType() {
@@ -594,7 +638,10 @@ class Assertions {
 
 				for (OWLAxiom ax : ont.getAxioms(Imports.EXCLUDED)) {
 
-					process(ax);
+					if (!annotationRelated(ax)) {
+
+						process(ax);
+					}
 				}
 			}
 
@@ -602,6 +649,18 @@ class Assertions {
 
 				logOutOfScopeAxiomTypes();
 			}
+		}
+
+		private boolean annotationRelated(OWLAxiom ax) {
+
+			if (ax instanceof OWLDeclarationAxiom) {
+
+				OWLDeclarationAxiom dax = (OWLDeclarationAxiom)ax;
+
+				return dax.getEntity() instanceof OWLAnnotationProperty;
+			}
+
+			return ax instanceof OWLAnnotationAxiom;
 		}
 
 		private void process(OWLAxiom ax) {
@@ -627,6 +686,8 @@ class Assertions {
 
 				logger.logLine("AXIOM-TYPE: " + axType);
 			}
+
+			logger.logSeparatorLine();
 		}
 
 		private <T>T toTypeOrNull(Object obj, Class<T> type) {
@@ -634,7 +695,7 @@ class Assertions {
 			return type.isAssignableFrom(obj.getClass()) ? type.cast(obj) : null;
 		}
 
-		private <T>List<T> allToTypeOrNull(List<?> objs, Class<T> type) {
+		private <T>List<T> allToTypeOrNull(Collection<?> objs, Class<T> type) {
 
 			List<T> typeObjs = new ArrayList<T>();
 

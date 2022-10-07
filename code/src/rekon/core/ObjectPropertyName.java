@@ -31,8 +31,20 @@ import java.util.*;
  */
 public abstract class ObjectPropertyName extends PropertyName {
 
+	private Set<ObjectPropertyName> inverses = new HashSet<ObjectPropertyName>();
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+
 	private boolean transitive = false;
+
+	public void addInverses(Collection<ObjectPropertyName> invs) {
+
+		inverses.addAll(invs);
+
+		for (ObjectPropertyName inv : invs) {
+
+			inv.inverses.add(this);
+		}
+	}
 
 	public void addChain(PropertyChain chain) {
 
@@ -42,6 +54,16 @@ public abstract class ObjectPropertyName extends PropertyName {
 	public void setTransitive() {
 
 		transitive = true;
+	}
+
+	public void setSymmetric() {
+
+		inverses.add(this);
+	}
+
+	Collection<ObjectPropertyName> getInverses() {
+
+		return inverses;
 	}
 
 	boolean anyChains() {
@@ -62,7 +84,7 @@ public abstract class ObjectPropertyName extends PropertyName {
 		return false;
 	}
 
-	List<PropertyChain> getAllChains() {
+	Collection<PropertyChain> getAllChains() {
 
 		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
 
