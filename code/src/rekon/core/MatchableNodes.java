@@ -42,7 +42,10 @@ class MatchableNodes {
 
 			for (MatchableNode m : matchables) {
 
-				addAnyFor(m);
+				if (m.getName() instanceof IndividualName) {
+
+					addAnyFor(m);
+				}
 			}
 
 			for (MatchableNode m : newMatchables) {
