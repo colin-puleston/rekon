@@ -48,7 +48,7 @@ public class NodeValue extends ObjectValue {
 		return this;
 	}
 
-	NodeName asNodeName() {
+	NodeName toSingleName() {
 
 		if (disjuncts.size() == 1) {
 
@@ -78,23 +78,6 @@ public class NodeValue extends ObjectValue {
 
 			collectSignatureNames(collector);
 		}
-	}
-
-	Collection<Relation> collectSignatureRelations(NameSet visitedNodes) {
-
-		NodeName n = asNodeName();
-
-		if (n != null) {
-
-			NodePattern p = n.getProfile();
-
-			if (p != null && visitedNodes.add(n)) {
-
-				return p.resolveSignatureRelations(visitedNodes);
-			}
-		}
-
-		return Collections.emptySet();
 	}
 
 	boolean subsumesOther(Value v) {
@@ -132,7 +115,7 @@ public class NodeValue extends ObjectValue {
 
 	void render(PatternRenderer r) {
 
-		NodeName n = asNodeName();
+		NodeName n = toSingleName();
 
 		if (n != null) {
 
@@ -153,7 +136,7 @@ public class NodeValue extends ObjectValue {
 
 	private void collectDefinitionNames(NameCollector collector) {
 
-		NodeName n = asNodeName();
+		NodeName n = toSingleName();
 
 		if (n != null) {
 

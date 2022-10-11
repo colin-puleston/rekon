@@ -55,14 +55,19 @@ public class NameList extends Names {
 		this.names = new ArrayList<Name>(names);
 	}
 
+	public void clear() {
+
+		names.clear();
+	}
+
 	public Collection<Name> getNames() {
 
 		return names;
 	}
 
-	public void clear() {
+	public Name get(int index) {
 
-		names.clear();
+		return names.get(0);
 	}
 
 	public NameSet toSet() {

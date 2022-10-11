@@ -36,79 +36,6 @@ public class NodePattern extends Expression {
 	private Set<Relation> relations = new HashSet<Relation>();
 	private Set<Relation> signatureRelations = null;
 
-	private class SignatureRelationCollector {
-
-		private NameSet visitedNodes;
-
-		SignatureRelationCollector() {
-
-			this(new NameSet());
-		}
-
-		SignatureRelationCollector(NameSet visitedNodes) {
-
-			this.visitedNodes = visitedNodes;
-
-			signatureRelations = new HashSet<Relation>();
-
-			addFor(NodePattern.this);
-
-			for (Name n : names.getNames()) {
-
-				addAllImpliedFor((NodeName)n);
-			}
-		}
-
-		private void addAllImpliedFor(NodeName name) {
-
-			addFor(name);
-
-			for (Name sn : name.getSubsumers().getNames()) {
-
-				addFor((NodeName)sn);
-			}
-		}
-
-		private void addFor(NodeName name) {
-
-			NodePattern p = name.getProfile();
-
-			if (p != null && p != NodePattern.this) {
-
-				addFor(p);
-			}
-		}
-
-		private void addFor(NodePattern p) {
-
-			for (Relation r : p.relations) {
-
-				for (Relation sr : r.expandForSignature(visitedNodes)) {
-
-					checkAdd(sr);
-				}
-			}
-		}
-
-		private void checkAdd(Relation r) {
-
-			for (Relation sr : new HashSet<Relation>(signatureRelations)) {
-
-				if (r.subsumes(sr)) {
-
-					return;
-				}
-
-				if (sr.subsumes(r)) {
-
-					signatureRelations.remove(sr);
-				}
-			}
-
-			signatureRelations.add(r);
-		}
-	}
-
 	public NodePattern(NodeName name) {
 
 		names.add(name);
@@ -172,7 +99,17 @@ public class NodePattern extends Expression {
 		return new NodePattern(names, newRelations);
 	}
 
-	NodeName asNodeName() {
+	NodeName getSingleName() {
+
+		if (names.size() > 1) {
+
+			throw new Error("Multiple names!");
+		}
+
+		return (NodeName)names.get(0);
+	}
+
+	NodeName toSingleName() {
 
 		if (names.size() == 1 && relations.isEmpty()) {
 
@@ -266,19 +203,14 @@ public class NodePattern extends Expression {
 
 	Collection<Relation> getSignatureRelations() {
 
-		if (signatureRelations == null) {
-
-			new SignatureRelationCollector();
-		}
-
-		return signatureRelations;
+		return resolveSignatureRelations(null);
 	}
 
 	Collection<Relation> resolveSignatureRelations(NameSet visitedNodes) {
 
 		if (signatureRelations == null) {
 
-			new SignatureRelationCollector(visitedNodes);
+			signatureRelations = collectSignatureRelations(visitedNodes);
 		}
 
 		return signatureRelations;
@@ -299,6 +231,11 @@ public class NodePattern extends Expression {
 
 			re.render(r);
 		}
+	}
+
+	private Set<Relation> collectSignatureRelations(NameSet visitedNodes) {
+
+		return new SignatureRelationCollector(visitedNodes).collectFromProfile(this);
 	}
 
 	private boolean subsumesAllNames(NodePattern p) {

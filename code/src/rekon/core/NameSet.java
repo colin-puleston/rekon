@@ -55,11 +55,6 @@ public class NameSet extends Names {
 		this.names = new HashSet<Name>(names);
 	}
 
-	public Collection<Name> getNames() {
-
-		return names;
-	}
-
 	public boolean remove(Name name) {
 
 		return names.remove(name);
@@ -101,6 +96,11 @@ public class NameSet extends Names {
 	public void clear() {
 
 		names.clear();
+	}
+
+	public Collection<Name> getNames() {
+
+		return names;
 	}
 
 	public boolean contains(Name name) {

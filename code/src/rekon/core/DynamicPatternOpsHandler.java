@@ -226,7 +226,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		if (pattern != null) {
 
-			NodeName n = pattern.asNodeName();
+			NodeName n = pattern.toSingleName();
 
 			if (n != null) {
 

@@ -71,7 +71,7 @@ class MatchableNodes {
 
 			if (!ips.isEmpty()) {
 
-				NodeName invSource = forwardRel.getNodeTarget().asNodeName();
+				NodeName invSource = forwardRel.getNodeTarget().toSingleName();
 
 				if (invSource != null) {
 
