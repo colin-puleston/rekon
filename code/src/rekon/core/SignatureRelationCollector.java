@@ -32,11 +32,11 @@ import java.util.*;
 class SignatureRelationCollector {
 
 	private Set<Relation> collected = new HashSet<Relation>();
-	private NameSet visitedNodes;
+	private NodeCycleChecker cycleChecker;
 
-	SignatureRelationCollector(NameSet visitedNodes) {
+	SignatureRelationCollector(NodeCycleChecker cycleChecker) {
 
-		this.visitedNodes = visitedNodes != null ? visitedNodes : new NameSet();
+		this.cycleChecker = cycleChecker;
 	}
 
 	Set<Relation> collectFromProfile(NodePattern profile) {
@@ -49,16 +49,18 @@ class SignatureRelationCollector {
 
 	Set<Relation> collectFromName(NodeName name) {
 
-		checkAddFromName(name);
-		collectFromSubsumers(name);
+		if (checkAddFromName(name)) {
+
+			collectFromSubsumers(name);
+		}
 
 		return collected;
 	}
 
-	private SignatureRelationCollector(Name name, NameSet visitedNodes) {
+	private SignatureRelationCollector(Name name, NodeCycleChecker cycleChecker) {
 
 		this.collected = collected;
-		this.visitedNodes = visitedNodes;
+		this.cycleChecker = cycleChecker;
 	}
 
 	private void collectFromSubsumers(NodeName name) {
@@ -69,28 +71,35 @@ class SignatureRelationCollector {
 		}
 	}
 
-	private void collectFromExpandedRelations(NodePattern root) {
+	private void collectFromExpandedRelations(NodePattern profile) {
 
-		for (Relation r : root.getDirectRelations()) {
+		for (Relation r : profile.getDirectRelations()) {
 
-			for (Relation sr : r.expandForSignature(visitedNodes)) {
+			for (Relation sr : r.expandForSignature(cycleChecker)) {
 
 				checkAdd(sr);
 			}
 		}
 	}
 
-	private void checkAddFromName(NodeName name) {
+	private boolean checkAddFromName(NodeName name) {
+
+		if (cycleChecker.cycleSource(name)) {
+
+			return false;
+		}
 
 		NodePattern p = name.getProfile();
 
 		if (p != null) {
 
-			for (Relation r : p.getSignatureRelations()) {
+			for (Relation r : p.resolveSignatureRelations(cycleChecker)) {
 
 				checkAdd(r);
 			}
 		}
+
+		return true;
 	}
 
 	private void checkAdd(Relation r) {

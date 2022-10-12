@@ -33,7 +33,7 @@ public class SomeRelation extends ObjectRelation {
 
 	static private class Expander {
 
-		private NameSet visitedNodes;
+		private NodeCycleChecker cycleChecker;
 
 		private Set<Relation> allExpansions = new HashSet<Relation>();
 
@@ -44,15 +44,15 @@ public class SomeRelation extends ObjectRelation {
 
 			void collectFromNested(SomeRelation current) {
 
-				Value target = current.getTarget();
+				Value tv = current.getTarget();
 
-				if (target instanceof NodeValue) {
+				if (tv instanceof NodeValue) {
 
-					NodeName n = ((NodeValue)target).toSingleName();
+					NodeName tn = ((NodeValue)tv).toSingleName();
 
-					if (n != null) {
+					if (tn != null) {
 
-						collectFromTarget(n);
+						collectFromTarget(tn);
 					}
 				}
 			}
@@ -72,7 +72,7 @@ public class SomeRelation extends ObjectRelation {
 
 			private Set<Relation> getAllFromTarget(NodeName target) {
 
-				return new SignatureRelationCollector(visitedNodes).collectFromName(target);
+				return new SignatureRelationCollector(cycleChecker).collectFromName(target);
 			}
 		}
 
@@ -127,9 +127,9 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		Expander(SomeRelation relation, NameSet visitedNodes) {
+		Expander(SomeRelation relation, NodeCycleChecker cycleChecker) {
 
-			this.visitedNodes = visitedNodes;
+			this.cycleChecker = cycleChecker;
 
 			allExpansions.add(relation);
 			lastPassExpansions.add(relation);
@@ -201,9 +201,9 @@ public class SomeRelation extends ObjectRelation {
 		super(property, target);
 	}
 
-	Collection<Relation> expandForSignature(NameSet visitedNodes) {
+	Collection<Relation> expandForSignature(NodeCycleChecker cycleChecker) {
 
-		return new Expander(this, visitedNodes).expand();
+		return new Expander(this, cycleChecker).expand();
 	}
 
 	NodeValue getNodeTarget() {

@@ -203,14 +203,28 @@ public class NodePattern extends Expression {
 
 	Collection<Relation> getSignatureRelations() {
 
-		return resolveSignatureRelations(null);
+		if (signatureRelations == null) {
+
+			NodeCycleChecker cycleChecker = new NodeCycleChecker(getSingleName());
+
+			signatureRelations = collectSignatureRelations(cycleChecker);
+		}
+
+		return signatureRelations;
 	}
 
-	Collection<Relation> resolveSignatureRelations(NameSet visitedNodes) {
+	Collection<Relation> resolveSignatureRelations(NodeCycleChecker cycleChecker) {
 
 		if (signatureRelations == null) {
 
-			signatureRelations = collectSignatureRelations(visitedNodes);
+			Set<Relation> collected = collectSignatureRelations(cycleChecker);
+
+			if (cycleChecker.cycleDetected()) {
+
+				return collected;
+			}
+
+			signatureRelations = collected;
 		}
 
 		return signatureRelations;
@@ -233,9 +247,9 @@ public class NodePattern extends Expression {
 		}
 	}
 
-	private Set<Relation> collectSignatureRelations(NameSet visitedNodes) {
+	private Set<Relation> collectSignatureRelations(NodeCycleChecker cycleChecker) {
 
-		return new SignatureRelationCollector(visitedNodes).collectFromProfile(this);
+		return new SignatureRelationCollector(cycleChecker).collectFromProfile(this);
 	}
 
 	private boolean subsumesAllNames(NodePattern p) {

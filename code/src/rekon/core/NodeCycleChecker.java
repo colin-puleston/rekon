@@ -24,64 +24,39 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-abstract class Value extends Expression {
+class NodeCycleChecker {
 
-	NodeValue asNodeValue() {
+	private NameSet visited;
+	private boolean cycleDetected = false;
 
-		return null;
+	NodeCycleChecker(NodeName rootNode) {
+
+		this(new NameSet(rootNode));
 	}
 
-	BooleanValue asBooleanValue() {
+	NodeCycleChecker(NameSet visited) {
 
-		return null;
+		this.visited = visited;
 	}
 
-	IntegerRange asIntegerRange() {
+	boolean cycleSource(NodeName node) {
 
-		return null;
+		if (visited.add(node)) {
+
+			return false;
+		}
+
+		cycleDetected = true;
+
+		return true;
 	}
 
-	FloatRange asFloatRange() {
+	boolean cycleDetected() {
 
-		return null;
+		return cycleDetected;
 	}
-
-	DoubleRange asDoubleRange() {
-
-		return null;
-	}
-
-	Collection<Relation> getSignatureRelations(NodeCycleChecker cycleChecker) {
-
-		return Collections.emptySet();
-	}
-
-	boolean subsumes(Value v) {
-
-		return v == this || subsumesOther(v);
-	}
-
-	void registerDefinitionRefedNames() {
-	}
-
-	abstract void collectNames(NameCollector collector);
-
-	abstract boolean subsumesOther(Value v);
-
-	boolean classifyTarget(boolean initialPass) {
-
-		return initialPass;
-	}
-
-	boolean newSubsumers(NodeMatcher matcher) {
-
-		return false;
-	}
-
-	abstract void render(PatternRenderer r);
 }
+
