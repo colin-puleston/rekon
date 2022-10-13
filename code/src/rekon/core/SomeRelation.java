@@ -33,7 +33,7 @@ public class SomeRelation extends ObjectRelation {
 
 	static private class Expander {
 
-		private NodeCycleChecker cycleChecker;
+		private NodeVisitMonitor visitMonitor;
 
 		private Set<Relation> allExpansions = new HashSet<Relation>();
 
@@ -72,7 +72,7 @@ public class SomeRelation extends ObjectRelation {
 
 			private Set<Relation> getAllFromTarget(NodeName target) {
 
-				return new SignatureRelationCollector(cycleChecker).collectFromName(target);
+				return new SignatureRelationCollector(visitMonitor).collectFromName(target);
 			}
 		}
 
@@ -127,9 +127,9 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		Expander(SomeRelation relation, NodeCycleChecker cycleChecker) {
+		Expander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
 
-			this.cycleChecker = cycleChecker;
+			this.visitMonitor = visitMonitor;
 
 			allExpansions.add(relation);
 			lastPassExpansions.add(relation);
@@ -201,9 +201,9 @@ public class SomeRelation extends ObjectRelation {
 		super(property, target);
 	}
 
-	Collection<Relation> expandForSignature(NodeCycleChecker cycleChecker) {
+	Collection<Relation> expandForSignature(NodeVisitMonitor visitMonitor) {
 
-		return new Expander(this, cycleChecker).expand();
+		return new Expander(this, visitMonitor).expand();
 	}
 
 	NodeValue getNodeTarget() {

@@ -24,39 +24,36 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-class NodeCycleChecker {
+class NodeVisitMonitor {
 
-	private NameSet visited;
-	private boolean cycleDetected = false;
+	private NameSet visited = new NameSet();
+	private boolean incompleteTraversal = false;
 
-	NodeCycleChecker(NodeName rootNode) {
+	NodeVisitMonitor(NodeName rootNode) {
 
-		this(new NameSet(rootNode));
+		visited.add(rootNode);
 	}
 
-	NodeCycleChecker(NameSet visited) {
-
-		this.visited = visited;
-	}
-
-	boolean cycleSource(NodeName node) {
+	boolean startVisit(NodeName node) {
 
 		if (visited.add(node)) {
 
-			return false;
+			return true;
 		}
 
-		cycleDetected = true;
+		incompleteTraversal = true;
 
-		return true;
+		return false;
 	}
 
-	boolean cycleDetected() {
+	boolean incompleteTraversal() {
 
-		return cycleDetected;
+		return incompleteTraversal;
 	}
 }
 
