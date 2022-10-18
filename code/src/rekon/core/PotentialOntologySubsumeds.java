@@ -40,7 +40,7 @@ class PotentialOntologySubsumeds extends PotentialSubsumeds {
 
 	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return names.expandWithNonRootDefnSubsumers(PatternNameRole.rankToRole(rank));
+		return ProfileMatchNames.resolve(names, PatternNameRole.rankToRole(rank));
 	}
 
 	List<Names> getRankedDefinitionNames(NodePattern defn) {

@@ -24,49 +24,41 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-class PotentialDynamicSubsumeds extends PotentialSubsumeds {
+class ProfileMatchNames {
 
-	private int nextOptionRegRank = 0;
-	private boolean optionRegComplete = false;
+	static Names resolve(Names leafNames) {
 
-	PotentialDynamicSubsumeds(List<MatchableNode> allOptions) {
-
-		super(allOptions);
+		return resolve(leafNames, null);
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	static Names resolve(Names leafNames, PatternNameRole defnRole) {
 
-		return ProfileMatchNames.resolve(names);
+		NameSet resolved = new NameSet();
+
+		for (Name n : leafNames.getNames()) {
+
+			checkAdd(resolved, n, defnRole);
+
+			for (Name s : n.getSubsumers().getNames()) {
+
+				if (!s.rootName()) {
+
+					checkAdd(resolved, s, defnRole);
+				}
+			}
+		}
+
+		return resolved;
 	}
 
-	List<Names> getRankedDefinitionNames(NodePattern defn) {
+	static private void checkAdd(Names resolved, Name name, PatternNameRole defnRole) {
 
-		List<Names> defnNames = new NameCollector(true, true).collectRanked(defn);
+		if (defnRole == null || name.definitionRefed(defnRole)) {
 
-		checkExpandOptionRanksRegister(defnNames);
-
-		return defnNames;
-	}
-
-	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
-
-		return new NameCollector(false, true).collectRanked(profile, startRank, stopRank);
-	}
-
-	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
-
-		int stopRank = defnNames.size();
-
-		if (!optionRegComplete && stopRank > nextOptionRegRank) {
-
-			registerOptionRanks(nextOptionRegRank, stopRank);
-
-			nextOptionRegRank = stopRank;
+			resolved.add(name);
 		}
 	}
 }

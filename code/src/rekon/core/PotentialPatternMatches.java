@@ -219,12 +219,14 @@ abstract class PotentialPatternMatches<O> {
 		private int stopRank;
 
 		private List<OptionReg> optionRegs = new ArrayList<OptionReg>();
-		private boolean completedReg = true;
+		private boolean completedMultiReg = true;
 
 		private class OptionReg {
 
 			private O option;
 			private List<Names> rankedNames;
+
+			private boolean stoppedReg = false;
 
 			OptionReg(O option) {
 
@@ -235,13 +237,20 @@ abstract class PotentialPatternMatches<O> {
 
 			void checkRegister(RankMatches rankMatches, int rank) {
 
-				int regRanks = rankedNames.size();
+				if (!stoppedReg && rankedNames.size() > rank) {
 
-				if (regRanks > rank) {
+					Names rankNames = rankedNames.get(rank);
 
-					rankMatches.registerOption(option, rankedNames.get(rank));
+					if (rankNames.isEmpty()) {
 
-					completedReg &= (regRanks <= stopRank);
+						stoppedReg = true;
+					}
+					else {
+
+						rankMatches.registerOption(option, rankNames);
+
+						completedMultiReg &= (rankedNames.size() <= stopRank);
+					}
 				}
 			}
 		}
@@ -262,9 +271,9 @@ abstract class PotentialPatternMatches<O> {
 			execProcesses();
 		}
 
-		boolean completedReg() {
+		boolean completedMultiReg() {
 
-			return completedReg;
+			return completedMultiReg;
 		}
 
 		void execThreadProcess(int totalThreads, int threadIndex) {
@@ -310,7 +319,7 @@ abstract class PotentialPatternMatches<O> {
 
 	boolean registerOptionRanks(int startRank, int stopRank) {
 
-		return new MultiOptionRegistrar(startRank, stopRank).completedReg();
+		return new MultiOptionRegistrar(startRank, stopRank).completedMultiReg();
 	}
 
 	abstract List<O> getAllOptions();

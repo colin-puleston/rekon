@@ -64,7 +64,7 @@ class PotentialDynamicSubsumers {
 
 		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return names.expandWithNonRootDefnSubsumers(PatternNameRole.rankToRole(rank));
+			return ProfileMatchNames.resolve(names, PatternNameRole.rankToRole(rank));
 		}
 
 		boolean unionRankOptionsForRetrieval() {

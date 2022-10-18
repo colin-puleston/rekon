@@ -97,16 +97,6 @@ public abstract class Names {
 		return allOfType(type) ? this : deriveForTypeOnly(type);
 	}
 
-	NameSet expandWithNonRootSubsumers() {
-
-		return expandWithNonRootSubsumers(null);
-	}
-
-	NameSet expandWithNonRootDefnSubsumers(PatternNameRole role) {
-
-		return expandWithNonRootSubsumers(role);
-	}
-
 	Name getFirstName() {
 
 		return getNames().iterator().next();
@@ -115,24 +105,6 @@ public abstract class Names {
 	private boolean equalsNames(Names other) {
 
 		return getNames().equals(other.getNames());
-	}
-
-	private NameSet expandWithNonRootSubsumers(PatternNameRole defnRole) {
-
-		NameSet expanded = new NameSet(this);
-
-		for (Name n : getNames()) {
-
-			for (Name s : n.getSubsumers().getNames()) {
-
-				if (!s.rootName() && (defnRole == null || s.definitionRefed(defnRole))) {
-
-					expanded.add(s);
-				}
-			}
-		}
-
-		return expanded;
 	}
 
 	private boolean allOfType(Class<? extends Name> type) {
