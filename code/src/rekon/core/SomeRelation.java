@@ -31,14 +31,14 @@ import java.util.*;
  */
 public class SomeRelation extends ObjectRelation {
 
-	static private class Expander {
+	static private class SignatureExpander {
 
 		private NodeVisitMonitor visitMonitor;
 
-		private Set<Relation> allExpansions = new HashSet<Relation>();
+		private List<Relation> allExpansions = new ArrayList<Relation>();
 
 		private List<SomeRelation> passExpansions = new ArrayList<SomeRelation>();
-		private List<SomeRelation> lastPassExpansions = new ArrayList<SomeRelation>();
+		private List<SomeRelation> nextPassExpanders;
 
 		private abstract class ExpansionTypeCollector {
 
@@ -72,7 +72,16 @@ public class SomeRelation extends ObjectRelation {
 
 			private Set<Relation> getAllFromTarget(NodeName target) {
 
-				return new SignatureRelationCollector(visitMonitor).collectFromName(target);
+				SignatureRelationCollector collector = createCollector();
+
+				collector.collectFromName(target);
+
+				return collector.getCollected();
+			}
+
+			private SignatureRelationCollector createCollector() {
+
+				return new SignatureRelationCollector(visitMonitor);
 			}
 		}
 
@@ -127,12 +136,11 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		Expander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
+		SignatureExpander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
 
 			this.visitMonitor = visitMonitor;
 
-			allExpansions.add(relation);
-			lastPassExpansions.add(relation);
+			nextPassExpanders = Collections.singletonList(relation);
 
 			List<ExpansionTypeCollector> typeCollectors = getExpansionTypeCollectors(relation);
 
@@ -142,7 +150,7 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		Collection<Relation> expand() {
+		Collection<Relation> getAllExpansions() {
 
 			return allExpansions;
 		}
@@ -153,7 +161,7 @@ public class SomeRelation extends ObjectRelation {
 
 				for (ExpansionTypeCollector typeCol : typeCollectors) {
 
-					for (SomeRelation r : lastPassExpansions) {
+					for (SomeRelation r : nextPassExpanders) {
 
 						typeCol.collectFromNested(r);
 					}
@@ -164,7 +172,7 @@ public class SomeRelation extends ObjectRelation {
 					break;
 				}
 
-				lastPassExpansions = passExpansions;
+				nextPassExpanders = passExpansions;
 				passExpansions = new ArrayList<SomeRelation>();
 			}
 		}
@@ -189,10 +197,8 @@ public class SomeRelation extends ObjectRelation {
 
 		private void addExpansion(SomeRelation relation) {
 
-			if (allExpansions.add(relation)) {
-
-				passExpansions.add(relation);
-			}
+			allExpansions.add(relation);
+			passExpansions.add(relation);
 		}
 	}
 
@@ -201,9 +207,9 @@ public class SomeRelation extends ObjectRelation {
 		super(property, target);
 	}
 
-	Collection<Relation> expandForSignature(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
 
-		return new Expander(this, visitMonitor).expand();
+		return new SignatureExpander(this, visitMonitor).getAllExpansions();
 	}
 
 	NodeValue getNodeTarget() {

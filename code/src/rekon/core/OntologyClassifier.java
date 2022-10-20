@@ -38,6 +38,77 @@ class OntologyClassifier extends Classifier {
 	private MatchableNodes matchables;
 	private List<MatchableNode> definedMatchables = new ArrayList<MatchableNode>();
 
+	private abstract class ClassificationPassConfig {
+
+		private List<MatchableNode> classifiables = new ArrayList<MatchableNode>();
+
+		ClassificationPassConfig(boolean initialPass) {
+
+			for (MatchableNode m : matchables.getAll()) {
+
+				NodePattern p = m.getProfile();
+
+				if (processCandidate(p) && p.classifiable(initialPass)) {
+
+					classifiables.add(m);
+				}
+			}
+		}
+
+		boolean anyClassifiables() {
+
+			return !classifiables.isEmpty();
+		}
+
+		List<MatchableNode> getClassifiables() {
+
+			return classifiables;
+		}
+
+		abstract boolean processCandidate(NodePattern p);
+	}
+
+	private class RestrictedSignaturesInitialPassConfig extends ClassificationPassConfig {
+
+		RestrictedSignaturesInitialPassConfig() {
+
+			super(true);
+		}
+
+		boolean processCandidate(NodePattern p) {
+
+			p.setRestrictedSignature();
+
+			return true;
+		}
+	}
+
+	private class ExpandedSignaturesInitialPassConfig extends ClassificationPassConfig {
+
+		ExpandedSignaturesInitialPassConfig() {
+
+			super(true);
+		}
+
+		boolean processCandidate(NodePattern p) {
+
+			return p.setExpandedSignature();
+		}
+	}
+
+	private class SubsequentPassConfig extends ClassificationPassConfig {
+
+		SubsequentPassConfig() {
+
+			super(false);
+		}
+
+		boolean processCandidate(NodePattern p) {
+
+			return true;
+		}
+	}
+
 	private class ClassificationPass {
 
 		private List<MatchableNode> passCandidates;
@@ -69,24 +140,24 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		ClassificationPass(List<MatchableNode> passCandidates) {
+		ClassificationPass(ClassificationPassConfig passConfig) {
 
-			this.passCandidates = passCandidates;
+			passCandidates = passConfig.getClassifiables();
 
 			candidatesFilter = new PotentialOntologySubsumeds(passCandidates);
 		}
 
-		List<MatchableNode> perfomPass() {
+		ClassificationPassConfig perfomPass() {
 
 			new SubsumptionsChecker();
 			expandNewInferences();
 
-			List<MatchableNode> nextPassCandidates = findClassifiables(false);
+			ClassificationPassConfig nextPassConfig = new SubsequentPassConfig();
 
 			checkResetSignatureRefs();
 			absorbNewInferences();
 
-			return nextPassCandidates;
+			return nextPassConfig;
 		}
 
 		private void checkDefinedSubsumptions(MatchableNode defined) {
@@ -166,27 +237,15 @@ class OntologyClassifier extends Classifier {
 
 	private void classify() {
 
-		List<MatchableNode> passCandidates = findClassifiables(true);
-
-		do {
-
-			passCandidates = new ClassificationPass(passCandidates).perfomPass();
-		}
-		while (!passCandidates.isEmpty());
+		perfomExhaustivePasses(new RestrictedSignaturesInitialPassConfig());
+		perfomExhaustivePasses(new ExpandedSignaturesInitialPassConfig());
 	}
 
-	private List<MatchableNode> findClassifiables(boolean initialPass) {
+	private void perfomExhaustivePasses(ClassificationPassConfig passConfig) {
 
-		List<MatchableNode> classifiables = new ArrayList<MatchableNode>();
+		while (passConfig.anyClassifiables()) {
 
-		for (MatchableNode m : matchables.getAll()) {
-
-			if (m.getProfile().classifiable(initialPass)) {
-
-				classifiables.add(m);
-			}
+			passConfig = new ClassificationPass(passConfig).perfomPass();
 		}
-
-		return classifiables;
 	}
 }

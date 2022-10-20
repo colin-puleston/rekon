@@ -36,6 +36,69 @@ public class NodePattern extends Expression {
 	private Set<Relation> relations = new HashSet<Relation>();
 	private Set<Relation> signatureRelations = null;
 
+	private SignatureMode signatureMode = SignatureMode.EXPANDED;
+
+	private enum SignatureMode {RESTRICTED, EXPANDING, EXPANDED}
+
+	private class PatternSignatureRelationCollector extends SignatureRelationCollector {
+
+		private Set<Relation> initialCollected;
+		private boolean additions = false;
+
+		private NodeVisitMonitor visitMonitor;
+
+		PatternSignatureRelationCollector() {
+
+			this(new NodeVisitMonitor(getSingleName()));
+		}
+
+		PatternSignatureRelationCollector(NodeVisitMonitor visitMonitor) {
+
+			super(visitMonitor);
+
+			this.visitMonitor = visitMonitor;
+
+			initialCollected = getCollected();
+		}
+
+		Set<Relation> collect() {
+
+			if (signatureMode != SignatureMode.RESTRICTED) {
+
+				collectFromSubsumers(getSingleName());
+			}
+
+			if (signatureMode != SignatureMode.EXPANDING) {
+
+				collectFromRelationExpansions(relations);
+			}
+
+			return getCollected();
+		}
+
+		Set<Relation> getInitialCollected() {
+
+			return signatureMode == SignatureMode.EXPANDING ? signatureRelations : relations;
+		}
+
+		Set<Relation> ensureUpdatable(Set<Relation> collected) {
+
+			if (collected == initialCollected) {
+
+				additions = true;
+
+				return new HashSet<Relation>(initialCollected);
+			}
+
+			return collected;
+		}
+
+		boolean additions() {
+
+			return additions;
+		}
+	}
+
 	public NodePattern(NodeName name) {
 
 		names.add(name);
@@ -65,6 +128,22 @@ public class NodePattern extends Expression {
 		this(names);
 
 		this.relations.addAll(relations);
+	}
+
+	void setRestrictedSignature() {
+
+		signatureMode = SignatureMode.RESTRICTED;
+	}
+
+	boolean setExpandedSignature() {
+
+		signatureMode = SignatureMode.EXPANDING;
+
+		boolean additions = setSignatureRelations();
+
+		signatureMode = SignatureMode.EXPANDED;
+
+		return additions;
 	}
 
 	NodePattern combineWith(NodePattern other) {
@@ -205,9 +284,7 @@ public class NodePattern extends Expression {
 
 		if (signatureRelations == null) {
 
-			NodeVisitMonitor visitMonitor = new NodeVisitMonitor(getSingleName());
-
-			signatureRelations = collectSignatureRelations(visitMonitor);
+			setSignatureRelations();
 		}
 
 		return signatureRelations;
@@ -247,9 +324,18 @@ public class NodePattern extends Expression {
 		}
 	}
 
+	private boolean setSignatureRelations() {
+
+		PatternSignatureRelationCollector collector = new PatternSignatureRelationCollector();
+
+		signatureRelations = collector.collect();
+
+		return collector.additions();
+	}
+
 	private Set<Relation> collectSignatureRelations(NodeVisitMonitor visitMonitor) {
 
-		return new SignatureRelationCollector(visitMonitor).collectFromProfile(this);
+		return new PatternSignatureRelationCollector(visitMonitor).collect();
 	}
 
 	private boolean subsumesAllNames(NodePattern p) {

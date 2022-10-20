@@ -73,9 +73,9 @@ public abstract class Relation extends Expression {
 		target.collectNames(collector.forNextRank());
 	}
 
-	Collection<Relation> expandForSignature(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
 
-		return Collections.singleton(this);
+		return Collections.emptySet();
 	}
 
 	boolean potentialNewSignatureRelations() {

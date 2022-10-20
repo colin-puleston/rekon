@@ -31,25 +31,19 @@ import java.util.*;
  */
 class SignatureRelationCollector {
 
-	private Set<Relation> collected = new HashSet<Relation>();
 	private NodeVisitMonitor visitMonitor;
+	private Set<Relation> collected;
 
 	SignatureRelationCollector(NodeVisitMonitor visitMonitor) {
 
 		this.visitMonitor = visitMonitor;
-	}
 
-	Set<Relation> collectFromProfile(NodePattern profile) {
-
-		collectFromSubsumers(profile.getSingleName());
-		collectFromExpandedRelations(profile);
-
-		return collected;
+		collected = getInitialCollected();
 	}
 
 	Set<Relation> collectFromName(NodeName name) {
 
-		if (checkAddFromName(name)) {
+		if (collectFromRelations(name)) {
 
 			collectFromSubsumers(name);
 		}
@@ -57,32 +51,41 @@ class SignatureRelationCollector {
 		return collected;
 	}
 
-	private SignatureRelationCollector(Name name, NodeVisitMonitor visitMonitor) {
-
-		this.collected = collected;
-		this.visitMonitor = visitMonitor;
-	}
-
-	private void collectFromSubsumers(NodeName name) {
+	void collectFromSubsumers(NodeName name) {
 
 		for (Name n : name.getSubsumers().getNames()) {
 
-			checkAddFromName((NodeName)n);
+			collectFromRelations((NodeName)n);
 		}
 	}
 
-	private void collectFromExpandedRelations(NodePattern profile) {
+	void collectFromRelationExpansions(Set<Relation> relations) {
 
-		for (Relation r : profile.getDirectRelations()) {
+		for (Relation r : relations) {
 
-			for (Relation sr : r.expandForSignature(visitMonitor)) {
+			for (Relation sr : r.getSignatureExpansions(visitMonitor)) {
 
 				checkAdd(sr);
 			}
 		}
 	}
 
-	private boolean checkAddFromName(NodeName name) {
+	Set<Relation> getInitialCollected() {
+
+		return new HashSet<Relation>();
+	}
+
+	Set<Relation> getCollected() {
+
+		return collected;
+	}
+
+	Set<Relation> ensureUpdatable(Set<Relation> collected) {
+
+		return collected;
+	}
+
+	private boolean collectFromRelations(NodeName name) {
 
 		if (visitMonitor.startVisit(name)) {
 
@@ -104,19 +107,26 @@ class SignatureRelationCollector {
 
 	private void checkAdd(Relation r) {
 
-		for (Relation sr : new HashSet<Relation>(collected)) {
+		for (Relation cr : new ArrayList<Relation>(collected)) {
 
-			if (r.subsumes(sr)) {
+			if (r.subsumes(cr)) {
 
 				return;
 			}
 
-			if (sr.subsumes(r)) {
+			if (cr.subsumes(r)) {
 
-				collected.remove(sr);
+				ensureUpdatable().remove(cr);
 			}
 		}
 
-		collected.add(r);
+		ensureUpdatable().add(r);
+	}
+
+	private Set<Relation> ensureUpdatable() {
+
+		collected = ensureUpdatable(collected);
+
+		return collected;
 	}
 }
