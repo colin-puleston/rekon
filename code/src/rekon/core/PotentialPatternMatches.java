@@ -226,8 +226,6 @@ abstract class PotentialPatternMatches<O> {
 			private O option;
 			private List<Names> rankedNames;
 
-			private boolean stoppedReg = false;
-
 			OptionReg(O option) {
 
 				this.option = option;
@@ -237,20 +235,13 @@ abstract class PotentialPatternMatches<O> {
 
 			void checkRegister(RankMatches rankMatches, int rank) {
 
-				if (!stoppedReg && rankedNames.size() > rank) {
+				if (rankedNames.size() > rank) {
 
 					Names rankNames = rankedNames.get(rank);
 
-					if (rankNames.isEmpty()) {
+					rankMatches.registerOption(option, rankNames);
 
-						stoppedReg = true;
-					}
-					else {
-
-						rankMatches.registerOption(option, rankNames);
-
-						completedMultiReg &= (rankedNames.size() <= stopRank);
-					}
+					completedMultiReg &= (rankedNames.size() <= stopRank);
 				}
 			}
 		}
