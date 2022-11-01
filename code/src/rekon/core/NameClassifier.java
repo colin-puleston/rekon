@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class NameClassifier {
+class NameClassifier extends NameClassificationHandler {
 
 	private Name name;
 	private NameSet subsumers = new NameSet();
@@ -128,11 +128,6 @@ class NameClassifier {
 		this.name = name;
 	}
 
-	InferredSubsumers getInferredSubsumers() {
-
-		return getInferredSubsumersImpl();
-	}
-
 	NameClassification createClassification() {
 
 		return new NameClassification(name, subsumers);
@@ -171,14 +166,14 @@ class NameClassifier {
 		}
 	}
 
+	boolean classified() {
+
+		return false;
+	}
+
 	boolean rootName() {
 
 		return subsumers.isEmpty();
-	}
-
-	boolean multipleAsserteds() {
-
-		return multipleAsserteds;
 	}
 
 	Name getName() {
@@ -194,6 +189,16 @@ class NameClassifier {
 	boolean isSubsumer(Name test) {
 
 		return subsumers.contains(test);
+	}
+
+	boolean multipleAsserteds() {
+
+		return multipleAsserteds;
+	}
+
+	InferredSubsumers getInferredSubsumers() {
+
+		return getInferredSubsumersImpl();
 	}
 
 	private InferredSubsumersImpl getInferredSubsumersImpl() {

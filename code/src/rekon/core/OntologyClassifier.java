@@ -33,9 +33,6 @@ class OntologyClassifier extends Classifier {
 
 	private Ontology ontology;
 
-	private List<NodeName> allNodes;
-
-	private MatchableNodes matchables;
 	private List<MatchableNode> definedMatchables = new ArrayList<MatchableNode>();
 
 	private abstract class ClassificationPassConfig {
@@ -44,7 +41,7 @@ class OntologyClassifier extends Classifier {
 
 		ClassificationPassConfig(boolean initialPass) {
 
-			for (MatchableNode m : matchables.getAll()) {
+			for (MatchableNode m : ontology.getMatchables().getAll()) {
 
 				NodePattern p = m.getProfile();
 
@@ -131,7 +128,7 @@ class OntologyClassifier extends Classifier {
 
 			NewInferenceExpander() {
 
-				invokeListProcesses(allNodes);
+				invokeListProcesses(ontology.getNodeNames());
 			}
 
 			void processElement(NodeName n) {
@@ -143,18 +140,18 @@ class OntologyClassifier extends Classifier {
 		ClassificationPass(ClassificationPassConfig passConfig) {
 
 			passCandidates = passConfig.getClassifiables();
-
 			candidatesFilter = new PotentialOntologySubsumeds(passCandidates);
 		}
 
 		ClassificationPassConfig perfomPass() {
 
 			new SubsumptionsChecker();
+
 			expandNewInferences();
 
 			ClassificationPassConfig nextPassConfig = new SubsequentPassConfig();
 
-			checkResetSignatureRefs();
+			resetPotentiallyUpdatedSignatureRefs();
 			absorbNewInferences();
 
 			return nextPassConfig;
@@ -184,7 +181,7 @@ class OntologyClassifier extends Classifier {
 
 			boolean expansions = false;
 
-			for (NodeName n : allNodes) {
+			for (NodeName n : ontology.getNodeNames()) {
 
 				expansions |= n.getInferredSubsumers().configureForNextExpansion();
 			}
@@ -194,17 +191,17 @@ class OntologyClassifier extends Classifier {
 
 		private void absorbNewInferences() {
 
-			for (NodeName n : allNodes) {
+			for (NodeName n : ontology.getNodeNames()) {
 
 				n.getInferredSubsumers().absorbIntoClassifier();
 			}
 		}
 
-		private void checkResetSignatureRefs() {
+		private void resetPotentiallyUpdatedSignatureRefs() {
 
 			List<MatchableNode> potentiallyUpdateds = new ArrayList<MatchableNode>();
 
-			for (MatchableNode m : matchables.getAll()) {
+			for (MatchableNode m : ontology.getMatchables().getAll()) {
 
 				if (m.getProfile().potentialSignatureUpdates()) {
 
@@ -221,10 +218,9 @@ class OntologyClassifier extends Classifier {
 
 	OntologyClassifier(Ontology ontology) {
 
-		allNodes = ontology.getNodeNames();
-		matchables = ontology.getMatchables();
+		this.ontology = ontology;
 
-		for (MatchableNode m : matchables.getAll()) {
+		for (MatchableNode m : ontology.getMatchables().getAll()) {
 
 			if (m.hasDefinitions()) {
 
@@ -239,6 +235,8 @@ class OntologyClassifier extends Classifier {
 
 		perfomExhaustivePasses(new RestrictedSignaturesInitialPassConfig());
 		perfomExhaustivePasses(new ExpandedSignaturesInitialPassConfig());
+
+		NameClassification.completeClassifications(ontology.getAllNames());
 	}
 
 	private void perfomExhaustivePasses(ClassificationPassConfig passConfig) {

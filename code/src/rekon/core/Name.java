@@ -31,19 +31,17 @@ import java.util.*;
  */
 public abstract class Name {
 
-	private NameClassifier classifier = new NameClassifier(this);
-	private NameClassification classification = null;
-
+	private NameClassificationHandler classificationHandler = new NameClassifier(this);
 	private Set<PatternNameRole> definitionRoles = new HashSet<PatternNameRole>();
 
 	public void addSubsumer(Name subsumer) {
 
-		classifier.addAssertedSubsumer(subsumer);
+		getClassifier().addAssertedSubsumer(subsumer);
 	}
 
 	public void addEquivalent(Name equiv) {
 
-		classifier.addAssertedEquivalent(equiv);
+		getClassifier().addAssertedEquivalent(equiv);
 	}
 
 	public String toString() {
@@ -80,7 +78,7 @@ public abstract class Name {
 
 	public boolean rootName() {
 
-		return classifier != null ? classifier.rootName() : classification.rootName();
+		return classificationHandler.rootName();
 	}
 
 	void registerAsDefinitionRefed(PatternNameRole role) {
@@ -90,34 +88,22 @@ public abstract class Name {
 
 	void setClassification() {
 
-		classification = classifier.createClassification();
-
-		classifier = null;
+		classificationHandler = getClassifier().createClassification();
 	}
 
 	NameClassifier getClassifier() {
 
-		if (classifier == null) {
-
-			throw new Error("Cannot access classifier post-classification: " + this);
-		}
-
-		return classifier;
+		return getClassificationHandler(NameClassifier.class);
 	}
 
 	NameClassification getClassification() {
 
-		if (classification == null) {
-
-			throw new Error("Cannot access classification pre-classification: " + this);
-		}
-
-		return classification;
+		return getClassificationHandler(NameClassification.class);
 	}
 
 	boolean classified() {
 
-		return classification != null;
+		return classificationHandler.classified();
 	}
 
 	boolean dynamic() {
@@ -137,7 +123,7 @@ public abstract class Name {
 
 	Names getSubsumers() {
 
-		return classifier != null ? classifier.getSubsumers() : classification.getSubsumers();
+		return classificationHandler.getSubsumers();
 	}
 
 	boolean subsumes(Name name) {
@@ -165,8 +151,19 @@ public abstract class Name {
 
 	private boolean hasSubsumer(Name name) {
 
-		return classifier != null
-				? classifier.isSubsumer(name)
-				: classification.isSubsumer(name);
+		return classificationHandler.isSubsumer(name);
+	}
+
+	private <T extends NameClassificationHandler>T getClassificationHandler(Class<T> type) {
+
+		if (classificationHandler.getClass() == type) {
+
+			return type.cast(classificationHandler);
+		}
+
+		throw new Error(
+					"Unexpected classification-handler type: "
+					+ classificationHandler.getClass()
+					+ ", for: " + this);
 	}
 }

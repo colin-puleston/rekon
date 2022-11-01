@@ -29,20 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class NameClassification {
-
-	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
-
-		DirectSupersSetter(List<Name> allNames) {
-
-			invokeListProcesses(allNames);
-		}
-
-		void processElement(Name n) {
-
-			getInitialiserFor(n).setDirectSupers();
-		}
-	}
+class NameClassification extends NameClassificationHandler {
 
 	static void completeClassifications(List<Name> allNames) {
 
@@ -77,6 +64,19 @@ class NameClassification {
 	static private Initialiser getInitialiserFor(Name n) {
 
 		return n.getClassification().initialiser;
+	}
+
+	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
+
+		DirectSupersSetter(List<Name> allNames) {
+
+			invokeListProcesses(allNames);
+		}
+
+		void processElement(Name n) {
+
+			getInitialiserFor(n).setDirectSupers();
+		}
 	}
 
 	private Name name;
@@ -206,6 +206,11 @@ class NameClassification {
 		this.name = name;
 
 		initialiser = new Initialiser(subsumers);
+	}
+
+	boolean classified() {
+
+		return true;
 	}
 
 	boolean rootName() {

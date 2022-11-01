@@ -35,9 +35,9 @@ class PatternSubsumptions {
 
 		private PotentialSubsumeds potentialSubsumeds;
 
-		SubsumptionsFinder(MatchableNodes matchables) {
+		SubsumptionsFinder(Ontology ontology) {
 
-			potentialSubsumeds = createPotentialSubsumeds(matchables);
+			potentialSubsumeds = createPotentialSubsumeds(ontology);
 		}
 
 		NameSet find(NodePattern pattern) {
@@ -59,16 +59,16 @@ class PatternSubsumptions {
 
 		abstract boolean requiredCandidate(MatchableNode c);
 
-		private PotentialSubsumeds createPotentialSubsumeds(MatchableNodes matchables) {
+		private PotentialSubsumeds createPotentialSubsumeds(Ontology ontology) {
 
-			return new PotentialDynamicSubsumeds(getPotentialCandidates(matchables));
+			return new PotentialDynamicSubsumeds(getPotentialCandidates(ontology));
 		}
 
-		private List<MatchableNode> getPotentialCandidates(MatchableNodes matchables) {
+		private List<MatchableNode> getPotentialCandidates(Ontology ontology) {
 
 			List<MatchableNode> candidates = new ArrayList<MatchableNode>();
 
-			for (MatchableNode c : matchables.getAll()) {
+			for (MatchableNode c : ontology.getMatchables().getAll()) {
 
 				if (getNodeType().isAssignableFrom(c.getName().getClass())) {
 
@@ -112,9 +112,9 @@ class PatternSubsumptions {
 
 		private NameSet filterNames = null;
 
-		ClassSubsumptions(MatchableNodes matchables) {
+		ClassSubsumptions(Ontology ontology) {
 
-			super(matchables);
+			super(ontology);
 		}
 
 		NameSet find(NodePattern pattern, NameSet filterNames) {
@@ -137,9 +137,9 @@ class PatternSubsumptions {
 
 	static private class InstanceSubsumptions extends SubsumptionsFinder {
 
-		InstanceSubsumptions(MatchableNodes matchables) {
+		InstanceSubsumptions(Ontology ontology) {
 
-			super(matchables);
+			super(ontology);
 		}
 
 		boolean requiredCandidate(MatchableNode c) {
@@ -158,10 +158,8 @@ class PatternSubsumptions {
 
 	PatternSubsumptions(Ontology ontology) {
 
-		MatchableNodes matchables = ontology.getMatchables();
-
-		classSubsumptions = new ClassSubsumptions(matchables);
-		instanceSubsumptions = new InstanceSubsumptions(matchables);
+		classSubsumptions = new ClassSubsumptions(ontology);
+		instanceSubsumptions = new InstanceSubsumptions(ontology);
 	}
 
 	NameSet inferSubsumedClasses(NodePattern pattern) {

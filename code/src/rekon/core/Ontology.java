@@ -31,7 +31,12 @@ import java.util.*;
  */
 public class Ontology {
 
+	private List<Name> allNames;
 	private List<NodeName> nodeNames = new ArrayList<NodeName>();
+
+	private Collection<ObjectPropertyName> objectPropertyNames;
+	private Collection<DataPropertyName> dataPropertyNames;
+
 	private MatchableNodes matchables = new MatchableNodes();
 
 	public Ontology(OntologyInitialiser initialiser) {
@@ -42,16 +47,19 @@ public class Ontology {
 		nodeNames.addAll(initialiser.getClassNames());
 		nodeNames.addAll(initialiser.getIndividualNames());
 
-		processMappedNamesPostAdditions(getAllNames(initialiser));
+		objectPropertyNames = initialiser.getObjectPropertyNames();
+		dataPropertyNames = initialiser.getDataPropertyNames();
+
+		processMappedNamesPostAdditions();
 
 		initialiser.createNodeProfiles();
 		initialiser.createClassDefinitions();
 
 		matchables.addAllInverseRelations();
 
-		new OntologyClassifier(this);
+		allNames = getAllCurrentNames();
 
-		processNamesPostClassification(getAllNames(initialiser));
+		new OntologyClassifier(this);
 	}
 
 	public DynamicOps createDynamicOps() {
@@ -59,9 +67,9 @@ public class Ontology {
 		return new DynamicOps(this);
 	}
 
-	MatchableNodes getMatchables() {
+	List<Name> getAllNames() {
 
-		return matchables;
+		return allNames;
 	}
 
 	List<NodeName> getNodeNames() {
@@ -69,28 +77,28 @@ public class Ontology {
 		return nodeNames;
 	}
 
-	private void processMappedNamesPostAdditions(Collection<Name> allNames) {
+	MatchableNodes getMatchables() {
 
-		for (Name n : allNames) {
+		return matchables;
+	}
+
+	private void processMappedNamesPostAdditions() {
+
+		for (Name n : getAllCurrentNames()) {
 
 			n.getClassifier().onPostAssertionAdditions();
 		}
 	}
 
-	private void processNamesPostClassification(List<Name> allNames) {
+	private List<Name> getAllCurrentNames() {
 
-		NameClassification.completeClassifications(allNames);
-	}
+		List<Name> allCurrent = new ArrayList<Name>();
 
-	private List<Name> getAllNames(OntologyInitialiser initialiser) {
+		allCurrent.addAll(nodeNames);
+		allCurrent.addAll(objectPropertyNames);
+		allCurrent.addAll(dataPropertyNames);
 
-		List<Name> allNames = new ArrayList<Name>();
-
-		allNames.addAll(nodeNames);
-		allNames.addAll(initialiser.getObjectPropertyNames());
-		allNames.addAll(initialiser.getDataPropertyNames());
-
-		return allNames;
+		return allCurrent;
 	}
 
 	private MatchStructures createMatchStructures() {

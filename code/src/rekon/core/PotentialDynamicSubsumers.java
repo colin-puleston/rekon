@@ -31,7 +31,7 @@ import java.util.*;
  */
 class PotentialDynamicSubsumers {
 
-	private Collection<MatchableNode> matchables;
+	private Collection<MatchableNode> allMatchables;
 
 	private SimplePotentials simplePotentials = new SimplePotentials();
 	private NestedPotentials nestedPotentials = new NestedPotentials();
@@ -91,7 +91,7 @@ class PotentialDynamicSubsumers {
 
 		private void addCategoryOptions() {
 
-			for (MatchableNode m : matchables) {
+			for (MatchableNode m : allMatchables) {
 
 				for (NodePattern d : m.getDefinitions()) {
 
@@ -140,9 +140,9 @@ class PotentialDynamicSubsumers {
 		}
 	}
 
-	PotentialDynamicSubsumers(Collection<MatchableNode> matchables) {
+	PotentialDynamicSubsumers(Collection<MatchableNode> allMatchables) {
 
-		this.matchables = matchables;
+		this.allMatchables = allMatchables;
 	}
 
 	Collection<NodeDefinition> getPotentialsFor(NodePattern request) {

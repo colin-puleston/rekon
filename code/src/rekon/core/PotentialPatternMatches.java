@@ -119,6 +119,18 @@ abstract class PotentialPatternMatches<O> {
 		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
+		void PRINT() {
+
+			int t = 0;
+
+			for (Set<O> s : optionsByRefName.values()) {
+
+				t += s.size();
+			}
+
+			System.out.println("X-RANK-SIZE: " + t);
+		}
+
 		void registerOption(O option, Names rankNames) {
 
 			for (Name n : resolveNamesForRegistration(rankNames, rank).getNames()) {
@@ -306,6 +318,13 @@ abstract class PotentialPatternMatches<O> {
 	void registerDefaultNestedOptionRanks() {
 
 		new MultiOptionRegistrar(0, 3);
+
+		for (RankMatches rm : allRankMatches) {
+
+//			rm.PRINT();
+		}
+
+//		System.out.println("\n");
 	}
 
 	boolean registerOptionRanks(int startRank, int stopRank) {
