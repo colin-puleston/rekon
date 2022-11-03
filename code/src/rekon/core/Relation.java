@@ -55,9 +55,9 @@ public abstract class Relation extends Expression {
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
 	}
 
-	boolean classifyTarget(boolean initialPass) {
+	boolean classifierTarget(boolean initialPass) {
 
-		return property.anyDefinitionRefs() && target.classifyTarget(initialPass);
+		return property.anyDefinitionRefs() && target.classifierTarget(initialPass);
 	}
 
 	void registerDefinitionRefedNames() {

@@ -124,19 +124,6 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private class NewInferenceExpander extends MultiThreadListProcessor<NodeName> {
-
-			NewInferenceExpander() {
-
-				invokeListProcesses(ontology.getNodeNames());
-			}
-
-			void processElement(NodeName n) {
-
-				n.getInferredSubsumers().expandLatestInferences();
-			}
-		}
-
 		ClassificationPass(ClassificationPassConfig passConfig) {
 
 			passCandidates = passConfig.getClassifiables();
@@ -147,12 +134,12 @@ class OntologyClassifier extends Classifier {
 
 			new SubsumptionsChecker();
 
-			expandNewInferences();
+			expandAllNewInferences();
 
 			ClassificationPassConfig nextPassConfig = new SubsequentPassConfig();
 
 			resetPotentiallyUpdatedSignatureRefs();
-			absorbNewInferences();
+			absorbAllNewInferences();
 
 			return nextPassConfig;
 		}
@@ -168,33 +155,14 @@ class OntologyClassifier extends Classifier {
 			}
 		}
 
-		private void expandNewInferences() {
+		private void expandAllNewInferences() {
 
-			do {
-
-				new NewInferenceExpander();
-			}
-			while(configureForNextInferenceExpansion());
+			NameClassifier.expandAllNewInferredSubsumers(ontology.getNodeNames());
 		}
 
-		private boolean configureForNextInferenceExpansion() {
+		private void absorbAllNewInferences() {
 
-			boolean expansions = false;
-
-			for (NodeName n : ontology.getNodeNames()) {
-
-				expansions |= n.getInferredSubsumers().configureForNextExpansion();
-			}
-
-			return expansions;
-		}
-
-		private void absorbNewInferences() {
-
-			for (NodeName n : ontology.getNodeNames()) {
-
-				n.getInferredSubsumers().absorbIntoClassifier();
-			}
+			NameClassifier.absorbAllNewInferredSubsumers(ontology.getNodeNames());
 		}
 
 		private void resetPotentiallyUpdatedSignatureRefs() {

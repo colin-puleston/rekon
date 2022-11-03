@@ -223,7 +223,7 @@ public class SomeRelation extends ObjectRelation {
 
 		if (prop.transitive() || prop.anyChains()) {
 
-			return getTarget().newSubsumers(NodeMatcher.structureFor(prop));
+			return getTarget().anyNewSubsumers(NodeMatcher.structureFor(prop));
 		}
 
 		return false;

@@ -53,29 +53,24 @@ public abstract class NodeName extends Name {
 		return matchable != null ? matchable.getDefinitions() : Collections.emptySet();
 	}
 
-	InferredSubsumers getInferredSubsumers() {
+	boolean classifierTargetRoot(boolean initialPass) {
 
-		return getClassifier().getInferredSubsumers();
+		return classifierTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_ROOT);
 	}
 
-	boolean classifyTargetRoot(boolean initialPass) {
+	boolean classifierTargetValue(boolean initialPass) {
 
-		return classifyTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_ROOT);
+		return classifierTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_VALUE);
 	}
 
-	boolean classifyTargetValue(boolean initialPass) {
+	boolean anyNewSubsumers(NodeMatcher matcher) {
 
-		return classifyTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_VALUE);
+		return !classified() && getClassifier().anyNewInferredSubsumers(matcher);
 	}
 
-	boolean newSubsumers(NodeMatcher matcher) {
+	private boolean classifierTarget(boolean initialPass, NodeMatcher matcher) {
 
-		return !classified() && getInferredSubsumers().anyMatches(matcher);
-	}
-
-	private boolean classifyTarget(boolean initialPass, NodeMatcher matcher) {
-
-		return initialPass ? anyMatches(matcher) : newSubsumers(matcher);
+		return initialPass ? anyMatches(matcher) : anyNewSubsumers(matcher);
 	}
 
 	private boolean anyMatches(NodeMatcher matcher) {

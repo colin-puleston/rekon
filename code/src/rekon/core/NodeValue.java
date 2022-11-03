@@ -87,11 +87,11 @@ public class NodeValue extends ObjectValue {
 		return n != null && subsumesNodeValue(n);
 	}
 
-	boolean classifyTarget(boolean initialPass) {
+	boolean classifierTarget(boolean initialPass) {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (((NodeName)d).classifyTargetValue(initialPass)) {
+			if (((NodeName)d).classifierTargetValue(initialPass)) {
 
 				return true;
 			}
@@ -100,11 +100,11 @@ public class NodeValue extends ObjectValue {
 		return false;
 	}
 
-	boolean newSubsumers(NodeMatcher matcher) {
+	boolean anyNewSubsumers(NodeMatcher matcher) {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (((NodeName)d).newSubsumers(matcher)) {
+			if (((NodeName)d).anyNewSubsumers(matcher)) {
 
 				return true;
 			}

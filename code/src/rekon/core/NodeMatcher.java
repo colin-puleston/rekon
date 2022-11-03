@@ -33,8 +33,8 @@ abstract class NodeMatcher {
 
 	static final NodeMatcher ANY = new Any();
 	static final NodeMatcher STRUCTURED = new Structured();
-	static final NodeMatcher CLASSIFY_TARGET_ROOT = new ClassifyTarget(PatternNameRole.ROOT);
-	static final NodeMatcher CLASSIFY_TARGET_VALUE = new ClassifyTarget(PatternNameRole.VALUE);
+	static final NodeMatcher CLASSIFY_TARGET_ROOT = new ClassifierTarget(PatternNameRole.ROOT);
+	static final NodeMatcher CLASSIFY_TARGET_VALUE = new ClassifierTarget(PatternNameRole.VALUE);
 
 	static NodeMatcher structureFor(PropertyName property) {
 
@@ -113,11 +113,11 @@ abstract class NodeMatcher {
 		}
 	}
 
-	static private class ClassifyTarget extends Structured {
+	static private class ClassifierTarget extends Structured {
 
 		private PatternNameRole role;
 
-		ClassifyTarget(PatternNameRole role) {
+		ClassifierTarget(PatternNameRole role) {
 
 			this.role = role;
 		}

@@ -24,19 +24,63 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
 class NameClassifier extends NameClassificationHandler {
+
+	static private class NewInferredSubsumerExpander extends MultiThreadListProcessor<NodeName> {
+
+		NewInferredSubsumerExpander(List<NodeName> all) {
+
+			invokeListProcesses(all);
+		}
+
+		void processElement(NodeName n) {
+
+			n.getClassifier().inferredSubsumers.expandLatestInferences();
+		}
+	}
+
+	static void expandAllNewInferredSubsumers(List<NodeName> all) {
+
+		do {
+
+			new NewInferredSubsumerExpander(all);
+		}
+		while(configureForNextInferenceExpansion(all));
+	}
+
+	static void absorbAllNewInferredSubsumers(List<NodeName> all) {
+
+		for (NodeName n : all) {
+
+			n.getClassifier().inferredSubsumers.absorbNewInferences();
+		}
+	}
+
+	static private boolean configureForNextInferenceExpansion(List<NodeName> all) {
+
+		boolean expansions = false;
+
+		for (NodeName n : all) {
+
+			expansions |= n.getClassifier().inferredSubsumers.configureForNextExpansion();
+		}
+
+		return expansions;
+	}
 
 	private Name name;
 	private NameSet subsumers = new NameSet();
 
 	private boolean multipleAsserteds = false;
 
-	private InferredSubsumersImpl inferredSubsumers = null;
+	private InferredSubsumers inferredSubsumers = new InferredSubsumers();
 
-	private class InferredSubsumersImpl extends InferredSubsumers {
+	private class InferredSubsumers {
 
 		private NameSet allNewInfs = new NameSet();
 		private NameSet latestInfs = new NameSet();
@@ -72,16 +116,23 @@ class NameClassifier extends NameClassificationHandler {
 			return true;
 		}
 
-		boolean anyMatches(NodeMatcher matcher) {
+		boolean anyNewInferences(NodeMatcher matcher) {
 
 			return matcher.anyMatches(allNewInfs);
 		}
 
-		void absorbIntoClassifier() {
+		boolean absorbNewInferences() {
+
+			if (allNewInfs.isEmpty()) {
+
+				return false;
+			}
 
 			subsumers.addAll(allNewInfs);
 
 			allNewInfs.clear();
+
+			return true;
 		}
 
 		private synchronized void addDirectlyInferred(Name subsumer) {
@@ -99,10 +150,10 @@ class NameClassifier extends NameClassificationHandler {
 					addExpansions(s.getSubsumers());
 				}
 
-				InferredSubsumersImpl sa = s.getClassifier().getInferredSubsumersImpl();
+				InferredSubsumers sis = s.getClassifier().inferredSubsumers;
 
-				addExpansions(sa.allNewInfs);
-				addExpansions(sa.latestInfs);
+				addExpansions(sis.allNewInfs);
+				addExpansions(sis.latestInfs);
 			}
 		}
 
@@ -166,6 +217,16 @@ class NameClassifier extends NameClassificationHandler {
 		}
 	}
 
+	void registerDirectlyInferredSubsumer(Name subsumer) {
+
+		inferredSubsumers.checkAddDirectlyInferred(subsumer);
+	}
+
+	boolean absorbNewInferredSubsumers() {
+
+		return inferredSubsumers.absorbNewInferences();
+	}
+
 	boolean classified() {
 
 		return false;
@@ -196,19 +257,9 @@ class NameClassifier extends NameClassificationHandler {
 		return multipleAsserteds;
 	}
 
-	InferredSubsumers getInferredSubsumers() {
+	boolean anyNewInferredSubsumers(NodeMatcher matcher) {
 
-		return getInferredSubsumersImpl();
-	}
-
-	private InferredSubsumersImpl getInferredSubsumersImpl() {
-
-		if (inferredSubsumers == null) {
-
-			inferredSubsumers = new InferredSubsumersImpl();
-		}
-
-		return inferredSubsumers;
+		return inferredSubsumers.anyNewInferences(matcher);
 	}
 
 	private void expandAssertedsFrom(Name current) {

@@ -237,7 +237,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (((NodeName)n).classifyTargetRoot(initialPass)) {
+			if (((NodeName)n).classifierTargetRoot(initialPass)) {
 
 				return true;
 			}
@@ -245,7 +245,7 @@ public class NodePattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.classifyTarget(initialPass)) {
+			if (r.classifierTarget(initialPass)) {
 
 				return true;
 			}
@@ -258,7 +258,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (((NodeName)n).newSubsumers(NodeMatcher.STRUCTURED)) {
+			if (((NodeName)n).anyNewSubsumers(NodeMatcher.STRUCTURED)) {
 
 				return true;
 			}
