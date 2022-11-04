@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class Name {
 
-	private NameClassificationHandler classificationHandler = new NameClassifier(this);
+	private NameClassificationHandler classificationHandler = createClassifier();
 	private Set<PatternNameRole> definitionRoles = new HashSet<PatternNameRole>();
 
 	public void addSubsumer(Name subsumer) {
@@ -101,11 +101,6 @@ public abstract class Name {
 		return getClassificationHandler(NameClassification.class);
 	}
 
-	boolean classified() {
-
-		return classificationHandler.classified();
-	}
-
 	boolean dynamic() {
 
 		return false;
@@ -149,6 +144,16 @@ public abstract class Name {
 		return false;
 	}
 
+	boolean anyNewSubsumers(NodeMatcher matcher) {
+
+		return classificationHandler.anyNewSubsumers(matcher);
+	}
+
+	NameClassifier createClassifier() {
+
+		return new NameClassifier(this);
+	}
+
 	private boolean hasSubsumer(Name name) {
 
 		return classificationHandler.isSubsumer(name);
@@ -156,7 +161,7 @@ public abstract class Name {
 
 	private <T extends NameClassificationHandler>T getClassificationHandler(Class<T> type) {
 
-		if (classificationHandler.getClass() == type) {
+		if (type.isAssignableFrom(classificationHandler.getClass())) {
 
 			return type.cast(classificationHandler);
 		}

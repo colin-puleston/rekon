@@ -51,7 +51,7 @@ abstract class Classifier {
 
 		if (!definedName.subsumes(cn) && defn.subsumes(candidate.getProfile())) {
 
-			cn.getClassifier().registerDirectlyInferredSubsumer(definedName);
+			cn.getNodeClassifier().checkAddInferredSubsumer(definedName);
 		}
 	}
 }

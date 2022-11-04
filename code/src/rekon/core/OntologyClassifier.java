@@ -157,12 +157,12 @@ class OntologyClassifier extends Classifier {
 
 		private void expandAllNewInferences() {
 
-			NameClassifier.expandAllNewInferredSubsumers(ontology.getNodeNames());
+			NodeNameClassifier.expandAllNewInferredSubsumers(ontology.getNodeNames());
 		}
 
 		private void absorbAllNewInferences() {
 
-			NameClassifier.absorbAllNewInferredSubsumers(ontology.getNodeNames());
+			NodeNameClassifier.absorbAllNewInferredSubsumers(ontology.getNodeNames());
 		}
 
 		private void resetPotentiallyUpdatedSignatureRefs() {

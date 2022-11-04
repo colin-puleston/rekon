@@ -208,11 +208,6 @@ class NameClassification extends NameClassificationHandler {
 		initialiser = new Initialiser(subsumers);
 	}
 
-	boolean classified() {
-
-		return true;
-	}
-
 	boolean rootName() {
 
 		return supers.get(true).isEmpty();

@@ -50,35 +50,40 @@ class DynamicClassifier extends Classifier {
 
 		do {
 
-			checkCandidateSubsumptions(c, defineds);
+			if (defineds == null) {
+
+				checkCandidateSubsumptions(c);
+			}
+			else {
+
+				checkCandidateSubsumptions(c, defineds);
+			}
 		}
 		while (checkReclassifiable(c));
 	}
 
+	private void checkCandidateSubsumptions(MatchableNode c) {
+
+		for (NodeDefinition defn : definedsFilter.getPotentialsFor(c.getProfile())) {
+
+			checkSubsumption(defn, c);
+		}
+	}
+
 	private void checkCandidateSubsumptions(MatchableNode c, Collection<MatchableNode> defineds) {
 
-		if (defineds == null) {
+		for (MatchableNode defined : defineds) {
 
-			for (NodeDefinition defn : definedsFilter.getPotentialsFor(c.getProfile())) {
+			for (NodePattern defn : defined.getDefinitions()) {
 
-				checkSubsumption(defn, c);
-			}
-		}
-		else {
-
-			for (MatchableNode defined : defineds) {
-
-				for (NodePattern defn : defined.getDefinitions()) {
-
-					checkSubsumption(defined, defn, c);
-				}
+				checkSubsumption(defined, defn, c);
 			}
 		}
 	}
 
 	private boolean checkReclassifiable(MatchableNode c) {
 
-		if (c.getName().getClassifier().absorbNewInferredSubsumers()) {
+		if (c.getName().getNodeClassifier().absorbNewInferredSubsumers()) {
 
 			NodePattern p = c.getProfile();
 

@@ -36,6 +36,13 @@ public abstract class NodeName extends Name {
 	void setMatchable(MatchableNode matchable) {
 
 		this.matchable = matchable;
+
+		getNodeClassifier().setMatchableNode();
+	}
+
+	boolean matchable() {
+
+		return matchable != null;
 	}
 
 	MatchableNode getMatchable() {
@@ -63,9 +70,14 @@ public abstract class NodeName extends Name {
 		return classifierTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_VALUE);
 	}
 
-	boolean anyNewSubsumers(NodeMatcher matcher) {
+	NodeNameClassifier getNodeClassifier() {
 
-		return !classified() && getClassifier().anyNewInferredSubsumers(matcher);
+		return (NodeNameClassifier)getClassifier();
+	}
+
+	NameClassifier createClassifier() {
+
+		return new NodeNameClassifier(this);
 	}
 
 	private boolean classifierTarget(boolean initialPass, NodeMatcher matcher) {

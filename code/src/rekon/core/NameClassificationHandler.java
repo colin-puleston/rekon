@@ -29,11 +29,14 @@ package rekon.core;
  */
 abstract class NameClassificationHandler {
 
-	abstract boolean classified();
-
 	abstract boolean rootName();
 
 	abstract Names getSubsumers();
 
 	abstract boolean isSubsumer(Name name);
+
+	boolean anyNewSubsumers(NodeMatcher matcher) {
+
+		return false;
+	}
 }
