@@ -89,7 +89,7 @@ class NodeNameClassifier extends NameClassifier {
 
 		final NameSet allNewInferreds = new NameSet();
 
-		abstract void checkAddDirectlyInferred(Name subsumer);
+		abstract void addDirectlyInferred(Name subsumer);
 
 		void expandLatestInferences(boolean forMatchableNode) {
 
@@ -141,12 +141,10 @@ class NodeNameClassifier extends NameClassifier {
 		private NameSet latestInferreds = new NameSet();
 		private NameSet currentExpansions = new NameSet();
 
-		void checkAddDirectlyInferred(Name subsumer) {
+		void addDirectlyInferred(Name subsumer) {
 
-			if (newSubsumer(subsumer)) {
-
-				addDirectlyInferred(subsumer);
-			}
+			allNewInferreds.add(subsumer);
+			latestInferreds.add(subsumer);
 		}
 
 		void expandLatestInferencesForMatchableNode() {
@@ -177,12 +175,6 @@ class NodeNameClassifier extends NameClassifier {
 		Names getMatchableNodeLatestInferreds() {
 
 			return latestInferreds;
-		}
-
-		private synchronized void addDirectlyInferred(Name subsumer) {
-
-			allNewInferreds.add(subsumer);
-			latestInferreds.add(subsumer);
 		}
 
 		private void expandDirectLatestInferences() {
@@ -219,7 +211,7 @@ class NodeNameClassifier extends NameClassifier {
 
 	private class NonMatchableNodeInferredSubsumers extends InferredSubsumers {
 
-		void checkAddDirectlyInferred(Name subsumer) {
+		void addDirectlyInferred(Name subsumer) {
 
 			throw new Error("Unexpected method invocation!");
 		}
@@ -270,9 +262,9 @@ class NodeNameClassifier extends NameClassifier {
 		inferredSubsumers = new MatchableNodeInferredSubsumers();
 	}
 
-	void checkAddInferredSubsumer(Name subsumer) {
+	synchronized void addNewInferredSubsumer(Name subsumer) {
 
-		inferredSubsumers.checkAddDirectlyInferred(subsumer);
+		inferredSubsumers.addDirectlyInferred(subsumer);
 	}
 
 	boolean absorbNewInferredSubsumers() {

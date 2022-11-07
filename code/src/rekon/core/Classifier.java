@@ -31,10 +31,7 @@ abstract class Classifier {
 
 	static void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode candidate) {
 
-		if (candidate != defined) {
-
-			checkSubsumption(defined.getName(), defn, candidate);
-		}
+		checkSubsumption(defined.getName(), defn, candidate);
 	}
 
 	static void checkSubsumption(NodeDefinition defn, MatchableNode candidate) {
@@ -49,9 +46,11 @@ abstract class Classifier {
 
 		NodeName cn = candidate.getName();
 
-		if (!definedName.subsumes(cn) && defn.subsumes(candidate.getProfile())) {
+		if (cn != definedName
+			&& !definedName.subsumes(cn)
+			&& defn.subsumes(candidate.getProfile())) {
 
-			cn.getNodeClassifier().checkAddInferredSubsumer(definedName);
+			cn.getNodeClassifier().addNewInferredSubsumer(definedName);
 		}
 	}
 }
