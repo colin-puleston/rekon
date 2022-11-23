@@ -31,14 +31,14 @@ import java.util.*;
  */
 class NameClassification extends NameClassificationHandler {
 
-	static void completeClassifications(List<Name> allNames) {
+	static void completeAllClassifications(List<Name> allNames) {
 
 		for (Name n : allNames) {
 
 			n.setClassification();
 		}
 
-		initialiseClassifications(allNames);
+		initialiseAllClassifications(allNames);
 
 		for (Name n : allNames) {
 
@@ -46,7 +46,7 @@ class NameClassification extends NameClassificationHandler {
 		}
 	}
 
-	static private void initialiseClassifications(List<Name> allNames) {
+	static private void initialiseAllClassifications(List<Name> allNames) {
 
 		for (Name n : allNames) {
 

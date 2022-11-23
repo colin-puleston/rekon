@@ -28,4 +28,9 @@ package rekon.core;
  * @author Colin Puleston
  */
 public abstract class PropertyName extends Name {
+
+	boolean classifierTargetProperty() {
+
+		return anyDefinitionRefs();
+	}
 }

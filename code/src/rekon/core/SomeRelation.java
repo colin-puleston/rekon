@@ -207,14 +207,19 @@ public class SomeRelation extends ObjectRelation {
 		super(property, target);
 	}
 
-	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
-
-		return new SignatureExpander(this, visitMonitor).getAllExpansions();
-	}
-
 	NodeValue getNodeTarget() {
 
 		return (NodeValue)getTarget();
+	}
+
+	Names getTargetNodes() {
+
+		return getNodeTarget().getDisjuncts();
+	}
+
+	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
+
+		return new SignatureExpander(this, visitMonitor).getAllExpansions();
 	}
 
 	boolean potentialNewSignatureRelations() {

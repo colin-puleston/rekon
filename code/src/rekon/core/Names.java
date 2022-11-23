@@ -84,14 +84,6 @@ public abstract class Names {
 
 	public abstract NameSet toSet();
 
-	void registerAsDefinitionRefed(PatternNameRole role) {
-
-		for (Name n : getNames()) {
-
-			n.registerAsDefinitionRefed(role);
-		}
-	}
-
 	Names filterForType(Class<? extends Name> type) {
 
 		return allOfType(type) ? this : deriveForTypeOnly(type);

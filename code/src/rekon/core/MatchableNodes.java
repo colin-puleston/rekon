@@ -128,6 +128,24 @@ class MatchableNodes {
 		new InverseRelationsAdder();
 	}
 
+	void resetAllPotentiallyUpdatedSignatureRefs() {
+
+		List<MatchableNode> potentiallyUpdateds = new ArrayList<MatchableNode>();
+
+		for (MatchableNode m : matchables) {
+
+			if (m.getProfile().potentialSignatureUpdates()) {
+
+				potentiallyUpdateds.add(m);
+			}
+		}
+
+		for (MatchableNode m : potentiallyUpdateds) {
+
+			m.getProfile().resetSignatureRefs();
+		}
+	}
+
 	List<MatchableNode> getAll() {
 
 		return matchables;

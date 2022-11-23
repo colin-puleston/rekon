@@ -63,11 +63,6 @@ public class NodeValue extends ObjectValue {
 		return disjuncts;
 	}
 
-	void registerDefinitionRefedNames() {
-
-		disjuncts.registerAsDefinitionRefed(PatternNameRole.VALUE);
-	}
-
 	void collectNames(NameCollector collector) {
 
 		if (collector.definition()) {
@@ -87,24 +82,11 @@ public class NodeValue extends ObjectValue {
 		return n != null && subsumesNodeValue(n);
 	}
 
-	boolean classifierTarget(boolean initialPass) {
-
-		for (Name d : disjuncts.getNames()) {
-
-			if (((NodeName)d).classifierTargetValue(initialPass)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	boolean anyNewSubsumers(NodeMatcher matcher) {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (((NodeName)d).anyNewSubsumers(matcher)) {
+			if (d.anyNewSubsumers(matcher)) {
 
 				return true;
 			}

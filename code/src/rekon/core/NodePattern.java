@@ -137,7 +137,10 @@ public class NodePattern extends Expression {
 
 	boolean setExpandedSignature() {
 
-		signatureMode = SignatureMode.EXPANDING;
+		if (signatureRelations != null) {
+
+			signatureMode = SignatureMode.EXPANDING;
+		}
 
 		boolean additions = setSignatureRelations();
 
@@ -210,11 +213,13 @@ public class NodePattern extends Expression {
 
 	void registerDefinitionRefedNames() {
 
-		names.registerAsDefinitionRefed(PatternNameRole.ROOT);
+		registerAsDefinitionRefed(names, PatternNameRole.ROOT);
 
 		for (Relation r : relations) {
 
-			r.registerDefinitionRefedNames();
+			r.getProperty().registerAsDefinitionRefed(PatternNameRole.RELATION);
+
+			registerAsDefinitionRefed(r.getTargetNodes(), PatternNameRole.VALUE);
 		}
 	}
 
@@ -235,19 +240,22 @@ public class NodePattern extends Expression {
 
 	boolean classifiable(boolean initialPass) {
 
-		for (Name n : names.getNames()) {
+		if (getSingleName().classifierTargetRoot(initialPass)) {
 
-			if (((NodeName)n).classifierTargetRoot(initialPass)) {
-
-				return true;
-			}
+			return true;
 		}
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.classifierTarget(initialPass)) {
+			if (r.getProperty().classifierTargetProperty()) {
 
-				return true;
+				for (Name tn : r.getTargetNodes().getNames()) {
+
+					if (((NodeName)tn).classifierTargetValue(initialPass)) {
+
+						return true;
+					}
+				}
 			}
 		}
 
@@ -258,7 +266,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (((NodeName)n).anyNewSubsumers(NodeMatcher.STRUCTURED)) {
+			if (n.anyNewSubsumers(NodeMatcher.STRUCTURED)) {
 
 				return true;
 			}
@@ -321,6 +329,14 @@ public class NodePattern extends Expression {
 		for (Relation re : relations) {
 
 			re.render(r);
+		}
+	}
+
+	private void registerAsDefinitionRefed(Names regNames, PatternNameRole role) {
+
+		for (Name n : regNames.getNames()) {
+
+			n.registerAsDefinitionRefed(role);
 		}
 	}
 

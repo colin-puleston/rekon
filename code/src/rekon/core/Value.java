@@ -66,17 +66,9 @@ abstract class Value extends Expression {
 		return v == this || subsumesOther(v);
 	}
 
-	void registerDefinitionRefedNames() {
-	}
-
 	abstract void collectNames(NameCollector collector);
 
 	abstract boolean subsumesOther(Value v);
-
-	boolean classifierTarget(boolean initialPass) {
-
-		return initialPass;
-	}
 
 	boolean anyNewSubsumers(NodeMatcher matcher) {
 

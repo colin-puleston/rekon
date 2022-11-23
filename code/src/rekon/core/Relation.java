@@ -55,22 +55,16 @@ public abstract class Relation extends Expression {
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
 	}
 
-	boolean classifierTarget(boolean initialPass) {
-
-		return property.anyDefinitionRefs() && target.classifierTarget(initialPass);
-	}
-
-	void registerDefinitionRefedNames() {
-
-		property.registerAsDefinitionRefed(PatternNameRole.RELATION);
-		target.registerDefinitionRefedNames();
-	}
-
 	void collectNames(NameCollector collector) {
 
 		collector.collectName(property);
 
 		target.collectNames(collector.forNextRank());
+	}
+
+	Names getTargetNodes() {
+
+		return Names.NO_NAMES;
 	}
 
 	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
