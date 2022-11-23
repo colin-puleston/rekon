@@ -87,6 +87,11 @@ public class NodePattern extends Expression {
 
 				additions = true;
 
+				if (signatureMode == SignatureMode.EXPANDING) {
+
+					return initialCollected;
+				}
+
 				return new HashSet<Relation>(initialCollected);
 			}
 
@@ -137,10 +142,14 @@ public class NodePattern extends Expression {
 
 	boolean setExpandedSignature() {
 
-		if (signatureRelations != null) {
+		if (signatureRelations == null) {
 
-			signatureMode = SignatureMode.EXPANDING;
+			signatureMode = SignatureMode.EXPANDED;
+
+			return false;
 		}
+
+		signatureMode = SignatureMode.EXPANDING;
 
 		boolean additions = setSignatureRelations();
 
