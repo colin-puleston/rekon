@@ -40,11 +40,6 @@ class DynamicPatternClasses extends FreeClasses {
 
 			return true;
 		}
-
-		boolean patternComponent() {
-
-			return true;
-		}
 	}
 
 	ClassName createClassName(int index) {

@@ -37,11 +37,6 @@ class OntologyPatternClasses extends FreeOntologyClasses {
 
 			super(index);
 		}
-
-		boolean patternComponent() {
-
-			return true;
-		}
 	}
 
 	OntologyPatternClasses(Collection<NodeName> ontologyNodes) {

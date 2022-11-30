@@ -37,11 +37,6 @@ class ImpliedOntologyClasses extends FreeOntologyClasses {
 
 			super(index);
 		}
-
-		boolean patternComponent() {
-
-			return false;
-		}
 	}
 
 	private MatchableNodes matchables;

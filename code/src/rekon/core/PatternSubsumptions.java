@@ -78,34 +78,6 @@ class PatternSubsumptions {
 
 			return candidates;
 		}
-
-		private boolean potentialCandidateNode(NodeName n) {
-
-			return nodeOfRequiredType(n) && anyMappedSubsumedNodes(n);
-		}
-
-		private boolean nodeOfRequiredType(NodeName n) {
-
-			return getNodeType().isAssignableFrom(n.getClass());
-		}
-
-		private boolean anyMappedSubsumedNodes(NodeName n) {
-
-			if (n.mapped()) {
-
-				return true;
-			}
-
-			for (Name sub : n.getSubs(getNodeType(), false).getNames()) {
-
-				if (sub.mapped()) {
-
-					return true;
-				}
-			}
-
-			return false;
-		}
 	}
 
 	static private class ClassSubsumptions extends SubsumptionsFinder {

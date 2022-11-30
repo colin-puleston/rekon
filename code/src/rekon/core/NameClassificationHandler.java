@@ -33,7 +33,7 @@ abstract class NameClassificationHandler {
 
 	abstract Names getSubsumers();
 
-	abstract boolean isSubsumer(Name name);
+	abstract boolean isSubsumer(Name test);
 
 	boolean anyNewSubsumers(NodeMatcher matcher) {
 

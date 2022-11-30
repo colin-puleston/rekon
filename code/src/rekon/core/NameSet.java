@@ -31,6 +31,8 @@ import java.util.*;
  */
 public class NameSet extends Names {
 
+	static public final NameSet NO_NAMES = new NameSet();
+
 	private Set<Name> names;
 
 	public NameSet() {

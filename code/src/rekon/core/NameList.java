@@ -31,6 +31,8 @@ import java.util.*;
  */
 public class NameList extends Names {
 
+	static public final NameList NO_NAMES = new NameList();
+
 	private List<Name> names;
 
 	public NameList() {
