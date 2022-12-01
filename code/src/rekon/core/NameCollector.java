@@ -130,7 +130,7 @@ class NameCollector {
 
 	void collectForDefinitionValue(NodeName n) {
 
-		if (n.dynamic() && config.linkedCollection() && !config.lastRequiredRank(rank)) {
+		if (n.dynamic() && config.linkedCollection()) {
 
 			for (NodePattern d : n.getDefinitions()) {
 
@@ -212,6 +212,11 @@ class NameCollector {
 		}
 
 		return nextRankCollector;
+	}
+
+	boolean lastRequiredRank() {
+
+		return config.lastRequiredRank(rank);
 	}
 
 	private NameCollector(Config config, List<Names> allNames, Deque<Name> linkNames) {
