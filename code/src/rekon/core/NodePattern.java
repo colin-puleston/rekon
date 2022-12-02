@@ -45,8 +45,6 @@ public class NodePattern extends Expression {
 		private Set<Relation> initialCollected;
 		private boolean additions = false;
 
-		private NodeVisitMonitor visitMonitor;
-
 		PatternSignatureRelationCollector() {
 
 			this(new NodeVisitMonitor(getSingleName()));
@@ -55,8 +53,6 @@ public class NodePattern extends Expression {
 		PatternSignatureRelationCollector(NodeVisitMonitor visitMonitor) {
 
 			super(visitMonitor);
-
-			this.visitMonitor = visitMonitor;
 
 			initialCollected = getCollected();
 		}
@@ -238,9 +234,11 @@ public class NodePattern extends Expression {
 
 		if (!collector.lastRequiredRank()) {
 
+			collector = collector.forNextRank();
+
 			for (Relation r : getRelations(collector.signature())) {
 
-				r.collectNames(collector.forNextRank());
+				r.collectNames(collector);
 			}
 		}
 	}

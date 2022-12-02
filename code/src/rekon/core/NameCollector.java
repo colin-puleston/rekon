@@ -130,7 +130,7 @@ class NameCollector {
 
 	void collectForDefinitionValue(NodeName n) {
 
-		if (n.dynamic() && config.linkedCollection()) {
+		if (config.linkedCollection() && n.dynamic()) {
 
 			for (NodePattern d : n.getDefinitions()) {
 

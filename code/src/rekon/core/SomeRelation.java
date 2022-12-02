@@ -106,7 +106,7 @@ public class SomeRelation extends ObjectRelation {
 		private class ChainBasedCollector extends ExpansionTypeCollector {
 
 			private PropertyChain chain;
-			private int tailsSubsIndex = 0;
+			private int tailSubsIndex = 0;
 
 			ChainBasedCollector(PropertyChain chain) {
 
@@ -115,17 +115,17 @@ public class SomeRelation extends ObjectRelation {
 
 			void collectFrom(SomeRelation current) {
 
-				if (chain.hasTailSub(current.getProperty(), tailsSubsIndex)) {
+				if (chain.hasTailSub(current.getProperty(), tailSubsIndex)) {
 
-					if (chain.lastTailSub(tailsSubsIndex)) {
+					if (chain.lastTailSub(tailSubsIndex)) {
 
 						addExpansion(createLinkRelation(current));
 					}
 					else {
 
-						tailsSubsIndex++;
+						tailSubsIndex++;
 						collectFromNested(current);
-						tailsSubsIndex--;
+						tailSubsIndex--;
 					}
 				}
 			}
