@@ -65,14 +65,7 @@ public class NodeValue extends ObjectValue {
 
 	void collectNames(NameCollector collector) {
 
-		if (collector.definition()) {
-
-			collectDefinitionNames(collector);
-		}
-		else {
-
-			collectSignatureNames(collector);
-		}
+		collector.collectForValueDisjuncts(disjuncts);
 	}
 
 	boolean subsumesOther(Value v) {
@@ -113,28 +106,6 @@ public class NodeValue extends ObjectValue {
 
 				r.addLine(d.getLabel());
 			}
-		}
-	}
-
-	private void collectDefinitionNames(NameCollector collector) {
-
-		NodeName n = toSingleName();
-
-		if (n != null) {
-
-			collector.collectForDefinitionValue(n);
-		}
-		else {
-
-			collector.collectRoot();
-		}
-	}
-
-	private void collectSignatureNames(NameCollector collector) {
-
-		for (Name d : disjuncts.getNames()) {
-
-			collector.collectForSignatureValue((NodeName)d);
 		}
 	}
 

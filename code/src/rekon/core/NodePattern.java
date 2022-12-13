@@ -232,7 +232,7 @@ public class NodePattern extends Expression {
 
 		collector.collectNames(names);
 
-		if (!collector.lastRequiredRank()) {
+		if (collector.continueForNextRelationsRank()) {
 
 			collector = collector.forNextRank();
 
@@ -245,7 +245,20 @@ public class NodePattern extends Expression {
 
 	boolean subsumes(NodePattern p) {
 
-		return subsumesAllNames(p) && allRelationsSubsumeSignatureRelations(p);
+		return subsumesAllNames(p) && subsumesRelations(p);
+	}
+
+	boolean subsumesRelations(NodePattern p) {
+
+		for (Relation r : relations) {
+
+			if (!subsumesAnySignatureRelation(r, p)) {
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	boolean classifiable(boolean initialPass) {
@@ -388,19 +401,6 @@ public class NodePattern extends Expression {
 		}
 
 		return false;
-	}
-
-	private boolean allRelationsSubsumeSignatureRelations(NodePattern p) {
-
-		for (Relation r : relations) {
-
-			if (!subsumesAnySignatureRelation(r, p)) {
-
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	private boolean subsumesAnySignatureRelation(Relation r, NodePattern p) {

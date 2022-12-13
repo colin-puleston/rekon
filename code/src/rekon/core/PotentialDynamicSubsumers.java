@@ -44,7 +44,7 @@ class PotentialDynamicSubsumers {
 
 			checkInitialised();
 
-			return getPotentialsFor(request, getRankedNames(request, false));
+			return getPotentialsFor(request, getRankedProfileNames(request));
 		}
 
 		List<NodeDefinition> getAllOptions() {
@@ -54,7 +54,7 @@ class PotentialDynamicSubsumers {
 
 		List<Names> getOptionMatchNames(NodeDefinition option, int startRank, int stopRank) {
 
-			return getRankedNames(option.getDefinition(), true);
+			return getRankedDefinitionNames(option.getDefinition());
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -76,7 +76,9 @@ class PotentialDynamicSubsumers {
 
 		abstract boolean nestedPatterns();
 
-		abstract List<Names> getRankedNames(NodePattern p, boolean definition);
+		abstract List<Names> getRankedDefinitionNames(NodePattern p);
+
+		abstract List<Names> getRankedProfileNames(NodePattern p);
 
 		private synchronized void checkInitialised() {
 
@@ -116,7 +118,17 @@ class PotentialDynamicSubsumers {
 			registerSingleOptionRank();
 		}
 
-		List<Names> getRankedNames(NodePattern p, boolean definition) {
+		List<Names> getRankedDefinitionNames(NodePattern p) {
+
+			return getRankedNames(p);
+		}
+
+		List<Names> getRankedProfileNames(NodePattern p) {
+
+			return getRankedNames(p);
+		}
+
+		private List<Names> getRankedNames(NodePattern p) {
 
 			return Collections.singletonList(p.getNames());
 		}
@@ -134,9 +146,14 @@ class PotentialDynamicSubsumers {
 			registerDefaultNestedOptionRanks();
 		}
 
-		List<Names> getRankedNames(NodePattern p, boolean definition) {
+		List<Names> getRankedDefinitionNames(NodePattern p) {
 
-			return new NameCollector(definition, false).collectRanked(p);
+			return new FilteringNameCollector(true).collect(p);
+		}
+
+		List<Names> getRankedProfileNames(NodePattern p) {
+
+			return new FilteringNameCollector(false).collect(p);
 		}
 	}
 

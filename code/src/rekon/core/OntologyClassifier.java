@@ -29,11 +29,12 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class OntologyClassifier extends Classifier {
+class OntologyClassifier {
 
 	private Ontology ontology;
 
 	private List<MatchableNode> defineds = new ArrayList<MatchableNode>();
+	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
 
 	private abstract class ClassificationPassConfig {
 
@@ -148,7 +149,7 @@ class OntologyClassifier extends Classifier {
 
 				for (MatchableNode c : candidatesFilter.getPotentialsFor(defn)) {
 
-					checkSubsumption(defined, defn, c);
+					subsumptionChecker.check(defined, defn, c);
 				}
 			}
 		}
@@ -166,6 +167,14 @@ class OntologyClassifier extends Classifier {
 		private void resetPotentiallyUpdatedSignatureRefs() {
 
 			ontology.getMatchables().resetAllPotentiallyUpdatedSignatureRefs();
+		}
+	}
+
+	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
+
+		boolean subsumes(NodePattern defn, NodePattern profile) {
+
+			return defn.subsumesRelations(profile);
 		}
 	}
 

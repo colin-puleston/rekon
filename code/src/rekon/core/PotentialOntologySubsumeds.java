@@ -45,16 +45,11 @@ class PotentialOntologySubsumeds extends PotentialSubsumeds {
 
 	List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		return getRankedNames(defn, true);
+		return new FilteringNameCollector(true).collect(defn);
 	}
 
 	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
 
-		return getRankedNames(profile, false);
-	}
-
-	private List<Names> getRankedNames(NodePattern p, boolean definition) {
-
-		return new NameCollector(definition, false).collectRanked(p);
+		return new FilteringNameCollector(false).collect(profile);
 	}
 }

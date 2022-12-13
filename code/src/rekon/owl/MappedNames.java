@@ -301,6 +301,11 @@ class MappedNames {
 
 					name.addSubsumer(classes.getName(c));
 				}
+
+				if (name.rootName()) {
+
+					name.addSubsumer(classes.getRootName());
+				}
 			}
 		}
 

@@ -27,30 +27,56 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class Classifier {
+class SimpleNameCollector extends NameCollector {
 
-	static void checkSubsumption(MatchableNode defined, NodePattern defn, MatchableNode candidate) {
+	private boolean definition;
 
-		checkSubsumption(defined.getName(), defn, candidate);
+	private NameSet names = new NameSet();
+	private boolean nestedRank = false;
+
+	SimpleNameCollector(boolean definition) {
+
+		this.definition = definition;
 	}
 
-	static void checkSubsumption(NodeDefinition defn, MatchableNode candidate) {
+	boolean definition() {
 
-		checkSubsumption(defn.getNodeName(), defn.getDefinition(), candidate);
+		return definition;
 	}
 
-	static private void checkSubsumption(
-							NodeName definedName,
-							NodePattern defn,
-							MatchableNode candidate) {
+	Names collect(NodePattern p) {
 
-		NodeName cn = candidate.getName();
+		p.collectNames(this);
 
-		if (cn != definedName
-			&& !definedName.subsumes(cn)
-			&& defn.subsumes(candidate.getProfile())) {
+		return names;
+	}
 
-			cn.getNodeClassifier().addNewInferredSubsumer(definedName);
+	void collectName(Name n) {
+
+		names.add(n);
+	}
+
+	void collectNames(Names ns) {
+
+		for (Name n : ns.getNames()) {
+
+			names.add(n);
 		}
 	}
+
+	void collectRoot() {
+	}
+
+	boolean continueForNextRelationsRank() {
+
+		return !nestedRank;
+	}
+
+	NameCollector forNextRank() {
+
+		nestedRank |= true;
+
+		return this;
+	}
 }
+

@@ -24,49 +24,36 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-class PotentialDynamicSubsumeds extends PotentialSubsumeds {
+class SubsumptionChecker {
 
-	private int nextOptionRegRank = 0;
-	private boolean optionRegComplete = false;
+	void check(MatchableNode defined, NodePattern defn, MatchableNode candidate) {
 
-	PotentialDynamicSubsumeds(List<MatchableNode> allOptions) {
-
-		super(allOptions);
+		check(defined.getName(), defn, candidate);
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	void check(NodeDefinition defn, MatchableNode candidate) {
 
-		return ProfileMatchNames.resolve(names);
+		check(defn.getNodeName(), defn.getDefinition(), candidate);
 	}
 
-	List<Names> getRankedDefinitionNames(NodePattern defn) {
+	boolean subsumes(NodePattern defn, NodePattern profile) {
 
-		List<Names> defnNames = new FilteringLinkedNameCollector(true).collect(defn);
-
-		checkExpandOptionRanksRegister(defnNames);
-
-		return defnNames;
+		return defn.subsumes(profile);
 	}
 
-	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
+	private void check(NodeName definedName, NodePattern defn, MatchableNode candidate) {
 
-		return new FilteringLinkedNameCollector(false, startRank, stopRank).collect(profile);
-	}
+		NodeName cn = candidate.getName();
 
-	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
+		if (cn != definedName && !definedName.subsumes(cn)) {
 
-		int stopRank = defnNames.size();
+			if (subsumes(defn, candidate.getProfile())) {
 
-		if (!optionRegComplete && stopRank > nextOptionRegRank) {
-
-			registerOptionRanks(nextOptionRegRank, stopRank);
-
-			nextOptionRegRank = stopRank;
+				cn.getNodeClassifier().addNewInferredSubsumer(definedName);
+			}
 		}
 	}
 }

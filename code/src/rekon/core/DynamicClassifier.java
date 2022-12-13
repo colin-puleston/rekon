@@ -29,9 +29,10 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DynamicClassifier extends Classifier {
+class DynamicClassifier {
 
 	private PotentialDynamicSubsumers definedsFilter;
+	private SubsumptionChecker subsumptionChecker = new SubsumptionChecker();
 
 	DynamicClassifier(Ontology ontology) {
 
@@ -66,7 +67,7 @@ class DynamicClassifier extends Classifier {
 
 		for (NodeDefinition defn : definedsFilter.getPotentialsFor(c.getProfile())) {
 
-			checkSubsumption(defn, c);
+			subsumptionChecker.check(defn, c);
 		}
 	}
 
@@ -76,7 +77,7 @@ class DynamicClassifier extends Classifier {
 
 			for (NodePattern defn : defined.getDefinitions()) {
 
-				checkSubsumption(defined, defn, c);
+				subsumptionChecker.check(defined, defn, c);
 			}
 		}
 	}
