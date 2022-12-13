@@ -59,9 +59,12 @@ class FilteringNameCollector {
 
 		void collectForValueDisjuncts(Names disjuncts) {
 
-			if (definition() && disjuncts.size() == 1) {
+			if (definition()) {
 
-				collectForValueNode((NodeName)disjuncts.getFirstName());
+				if (disjuncts.size() == 1) {
+
+					collectForValueNode((NodeName)disjuncts.getFirstName());
+				}
 			}
 			else {
 
