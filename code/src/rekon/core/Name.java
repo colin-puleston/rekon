@@ -32,7 +32,7 @@ import java.util.*;
 public abstract class Name {
 
 	private NameClassificationHandler classificationHandler = createClassifier();
-	private Set<PatternNameRole> definitionRoles = new HashSet<PatternNameRole>();
+	private Set<MatchRole> definitionRoles = new HashSet<MatchRole>();
 
 	public void addSubsumer(Name subsumer) {
 
@@ -81,7 +81,7 @@ public abstract class Name {
 		return classificationHandler.rootName();
 	}
 
-	void registerAsDefinitionRefed(PatternNameRole role) {
+	void registerAsDefinitionRefed(MatchRole role) {
 
 		definitionRoles.add(role);
 	}
@@ -111,7 +111,7 @@ public abstract class Name {
 		return !definitionRoles.isEmpty();
 	}
 
-	boolean definitionRefed(PatternNameRole role) {
+	boolean definitionRefed(MatchRole role) {
 
 		return definitionRoles.contains(role);
 	}
@@ -144,9 +144,9 @@ public abstract class Name {
 		return false;
 	}
 
-	boolean anyNewSubsumers(NodeMatcher matcher) {
+	boolean anyNewSubsumers(NodeSelector selector) {
 
-		return classificationHandler.anyNewSubsumers(matcher);
+		return classificationHandler.anyNewSubsumers(selector);
 	}
 
 	NameClassifier createClassifier() {

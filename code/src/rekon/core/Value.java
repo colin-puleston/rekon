@@ -70,7 +70,7 @@ abstract class Value extends Expression {
 
 	abstract boolean subsumesOther(Value v);
 
-	boolean anyNewSubsumers(NodeMatcher matcher) {
+	boolean anyNewSubsumers(NodeSelector selector) {
 
 		return false;
 	}

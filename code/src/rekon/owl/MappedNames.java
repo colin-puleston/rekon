@@ -336,11 +336,6 @@ class MappedNames {
 				addInverses(entity, n);
 				addChains(entity, n);
 
-				if (entity.transitive()) {
-
-					n.setTransitive();
-				}
-
 				if (entity.symmetric()) {
 
 					n.setSymmetric();
@@ -365,6 +360,11 @@ class MappedNames {
 			}
 
 			private void addChains(AssertedObjectProperty entity, ObjectPropertyName name) {
+
+				if (entity.transitive()) {
+
+					new PropertyChain(name);
+				}
 
 				for (List<OWLObjectProperty> chain : entity.getChains()) {
 

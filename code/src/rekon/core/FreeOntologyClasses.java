@@ -29,21 +29,38 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class FreeOntologyClasses extends FreeClasses {
+class FreeOntologyClasses extends FreeClasses {
 
 	private Collection<NodeName> ontologyNodes;
+
+	private class IntermediateOntologyClassName extends IntermediateClassName {
+
+		IntermediateOntologyClassName() {
+
+			ontologyNodes.add(this);
+		}
+	}
+
+	private class GCIImpliedOntologyClassName extends GCIImpliedClassName {
+
+		GCIImpliedOntologyClassName() {
+
+			ontologyNodes.add(this);
+		}
+	}
 
 	FreeOntologyClasses(Collection<NodeName> ontologyNodes) {
 
 		this.ontologyNodes = ontologyNodes;
 	}
 
-	ClassName create(ClassName sup, Collection<NodePattern> defns) {
+	ClassName createIntermediate() {
 
-		ClassName n = super.create(sup, defns);
+		return new IntermediateOntologyClassName();
+	}
 
-		ontologyNodes.add(n);
+	ClassName createGCIImplied() {
 
-		return n;
+		return new GCIImpliedOntologyClassName();
 	}
 }

@@ -33,4 +33,9 @@ public class AllRelation extends ObjectRelation {
 
 		super(property, target);
 	}
+
+	boolean allRelation() {
+
+		return true;
+	}
 }

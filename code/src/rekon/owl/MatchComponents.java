@@ -187,7 +187,7 @@ class MatchComponents {
 				disjuncts.addAll(djs);
 			}
 
-			return new NodeValue(disjuncts);
+			return createNodeValue(disjuncts);
 		}
 	}
 
@@ -251,7 +251,7 @@ class MatchComponents {
 
 			Set<? extends NodeName> djs = valueToNodeDisjuncts(filler);
 
-			return djs != null ? new NodeValue(djs) : null;
+			return djs != null ? createNodeValue(djs) : null;
 		}
 	}
 
@@ -617,7 +617,9 @@ class MatchComponents {
 
 			if (p != null) {
 
-				pCls = matchStructures.addPatternClass(p);
+				pCls = matchStructures.addIntermediateClass();
+
+				matchStructures.addPatternNodeDefinition(pCls, p);
 
 				patternClasses.put(v, pCls);
 			}
@@ -641,5 +643,24 @@ class MatchComponents {
 		}
 
 		return disjuncts;
+	}
+
+	private NodeValue createNodeValue(Collection<? extends NodeName> disjuncts) {
+
+		return new NodeValue(resolveValueNode(disjuncts));
+	}
+
+	private NodeName resolveValueNode(Collection<? extends NodeName> disjuncts) {
+
+		if (disjuncts.size() == 1) {
+
+			return disjuncts.iterator().next();
+		}
+
+		ClassName c = matchStructures.addIntermediateClass();
+
+		matchStructures.addDisjunctionClass(c, disjuncts);
+
+		return c;
 	}
 }

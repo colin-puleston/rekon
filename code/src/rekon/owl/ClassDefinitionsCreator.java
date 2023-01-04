@@ -44,8 +44,8 @@ class ClassDefinitionsCreator {
 
 	private abstract class EquivsBasedCreator {
 
-		private Set<NodePattern> defns = new HashSet<NodePattern>();
-		private Set<NodePattern> subs = new HashSet<NodePattern>();
+		private Set<NodePattern> patternDefns = new HashSet<NodePattern>();
+		private Set<List<NodePattern>> disjunctionDefns = new HashSet<List<NodePattern>>();
 
 		boolean create(Collection<OWLClassExpression> equivs) {
 
@@ -57,24 +57,26 @@ class ClassDefinitionsCreator {
 				}
 			}
 
-			ClassName c = resolveDefinedClass(defns);
+			ClassName c = resolveDefinedClass();
 
-			if (c != null) {
+			for (NodePattern defn : patternDefns) {
 
-				if (!subs.isEmpty()) {
-
-					matchStructures.addImpliedClasses(c, subs);
-				}
-
-				return true;
+				matchStructures.addPatternNodeDefinition(c, defn);
 			}
 
-			return false;
+			for (List<NodePattern> disjuncts : disjunctionDefns) {
+
+				List<NodeName> nodeDjs = resolveGCIDisjunctsToNodes(disjuncts);
+
+				matchStructures.addDisjunctionClass(c, nodeDjs);
+			}
+
+			return true;
 		}
 
 		abstract boolean handleOutOfScopeEquiv(OWLClassExpression equiv);
 
-		abstract ClassName resolveDefinedClass(Set<NodePattern> defns);
+		abstract ClassName resolveDefinedClass();
 
 		private boolean absorbEquiv(OWLClassExpression equiv) {
 
@@ -91,11 +93,11 @@ class ClassDefinitionsCreator {
 
 				if (djs.size() == 1) {
 
-					defns.add(djs.get(0));
+					patternDefns.add(djs.get(0));
 				}
 				else {
 
-					subs.addAll(djs);
+					disjunctionDefns.add(djs);
 				}
 			}
 
@@ -121,16 +123,9 @@ class ClassDefinitionsCreator {
 			return true;
 		}
 
-		ClassName resolveDefinedClass(Set<NodePattern> defns) {
+		ClassName resolveDefinedClass() {
 
-			ClassName cls = mappedNames.get(assertCls.getEntity());
-
-			if (!defns.isEmpty()) {
-
-				matchStructures.addClassDefinitions(cls, defns);
-			}
-
-			return cls;
+			return mappedNames.get(assertCls.getEntity());
 		}
 	}
 
@@ -149,9 +144,9 @@ class ClassDefinitionsCreator {
 			return false;
 		}
 
-		ClassName resolveDefinedClass(Set<NodePattern> defns) {
+		ClassName resolveDefinedClass() {
 
-			return defns.isEmpty() ? null : matchStructures.addImpliedClass(defns);
+			return matchStructures.addGCIImpliedClass();
 		}
 	}
 
@@ -173,15 +168,18 @@ class ClassDefinitionsCreator {
 
 		private boolean create() {
 
-			List<NodePattern> pSubs = matchComponents.toNodePatternDisjunction(sub);
+			List<NodePattern> subDjs = matchComponents.toNodePatternDisjunction(sub);
 
-			if (pSubs != null) {
+			if (subDjs != null) {
 
 				ClassName supCls = resolveSuperClass();
 
 				if (supCls != null) {
 
-					matchStructures.addImpliedClasses(supCls, pSubs);
+					for (NodeName subCls : resolveGCIDisjunctsToNodes(subDjs)) {
+
+						subCls.addSubsumer(supCls);
+					}
 
 					return true;
 				}
@@ -199,7 +197,7 @@ class ClassDefinitionsCreator {
 
 			NodePattern p = matchComponents.toNodePattern(sup);
 
-			return p != null ? matchStructures.addImpliedClass(p) : null;
+			return p != null ? addGCIImpliedClass(p) : null;
 		}
 	}
 
@@ -236,5 +234,33 @@ class ClassDefinitionsCreator {
 		logger.logOutOfScopeWarningLine(axiomDesc);
 		logger.logLine("AXIOM: " + axiom);
 		logger.logSeparatorLine();
+	}
+
+	private List<NodeName> resolveGCIDisjunctsToNodes(List<NodePattern> disjuncts) {
+
+		List<NodeName> nodeDjs = new ArrayList<NodeName>();
+
+		for (NodePattern d : disjuncts) {
+
+			nodeDjs.add(resolveGCIDisjunctToNode(d));
+		}
+
+		return nodeDjs;
+	}
+
+	private NodeName resolveGCIDisjunctToNode(NodePattern disjunct) {
+
+		NodeName n = disjunct.toSingleName();
+
+		return n != null ? n : addGCIImpliedClass(disjunct);
+	}
+
+	private ClassName addGCIImpliedClass(NodePattern defn) {
+
+		ClassName c = matchStructures.addGCIImpliedClass();
+
+		matchStructures.addPatternNodeDefinition(c, defn);
+
+		return c;
 	}
 }

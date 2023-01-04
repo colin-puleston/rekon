@@ -27,23 +27,24 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class DynamicPatternClasses extends FreeClasses {
+class DefinitionPattern {
 
-	static private class DynamicPatternName extends FreeClassName {
+	private NodeName node;
+	private NodePattern definition;
 
-		DynamicPatternName(int index) {
+	DefinitionPattern(NodeName node, NodePattern definition) {
 
-			super(index);
-		}
-
-		boolean dynamic() {
-
-			return true;
-		}
+		this.node = node;
+		this.definition = definition;
 	}
 
-	ClassName createClassName(int index) {
+	NodeName getNode() {
 
-		return new DynamicPatternName(index);
+		return node;
+	}
+
+	NodePattern getDefinition() {
+
+		return definition;
 	}
 }

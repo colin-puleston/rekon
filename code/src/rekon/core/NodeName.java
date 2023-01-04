@@ -31,43 +31,73 @@ import java.util.*;
  */
 public abstract class NodeName extends Name {
 
-	private MatchableNode matchable = null;
+	static private final List<MatchableNode<?>> NO_MATCHABLE_NODES = Collections.emptyList();
 
-	void setMatchable(MatchableNode matchable) {
+	private List<MatchableNode<?>> matchableNodes = NO_MATCHABLE_NODES;
 
-		this.matchable = matchable;
+	void addMatchableNode(MatchableNode<?> matchable) {
+
+		checkNewMatchableNode(matchable);
+
+		if (matchableNodes == NO_MATCHABLE_NODES) {
+
+			matchableNodes = new ArrayList<MatchableNode<?>>();
+		}
+
+		matchableNodes.add(matchable);
 
 		getNodeClassifier().setMatchableNode();
 	}
 
 	boolean matchable() {
 
-		return matchable != null;
+		return !matchableNodes.isEmpty();
 	}
 
-	MatchableNode getMatchable() {
+	List<MatchableNode<?>> getMatchableNodes() {
 
-		return matchable;
+		return matchableNodes;
 	}
 
-	NodePattern getProfile() {
+	PatternNode getPatternNode() {
 
-		return matchable != null ? matchable.getProfile() : null;
+		List<PatternNode> pns = selectMatchableNodes(PatternNode.class);
+
+		return pns.isEmpty() ? null : pns.get(0);
 	}
 
-	Collection<NodePattern> getDefinitions() {
+	List<DisjunctionNode> getDisjunctionNodes() {
 
-		return matchable != null ? matchable.getDefinitions() : Collections.emptySet();
+		return selectMatchableNodes(DisjunctionNode.class);
 	}
 
-	boolean classifierTargetRoot(boolean initialPass) {
+	NodePattern getProfilePattern() {
 
-		return classifierTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_ROOT);
+		PatternNode pn = getPatternNode();
+
+		return pn != null ? pn.getProfile() : null;
 	}
 
-	boolean classifierTargetValue(boolean initialPass) {
+	Collection<NodePattern> getDefinitionPatterns() {
 
-		return classifierTarget(initialPass, NodeMatcher.CLASSIFY_TARGET_VALUE);
+		PatternNode pn = getPatternNode();
+
+		return pn != null ? pn.getDefinitions() : Collections.emptySet();
+	}
+
+	boolean classifyTargetPatternRoot(boolean initialPass) {
+
+		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_PATTERN_ROOT);
+	}
+
+	boolean classifyTargetPatternValue(boolean initialPass) {
+
+		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_PATTERN_VALUE);
+	}
+
+	boolean classifyTargetDisjunct(boolean initialPass) {
+
+		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_DISJUNCT);
 	}
 
 	NodeNameClassifier getNodeClassifier() {
@@ -80,13 +110,36 @@ public abstract class NodeName extends Name {
 		return new NodeNameClassifier(this);
 	}
 
-	private boolean classifierTarget(boolean initialPass, NodeMatcher matcher) {
+	private void checkNewMatchableNode(MatchableNode<?> m) {
 
-		return initialPass ? anyMatches(matcher) : anyNewSubsumers(matcher);
+		if (m instanceof PatternNode && getPatternNode() != null) {
+
+			throw new Error("Attempting to add second pattern-node for: " + this);
+		}
 	}
 
-	private boolean anyMatches(NodeMatcher matcher) {
+	private <T extends MatchableNode<?>>List<T> selectMatchableNodes(Class<T> type) {
 
-		return matcher.match(this) || matcher.anyMatches(getSubsumers());
+		List<T> selecteds = new ArrayList<T>();
+
+		for (MatchableNode<?> m : matchableNodes) {
+
+			if (type.isAssignableFrom(m.getClass())) {
+
+				selecteds.add(type.cast(m));
+			}
+		}
+
+		return selecteds;
+	}
+
+	private boolean classifyTarget(boolean initialPass, NodeSelector selector) {
+
+		return initialPass ? anyMatches(selector) : anyNewSubsumers(selector);
+	}
+
+	private boolean anyMatches(NodeSelector selector) {
+
+		return selector.select(this) || selector.anyMatches(getSubsumers());
 	}
 }

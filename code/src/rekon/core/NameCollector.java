@@ -36,14 +36,6 @@ abstract class NameCollector {
 		return !definition();
 	}
 
-	void collectForValueDisjuncts(Names disjuncts) {
-
-		for (Name d : disjuncts.getNames()) {
-
-			collectForValueNode((NodeName)d);
-		}
-	}
-
 	void collectForValueNode(NodeName n) {
 
 		collectName(n);

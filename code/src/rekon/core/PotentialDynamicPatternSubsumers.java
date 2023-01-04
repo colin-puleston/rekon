@@ -29,30 +29,32 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialDynamicSubsumers {
+class PotentialDynamicPatternSubsumers {
 
-	private Collection<MatchableNode> allMatchables;
+	private Collection<PatternNode> allPatternNodes;
 
 	private SimplePotentials simplePotentials = new SimplePotentials();
 	private NestedPotentials nestedPotentials = new NestedPotentials();
 
-	private abstract class CategoryPotentials extends PotentialPatternMatches<NodeDefinition> {
+	private abstract class CategoryPotentials
+								extends
+									PotentialSubsumptions<DefinitionPattern> {
 
-		private List<NodeDefinition> categoryOptions = null;
+		private List<DefinitionPattern> categoryOptions = null;
 
-		Collection<NodeDefinition> getPotentialsFor(NodePattern request) {
+		Collection<DefinitionPattern> getPotentialsFor(NodePattern request) {
 
 			checkInitialised();
 
-			return getPotentialsFor(request, getRankedProfileNames(request));
+			return getPotentialsFor(getRankedProfileNames(request));
 		}
 
-		List<NodeDefinition> getAllOptions() {
+		List<DefinitionPattern> getAllOptions() {
 
 			return categoryOptions;
 		}
 
-		List<Names> getOptionMatchNames(NodeDefinition option, int startRank, int stopRank) {
+		List<Names> getOptionMatchNames(DefinitionPattern option, int startRank, int stopRank) {
 
 			return getRankedDefinitionNames(option.getDefinition());
 		}
@@ -64,7 +66,7 @@ class PotentialDynamicSubsumers {
 
 		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return ProfileMatchNames.resolve(names, PatternNameRole.rankToRole(rank));
+			return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
 		}
 
 		boolean unionRankOptionsForRetrieval() {
@@ -84,7 +86,7 @@ class PotentialDynamicSubsumers {
 
 			if (categoryOptions == null) {
 
-				categoryOptions = new ArrayList<NodeDefinition>();
+				categoryOptions = new ArrayList<DefinitionPattern>();
 
 				addCategoryOptions();
 				initialiseOptionRanks();
@@ -93,13 +95,13 @@ class PotentialDynamicSubsumers {
 
 		private void addCategoryOptions() {
 
-			for (MatchableNode m : allMatchables) {
+			for (PatternNode n : allPatternNodes) {
 
-				for (NodePattern d : m.getDefinitions()) {
+				for (NodePattern d : n.getDefinitions()) {
 
 					if (d.nestedPattern(false) == nestedPatterns()) {
 
-						categoryOptions.add(new NodeDefinition(m.getName(), d));
+						categoryOptions.add(new DefinitionPattern(n.getName(), d));
 					}
 				}
 			}
@@ -157,14 +159,14 @@ class PotentialDynamicSubsumers {
 		}
 	}
 
-	PotentialDynamicSubsumers(Collection<MatchableNode> allMatchables) {
+	PotentialDynamicPatternSubsumers(Collection<PatternNode> allPatternNodes) {
 
-		this.allMatchables = allMatchables;
+		this.allPatternNodes = allPatternNodes;
 	}
 
-	Collection<NodeDefinition> getPotentialsFor(NodePattern request) {
+	Collection<DefinitionPattern> getPotentialsFor(NodePattern request) {
 
-		List<NodeDefinition> all = new ArrayList<NodeDefinition>();
+		List<DefinitionPattern> all = new ArrayList<DefinitionPattern>();
 
 		all.addAll(simplePotentials.getPotentialsFor(request));
 

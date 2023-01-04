@@ -29,8 +29,8 @@ package rekon.core;
  */
 public class DynamicOps {
 
-	private PatternSubsumptions patternSubsumptions;
-	private DynamicClassifier classifier;
+	private PatternSubsumersFinder patternSubsumers;
+	private PatternSubsumedsFinder patternSubsumeds;
 
 	public DynamicOpsHandler createHandler(NodeName nodeName) {
 
@@ -44,12 +44,12 @@ public class DynamicOps {
 
 	DynamicOps(Ontology ontology) {
 
-		patternSubsumptions = new PatternSubsumptions(ontology);
-		classifier = new DynamicClassifier(ontology);
+		patternSubsumers = new PatternSubsumersFinder(ontology);
+		patternSubsumeds = new PatternSubsumedsFinder(ontology);
 	}
 
 	private DynamicPatternOpsHandler createPatternOpsHandler(PatternCreator patternCreator) {
 
-		return new DynamicPatternOpsHandler(patternSubsumptions, classifier, patternCreator);
+		return new DynamicPatternOpsHandler(patternSubsumers, patternSubsumeds, patternCreator);
 	}
 }

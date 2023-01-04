@@ -34,13 +34,14 @@ public class PropertyChain {
 	private ObjectPropertyName sup;
 	private List<ObjectPropertyName> subsTail = new ArrayList<ObjectPropertyName>();
 
+	public PropertyChain(ObjectPropertyName transitiveProp) {
+
+		this(transitiveProp, transitiveProp, Collections.singletonList(transitiveProp));
+	}
+
 	public PropertyChain(ObjectPropertyName sup, List<ObjectPropertyName> subs) {
 
-		this.sup = sup;
-
-		subsTail = subs.subList(1, subs.size());
-
-		subs.get(0).addChain(this);
+		this(sup, subs.get(0), subs.subList(1, subs.size()));
 	}
 
 	SomeRelation createLinkRelation(ObjectValue target) {
@@ -61,5 +62,16 @@ public class PropertyChain {
 	boolean lastTailSub(int index) {
 
 		return index == subsTail.size() - 1;
+	}
+
+	private PropertyChain(
+				ObjectPropertyName sup,
+				ObjectPropertyName subsHead,
+				List<ObjectPropertyName> subsTail) {
+
+		this.sup = sup;
+		this.subsTail = subsTail;
+
+		subsHead.addChain(this);
 	}
 }

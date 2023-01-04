@@ -35,7 +35,7 @@ abstract class NameClassificationHandler {
 
 	abstract boolean isSubsumer(Name test);
 
-	boolean anyNewSubsumers(NodeMatcher matcher) {
+	boolean anyNewSubsumers(NodeSelector selector) {
 
 		return false;
 	}

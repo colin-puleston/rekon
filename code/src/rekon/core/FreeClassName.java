@@ -43,6 +43,11 @@ abstract class FreeClassName extends ClassName {
 		return false;
 	}
 
+	public boolean rootName() {
+
+		return false;
+	}
+
 	FreeClassName(int index) {
 
 		this.index = index;

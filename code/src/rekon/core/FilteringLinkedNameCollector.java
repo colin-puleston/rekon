@@ -64,7 +64,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (n.dynamic()) {
 
-				for (NodePattern d : n.getDefinitions()) {
+				for (NodePattern d : n.getDefinitionPatterns()) {
 
 					d.collectNames(this);
 				}
@@ -81,13 +81,20 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (!linkNames.contains(n)) {
 
-				NodePattern p = n.getProfile();
+				if (!n.getDisjunctionNodes().isEmpty()) {
 
-				if (p != null) {
+					collectRoot();
+				}
+				else {
 
-					linkNames.push(n);
-					p.collectNames(this);
-					linkNames.pop();
+					NodePattern p = n.getProfilePattern();
+
+					if (p != null) {
+
+						linkNames.push(n);
+						p.collectNames(this);
+						linkNames.pop();
+					}
 				}
 			}
 		}

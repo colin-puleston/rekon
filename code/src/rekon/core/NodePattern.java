@@ -47,7 +47,7 @@ public class NodePattern extends Expression {
 
 		PatternSignatureRelationCollector() {
 
-			this(new NodeVisitMonitor(getSingleName()));
+			this(new NodeVisitMonitor(names));
 		}
 
 		PatternSignatureRelationCollector(NodeVisitMonitor visitMonitor) {
@@ -61,7 +61,10 @@ public class NodePattern extends Expression {
 
 			if (signatureMode != SignatureMode.RESTRICTED) {
 
-				collectFromSubsumers(getSingleName());
+				for (Name n : names.getNames()) {
+
+					collectFromSubsumers((NodeName)n);
+				}
 			}
 
 			if (signatureMode != SignatureMode.EXPANDING) {
@@ -131,6 +134,16 @@ public class NodePattern extends Expression {
 		this.relations.addAll(relations);
 	}
 
+	public NodeName toSingleName() {
+
+		if (names.size() == 1 && relations.isEmpty()) {
+
+			return (NodeName)names.getFirstName();
+		}
+
+		return null;
+	}
+
 	void setRestrictedSignature() {
 
 		signatureMode = SignatureMode.RESTRICTED;
@@ -186,26 +199,6 @@ public class NodePattern extends Expression {
 		return new NodePattern(names, newRelations);
 	}
 
-	NodeName getSingleName() {
-
-		if (names.size() > 1) {
-
-			throw new Error("Multiple names!");
-		}
-
-		return (NodeName)names.get(0);
-	}
-
-	NodeName toSingleName() {
-
-		if (names.size() == 1 && relations.isEmpty()) {
-
-			return (NodeName)names.getFirstName();
-		}
-
-		return null;
-	}
-
 	Names getNames() {
 
 		return names;
@@ -218,13 +211,13 @@ public class NodePattern extends Expression {
 
 	void registerDefinitionRefedNames() {
 
-		registerAsDefinitionRefed(names, PatternNameRole.ROOT);
+		registerAsDefinitionRefed(names, MatchRole.PATTERN_ROOT);
 
 		for (Relation r : relations) {
 
-			r.getProperty().registerAsDefinitionRefed(PatternNameRole.RELATION);
+			r.getProperty().registerAsDefinitionRefed(MatchRole.PATTERN_RELATION);
 
-			registerAsDefinitionRefed(r.getTargetNodes(), PatternNameRole.VALUE);
+			registerAsDefinitionRefed(r.getTargetNodes(), MatchRole.PATTERN_VALUE);
 		}
 	}
 
@@ -263,18 +256,21 @@ public class NodePattern extends Expression {
 
 	boolean classifiable(boolean initialPass) {
 
-		if (getSingleName().classifierTargetRoot(initialPass)) {
+		for (Name n : names.getNames()) {
 
-			return true;
+			if (((NodeName)n).classifyTargetPatternRoot(initialPass)) {
+
+				return true;
+			}
 		}
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getProperty().classifierTargetProperty()) {
+			if (r.getProperty().classifyTargetPatternProperty()) {
 
 				for (Name tn : r.getTargetNodes().getNames()) {
 
-					if (((NodeName)tn).classifierTargetValue(initialPass)) {
+					if (((NodeName)tn).classifyTargetPatternValue(initialPass)) {
 
 						return true;
 					}
@@ -289,7 +285,7 @@ public class NodePattern extends Expression {
 
 		for (Name n : names.getNames()) {
 
-			if (n.anyNewSubsumers(NodeMatcher.STRUCTURED)) {
+			if (n.anyNewSubsumers(NodeSelector.STRUCTURED)) {
 
 				return true;
 			}
@@ -355,7 +351,7 @@ public class NodePattern extends Expression {
 		}
 	}
 
-	private void registerAsDefinitionRefed(Names regNames, PatternNameRole role) {
+	private void registerAsDefinitionRefed(Names regNames, MatchRole role) {
 
 		for (Name n : regNames.getNames()) {
 

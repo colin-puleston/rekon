@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2022 Colin Puleston
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * Permission is hereby granted, free of charge, to new person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -31,71 +31,199 @@ import java.util.*;
  */
 class DynamicClassifier {
 
-	private PotentialDynamicSubsumers definedsFilter;
+	private PotentialDynamicPatternSubsumers definedPatternsFilter;
+	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
+
+	private DefaultClassifier defaultClassifier = new DefaultClassifier();
 	private SubsumptionChecker subsumptionChecker = new SubsumptionChecker();
 
-	DynamicClassifier(Ontology ontology) {
+	private abstract class ClassifierOption {
 
-		definedsFilter = new PotentialDynamicSubsumers(ontology.getMatchables().getAll());
-	}
+		private boolean newSubsumptions = false;
 
-	void classify(MatchableNodes dynamicMatchables, Collection<MatchableNode> defineds) {
+		NameSet classify(DynamicPattern pattern) {
 
-		for (MatchableNode c : dynamicMatchables.getAll()) {
+			classifyMatchables(pattern.getPatternMatchables());
 
-			classifyCandidate(c, defineds);
+			return pattern.getPatternClass().getClassifier().getSubsumers();
 		}
-	}
 
-	private void classifyCandidate(MatchableNode c, Collection<MatchableNode> defineds) {
+		void updateNewSubsumptions(boolean newSubsumption) {
 
-		do {
+			if (newSubsumption && !newSubsumptions) {
 
-			if (defineds == null) {
-
-				checkCandidateSubsumptions(c);
-			}
-			else {
-
-				checkCandidateSubsumptions(c, defineds);
+				newSubsumptions = true;
 			}
 		}
-		while (checkReclassifiable(c));
-	}
 
-	private void checkCandidateSubsumptions(MatchableNode c) {
+		private void classifyMatchables(DynamicMatchableNodes matchables) {
 
-		for (NodeDefinition defn : definedsFilter.getPotentialsFor(c.getProfile())) {
+			for (MatchableNode<?> candidate : matchables.getAllMatchableNodes()) {
 
-			subsumptionChecker.check(defn, c);
+				exhaustivelyClassify(candidate);
+
+				if (!newSubsumptions) {
+
+					break;
+				}
+
+				newSubsumptions = false;
+			}
+		}
+
+		private void exhaustivelyClassify(MatchableNode<?> candidate) {
+
+			do {
+
+				classify(candidate);
+			}
+			while (checkReclassifiable(candidate));
+		}
+
+		abstract void classify(MatchableNode<?> candidate);
+
+		private boolean checkReclassifiable(MatchableNode<?> candidate) {
+
+			NodeName n = candidate.getName();
+
+			if (n.getNodeClassifier().absorbNewInferredSubsumers()) {
+
+				NodePattern p = n.getProfilePattern();
+
+				if (p != null && p.potentialSignatureUpdates()) {
+
+					p.resetSignatureRefs();
+				}
+
+				return true;
+			}
+
+			return false;
 		}
 	}
 
-	private void checkCandidateSubsumptions(MatchableNode c, Collection<MatchableNode> defineds) {
+	private class DefaultClassifier extends ClassifierOption {
 
-		for (MatchableNode defined : defineds) {
+		private TypeClassifier typeClassifier = new TypeClassifier();
+
+		private class TypeClassifier extends MatchableNodeVisitor {
+
+			void visit(PatternNode candidate) {
+
+				classify(candidate);
+			}
+
+			void visit(DisjunctionNode candidate) {
+
+				classify(candidate);
+			}
+		}
+
+		void classify(MatchableNode<?> candidate) {
+
+			candidate.acceptVisitor(typeClassifier);
+		}
+
+		private void classify(PatternNode candidate) {
+
+			NodePattern profile = candidate.getProfile();
+
+			for (DefinitionPattern defn : definedPatternsFilter.getPotentialsFor(profile)) {
+
+				updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+			}
+		}
+
+		private void classify(DisjunctionNode candidate) {
+
+			for (DisjunctionNode defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
+
+				updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+			}
+		}
+	}
+
+	private class PreFilteredDefinedsClassifier extends ClassifierOption {
+
+		private Collection<MatchableNode<?>> preFilteredDefineds;
+
+		private class TypeClassifier extends MatchableNodeVisitor {
+
+			private MatchableNode<?> candidate;
+
+			TypeClassifier(MatchableNode<?> defined, MatchableNode<?> candidate) {
+
+				this.candidate = candidate;
+
+				defined.acceptVisitor(this);
+			}
+
+			void visit(PatternNode defined) {
+
+				classify(defined, (PatternNode)candidate);
+			}
+
+			void visit(DisjunctionNode defined) {
+
+				classify(defined, (DisjunctionNode)candidate);
+			}
+		}
+
+		PreFilteredDefinedsClassifier(Collection<MatchableNode<?>> preFilteredDefineds) {
+
+			this.preFilteredDefineds = preFilteredDefineds;
+		}
+
+		void classify(MatchableNode<?> candidate) {
+
+			for (MatchableNode<?> defined : preFilteredDefineds) {
+
+				if (defined.getClass() == candidate.getClass()) {
+
+					new TypeClassifier(defined, candidate);
+				}
+			}
+		}
+
+		private void classify(PatternNode defined, PatternNode candidate) {
 
 			for (NodePattern defn : defined.getDefinitions()) {
 
-				subsumptionChecker.check(defined, defn, c);
+				updateNewSubsumptions(subsumptionChecker.check(defined, defn, candidate));
 			}
+		}
+
+		private void classify(DisjunctionNode defined, DisjunctionNode candidate) {
+
+			updateNewSubsumptions(subsumptionChecker.check(defined, candidate));
 		}
 	}
 
-	private boolean checkReclassifiable(MatchableNode c) {
+	DynamicClassifier(Ontology ontology) {
 
-		if (c.getName().getNodeClassifier().absorbNewInferredSubsumers()) {
+		MatchableNodes matchables = ontology.getMatchables();
 
-			NodePattern p = c.getProfile();
+		definedPatternsFilter = createDefinedPatternsFilter(matchables);
+		disjunctionDefnsFilter = createDisjunctionDefnsFilter(matchables);
+	}
 
-			if (p.potentialSignatureUpdates()) {
+	NameSet classify(DynamicPattern pattern) {
 
-				p.resetSignatureRefs();
-			}
+		return defaultClassifier.classify(pattern);
+	}
 
-			return true;
-		}
+	NameSet classify(DynamicPattern pattern, Collection<MatchableNode<?>> preFilteredDefineds) {
 
-		return false;
+		return new PreFilteredDefinedsClassifier(preFilteredDefineds).classify(pattern);
+	}
+
+	private PotentialDynamicPatternSubsumers createDefinedPatternsFilter(MatchableNodes matchables) {
+
+		return new PotentialDynamicPatternSubsumers(matchables.getAllPatternNodes());
+	}
+
+	private PotentialDisjunctionSubsumers createDisjunctionDefnsFilter(MatchableNodes matchables) {
+
+		return new PotentialDisjunctionSubsumers(matchables.getDisjunctionNodes());
 	}
 }

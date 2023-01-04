@@ -33,86 +33,40 @@ public class MatchStructures {
 
 	private MatchableNodes matchables;
 
-	private FreeClasses patternClasses;
+	private FreeClasses freeClasses;
 	private FreeClasses impliedClasses;
 
-	public void setNodeProfile(NodeName name, Collection<Relation> relations) {
+	public void checkAddPatternNode(NodeName name, Collection<Relation> relations) {
 
-		if (name.getClassifier().multipleAsserteds() || !relations.isEmpty()) {
+		if (name.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
 
-			matchables.add(name, new NodePattern(name, relations));
+			matchables.addPatternNode(name, new NodePattern(name, relations));
 		}
 	}
 
-	public void addClassDefinitions(ClassName name, Collection<NodePattern> defns) {
+	public void addPatternNodeDefinition(ClassName name, NodePattern defn) {
 
-		matchables.addDefinitions(name, defns);
+		matchables.addPatternNodeDefinition(name, defn);
 	}
 
-	public ClassName addPatternClass(NodePattern defn) {
+	public void addDisjunctionClass(ClassName name, Collection<? extends NodeName> disjuncts) {
 
-		return addFreeClass(patternClasses, null, Collections.singleton(defn));
+		matchables.addDisjunctionNode(name, disjuncts);
 	}
 
-	public ClassName addImpliedClass(NodePattern defn) {
+	public ClassName addIntermediateClass() {
 
-		return addImpliedClass(null, defn);
+		return freeClasses.createIntermediate();
 	}
 
-	public ClassName addImpliedClass(ClassName sup, NodePattern defn) {
+	public ClassName addGCIImpliedClass() {
 
-		return addImpliedClass(sup, Collections.singleton(defn));
+		return freeClasses.createGCIImplied();
 	}
 
-	public ClassName addImpliedClass(Collection<NodePattern> defns) {
-
-		return addImpliedClass(null, defns);
-	}
-
-	public void addImpliedClasses(ClassName sup, Collection<NodePattern> defns) {
-
-		for (NodePattern defn : defns) {
-
-			addImpliedClass(sup, defn);
-		}
-	}
-
-	MatchStructures(MatchableNodes matchables, FreeClasses patternClasses) {
-
-		this(matchables, patternClasses, null);
-	}
-
-	MatchStructures(
-		MatchableNodes matchables,
-		FreeClasses patternClasses,
-		FreeClasses impliedClasses) {
+	MatchStructures(MatchableNodes matchables, FreeClasses freeClasses) {
 
 		this.matchables = matchables;
-		this.patternClasses = patternClasses;
-		this.impliedClasses = impliedClasses;
-	}
-
-	private ClassName addImpliedClass(
-							ClassName sup,
-							Collection<NodePattern> defns) {
-
-		if (impliedClasses == null) {
-
-			throw new Error("Cannot add implied-class definitions!");
-		}
-
-		return addFreeClass(impliedClasses, sup, defns);
-	}
-
-	private ClassName addFreeClass(
-							FreeClasses freeClasses,
-							ClassName sup,
-							Collection<NodePattern> defns) {
-
-		ClassName n = freeClasses.create(sup, defns);
-
-		matchables.addDefinitions(n, defns);
-
-		return n;
+		this.freeClasses = freeClasses;
 	}
 }

@@ -31,141 +31,70 @@ import java.util.*;
  */
 class MatchableNodes {
 
-	private List<MatchableNode> matchables = new ArrayList<MatchableNode>();
-	private List<NodeName> names = new ArrayList<NodeName>();
+	private List<PatternNode> patternNodes = new ArrayList<PatternNode>();
+	private List<DisjunctionNode> disjunctionNodes = new ArrayList<DisjunctionNode>();
 
-	private class InverseRelationsAdder {
+	void addPatternNode(NodeName name, NodePattern profile) {
 
-		private List<MatchableNode> newMatchables = new ArrayList<MatchableNode>();
+		addPatternNode(new PatternNode(name, profile));
+	}
 
-		InverseRelationsAdder() {
+	void addPatternNodeDefinition(ClassName name, NodePattern defn) {
 
-			for (MatchableNode m : matchables) {
+		resolvePatternNode(name).addDefinition(defn);
+	}
 
-				if (m.getName() instanceof IndividualName) {
+	void addDisjunctionNode(ClassName name, Collection<? extends NodeName> disjuncts) {
 
-					addAnyFor(m);
-				}
-			}
+		addDisjunctionNode(new DisjunctionNode(name, disjuncts));
+	}
 
-			for (MatchableNode m : newMatchables) {
+	List<PatternNode> getAllPatternNodes() {
 
-				add(m);
-			}
-		}
+		return patternNodes;
+	}
 
-		private void addAnyFor(MatchableNode m) {
+	List<PatternNode> getDefinedPatternNodes() {
 
-			for (Relation r : m.getProfile().getDirectRelations()) {
+		List<PatternNode> defineds = new ArrayList<PatternNode>();
 
-				if (r instanceof SomeRelation) {
+		for (PatternNode n : patternNodes) {
 
-					addAnyFor(m.getName(), (SomeRelation)r);
-				}
-			}
-		}
+			if (n.hasDefinitions()) {
 
-		private void addAnyFor(NodeName forwardSource, SomeRelation forwardRel) {
-
-			Collection<ObjectPropertyName> ips = forwardRel.getObjectProperty().getInverses();
-
-			if (!ips.isEmpty()) {
-
-				NodeName invSource = forwardRel.getNodeTarget().toSingleName();
-
-				if (invSource != null) {
-
-					MatchableNode m = resolveMatchable(invSource);
-					NodeValue invTarget = new NodeValue(forwardSource);
-
-					for (ObjectPropertyName ip : ips) {
-
-						m.addProfileRelation(new SomeRelation(ip, invTarget));
-					}
-				}
+				defineds.add(n);
 			}
 		}
 
-		private MatchableNode resolveMatchable(NodeName name) {
-
-			MatchableNode m = name.getMatchable();
-
-			if (m == null) {
-
-				m = new MatchableNode(name, new NodePattern(name));
-
-				newMatchables.add(m);
-			}
-
-			return m;
-		}
+		return defineds;
 	}
 
-	MatchableNode add(NodeName name, NodePattern profile) {
+	List<DisjunctionNode> getDisjunctionNodes() {
 
-		return add(new MatchableNode(name, profile));
+		return disjunctionNodes;
 	}
 
-	MatchableNode addDefinitions(ClassName name, Collection<NodePattern> defns) {
+	void addPatternNode(PatternNode node) {
 
-		MatchableNode m = name.getMatchable();
+		patternNodes.add(node);
+	}
 
-		if (m == null) {
+	void addDisjunctionNode(DisjunctionNode node) {
 
-			m = add(name, new NodePattern(name));
-		}
+		disjunctionNodes.add(node);
+	}
 
-		for (NodePattern defn : defns) {
+	private PatternNode resolvePatternNode(NodeName name) {
 
-			m.addDefinition(defn);
+		PatternNode n = name.getPatternNode();
+
+		if (n == null) {
+
+			n = new PatternNode(name);
+
+			addPatternNode(n);
 		}
 
-		return m;
-	}
-
-	void addAllInverseRelations() {
-
-		new InverseRelationsAdder();
-	}
-
-	void resetAllPotentiallyUpdatedSignatureRefs() {
-
-		List<MatchableNode> potentiallyUpdateds = new ArrayList<MatchableNode>();
-
-		for (MatchableNode m : matchables) {
-
-			if (m.getProfile().potentialSignatureUpdates()) {
-
-				potentiallyUpdateds.add(m);
-			}
-		}
-
-		for (MatchableNode m : potentiallyUpdateds) {
-
-			m.getProfile().resetSignatureRefs();
-		}
-	}
-
-	List<MatchableNode> getAll() {
-
-		return matchables;
-	}
-
-	List<MatchableNode> copyAll() {
-
-		return new ArrayList<MatchableNode>(matchables);
-	}
-
-	List<NodeName> getAllNames() {
-
-		return names;
-	}
-
-	private MatchableNode add(MatchableNode m) {
-
-		matchables.add(m);
-		names.add(m.getName());
-
-		return m;
+		return n;
 	}
 }

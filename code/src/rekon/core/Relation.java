@@ -50,6 +50,11 @@ public abstract class Relation extends Expression {
 		return target;
 	}
 
+	boolean allRelation() {
+
+		return false;
+	}
+
 	boolean subsumes(Relation r) {
 
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
@@ -79,7 +84,7 @@ public abstract class Relation extends Expression {
 
 	void render(PatternRenderer r) {
 
-		r.addLine(property.getLabel());
+		r.addLine(property.getLabel() + "(" + renderRelationType() + ")");
 
 		target.render(r.nextLevel());
 	}
@@ -87,5 +92,10 @@ public abstract class Relation extends Expression {
 	private boolean subsumesOtherOfType(Relation r) {
 
 		return property.subsumes(r.property) && target.subsumes(r.target);
+	}
+
+	private String renderRelationType() {
+
+		return allRelation() ? "All" : "Some";
 	}
 }

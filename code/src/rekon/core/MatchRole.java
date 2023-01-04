@@ -24,68 +24,22 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public abstract class ObjectPropertyName extends PropertyName {
+enum MatchRole {
 
-	private Set<ObjectPropertyName> inverses = new HashSet<ObjectPropertyName>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	PATTERN_ROOT, PATTERN_RELATION, PATTERN_VALUE, DISJUNCT;
 
-	public void setSymmetric() {
+	static MatchRole rankToPatternRole(int rank) {
 
-		inverses.add(this);
-	}
+		MatchRole role = values()[rank];
 
-	public void addInverses(Collection<ObjectPropertyName> invs) {
+		if (role == DISJUNCT) {
 
-		inverses.addAll(invs);
-
-		for (ObjectPropertyName inv : invs) {
-
-			inv.inverses.add(this);
-		}
-	}
-
-	public void addChain(PropertyChain chain) {
-
-		chains.add(chain);
-	}
-
-	Collection<ObjectPropertyName> getInverses() {
-
-		return inverses;
-	}
-
-	boolean anyChains() {
-
-		if (!chains.isEmpty()) {
-
-			return true;
+			throw new Error("Cannot be applied to role: " + DISJUNCT);
 		}
 
-		for (Name s : getSubsumers().getNames()) {
-
-			if (!((ObjectPropertyName)s).chains.isEmpty()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	Collection<PropertyChain> getAllChains() {
-
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
-
-		for (Name s : getSubsumers().getNames()) {
-
-			allChains.addAll(((ObjectPropertyName)s).chains);
-		}
-
-		return allChains;
+		return role;
 	}
 }

@@ -29,57 +29,55 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends ObjectValue {
+class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 
-	private NodeName node;
+	private Names disjuncts;
 
-	public NodeValue(NodeName node) {
+	public String toString() {
 
-		this.node = node;
+		return getClass().getSimpleName() + "(" + getDisjunctLabelsList() + ")";
 	}
 
-	NodeValue asNodeValue() {
+	DisjunctionNode(ClassName name, Collection<? extends NodeName> disjuncts) {
 
-		return this;
+		super(name);
+
+		this.disjuncts = new NameList(disjuncts);
+
+		for (Name d : disjuncts) {
+
+			if (!name.dynamic()) {
+
+				d.addSubsumer(name);
+			}
+
+			d.registerAsDefinitionRefed(MatchRole.DISJUNCT);
+		}
 	}
 
-	NodeName getValueNode() {
+	Names getDisjuncts() {
 
-		return node;
+		return disjuncts;
 	}
 
-	void collectNames(NameCollector collector) {
+	boolean subsumes(DisjunctionNode other) {
 
-		collector.collectForValueNode(node);
+		for (Name d : other.disjuncts.getNames()) {
+
+			if (!subsumesNode((NodeName)d)) {
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
-	boolean subsumesOther(Value v) {
+	boolean classifiable(boolean initialPass) {
 
-		NodeValue nv = v.asNodeValue();
+		for (Name d : disjuncts.getNames()) {
 
-		return nv != null && subsumesOtherNode(nv.node);
-	}
-
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return node.anyNewSubsumers(selector);
-	}
-
-	void render(PatternRenderer r) {
-
-		r.addLine(node.getLabel());
-	}
-
-	private boolean subsumesOtherNode(NodeName on) {
-
-		return node.dynamic() ? subsumesAnyMatchable(on) : node.subsumes(on);
-	}
-
-	private boolean subsumesAnyMatchable(NodeName on) {
-
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
-
-			if (subsumesMatchable(om)) {
+			if (((NodeName)d).classifyTargetDisjunct(initialPass)) {
 
 				return true;
 			}
@@ -88,16 +86,43 @@ public class NodeValue extends ObjectValue {
 		return false;
 	}
 
-	private boolean subsumesMatchable(MatchableNode<?> om) {
+	void acceptVisitor(MatchableNodeVisitor visitor) {
 
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
+		visitor.visit(this);
+	}
 
-			if (m.subsumesMatchable(om)) {
+	Class<DisjunctionNode> getMatchableClass() {
+
+		return DisjunctionNode.class;
+	}
+
+	private boolean subsumesNode(NodeName n) {
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (d.subsumes(n)) {
 
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	private String getDisjunctLabelsList() {
+
+		String s = new String();
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (!s.isEmpty()) {
+
+				s += ',';
+			}
+
+			s += d.getLabel();
+		}
+
+		return s;
 	}
 }

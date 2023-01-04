@@ -24,27 +24,31 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-class NodeDefinition {
+class DynamicMatchableNodes extends MatchableNodes {
 
-	private NodeName nodeName;
-	private NodePattern definition;
+	private List<MatchableNode<?>> matchableNodes = new ArrayList<MatchableNode<?>>();
 
-	NodeDefinition(NodeName nodeName, NodePattern definition) {
+	void addPatternNode(PatternNode node) {
 
-		this.nodeName = nodeName;
-		this.definition = definition;
+		super.addPatternNode(node);
+
+		matchableNodes.add(node);
 	}
 
-	NodeName getNodeName() {
+	void addDisjunctionNode(DisjunctionNode node) {
 
-		return nodeName;
+		super.addDisjunctionNode(node);
+
+		matchableNodes.add(node);
 	}
 
-	NodePattern getDefinition() {
+	List<MatchableNode<?>> getAllMatchableNodes() {
 
-		return definition;
+		return matchableNodes;
 	}
 }

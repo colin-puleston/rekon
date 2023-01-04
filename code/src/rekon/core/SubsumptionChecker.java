@@ -29,31 +29,57 @@ package rekon.core;
  */
 class SubsumptionChecker {
 
-	void check(MatchableNode defined, NodePattern defn, MatchableNode candidate) {
+	boolean check(PatternNode defined, NodePattern defn, PatternNode candidate) {
 
-		check(defined.getName(), defn, candidate);
+		return check(defined.getName(), defn, candidate);
 	}
 
-	void check(NodeDefinition defn, MatchableNode candidate) {
+	boolean check(DefinitionPattern defn, PatternNode candidate) {
 
-		check(defn.getNodeName(), defn.getDefinition(), candidate);
+		return check(defn.getNode(), defn.getDefinition(), candidate);
 	}
 
-	boolean subsumes(NodePattern defn, NodePattern profile) {
+	boolean check(DisjunctionNode defn, DisjunctionNode candidate) {
+
+		if (defn != candidate && subsumption(defn, candidate)) {
+
+			addSubsumption(defn.getName(), candidate.getName());
+
+			return true;
+		}
+
+		return false;
+	}
+
+	boolean subsumption(NodePattern defn, NodePattern profile) {
 
 		return defn.subsumes(profile);
 	}
 
-	private void check(NodeName definedName, NodePattern defn, MatchableNode candidate) {
+	boolean subsumption(DisjunctionNode defn, DisjunctionNode candidate) {
+
+		return defn.subsumes(candidate);
+	}
+
+	private boolean check(NodeName definedName, NodePattern defn, PatternNode candidate) {
 
 		NodeName cn = candidate.getName();
 
 		if (cn != definedName && !definedName.subsumes(cn)) {
 
-			if (subsumes(defn, candidate.getProfile())) {
+			if (subsumption(defn, candidate.getProfile())) {
 
-				cn.getNodeClassifier().addNewInferredSubsumer(definedName);
+				addSubsumption(definedName, cn);
+
+				return true;
 			}
 		}
+
+		return false;
+	}
+
+	private void addSubsumption(NodeName subsumer, NodeName subsumed) {
+
+		subsumed.getNodeClassifier().addNewInferredSubsumer(subsumer);
 	}
 }

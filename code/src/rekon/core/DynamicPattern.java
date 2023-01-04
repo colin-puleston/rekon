@@ -24,68 +24,68 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public abstract class ObjectPropertyName extends PropertyName {
+class DynamicPattern {
 
-	private Set<ObjectPropertyName> inverses = new HashSet<ObjectPropertyName>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	private NodePattern pattern;
+	private ClassName patternClass = null;
 
-	public void setSymmetric() {
+	private DynamicMatchableNodes patternMatchables = new DynamicMatchableNodes();
+	private MatchStructures matchStructures = createMatchStructures();
 
-		inverses.add(this);
+	DynamicPattern(PatternCreator patternCreator) {
+
+		pattern = patternCreator.createNestedPatterns(matchStructures);
 	}
 
-	public void addInverses(Collection<ObjectPropertyName> invs) {
+	NodePattern getPattern() {
 
-		inverses.addAll(invs);
-
-		for (ObjectPropertyName inv : invs) {
-
-			inv.inverses.add(this);
-		}
+		return pattern;
 	}
 
-	public void addChain(PropertyChain chain) {
+	ClassName getPatternClass() {
 
-		chains.add(chain);
+		checkPatternClassInitialised();
+
+		return patternClass;
 	}
 
-	Collection<ObjectPropertyName> getInverses() {
+	DynamicMatchableNodes getPatternMatchables() {
 
-		return inverses;
+		checkPatternClassInitialised();
+
+		return patternMatchables;
 	}
 
-	boolean anyChains() {
+	private MatchStructures createMatchStructures() {
 
-		if (!chains.isEmpty()) {
+		return new MatchStructures(patternMatchables, new DynamicClasses());
+	}
 
-			return true;
-		}
+	private void processAllDynamicNamesPostAdditions() {
 
-		for (Name s : getSubsumers().getNames()) {
+		for (PatternNode n : patternMatchables.getAllPatternNodes()) {
 
-			if (!((ObjectPropertyName)s).chains.isEmpty()) {
+			NodeName nn = n.getName();
 
-				return true;
+			if (nn.dynamic()) {
+
+				nn.getClassifier().onPostAssertionAdditions();
 			}
 		}
-
-		return false;
 	}
 
-	Collection<PropertyChain> getAllChains() {
+	private void checkPatternClassInitialised() {
 
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
+		if (patternClass == null) {
 
-		for (Name s : getSubsumers().getNames()) {
+			patternClass = matchStructures.addIntermediateClass();
 
-			allChains.addAll(((ObjectPropertyName)s).chains);
+			matchStructures.addPatternNodeDefinition(patternClass, pattern);
+
+			processAllDynamicNamesPostAdditions();
 		}
-
-		return allChains;
 	}
 }

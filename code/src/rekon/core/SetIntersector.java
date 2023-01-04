@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class SetIntersector {
+class SetIntersector<E> {
 
 	static private class SmallestFirstComparator<E> implements Comparator<Collection<E>> {
 
@@ -77,5 +77,17 @@ class SetIntersector {
 		out.addAll(in);
 
 		return out;
+	}
+
+	private List<Collection<E>> sets = new ArrayList<Collection<E>>();
+
+	void addSet(Collection<E> set) {
+
+		sets.add(set);
+	}
+
+	Collection<E> intersectAll() {
+
+		return intersect(sets);
 	}
 }

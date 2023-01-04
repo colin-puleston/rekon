@@ -109,9 +109,9 @@ class NodeNameClassifier extends NameClassifier {
 
 		abstract boolean configureForNextExpansion();
 
-		boolean anyNewInferences(NodeMatcher matcher) {
+		boolean anyNewInferences(NodeSelector selector) {
 
-			return matcher.anyMatches(allNewInferreds);
+			return selector.anyMatches(allNewInferreds);
 		}
 
 		boolean absorbNewInferences() {
@@ -128,7 +128,7 @@ class NodeNameClassifier extends NameClassifier {
 			return true;
 		}
 
-		Names getMatchableSubsumerLatestInferreds(Name s) {
+		Names getMatchableNodeSubsumerLatestInferreds(Name s) {
 
 			return getInferredSubsumers(s).getMatchableNodeLatestInferreds();
 		}
@@ -192,7 +192,7 @@ class NodeNameClassifier extends NameClassifier {
 
 				if (matchableNode(s)) {
 
-					addSubsumerExpansions(getMatchableSubsumerLatestInferreds(s));
+					addSubsumerExpansions(getMatchableNodeSubsumerLatestInferreds(s));
 				}
 			}
 		}
@@ -225,7 +225,7 @@ class NodeNameClassifier extends NameClassifier {
 
 				if (matchableNode(s)) {
 
-					expandForNewMatchableSubsumers(s);
+					expandForNewMatchableNodeSubsumers(s);
 				}
 			}
 		}
@@ -240,9 +240,9 @@ class NodeNameClassifier extends NameClassifier {
 			throw new Error("Unexpected method invocation!");
 		}
 
-		private void expandForNewMatchableSubsumers(Name s) {
+		private void expandForNewMatchableNodeSubsumers(Name s) {
 
-			for (Name ss : getMatchableSubsumerLatestInferreds(s).getNames()) {
+			for (Name ss : getMatchableNodeSubsumerLatestInferreds(s).getNames()) {
 
 				if (newSubsumer(ss)) {
 
@@ -272,9 +272,9 @@ class NodeNameClassifier extends NameClassifier {
 		return inferredSubsumers.absorbNewInferences();
 	}
 
-	boolean anyNewSubsumers(NodeMatcher matcher) {
+	boolean anyNewSubsumers(NodeSelector selector) {
 
-		return inferredSubsumers.anyNewInferences(matcher);
+		return inferredSubsumers.anyNewInferences(selector);
 	}
 
 	private boolean newSubsumer(Name s) {

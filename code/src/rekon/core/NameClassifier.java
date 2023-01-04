@@ -32,7 +32,7 @@ class NameClassifier extends NameClassificationHandler {
 	private Name name;
 	private NameSet subsumers = new NameSet();
 
-	private boolean multipleAsserteds = false;
+	private boolean multipleAssertedSubsumers = false;
 
 	NameClassifier(Name name) {
 
@@ -66,11 +66,6 @@ class NameClassifier extends NameClassificationHandler {
 
 	void onPostAssertionAdditions() {
 
-		if (subsumers.size() > 1) {
-
-			multipleAsserteds = true;
-		}
-
 		for (Name s : subsumers.copyNames()) {
 
 			expandAssertedsFrom(s);
@@ -97,23 +92,31 @@ class NameClassifier extends NameClassificationHandler {
 		return subsumers.contains(test);
 	}
 
-	boolean multipleAsserteds() {
+	boolean multipleAssertedSubsumers() {
 
-		return multipleAsserteds;
+		return multipleAssertedSubsumers;
 	}
 
 	private void expandAssertedsFrom(Name current) {
 
 		for (Name next : current.getSubsumers().getNames()) {
 
-			if (checkAddAssertedSubsumer(next)) {
+			if (checkAddSubsumer(next)) {
 
 				expandAssertedsFrom(next);
 			}
 		}
 	}
 
-	private boolean checkAddAssertedSubsumer(Name subsumer) {
+	private void checkAddAssertedSubsumer(Name subsumer) {
+
+		if (checkAddSubsumer(subsumer)) {
+
+			multipleAssertedSubsumers |= subsumers.size() > 1;
+		}
+	}
+
+	private boolean checkAddSubsumer(Name subsumer) {
 
 		return subsumer != name && subsumers.add(subsumer);
 	}

@@ -29,25 +29,27 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class ImpliedOntologyClasses extends FreeOntologyClasses {
+class PotentialOntologyPatternSubsumeds extends PotentialPatternSubsumeds {
 
-	static private class ImpliedOntologyName extends FreeClassName {
+	PotentialOntologyPatternSubsumeds(List<PatternNode> allOptions) {
 
-		ImpliedOntologyName(int index) {
+		super(allOptions);
 
-			super(index);
-		}
+		registerDefaultNestedOptionRanks();
 	}
 
-	private MatchableNodes matchables;
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-	ImpliedOntologyClasses(Collection<NodeName> ontologyNodes) {
-
-		super(ontologyNodes);
+		return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
 	}
 
-	ClassName createClassName(int index) {
+	List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		return new ImpliedOntologyName(index);
+		return new FilteringNameCollector(true).collect(defn);
+	}
+
+	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
+
+		return new FilteringNameCollector(false).collect(profile);
 	}
 }

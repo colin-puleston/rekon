@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class SomeRelation extends ObjectRelation {
 
-	static private class SignatureExpander {
+	static private class ChainBasedSignatureExpander {
 
 		private NodeVisitMonitor visitMonitor;
 
@@ -40,24 +40,25 @@ public class SomeRelation extends ObjectRelation {
 		private List<SomeRelation> passExpansions = new ArrayList<SomeRelation>();
 		private List<SomeRelation> nextPassExpanders;
 
-		private abstract class ExpansionTypeCollector {
+		private class ExpansionCollector {
 
-			void collectFromNested(SomeRelation current) {
+			private PropertyChain chain;
+			private int tailSubsIndex = 0;
+
+			ExpansionCollector(PropertyChain chain) {
+
+				this.chain = chain;
+			}
+
+			void collectFromTargets(SomeRelation current) {
 
 				Value tv = current.getTarget();
 
 				if (tv instanceof NodeValue) {
 
-					NodeName tn = ((NodeValue)tv).toSingleName();
-
-					if (tn != null) {
-
-						collectFromTarget(tn);
-					}
+					collectFromTarget(((NodeValue)tv).getValueNode());
 				}
 			}
-
-			abstract void collectFrom(SomeRelation current);
 
 			private void collectFromTarget(NodeName target) {
 
@@ -65,55 +66,12 @@ public class SomeRelation extends ObjectRelation {
 
 					if (r instanceof SomeRelation) {
 
-						collectFrom((SomeRelation)r);
+						collectFromRelation((SomeRelation)r);
 					}
 				}
 			}
 
-			private Set<Relation> getAllFromTarget(NodeName target) {
-
-				SignatureRelationCollector collector = createCollector();
-
-				collector.collectFromName(target);
-
-				return collector.getCollected();
-			}
-
-			private SignatureRelationCollector createCollector() {
-
-				return new SignatureRelationCollector(visitMonitor);
-			}
-		}
-
-		private class TransitivityBasedCollector extends ExpansionTypeCollector {
-
-			private PropertyName transProp;
-
-			TransitivityBasedCollector(PropertyName transProp) {
-
-				this.transProp = transProp;
-			}
-
-			void collectFrom(SomeRelation current) {
-
-				if (transProp.subsumes(current.getProperty())) {
-
-					addExpansion(current);
-				}
-			}
-		}
-
-		private class ChainBasedCollector extends ExpansionTypeCollector {
-
-			private PropertyChain chain;
-			private int tailSubsIndex = 0;
-
-			ChainBasedCollector(PropertyChain chain) {
-
-				this.chain = chain;
-			}
-
-			void collectFrom(SomeRelation current) {
+			private void collectFromRelation(SomeRelation current) {
 
 				if (chain.hasTailSub(current.getProperty(), tailSubsIndex)) {
 
@@ -124,10 +82,19 @@ public class SomeRelation extends ObjectRelation {
 					else {
 
 						tailSubsIndex++;
-						collectFromNested(current);
+						collectFromTargets(current);
 						tailSubsIndex--;
 					}
 				}
+			}
+
+			private Set<Relation> getAllFromTarget(NodeName target) {
+
+				SignatureRelationCollector c = new SignatureRelationCollector(visitMonitor);
+
+				c.collectFromName(target);
+
+				return c.getCollected();
 			}
 
 			private SomeRelation createLinkRelation(SomeRelation endSub) {
@@ -136,17 +103,17 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		SignatureExpander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
+		ChainBasedSignatureExpander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
 
 			this.visitMonitor = visitMonitor;
 
 			nextPassExpanders = Collections.singletonList(relation);
 
-			List<ExpansionTypeCollector> typeCollectors = getExpansionTypeCollectors(relation);
+			List<ExpansionCollector> collectors = getExpansionCollectors(relation);
 
-			if (!typeCollectors.isEmpty()) {
+			if (!collectors.isEmpty()) {
 
-				collectExpansions(typeCollectors);
+				collectExpansions(collectors);
 			}
 		}
 
@@ -155,15 +122,15 @@ public class SomeRelation extends ObjectRelation {
 			return allExpansions;
 		}
 
-		private void collectExpansions(List<ExpansionTypeCollector> typeCollectors) {
+		private void collectExpansions(List<ExpansionCollector> collectors) {
 
 			while (true) {
 
-				for (ExpansionTypeCollector typeCol : typeCollectors) {
+				for (ExpansionCollector c : collectors) {
 
 					for (SomeRelation r : nextPassExpanders) {
 
-						typeCol.collectFromNested(r);
+						c.collectFromTargets(r);
 					}
 				}
 
@@ -177,22 +144,16 @@ public class SomeRelation extends ObjectRelation {
 			}
 		}
 
-		private List<ExpansionTypeCollector> getExpansionTypeCollectors(SomeRelation relation) {
+		private List<ExpansionCollector> getExpansionCollectors(SomeRelation relation) {
 
-			List<ExpansionTypeCollector> typeCollectors = new ArrayList<ExpansionTypeCollector>();
-			ObjectPropertyName transProp = relation.lookForMostGeneralTransitiveProperty();
-
-			if (transProp != null) {
-
-				typeCollectors.add(new TransitivityBasedCollector(transProp));
-			}
+			List<ExpansionCollector> collectors = new ArrayList<ExpansionCollector>();
 
 			for (PropertyChain chain : relation.getAllChains()) {
 
-				typeCollectors.add(new ChainBasedCollector(chain));
+				collectors.add(new ExpansionCollector(chain));
 			}
 
-			return typeCollectors;
+			return collectors;
 		}
 
 		private void addExpansion(SomeRelation relation) {
@@ -214,29 +175,24 @@ public class SomeRelation extends ObjectRelation {
 
 	Names getTargetNodes() {
 
-		return getNodeTarget().getDisjuncts();
+		return new NameList(getNodeTarget().getValueNode());
 	}
 
 	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
 
-		return new SignatureExpander(this, visitMonitor).getAllExpansions();
+		return new ChainBasedSignatureExpander(this, visitMonitor).getAllExpansions();
 	}
 
 	boolean potentialNewSignatureRelations() {
 
 		ObjectPropertyName prop = getObjectProperty();
 
-		if (prop.transitive() || prop.anyChains()) {
+		if (prop.anyChains()) {
 
-			return getTarget().anyNewSubsumers(NodeMatcher.structureFor(prop));
+			return getTarget().anyNewSubsumers(NodeSelector.structureFor(prop));
 		}
 
 		return false;
-	}
-
-	private ObjectPropertyName lookForMostGeneralTransitiveProperty() {
-
-		return getObjectProperty().lookForMostGeneralTransitiveProperty();
 	}
 
 	private Collection<PropertyChain> getAllChains() {

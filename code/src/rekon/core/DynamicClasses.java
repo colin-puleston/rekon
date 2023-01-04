@@ -27,38 +27,23 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class ProfileMatchNames {
+class DynamicClasses extends FreeClasses {
 
-	static Names resolve(Names leafNames) {
+	private class DynamicIntermediateClassName extends IntermediateClassName {
 
-		return resolve(leafNames, null);
+		boolean dynamic() {
+
+			return true;
+		}
 	}
 
-	static Names resolve(Names leafNames, PatternNameRole defnRole) {
+	ClassName createIntermediate() {
 
-		NameSet resolved = new NameSet();
-
-		for (Name n : leafNames.getNames()) {
-
-			checkAdd(resolved, n, defnRole);
-
-			for (Name s : n.getSubsumers().getNames()) {
-
-				if (!s.rootName()) {
-
-					checkAdd(resolved, s, defnRole);
-				}
-			}
-		}
-
-		return resolved;
+		return new DynamicIntermediateClassName();
 	}
 
-	static private void checkAdd(Names resolved, Name name, PatternNameRole defnRole) {
+	ClassName createGCIImplied() {
 
-		if (defnRole == null || name.definitionRefed(defnRole)) {
-
-			resolved.add(name);
-		}
+		throw new Error("Cannot create dynamic GCI-implied classes!");
 	}
 }

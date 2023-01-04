@@ -33,47 +33,141 @@ class OntologyClassifier {
 
 	private Ontology ontology;
 
-	private List<MatchableNode> defineds = new ArrayList<MatchableNode>();
+	private List<PatternNode> allPatternNodes;
+	private List<PatternNode> definedPatternNodes;
+
+	private List<DisjunctionNode> disjunctionNodes;
+	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
+
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
 
-	private abstract class ClassificationPassConfig {
+	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
-		private List<MatchableNode> candidates = new ArrayList<MatchableNode>();
+		boolean subsumption(NodePattern defn, NodePattern profile) {
 
-		ClassificationPassConfig(boolean initialPass) {
+			return defn.subsumesRelations(profile);
+		}
+	}
 
-			for (MatchableNode m : ontology.getMatchables().getAll()) {
+	private class PatternSubsumedsChecker extends MultiThreadListProcessor<PatternNode> {
 
-				NodePattern p = m.getProfile();
+		private PotentialPatternSubsumeds candidatesFilter;
 
-				if (potentialCandidate(p) && p.classifiable(initialPass)) {
+		PatternSubsumedsChecker(List<PatternNode> candidates) {
 
-					candidates.add(m);
+			candidatesFilter = new PotentialOntologyPatternSubsumeds(candidates);
+
+			invokeListProcesses(definedPatternNodes);
+		}
+
+		void processElement(PatternNode n) {
+
+			checkDefinedSubsumeds(n);
+		}
+
+		private void checkDefinedSubsumeds(PatternNode defined) {
+
+			for (NodePattern defn : defined.getDefinitions()) {
+
+				for (PatternNode c : candidatesFilter.getPotentialsFor(defn)) {
+
+					subsumptionChecker.check(defined, defn, c);
+				}
+			}
+		}
+	}
+
+	private class DisjunctionSubsumersChecker extends MultiThreadListProcessor<DisjunctionNode> {
+
+		DisjunctionSubsumersChecker(List<DisjunctionNode> candidates) {
+
+			invokeListProcesses(candidates);
+		}
+
+		void processElement(DisjunctionNode n) {
+
+			checkCandidateSubsumers(n);
+		}
+
+		private void checkCandidateSubsumers(DisjunctionNode candidate) {
+
+			for (DisjunctionNode defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
+
+				subsumptionChecker.check(defn, candidate);
+			}
+		}
+	}
+
+	private abstract class PassConfig {
+
+		private List<PatternNode> patternMatchCandidates = new ArrayList<PatternNode>();
+		private List<DisjunctionNode> disjunctionMatchCandidates = new ArrayList<DisjunctionNode>();
+
+		PassConfig(boolean initialPass) {
+
+			findPatternMatchCandidates(initialPass);
+			findDisjunctionMatchCandidates(initialPass);
+		}
+
+		boolean potentialInferences() {
+
+			return !patternMatchCandidates.isEmpty() || !disjunctionMatchCandidates.isEmpty();
+		}
+
+		void checkSubsumptions() {
+
+			new PatternSubsumedsChecker(patternMatchCandidates);
+			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
+		}
+
+		abstract boolean potentialPatternMatchCandidate(NodePattern p);
+
+		private void findPatternMatchCandidates(boolean initialPass) {
+
+			for (PatternNode n : allPatternNodes) {
+
+				NodePattern p = n.getProfile();
+
+				if (potentialPatternMatchCandidate(p) && p.classifiable(initialPass)) {
+
+					patternMatchCandidates.add(n);
 				}
 			}
 		}
 
-		boolean anyCandidates() {
+		private void findDisjunctionMatchCandidates(boolean initialPass) {
 
-			return !candidates.isEmpty();
+			for (DisjunctionNode d : disjunctionNodes) {
+
+				if (d.classifiable(initialPass)) {
+
+					disjunctionMatchCandidates.add(d);
+				}
+			}
 		}
-
-		List<MatchableNode> getCandidates() {
-
-			return candidates;
-		}
-
-		abstract boolean potentialCandidate(NodePattern p);
 	}
 
-	private class RestrictedSignaturesInitialPassConfig extends ClassificationPassConfig {
+	private class DefaultPassConfig extends PassConfig {
 
-		RestrictedSignaturesInitialPassConfig() {
+		DefaultPassConfig() {
+
+			super(false);
+		}
+
+		boolean potentialPatternMatchCandidate(NodePattern p) {
+
+			return true;
+		}
+	}
+
+	private class PatternRestrictionPassConfig extends PassConfig {
+
+		PatternRestrictionPassConfig() {
 
 			super(true);
 		}
 
-		boolean potentialCandidate(NodePattern p) {
+		boolean potentialPatternMatchCandidate(NodePattern p) {
 
 			p.setRestrictedSignature();
 
@@ -81,100 +175,16 @@ class OntologyClassifier {
 		}
 	}
 
-	private class ExpandedSignaturesInitialPassConfig extends ClassificationPassConfig {
+	private class PatternExpansionPassConfig extends PassConfig {
 
-		ExpandedSignaturesInitialPassConfig() {
+		PatternExpansionPassConfig() {
 
 			super(true);
 		}
 
-		boolean potentialCandidate(NodePattern p) {
+		boolean potentialPatternMatchCandidate(NodePattern p) {
 
 			return p.setExpandedSignature();
-		}
-	}
-
-	private class SubsequentPassConfig extends ClassificationPassConfig {
-
-		SubsequentPassConfig() {
-
-			super(false);
-		}
-
-		boolean potentialCandidate(NodePattern p) {
-
-			return true;
-		}
-	}
-
-	private class ClassificationPass {
-
-		private PotentialSubsumeds candidatesFilter;
-
-		private class SubsumptionsChecker extends MultiThreadListProcessor<MatchableNode> {
-
-			SubsumptionsChecker() {
-
-				invokeListProcesses(defineds);
-			}
-
-			void processElement(MatchableNode m) {
-
-				checkDefinedSubsumptions(m);
-			}
-		}
-
-		ClassificationPass(ClassificationPassConfig passConfig) {
-
-			candidatesFilter = new PotentialOntologySubsumeds(passConfig.getCandidates());
-		}
-
-		ClassificationPassConfig perfomPass() {
-
-			new SubsumptionsChecker();
-
-			expandAllNewInferences();
-
-			ClassificationPassConfig nextPassConfig = new SubsequentPassConfig();
-
-			absorbAllNewInferences();
-			resetPotentiallyUpdatedSignatureRefs();
-
-			return nextPassConfig;
-		}
-
-		private void checkDefinedSubsumptions(MatchableNode defined) {
-
-			for (NodePattern defn : defined.getDefinitions()) {
-
-				for (MatchableNode c : candidatesFilter.getPotentialsFor(defn)) {
-
-					subsumptionChecker.check(defined, defn, c);
-				}
-			}
-		}
-
-		private void expandAllNewInferences() {
-
-			NodeNameClassifier.expandAllNewInferredSubsumers(ontology.getNodeNames());
-		}
-
-		private void absorbAllNewInferences() {
-
-			NodeNameClassifier.absorbAllNewInferredSubsumers(ontology.getNodeNames());
-		}
-
-		private void resetPotentiallyUpdatedSignatureRefs() {
-
-			ontology.getMatchables().resetAllPotentiallyUpdatedSignatureRefs();
-		}
-	}
-
-	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
-
-		boolean subsumes(NodePattern defn, NodePattern profile) {
-
-			return defn.subsumesRelations(profile);
 		}
 	}
 
@@ -182,30 +192,72 @@ class OntologyClassifier {
 
 		this.ontology = ontology;
 
-		for (MatchableNode m : ontology.getMatchables().getAll()) {
+		MatchableNodes matchables = ontology.getMatchables();
 
-			if (m.hasDefinitions()) {
+		allPatternNodes = matchables.getAllPatternNodes();
+		definedPatternNodes = matchables.getDefinedPatternNodes();
 
-				defineds.add(m);
-			}
-		}
+		disjunctionNodes = matchables.getDisjunctionNodes();
+		disjunctionDefnsFilter = new PotentialDisjunctionSubsumers(disjunctionNodes);
 
 		classify();
 	}
 
 	private void classify() {
 
-		perfomExhaustivePasses(new RestrictedSignaturesInitialPassConfig());
-		perfomExhaustivePasses(new ExpandedSignaturesInitialPassConfig());
+		perfomExhaustivePasses(new PatternRestrictionPassConfig());
+		perfomExhaustivePasses(new PatternExpansionPassConfig());
 
 		NameClassification.completeAllClassifications(ontology.getAllNames());
 	}
 
-	private void perfomExhaustivePasses(ClassificationPassConfig passConfig) {
+	private void perfomExhaustivePasses(PassConfig passConfig) {
 
-		while (passConfig.anyCandidates()) {
+		while (passConfig.potentialInferences()) {
 
-			passConfig = new ClassificationPass(passConfig).perfomPass();
+			passConfig = perfomPass(passConfig);
+		}
+	}
+
+	private PassConfig perfomPass(PassConfig config) {
+
+		config.checkSubsumptions();
+
+		expandAllNewInferences();
+
+		PassConfig nextPassConfig = new DefaultPassConfig();
+
+		absorbAllNewInferences();
+		resetPotentiallyUpdatedSignatureRefs();
+
+		return nextPassConfig;
+	}
+
+	private void expandAllNewInferences() {
+
+		NodeNameClassifier.expandAllNewInferredSubsumers(ontology.getNodeNames());
+	}
+
+	private void absorbAllNewInferences() {
+
+		NodeNameClassifier.absorbAllNewInferredSubsumers(ontology.getNodeNames());
+	}
+
+	private void resetPotentiallyUpdatedSignatureRefs() {
+
+		List<PatternNode> potentiallyUpdateds = new ArrayList<PatternNode>();
+
+		for (PatternNode n : allPatternNodes) {
+
+			if (n.getProfile().potentialSignatureUpdates()) {
+
+				potentiallyUpdateds.add(n);
+			}
+		}
+
+		for (PatternNode n : potentiallyUpdateds) {
+
+			n.getProfile().resetSignatureRefs();
 		}
 	}
 }

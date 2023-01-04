@@ -29,7 +29,7 @@ package rekon.core;
  */
 public abstract class PropertyName extends Name {
 
-	boolean classifierTargetProperty() {
+	boolean classifyTargetPatternProperty() {
 
 		return anyDefinitionRefs();
 	}

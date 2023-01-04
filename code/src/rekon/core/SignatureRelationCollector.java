@@ -89,7 +89,7 @@ class SignatureRelationCollector {
 
 		if (visitMonitor.startVisit(name)) {
 
-			NodePattern p = name.getProfile();
+			NodePattern p = name.getProfilePattern();
 
 			if (p != null) {
 

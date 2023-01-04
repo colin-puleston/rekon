@@ -81,9 +81,9 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 		List<NodePattern> profs = new ArrayList<NodePattern>();
 
-		for (MatchableNode m : getApplicableMatchables()) {
+		for (PatternNode n : getApplicablePatternNodes()) {
 
-			profs.add(m.getProfile());
+			profs.add(n.getProfile());
 		}
 
 		return profs;
@@ -95,9 +95,9 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 		defns.add(new NodePattern(name));
 
-		for (MatchableNode m : getApplicableMatchables()) {
+		for (PatternNode n : getApplicablePatternNodes()) {
 
-			defns.addAll(m.getDefinitions());
+			defns.addAll(n.getDefinitions());
 		}
 
 		return defns;
@@ -108,32 +108,32 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		return name != null ? name.getSubs(type, direct) : Names.NO_NAMES;
 	}
 
-	private Collection<MatchableNode> getApplicableMatchables() {
+	private Collection<PatternNode> getApplicablePatternNodes() {
 
 		if (name == null) {
 
 			return Collections.emptyList();
 		}
 
-		List<MatchableNode> ms = new ArrayList<MatchableNode>();
+		List<PatternNode> applicables = new ArrayList<PatternNode>();
 
-		checkAddMatchable(ms, name);
+		checkAddPatternNode(applicables, name);
 
 		for (Name en : name.getEquivalents().getNames()) {
 
-			checkAddMatchable(ms, (NodeName)en);
+			checkAddPatternNode(applicables, (NodeName)en);
 		}
 
-		return ms;
+		return applicables;
 	}
 
-	private void checkAddMatchable(Collection<MatchableNode> ms, NodeName n) {
+	private void checkAddPatternNode(Collection<PatternNode> applicables, NodeName n) {
 
-		MatchableNode m = n.getMatchable();
+		PatternNode pn = n.getPatternNode();
 
-		if (m != null) {
+		if (pn != null) {
 
-			ms.add(m);
+			applicables.add(pn);
 		}
 	}
 }

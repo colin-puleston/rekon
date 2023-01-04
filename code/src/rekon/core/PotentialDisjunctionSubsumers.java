@@ -29,63 +29,49 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class ObjectPropertyName extends PropertyName {
+class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionNode> {
 
-	private Set<ObjectPropertyName> inverses = new HashSet<ObjectPropertyName>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	private List<DisjunctionNode> definitions;
 
-	public void setSymmetric() {
+	PotentialDisjunctionSubsumers(List<DisjunctionNode> definitions) {
 
-		inverses.add(this);
+		this.definitions = definitions;
+
+		registerSingleOptionRank();
 	}
 
-	public void addInverses(Collection<ObjectPropertyName> invs) {
+	Collection<DisjunctionNode> getPotentialsFor(DisjunctionNode request) {
 
-		inverses.addAll(invs);
-
-		for (ObjectPropertyName inv : invs) {
-
-			inv.inverses.add(this);
-		}
+		return getPotentialsFor(disjunctsToSingletonNamesList(request));
 	}
 
-	public void addChain(PropertyChain chain) {
+	List<DisjunctionNode> getAllOptions() {
 
-		chains.add(chain);
+		return definitions;
 	}
 
-	Collection<ObjectPropertyName> getInverses() {
+	List<Names> getOptionMatchNames(DisjunctionNode option, int startRank, int stopRank) {
 
-		return inverses;
+		return disjunctsToSingletonNamesList(option);
 	}
 
-	boolean anyChains() {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers().getNames()) {
-
-			if (!((ObjectPropertyName)s).chains.isEmpty()) {
-
-				return true;
-			}
-		}
-
-		return false;
+		return names;
 	}
 
-	Collection<PropertyChain> getAllChains() {
+	Names resolveNamesForRetrieval(Names names, int rank) {
 
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
+		return MatchNamesExpander.expand(names, MatchRole.DISJUNCT);
+	}
 
-		for (Name s : getSubsumers().getNames()) {
+	boolean unionRankOptionsForRetrieval() {
 
-			allChains.addAll(((ObjectPropertyName)s).chains);
-		}
+		return true;
+	}
 
-		return allChains;
+	private List<Names> disjunctsToSingletonNamesList(DisjunctionNode d) {
+
+		return Collections.singletonList(d.getDisjuncts());
 	}
 }

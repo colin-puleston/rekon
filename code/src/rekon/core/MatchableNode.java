@@ -29,38 +29,15 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class MatchableNode {
+abstract class MatchableNode<M extends MatchableNode<?>> {
 
 	private NodeName name;
 
-	private NodePattern profile;
-	private Set<NodePattern> definitions = new HashSet<NodePattern>();
-
-	public String toString() {
-
-		return getClass().getSimpleName() + "(" + name.getLabel() + ")";
-	}
-
-	MatchableNode(NodeName name, NodePattern profile) {
+	MatchableNode(NodeName name) {
 
 		this.name = name;
-		this.profile = profile;
 
-		name.setMatchable(this);
-	}
-
-	void addDefinition(NodePattern defn) {
-
-		definitions.add(defn);
-
-		profile = profile.combineWith(defn);
-
-		defn.registerDefinitionRefedNames();
-	}
-
-	void addProfileRelation(Relation relation) {
-
-		profile = profile.extend(relation);
+		name.addMatchableNode(this);
 	}
 
 	NodeName getName() {
@@ -68,36 +45,18 @@ class MatchableNode {
 		return name;
 	}
 
-	NodePattern getProfile() {
+	boolean subsumesMatchable(MatchableNode<?> other) {
 
-		return profile;
+		Class<M> cls = getMatchableClass();
+
+		return other.getClass() == cls && subsumes(cls.cast(other));
 	}
 
-	boolean hasDefinitions() {
+	abstract boolean subsumes(M other);
 
-		return !definitions.isEmpty();
-	}
+	abstract boolean classifiable(boolean initialPass);
 
-	Collection<NodePattern> getDefinitions() {
+	abstract void acceptVisitor(MatchableNodeVisitor visitor);
 
-		return definitions;
-	}
-
-	boolean subsumedBy(NodePattern pattern) {
-
-		return pattern.subsumes(profile);
-	}
-
-	boolean subsumes(NodePattern desc) {
-
-		for (NodePattern d : definitions) {
-
-			if (d.subsumes(desc)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
+	abstract Class<M> getMatchableClass();
 }

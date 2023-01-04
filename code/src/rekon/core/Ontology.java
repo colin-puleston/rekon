@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class Ontology {
 
-	private List<Name> allNames;
+	private List<Name> allNames = new ArrayList<Name>();
 	private List<NodeName> nodeNames = new ArrayList<NodeName>();
 
 	private Collection<ObjectPropertyName> objectPropertyNames;
@@ -50,14 +50,16 @@ public class Ontology {
 		objectPropertyNames = initialiser.getObjectPropertyNames();
 		dataPropertyNames = initialiser.getDataPropertyNames();
 
-		processMappedNamesPostAdditions();
-
 		initialiser.createNodeProfiles();
 		initialiser.createClassDefinitions();
 
-		matchables.addAllInverseRelations();
+		new InverseRelationsAdder(matchables);
 
-		allNames = getAllCurrentNames();
+		allNames.addAll(nodeNames);
+		allNames.addAll(objectPropertyNames);
+		allNames.addAll(dataPropertyNames);
+
+		processAllNamesPostAdditions();
 
 		new OntologyClassifier(this);
 	}
@@ -82,30 +84,16 @@ public class Ontology {
 		return matchables;
 	}
 
-	private void processMappedNamesPostAdditions() {
+	private void processAllNamesPostAdditions() {
 
-		for (Name n : getAllCurrentNames()) {
+		for (Name n : allNames) {
 
 			n.getClassifier().onPostAssertionAdditions();
 		}
 	}
 
-	private List<Name> getAllCurrentNames() {
-
-		List<Name> allCurrent = new ArrayList<Name>();
-
-		allCurrent.addAll(nodeNames);
-		allCurrent.addAll(objectPropertyNames);
-		allCurrent.addAll(dataPropertyNames);
-
-		return allCurrent;
-	}
-
 	private MatchStructures createMatchStructures() {
 
-		return new MatchStructures(
-						matchables,
-						new OntologyPatternClasses(nodeNames),
-						new ImpliedOntologyClasses(nodeNames));
+		return new MatchStructures(matchables, new FreeOntologyClasses(nodeNames));
 	}
 }

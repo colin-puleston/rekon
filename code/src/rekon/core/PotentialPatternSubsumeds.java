@@ -24,15 +24,46 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-enum PatternNameRole {
+abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternNode> {
 
-	ROOT, RELATION, VALUE;
+	private List<PatternNode> allOptions;
 
-	static PatternNameRole rankToRole(int rank) {
+	PotentialPatternSubsumeds(List<PatternNode> allOptions) {
 
-		return values()[rank];
+		this.allOptions = allOptions;
 	}
+
+	Collection<PatternNode> getPotentialsFor(NodePattern request) {
+
+		return getPotentialsFor(getRankedDefinitionNames(request));
+	}
+
+	List<PatternNode> getAllOptions() {
+
+		return allOptions;
+	}
+
+	List<Names> getOptionMatchNames(PatternNode option, int startRank, int stopRank) {
+
+		return getRankedProfileNames(option.getProfile(), startRank, stopRank);
+	}
+
+	Names resolveNamesForRetrieval(Names names, int rank) {
+
+		return names;
+	}
+
+	boolean unionRankOptionsForRetrieval() {
+
+		return false;
+	}
+
+	abstract List<Names> getRankedDefinitionNames(NodePattern defn);
+
+	abstract List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank);
 }

@@ -35,8 +35,6 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 	static private SubClassesResolver subClassesResolver = new SubClassesResolver();
 	static private InstancesResolver instancesResolver = new InstancesResolver();
 
-	static private EquivCheckDefineds equivCheckDefineds = new EquivCheckDefineds();
-
 	static private abstract class ResultsResolver {
 
 		Names resolve(NameSet inferreds, boolean direct) {
@@ -53,7 +51,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		abstract Names filter(Names inferreds);
 
-		private NameSet toDirects(NameSet inferreds) {
+		private Names toDirects(NameSet inferreds) {
 
 			for (Name s : inferreds.copyNames()) {
 
@@ -126,107 +124,49 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		}
 	}
 
-	static private class EquivCheckDefineds {
+	private PatternSubsumersFinder subsumersFinder;
+	private PatternSubsumedsFinder subsumedsFinder;
 
-		Collection<MatchableNode> deriveFromSubsumeds(NameSet subsumeds) {
-
-			Set<MatchableNode> potentials = new HashSet<MatchableNode>();
-
-			for (Name s : subsumeds.getNames()) {
-
-				findAllFrom((NodeName)s, potentials);
-			}
-
-			return potentials;
-		}
-
-		private void findAllFrom(NodeName n, Set<MatchableNode> potentials) {
-
-			findFrom(n, potentials);
-
-			for (Name ss : n.getSubs(ClassName.class, false).getNames()) {
-
-				findFrom((NodeName)ss, potentials);
-			}
-		}
-
-		private void findFrom(NodeName n, Set<MatchableNode> potentials) {
-
-			MatchableNode m = n.getMatchable();
-
-			if (m != null && m.hasDefinitions() && potentials.add(m)) {
-
-				findFrom(m, potentials);
-			}
-		}
-
-		private void findFrom(MatchableNode m, Set<MatchableNode> potentials) {
-
-			for (NodePattern d : m.getDefinitions()) {
-
-				for (Name n : getDefinitionMatchNames(d).getNames()) {
-
-					if (n instanceof NodeName) {
-
-						findFrom((NodeName)n, potentials);
-					}
-				}
-			}
-		}
-
-		private Names getDefinitionMatchNames(NodePattern defn) {
-
-			return new SimpleNameCollector(true).collect(defn);
-		}
-	}
-
-	private PatternSubsumptions subsumptions;
-	private DynamicClassifier classifier;
-
-	private NodePattern pattern;
-
-	private MatchableNodes matchables = new MatchableNodes();
-	private MatchStructures matchStructures;
+	private DynamicPattern dynamicPattern;
+	private NodePattern nodePattern;
 
 	public Names getEquivalents() {
 
-		return pattern != null ? inferEquivs() : Names.NO_NAMES;
+		return nodePattern != null ? inferEquivs() : Names.NO_NAMES;
 	}
 
 	public Names getSupers(boolean direct) {
 
-		return pattern != null ? inferSupers(direct) : Names.NO_NAMES;
+		return nodePattern != null ? inferSupers(direct) : Names.NO_NAMES;
 	}
 
 	public Names getSubs(boolean direct) {
 
-		return pattern != null ? inferSubs(direct) : Names.NO_NAMES;
+		return nodePattern != null ? inferSubs(direct) : Names.NO_NAMES;
 	}
 
 	public Names getInstances(boolean direct) {
 
-		return pattern != null ? inferInstances(direct) : Names.NO_NAMES;
+		return nodePattern != null ? inferInstances(direct) : Names.NO_NAMES;
 	}
 
 	DynamicPatternOpsHandler(
-		PatternSubsumptions subsumptions,
-		DynamicClassifier classifier,
+		PatternSubsumersFinder subsumersFinder,
+		PatternSubsumedsFinder subsumedsFinder,
 		PatternCreator patternCreator) {
 
-		this.subsumptions = subsumptions;
-		this.classifier = classifier;
+		this.subsumersFinder = subsumersFinder;
+		this.subsumedsFinder = subsumedsFinder;
 
-		matchStructures = createMatchStructures();
-		pattern = patternCreator.createNestedPatterns(matchStructures);
-
-		matchables.addAllInverseRelations();
+		dynamicPattern = new DynamicPattern(patternCreator);
+		nodePattern = dynamicPattern.getPattern();
 	}
 
 	DynamicOpsHandler checkResolveToNodeOpsHandler() {
 
-		if (pattern != null) {
+		if (nodePattern != null) {
 
-			NodeName n = pattern.toSingleName();
+			NodeName n = nodePattern.toSingleName();
 
 			if (n != null) {
 
@@ -239,8 +179,8 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	Collection<NodePattern> getProfiles() {
 
-		return pattern != null
-				? Collections.singletonList(pattern)
+		return nodePattern != null
+				? Collections.singletonList(nodePattern)
 				: Collections.emptyList();
 	}
 
@@ -255,7 +195,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		if (subsumeds.isEmpty()) {
 
-			return Names.NO_NAMES;
+			return NameSet.NO_NAMES;
 		}
 
 		return inferEquivsForSubsumeds(subsumeds);
@@ -263,7 +203,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private Names inferSupers(boolean direct) {
 
-		NameSet subsumers = inferSubsumers(null);
+		NameSet subsumers = inferSubsumers();
 
 		if (subsumers.isEmpty()) {
 
@@ -286,10 +226,10 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		if (subsumeds.isEmpty()) {
 
-			return Names.NO_NAMES;
+			return NameSet.NO_NAMES;
 		}
 
-		Names equivs = inferEquivsForSubsumeds(subsumeds);
+		NameSet equivs = inferEquivsForSubsumeds(subsumeds);
 
 		if (!equivs.isEmpty()) {
 
@@ -305,19 +245,19 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		if (subs.isEmpty()) {
 
-			return Names.NO_NAMES;
+			return NameSet.NO_NAMES;
 		}
 
 		return instancesResolver.resolve(subs, direct);
 	}
 
-	private Names inferEquivsForSubsumeds(NameSet subsumeds) {
+	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {
 
-		Names subsumers = inferSubsumersForSubsumeds(subsumeds);
+		NameSet subsumers = inferSubsumersForSubsumeds(subsumeds);
 
 		if (subsumers.isEmpty()) {
 
-			return Names.NO_NAMES;
+			return NameSet.NO_NAMES;
 		}
 
 		NameSet equivs = new NameSet(subsumeds);
@@ -327,37 +267,28 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return equivs;
 	}
 
-	private Names inferSubsumersForSubsumeds(NameSet subsumeds) {
+	private NameSet inferSubsumers() {
 
-		return inferSubsumers(equivCheckDefineds.deriveFromSubsumeds(subsumeds));
+		return subsumersFinder.inferSubsumers(dynamicPattern);
 	}
 
-	private NameSet inferSubsumers(Collection<MatchableNode> preFilteredDefineds) {
+	private NameSet inferSubsumersForSubsumeds(NameSet subsumeds) {
 
-		ClassName n = matchStructures.addPatternClass(pattern);
-
-		classifier.classify(matchables, preFilteredDefineds);
-
-		return n.getClassifier().getSubsumers();
+		return subsumersFinder.inferSubsumersForSubsumeds(dynamicPattern, subsumeds);
 	}
 
 	private NameSet inferSubsumedClasses() {
 
-		return subsumptions.inferSubsumedClasses(pattern);
+		return subsumedsFinder.inferSubsumedClasses(nodePattern);
 	}
 
 	private NameSet inferSubsumedClasses(NameSet filterNames) {
 
-		return subsumptions.inferSubsumedClasses(pattern, filterNames);
+		return subsumedsFinder.inferSubsumedClasses(nodePattern, filterNames);
 	}
 
 	private NameSet inferSubsumedInstances() {
 
-		return subsumptions.inferSubsumedInstances(pattern);
-	}
-
-	private MatchStructures createMatchStructures() {
-
-		return new MatchStructures(matchables, new DynamicPatternClasses());
+		return subsumedsFinder.inferSubsumedInstances(nodePattern);
 	}
 }

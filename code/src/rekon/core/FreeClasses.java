@@ -24,34 +24,31 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
 abstract class FreeClasses {
 
-	private int index = 0;
+	private int intermediatesIndex = 0;
+	private int cgiImpliedsIndex = 0;
 
-	ClassName create(ClassName sup, Collection<NodePattern> defns) {
+	class IntermediateClassName extends FreeClassName {
 
-		ClassName n = createClassName(index++);
-		NameClassifier classifier = n.getClassifier();
+		IntermediateClassName() {
 
-		if (sup != null) {
-
-			classifier.addAssertedSubsumer(sup);
+			super(cgiImpliedsIndex++);
 		}
-
-		for (NodePattern defn : defns) {
-
-			classifier.addAssertedSubsumers(defn.getNames());
-		}
-
-		classifier.onPostAssertionAdditions();
-
-		return n;
 	}
 
-	abstract ClassName createClassName(int index);
+	class GCIImpliedClassName extends FreeClassName {
+
+		GCIImpliedClassName() {
+
+			super(intermediatesIndex++);
+		}
+	}
+
+	abstract ClassName createIntermediate();
+
+	abstract ClassName createGCIImplied();
 }

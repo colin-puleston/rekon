@@ -29,23 +29,44 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class OntologyPatternClasses extends FreeOntologyClasses {
+class PotentialDynamicPatternSubsumeds extends PotentialPatternSubsumeds {
 
-	static private class OntologyPatternName extends FreeClassName {
+	private int nextOptionRegRank = 0;
+	private boolean optionRegComplete = false;
 
-		OntologyPatternName(int index) {
+	PotentialDynamicPatternSubsumeds(List<PatternNode> allOptions) {
 
-			super(index);
+		super(allOptions);
+	}
+
+	Names resolveNamesForRegistration(Names names, int rank) {
+
+		return MatchNamesExpander.expand(names);
+	}
+
+	List<Names> getRankedDefinitionNames(NodePattern defn) {
+
+		List<Names> defnNames = new FilteringLinkedNameCollector(true).collect(defn);
+
+		checkExpandOptionRanksRegister(defnNames);
+
+		return defnNames;
+	}
+
+	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
+
+		return new FilteringLinkedNameCollector(false, startRank, stopRank).collect(profile);
+	}
+
+	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
+
+		int stopRank = defnNames.size();
+
+		if (!optionRegComplete && stopRank > nextOptionRegRank) {
+
+			registerOptionRanks(nextOptionRegRank, stopRank);
+
+			nextOptionRegRank = stopRank;
 		}
-	}
-
-	OntologyPatternClasses(Collection<NodeName> ontologyNodes) {
-
-		super(ontologyNodes);
-	}
-
-	ClassName createClassName(int index) {
-
-		return new OntologyPatternName(index);
 	}
 }

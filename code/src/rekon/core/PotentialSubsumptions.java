@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialPatternMatches<O> {
+abstract class PotentialSubsumptions<O> {
 
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
@@ -158,7 +158,7 @@ abstract class PotentialPatternMatches<O> {
 
 		OptionCollector collectOptionsFor(Names rankNames) {
 
-			OptionCollector rankOptions = createOptionCollector();
+			OptionCollector rankOptions = createRankOptionsCollector();
 
 			for (Name n : rankNames.getNames()) {
 
@@ -205,7 +205,7 @@ abstract class PotentialPatternMatches<O> {
 			return true;
 		}
 
-		private OptionCollector createOptionCollector() {
+		private OptionCollector createRankOptionsCollector() {
 
 			return unionRankOptionsForRetrieval()
 						? new OptionUnion()
@@ -296,8 +296,6 @@ abstract class PotentialPatternMatches<O> {
 		}
 	}
 
-	abstract Collection<O> getPotentialsFor(NodePattern request);
-
 	void registerSingleOptionRank() {
 
 		new MultiOptionRegistrar(0, 1);
@@ -323,7 +321,7 @@ abstract class PotentialPatternMatches<O> {
 
 	abstract boolean unionRankOptionsForRetrieval();
 
-	Collection<O> getPotentialsFor(NodePattern request, List<Names> namesByRank) {
+	Collection<O> getPotentialsFor(List<Names> namesByRank) {
 
 		if (namesByRank.size() > allRankMatches.size()) {
 

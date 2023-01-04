@@ -29,22 +29,22 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PatternSubsumptions {
+class PatternSubsumedsFinder {
 
-	static private abstract class SubsumptionsFinder {
+	static private abstract class SubsumedsFinder {
 
-		private PotentialSubsumeds potentialSubsumeds;
+		private PotentialPatternSubsumeds potentials;
 
-		SubsumptionsFinder(Ontology ontology) {
+		SubsumedsFinder(Ontology ontology) {
 
-			potentialSubsumeds = createPotentialSubsumeds(ontology);
+			potentials = createPotentials(ontology);
 		}
 
 		NameSet find(NodePattern pattern) {
 
 			NameSet matches = new NameSet();
 
-			for (MatchableNode c : potentialSubsumeds.getPotentialsFor(pattern)) {
+			for (PatternNode c : potentials.getPotentialsFor(pattern)) {
 
 				if (requiredCandidate(c) && c.subsumedBy(pattern)) {
 
@@ -57,22 +57,22 @@ class PatternSubsumptions {
 
 		abstract Class<? extends NodeName> getNodeType();
 
-		abstract boolean requiredCandidate(MatchableNode c);
+		abstract boolean requiredCandidate(PatternNode c);
 
-		private PotentialSubsumeds createPotentialSubsumeds(Ontology ontology) {
+		private PotentialPatternSubsumeds createPotentials(Ontology ontology) {
 
-			return new PotentialDynamicSubsumeds(getPotentialCandidates(ontology));
+			return new PotentialDynamicPatternSubsumeds(getPotentialCandidates(ontology));
 		}
 
-		private List<MatchableNode> getPotentialCandidates(Ontology ontology) {
+		private List<PatternNode> getPotentialCandidates(Ontology ontology) {
 
-			List<MatchableNode> candidates = new ArrayList<MatchableNode>();
+			List<PatternNode> candidates = new ArrayList<PatternNode>();
 
-			for (MatchableNode c : ontology.getMatchables().getAll()) {
+			for (PatternNode n : ontology.getMatchables().getAllPatternNodes()) {
 
-				if (getNodeType().isAssignableFrom(c.getName().getClass())) {
+				if (getNodeType().isAssignableFrom(n.getName().getClass())) {
 
-					candidates.add(c);
+					candidates.add(n);
 				}
 			}
 
@@ -80,7 +80,7 @@ class PatternSubsumptions {
 		}
 	}
 
-	static private class ClassSubsumptions extends SubsumptionsFinder {
+	static private class ClassSubsumptions extends SubsumedsFinder {
 
 		private NameSet filterNames = null;
 
@@ -96,7 +96,7 @@ class PatternSubsumptions {
 			return find(pattern);
 		}
 
-		boolean requiredCandidate(MatchableNode c) {
+		boolean requiredCandidate(PatternNode c) {
 
 			return filterNames == null || filterNames.contains(c.getName());
 		}
@@ -107,14 +107,14 @@ class PatternSubsumptions {
 		}
 	}
 
-	static private class InstanceSubsumptions extends SubsumptionsFinder {
+	static private class InstanceSubsumptions extends SubsumedsFinder {
 
 		InstanceSubsumptions(Ontology ontology) {
 
 			super(ontology);
 		}
 
-		boolean requiredCandidate(MatchableNode c) {
+		boolean requiredCandidate(PatternNode c) {
 
 			return true;
 		}
@@ -128,7 +128,7 @@ class PatternSubsumptions {
 	private ClassSubsumptions classSubsumptions;
 	private InstanceSubsumptions instanceSubsumptions;
 
-	PatternSubsumptions(Ontology ontology) {
+	PatternSubsumedsFinder(Ontology ontology) {
 
 		classSubsumptions = new ClassSubsumptions(ontology);
 		instanceSubsumptions = new InstanceSubsumptions(ontology);

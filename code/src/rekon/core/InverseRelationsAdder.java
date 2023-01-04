@@ -29,27 +29,66 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialOntologySubsumeds extends PotentialSubsumeds {
+class InverseRelationsAdder {
 
-	PotentialOntologySubsumeds(List<MatchableNode> allOptions) {
+	private List<PatternNode> newPatternNodes = new ArrayList<PatternNode>();
 
-		super(allOptions);
+	InverseRelationsAdder(MatchableNodes matchables) {
 
-		registerDefaultNestedOptionRanks();
+		for (PatternNode n : matchables.getAllPatternNodes()) {
+
+			if (n.getName() instanceof IndividualName) {
+
+				addAnyFor(n);
+			}
+		}
+
+		for (PatternNode n : newPatternNodes) {
+
+			matchables.addPatternNode(n);
+		}
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	private void addAnyFor(PatternNode n) {
 
-		return ProfileMatchNames.resolve(names, PatternNameRole.rankToRole(rank));
+		for (Relation r : n.getProfile().getDirectRelations()) {
+
+			if (r instanceof SomeRelation) {
+
+				addAnyFor(n.getName(), (SomeRelation)r);
+			}
+		}
 	}
 
-	List<Names> getRankedDefinitionNames(NodePattern defn) {
+	private void addAnyFor(NodeName forwardSource, SomeRelation forwardRel) {
 
-		return new FilteringNameCollector(true).collect(defn);
+		Collection<ObjectPropertyName> ips = forwardRel.getObjectProperty().getInverses();
+
+		if (!ips.isEmpty()) {
+
+			NodeValue invSource = forwardRel.getNodeTarget();
+			NodeValue invTarget = new NodeValue(forwardSource);
+
+			PatternNode n = resolvePatternNode(invSource.getValueNode());
+
+			for (ObjectPropertyName ip : ips) {
+
+				n.addProfileRelation(new SomeRelation(ip, invTarget));
+			}
+		}
 	}
 
-	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
+	private PatternNode resolvePatternNode(NodeName name) {
 
-		return new FilteringNameCollector(false).collect(profile);
+		PatternNode n = name.getPatternNode();
+
+		if (n == null) {
+
+			n = new PatternNode(name);
+
+			newPatternNodes.add(n);
+		}
+
+		return n;
 	}
 }

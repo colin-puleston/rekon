@@ -57,28 +57,13 @@ class FilteringNameCollector {
 			return definition;
 		}
 
-		void collectForValueDisjuncts(Names disjuncts) {
-
-			if (definition()) {
-
-				if (disjuncts.size() == 1) {
-
-					collectForValueNode((NodeName)disjuncts.getFirstName());
-				}
-			}
-			else {
-
-				super.collectForValueDisjuncts(disjuncts);
-			}
-		}
-
 		void collectName(Name n) {
 
 			if (rankStatus == RankStatus.COLLECT) {
 
 				if (n.rootName()) {
 
-					setAllMatchRank();
+					setRootCollected();
 				}
 				else {
 
@@ -107,7 +92,7 @@ class FilteringNameCollector {
 
 			if (rankStatus == RankStatus.COLLECT) {
 
-				setAllMatchRank();
+				setRootCollected();
 			}
 		}
 
@@ -162,7 +147,7 @@ class FilteringNameCollector {
 			}
 		}
 
-		private void setAllMatchRank() {
+		private void setRootCollected() {
 
 			rankNames.clear();
 
