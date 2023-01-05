@@ -60,12 +60,7 @@ class OntologyClassifier {
 			invokeListProcesses(definedPatternNodes);
 		}
 
-		void processElement(PatternNode n) {
-
-			checkDefinedSubsumeds(n);
-		}
-
-		private void checkDefinedSubsumeds(PatternNode defined) {
+		void processElement(PatternNode defined) {
 
 			for (NodePattern defn : defined.getDefinitions()) {
 
@@ -79,21 +74,25 @@ class OntologyClassifier {
 
 	private class DisjunctionSubsumersChecker extends MultiThreadListProcessor<DisjunctionNode> {
 
-		DisjunctionSubsumersChecker(List<DisjunctionNode> candidates) {
+		private boolean initialPass;
+
+		DisjunctionSubsumersChecker(List<DisjunctionNode> candidates, boolean initialPass) {
+
+			this.initialPass = initialPass;
 
 			invokeListProcesses(candidates);
 		}
 
-		void processElement(DisjunctionNode n) {
-
-			checkCandidateSubsumers(n);
-		}
-
-		private void checkCandidateSubsumers(DisjunctionNode candidate) {
+		void processElement(DisjunctionNode candidate) {
 
 			for (DisjunctionNode defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
 
 				subsumptionChecker.check(defn, candidate);
+			}
+
+			if (!initialPass) {
+
+				candidate.setNewInferredCommonDisjunctSubsumers();
 			}
 		}
 	}
@@ -109,6 +108,11 @@ class OntologyClassifier {
 			findDisjunctionMatchCandidates(initialPass);
 		}
 
+		boolean initialPass() {
+
+			return false;
+		}
+
 		boolean potentialInferences() {
 
 			return !patternMatchCandidates.isEmpty() || !disjunctionMatchCandidates.isEmpty();
@@ -117,7 +121,7 @@ class OntologyClassifier {
 		void checkSubsumptions() {
 
 			new PatternSubsumedsChecker(patternMatchCandidates);
-			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
+			new DisjunctionSubsumersChecker(disjunctionMatchCandidates, initialPass());
 		}
 
 		abstract boolean potentialPatternMatchCandidate(NodePattern p);
@@ -165,6 +169,11 @@ class OntologyClassifier {
 		PatternRestrictionPassConfig() {
 
 			super(true);
+		}
+
+		boolean initialPass() {
+
+			return true;
 		}
 
 		boolean potentialPatternMatchCandidate(NodePattern p) {

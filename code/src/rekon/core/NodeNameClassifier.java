@@ -262,6 +262,27 @@ class NodeNameClassifier extends NameClassifier {
 		inferredSubsumers = new MatchableNodeInferredSubsumers();
 	}
 
+	void onPostAssertionAdditions() {
+
+		super.onPostAssertionAdditions();
+
+		for (DisjunctionNode d : getNodeName().getDisjunctionNodes()) {
+
+			d.setPreInferredCommonDisjunctSubsumers();
+		}
+	}
+
+	void checkAddInferredSubsumers(Names subsumers) {
+
+		for (Name s : subsumers.getNames()) {
+
+			if (newSubsumer(s)) {
+
+				addNewInferredSubsumer(s);
+			}
+		}
+	}
+
 	synchronized void addNewInferredSubsumer(Name subsumer) {
 
 		inferredSubsumers.addDirectlyInferred(subsumer);
@@ -275,6 +296,11 @@ class NodeNameClassifier extends NameClassifier {
 	boolean anyNewSubsumers(NodeSelector selector) {
 
 		return inferredSubsumers.anyNewInferences(selector);
+	}
+
+	private NodeName getNodeName() {
+
+		return (NodeName)getName();
 	}
 
 	private boolean newSubsumer(Name s) {

@@ -68,7 +68,7 @@ class NameClassifier extends NameClassificationHandler {
 
 		for (Name s : subsumers.copyNames()) {
 
-			expandAssertedsFrom(s);
+			addAndExpandPreInferredSubsumers(s.getSubsumers());
 		}
 	}
 
@@ -97,14 +97,19 @@ class NameClassifier extends NameClassificationHandler {
 		return multipleAssertedSubsumers;
 	}
 
-	private void expandAssertedsFrom(Name current) {
+	void addAndExpandPreInferredSubsumers(Names subsumers) {
 
-		for (Name next : current.getSubsumers().getNames()) {
+		for (Name s : subsumers.getNames()) {
 
-			if (checkAddSubsumer(next)) {
+			checkAddAndExpandPreInferredSubsumer(s);
+		}
+	}
 
-				expandAssertedsFrom(next);
-			}
+	private void checkAddAndExpandPreInferredSubsumer(Name subsumer) {
+
+		if (checkAddSubsumer(subsumer)) {
+
+			addAndExpandPreInferredSubsumers(subsumer.getSubsumers());
 		}
 	}
 

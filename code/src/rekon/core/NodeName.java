@@ -42,11 +42,11 @@ public abstract class NodeName extends Name {
 		if (matchableNodes == NO_MATCHABLE_NODES) {
 
 			matchableNodes = new ArrayList<MatchableNode<?>>();
+
+			getNodeClassifier().setMatchableNode();
 		}
 
 		matchableNodes.add(matchable);
-
-		getNodeClassifier().setMatchableNode();
 	}
 
 	boolean matchable() {

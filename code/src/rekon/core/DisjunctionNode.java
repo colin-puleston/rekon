@@ -55,6 +55,16 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		}
 	}
 
+	void setPreInferredCommonDisjunctSubsumers() {
+
+		getClassifier().addAndExpandPreInferredSubsumers(findCommonDisjunctSubsumers());
+	}
+
+	void setNewInferredCommonDisjunctSubsumers() {
+
+		getClassifier().checkAddInferredSubsumers(findCommonDisjunctSubsumers());
+	}
+
 	Names getDisjuncts() {
 
 		return disjuncts;
@@ -96,6 +106,18 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		return DisjunctionNode.class;
 	}
 
+	private Names findCommonDisjunctSubsumers() {
+
+		SetIntersector<Name> subsSets = new SetIntersector<Name>();
+
+		for (Name d : disjuncts.getNames()) {
+
+			subsSets.addSet(d.getSubsumers().getNames());
+		}
+
+		return new NameList(subsSets.intersectAll());
+	}
+
 	private boolean subsumesNode(NodeName n) {
 
 		for (Name d : disjuncts.getNames()) {
@@ -124,5 +146,10 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		}
 
 		return s;
+	}
+
+	private NodeNameClassifier getClassifier() {
+
+		return getName().getNodeClassifier();
 	}
 }
