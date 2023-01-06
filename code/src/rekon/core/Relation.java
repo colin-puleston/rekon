@@ -84,7 +84,7 @@ public abstract class Relation extends Expression {
 
 	void render(PatternRenderer r) {
 
-		r.addLine(property.getLabel() + "(" + renderRelationType() + ")");
+		r.addLine(property.getLabel() + " (" + renderRelationType() + ")");
 
 		target.render(r.nextLevel());
 	}
@@ -96,6 +96,6 @@ public abstract class Relation extends Expression {
 
 	private String renderRelationType() {
 
-		return allRelation() ? "All" : "Some";
+		return allRelation() ? "all" : "some";
 	}
 }
