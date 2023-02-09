@@ -72,14 +72,14 @@ public class NodeValue extends ObjectValue {
 
 	private boolean subsumesOtherNode(NodeName on) {
 
-		return node.dynamic() ? subsumesAnyMatchable(on) : node.subsumes(on);
+		return node.dynamic() ? anyMatchableSubsumes(on) : node.subsumes(on);
 	}
 
-	private boolean subsumesAnyMatchable(NodeName on) {
+	private boolean anyMatchableSubsumes(NodeName on) {
 
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
+		for (MatchableNode<?> m : node.getMatchableNodes()) {
 
-			if (subsumesMatchable(om)) {
+			if (m.subsumesNode(on) || subsumesAnyMatchable(m, on)) {
 
 				return true;
 			}
@@ -88,9 +88,9 @@ public class NodeValue extends ObjectValue {
 		return false;
 	}
 
-	private boolean subsumesMatchable(MatchableNode<?> om) {
+	private boolean subsumesAnyMatchable(MatchableNode<?> m, NodeName on) {
 
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
+		for (MatchableNode<?> om : on.getMatchableNodes()) {
 
 			if (m.subsumesMatchable(om)) {
 

@@ -81,6 +81,11 @@ class PatternNode extends MatchableNode<PatternNode> {
 		return definitions;
 	}
 
+	boolean subsumesNode(NodeName n) {
+
+		return false;
+	}
+
 	boolean subsumes(PatternNode other) {
 
 		return subsumes(other.profile);

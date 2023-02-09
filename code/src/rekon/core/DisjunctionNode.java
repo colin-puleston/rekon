@@ -70,6 +70,19 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		return disjuncts;
 	}
 
+	boolean subsumesNode(NodeName n) {
+
+		for (Name d : disjuncts.getNames()) {
+
+			if (d.subsumes(n)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	boolean subsumes(DisjunctionNode other) {
 
 		for (Name d : other.disjuncts.getNames()) {
@@ -116,19 +129,6 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		}
 
 		return new NameList(subsSets.intersectAll());
-	}
-
-	private boolean subsumesNode(NodeName n) {
-
-		for (Name d : disjuncts.getNames()) {
-
-			if (d.subsumes(n)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private String getDisjunctLabelsList() {

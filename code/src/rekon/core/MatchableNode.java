@@ -45,6 +45,8 @@ abstract class MatchableNode<M extends MatchableNode<?>> {
 		return name;
 	}
 
+	abstract boolean subsumesNode(NodeName n);
+
 	boolean subsumesMatchable(MatchableNode<?> other) {
 
 		Class<M> cls = getMatchableClass();
