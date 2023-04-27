@@ -31,11 +31,11 @@ import java.util.*;
  */
 class PatternSubsumedsFinder {
 
-	static private abstract class SubsumedsFinder {
+	static private abstract class NodeSubsumptions {
 
 		private PotentialPatternSubsumeds potentials;
 
-		SubsumedsFinder(Ontology ontology) {
+		NodeSubsumptions(Ontology ontology) {
 
 			potentials = createPotentials(ontology);
 		}
@@ -68,11 +68,13 @@ class PatternSubsumedsFinder {
 
 			List<PatternNode> candidates = new ArrayList<PatternNode>();
 
-			for (PatternNode n : ontology.getMatchables().getAllPatternNodes()) {
+			for (PatternNode pn : ontology.getMatchables().getAllPatternNodes()) {
 
-				if (getNodeType().isAssignableFrom(n.getName().getClass())) {
+				Name n = pn.getName();
 
-					candidates.add(n);
+				if (n.mapped() && getNodeType().isAssignableFrom(n.getClass())) {
+
+					candidates.add(pn);
 				}
 			}
 
@@ -80,7 +82,7 @@ class PatternSubsumedsFinder {
 		}
 	}
 
-	static private class ClassSubsumptions extends SubsumedsFinder {
+	static private class ClassSubsumptions extends NodeSubsumptions {
 
 		private NameSet filterNames = null;
 
@@ -107,7 +109,7 @@ class PatternSubsumedsFinder {
 		}
 	}
 
-	static private class InstanceSubsumptions extends SubsumedsFinder {
+	static private class InstanceSubsumptions extends NodeSubsumptions {
 
 		InstanceSubsumptions(Ontology ontology) {
 
