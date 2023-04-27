@@ -32,9 +32,9 @@ abstract class FreeClasses {
 	private int intermediatesIndex = 0;
 	private int cgiImpliedsIndex = 0;
 
-	class IntermediateClassName extends FreeClassName {
+	class PatternClassName extends FreeClassName {
 
-		IntermediateClassName() {
+		PatternClassName() {
 
 			super(cgiImpliedsIndex++);
 		}
@@ -48,7 +48,7 @@ abstract class FreeClasses {
 		}
 	}
 
-	abstract ClassName createIntermediate();
+	abstract ClassName createPatternClass();
 
-	abstract ClassName createGCIImplied();
+	abstract ClassName createGCIImpliedClass();
 }

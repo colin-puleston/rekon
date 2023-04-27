@@ -81,7 +81,7 @@ class DynamicPattern {
 
 		if (patternClass == null) {
 
-			patternClass = matchStructures.addIntermediateClass();
+			patternClass = matchStructures.addPatternClass();
 
 			matchStructures.addPatternNodeDefinition(patternClass, pattern);
 

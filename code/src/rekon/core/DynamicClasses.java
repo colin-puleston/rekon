@@ -29,7 +29,7 @@ package rekon.core;
  */
 class DynamicClasses extends FreeClasses {
 
-	private class DynamicIntermediateClassName extends IntermediateClassName {
+	private class DynamicPatternClassName extends PatternClassName {
 
 		boolean dynamic() {
 
@@ -37,12 +37,12 @@ class DynamicClasses extends FreeClasses {
 		}
 	}
 
-	ClassName createIntermediate() {
+	ClassName createPatternClass() {
 
-		return new DynamicIntermediateClassName();
+		return new DynamicPatternClassName();
 	}
 
-	ClassName createGCIImplied() {
+	ClassName createGCIImpliedClass() {
 
 		throw new Error("Cannot create dynamic GCI-implied classes!");
 	}

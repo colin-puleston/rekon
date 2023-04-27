@@ -54,14 +54,14 @@ public class MatchStructures {
 		matchables.addDisjunctionNode(name, disjuncts);
 	}
 
-	public ClassName addIntermediateClass() {
+	public ClassName addPatternClass() {
 
-		return freeClasses.createIntermediate();
+		return freeClasses.createPatternClass();
 	}
 
 	public ClassName addGCIImpliedClass() {
 
-		return freeClasses.createGCIImplied();
+		return freeClasses.createGCIImpliedClass();
 	}
 
 	MatchStructures(MatchableNodes matchables, FreeClasses freeClasses) {

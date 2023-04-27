@@ -33,17 +33,17 @@ class FreeOntologyClasses extends FreeClasses {
 
 	private Collection<NodeName> ontologyNodes;
 
-	private class IntermediateOntologyClassName extends IntermediateClassName {
+	private class OntologyPatternClassName extends PatternClassName {
 
-		IntermediateOntologyClassName() {
+		OntologyPatternClassName() {
 
 			ontologyNodes.add(this);
 		}
 	}
 
-	private class GCIImpliedOntologyClassName extends GCIImpliedClassName {
+	private class OntologyGCIImpliedClassName extends GCIImpliedClassName {
 
-		GCIImpliedOntologyClassName() {
+		OntologyGCIImpliedClassName() {
 
 			ontologyNodes.add(this);
 		}
@@ -54,13 +54,13 @@ class FreeOntologyClasses extends FreeClasses {
 		this.ontologyNodes = ontologyNodes;
 	}
 
-	ClassName createIntermediate() {
+	ClassName createPatternClass() {
 
-		return new IntermediateOntologyClassName();
+		return new OntologyPatternClassName();
 	}
 
-	ClassName createGCIImplied() {
+	ClassName createGCIImpliedClass() {
 
-		return new GCIImpliedOntologyClassName();
+		return new OntologyGCIImpliedClassName();
 	}
 }

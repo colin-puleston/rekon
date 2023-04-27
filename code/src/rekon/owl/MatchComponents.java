@@ -617,7 +617,7 @@ class MatchComponents {
 
 			if (p != null) {
 
-				pCls = matchStructures.addIntermediateClass();
+				pCls = matchStructures.addPatternClass();
 
 				matchStructures.addPatternNodeDefinition(pCls, p);
 
@@ -657,7 +657,7 @@ class MatchComponents {
 			return disjuncts.iterator().next();
 		}
 
-		ClassName c = matchStructures.addIntermediateClass();
+		ClassName c = matchStructures.addPatternClass();
 
 		matchStructures.addDisjunctionClass(c, disjuncts);
 

@@ -478,24 +478,18 @@ class RekonOps {
 
 	private OWLClassExpression resolveInputExpr(OWLClassExpression expr) {
 
-		if (expr instanceof OWLObjectIntersectionOf) {
+		if (expr instanceof OWLNaryBooleanClassExpression) {
 
-			return checkExtractSingleOperand((OWLObjectIntersectionOf)expr);
-		}
+			OWLNaryBooleanClassExpression bExpr = (OWLNaryBooleanClassExpression)expr;
+			Set<OWLClassExpression> ops = bExpr.getOperands();
 
-		if (expr instanceof OWLObjectUnionOf) {
+			if (ops.size() == 1) {
 
-			return checkExtractSingleOperand((OWLObjectUnionOf)expr);
+				return ops.iterator().next();
+			}
 		}
 
 		return expr;
-	}
-
-	private OWLClassExpression checkExtractSingleOperand(OWLNaryBooleanClassExpression expr) {
-
-		Set<OWLClassExpression> ops = expr.getOperands();
-
-		return ops.size() == 1 ? ops.iterator().next() : expr;
 	}
 
 	private Names getSuperNames(OWLClassExpression expr, boolean direct) {
