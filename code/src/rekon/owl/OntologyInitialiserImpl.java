@@ -87,6 +87,6 @@ class OntologyInitialiserImpl implements OntologyInitialiser {
 
 	DynamicOpsInvoker createDynamicOpsInvoker(Ontology ontology) {
 
-		return new DynamicOpsInvoker(ontology.createDynamicOps(), mappedNames, matchComponents);
+		return new DynamicOpsInvoker(ontology.createDynamicOps(), mappedNames);
 	}
 }

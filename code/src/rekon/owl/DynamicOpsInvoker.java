@@ -37,7 +37,6 @@ class DynamicOpsInvoker {
 
 	private DynamicOps dynamicOps;
 	private MappedNames mappedNames;
-	private MatchComponents matchComponents;
 
 	private class ExprPatternCreator implements PatternCreator {
 
@@ -59,14 +58,10 @@ class DynamicOpsInvoker {
 		}
 	}
 
-	DynamicOpsInvoker(
-		DynamicOps dynamicOps,
-		MappedNames mappedNames,
-		MatchComponents matchComponents) {
+	DynamicOpsInvoker(DynamicOps dynamicOps, MappedNames mappedNames) {
 
 		this.dynamicOps = dynamicOps;
 		this.mappedNames = mappedNames;
-		this.matchComponents = matchComponents;
 	}
 
 	Names getEquivalents(OWLClassExpression expr) {
