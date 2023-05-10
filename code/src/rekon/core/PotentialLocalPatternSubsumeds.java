@@ -29,75 +29,44 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends ObjectValue {
+class PotentialLocalPatternSubsumeds extends PotentialPatternSubsumeds {
 
-	private NodeName node;
+	private int nextOptionRegRank = 0;
+	private boolean optionRegComplete = false;
 
-	public NodeValue(NodeName node) {
+	PotentialLocalPatternSubsumeds(List<PatternNode> allOptions) {
 
-		this.node = node;
+		super(allOptions);
 	}
 
-	NodeValue asNodeValue() {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return this;
+		return MatchNamesExpander.expand(names);
 	}
 
-	NodeName getValueNode() {
+	List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		return node;
+		List<Names> defnNames = new FilteringLinkedNameCollector(true).collect(defn);
+
+		checkExpandOptionRanksRegister(defnNames);
+
+		return defnNames;
 	}
 
-	void collectNames(NameCollector collector) {
+	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
 
-		collector.collectForValueNode(node);
+		return new FilteringLinkedNameCollector(false, startRank, stopRank).collect(profile);
 	}
 
-	boolean subsumesOther(Value v) {
+	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
 
-		NodeValue nv = v.asNodeValue();
+		int stopRank = defnNames.size();
 
-		return nv != null && subsumesOtherNode(nv.node);
-	}
+		if (!optionRegComplete && stopRank > nextOptionRegRank) {
 
-	boolean anyNewSubsumers(NodeSelector selector) {
+			registerOptionRanks(nextOptionRegRank, stopRank);
 
-		return node.anyNewSubsumers(selector);
-	}
-
-	void render(PatternRenderer r) {
-
-		r.addLine(node.getLabel());
-	}
-
-	private boolean subsumesOtherNode(NodeName on) {
-
-		return node.local() ? anyMatchableSubsumes(on) : node.subsumes(on);
-	}
-
-	private boolean anyMatchableSubsumes(NodeName on) {
-
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
-
-			if (m.subsumesNode(on) || subsumesAnyMatchable(m, on)) {
-
-				return true;
-			}
+			nextOptionRegRank = stopRank;
 		}
-
-		return false;
-	}
-
-	private boolean subsumesAnyMatchable(MatchableNode<?> m, NodeName on) {
-
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
-
-			if (m.subsumesMatchable(om)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

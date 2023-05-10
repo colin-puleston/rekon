@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialDynamicPatternSubsumers {
+class PotentialLocalPatternSubsumers {
 
 	private Collection<PatternNode> allPatternNodes;
 
@@ -159,7 +159,7 @@ class PotentialDynamicPatternSubsumers {
 		}
 	}
 
-	PotentialDynamicPatternSubsumers(Collection<PatternNode> allPatternNodes) {
+	PotentialLocalPatternSubsumers(Collection<PatternNode> allPatternNodes) {
 
 		this.allPatternNodes = allPatternNodes;
 	}

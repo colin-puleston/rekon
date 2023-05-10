@@ -33,7 +33,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class MappedNames {
+class MappedNames implements OntologyNames {
 
 	static <E extends OWLEntity>E toMappedEntity(Name name, Class<E> entityType) {
 
@@ -422,15 +422,7 @@ class MappedNames {
 		}
 	}
 
-	MappedNames(Assertions assertions) {
-
-		classes = new ClassNames(assertions);
-		individuals = new IndividualNames(assertions, classes);
-		objectProperties = new ObjectPropertyNames(assertions);
-		dataProperties = new DataPropertyNames(assertions);
-	}
-
-	Collection<Name> getAllNames() {
+	public List<Name> getAllNames() {
 
 		List<Name> names = new ArrayList<Name>();
 
@@ -442,7 +434,7 @@ class MappedNames {
 		return names;
 	}
 
-	Collection<NodeName> getAllNodeNames() {
+	public List<NodeName> getAllNodeNames() {
 
 		List<NodeName> names = new ArrayList<NodeName>();
 
@@ -450,6 +442,19 @@ class MappedNames {
 		names.addAll(individuals.getAllNames());
 
 		return names;
+	}
+
+	MappedNames(Assertions assertions) {
+
+		classes = new ClassNames(assertions);
+		individuals = new IndividualNames(assertions, classes);
+		objectProperties = new ObjectPropertyNames(assertions);
+		dataProperties = new DataPropertyNames(assertions);
+	}
+
+	ClassName getRootClassName() {
+
+		return classes.getRootName();
 	}
 
 	Collection<ClassName> getClassNames() {
@@ -470,11 +475,6 @@ class MappedNames {
 	Collection<DataPropertyName> getDataPropertyNames() {
 
 		return dataProperties.getAllNames();
-	}
-
-	ClassName getRootClassName() {
-
-		return classes.getRootName();
 	}
 
 	ClassName get(OWLClass entity) {

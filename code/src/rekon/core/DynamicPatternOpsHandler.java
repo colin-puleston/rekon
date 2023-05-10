@@ -33,29 +33,22 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	static private SuperClassesResolver superClassesResolver = new SuperClassesResolver();
 	static private SubClassesResolver subClassesResolver = new SubClassesResolver();
-	static private InstancesResolver instancesResolver = new InstancesResolver();
+	static private IndividualsResolver individualsResolver = new IndividualsResolver();
 
 	static private abstract class ResultsResolver {
 
 		Names resolve(NameSet inferreds, boolean direct) {
 
-			return filter(direct ? toDirects(inferreds) : toAll(inferreds));
-		}
-
-		boolean expandable() {
-
-			return true;
+			return direct ? toDirects(inferreds) : toAll(inferreds);
 		}
 
 		abstract Names getAllLinked(Name n);
 
-		abstract Names filter(Names inferreds);
-
 		private Names toDirects(NameSet inferreds) {
 
-			for (Name s : inferreds.copyNames()) {
+			for (Name n : inferreds.copyNames()) {
 
-				inferreds.removeAll(getAllLinked(s));
+				inferreds.removeAll(getAllLinked(n));
 			}
 
 			return inferreds;
@@ -63,12 +56,9 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		private NameSet toAll(NameSet inferreds) {
 
-			if (expandable()) {
+			for (Name s : inferreds.copyNames()) {
 
-				for (Name s : inferreds.copyNames()) {
-
-					inferreds.addAll(getAllLinked(s));
-				}
+				inferreds.addAll(getAllLinked(s));
 			}
 
 			return inferreds;
@@ -81,51 +71,36 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 			return n.getSupers(false);
 		}
-
-		Names filter(Names inferreds) {
-
-			return inferreds;
-		}
 	}
 
-	static private abstract class SubsResolver extends ResultsResolver {
+	static private class SubClassesResolver extends ResultsResolver {
 
 		Names getAllLinked(Name n) {
 
-			return n.getSubs(getNodeType(), false);
-		}
-
-		Names filter(Names inferreds) {
-
-			return inferreds.filterForType(getNodeType());
-		}
-
-		abstract Class<? extends NodeName> getNodeType();
-	}
-
-	static private class SubClassesResolver extends SubsResolver {
-
-		Class<? extends NodeName> getNodeType() {
-
-			return ClassName.class;
+			return n.getSubs(ClassName.class, false);
 		}
 	}
 
-	static private class InstancesResolver extends SubsResolver {
+	static private class IndividualsResolver extends ResultsResolver {
 
-		boolean expandable() {
+		Names resolve(NameSet inferreds, boolean direct) {
 
-			return false;
+			return filter(super.resolve(inferreds, direct));
 		}
 
-		Class<? extends NodeName> getNodeType() {
+		Names getAllLinked(Name n) {
 
-			return IndividualName.class;
+			return n.getSubs(NodeName.class, false);
+		}
+
+		private Names filter(Names inferreds) {
+
+			return inferreds.filterForType(IndividualName.class);
 		}
 	}
 
-	private PatternSubsumersFinder subsumersFinder;
-	private PatternSubsumedsFinder subsumedsFinder;
+	private PatternSubsumers patternSubsumers;
+	private PatternSubsumeds patternSubsumeds;
 
 	private DynamicPattern dynamicPattern;
 	private NodePattern nodePattern;
@@ -145,18 +120,15 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return nodePattern != null ? inferSubs(direct) : Names.NO_NAMES;
 	}
 
-	public Names getInstances(boolean direct) {
+	public Names getIndividuals(boolean direct) {
 
-		return nodePattern != null ? inferInstances(direct) : Names.NO_NAMES;
+		return nodePattern != null ? inferIndividuals(direct) : Names.NO_NAMES;
 	}
 
-	DynamicPatternOpsHandler(
-		PatternSubsumersFinder subsumersFinder,
-		PatternSubsumedsFinder subsumedsFinder,
-		PatternCreator patternCreator) {
+	DynamicPatternOpsHandler(Ontology ontology, PatternCreator patternCreator) {
 
-		this.subsumersFinder = subsumersFinder;
-		this.subsumedsFinder = subsumedsFinder;
+		patternSubsumers = ontology.getPatternSubsumers();
+		patternSubsumeds = ontology.getPatternSubsumeds();
 
 		dynamicPattern = new DynamicPattern(patternCreator);
 		nodePattern = dynamicPattern.getPattern();
@@ -239,16 +211,16 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return subClassesResolver.resolve(subsumeds, direct);
 	}
 
-	private Names inferInstances(boolean direct) {
+	private Names inferIndividuals(boolean direct) {
 
-		NameSet subs = inferSubsumedInstances();
+		NameSet subs = inferAllSubsumedNodes();
 
 		if (subs.isEmpty()) {
 
 			return NameSet.NO_NAMES;
 		}
 
-		return instancesResolver.resolve(subs, direct);
+		return individualsResolver.resolve(subs, direct);
 	}
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {
@@ -269,26 +241,26 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private NameSet inferSubsumers() {
 
-		return subsumersFinder.inferSubsumers(dynamicPattern);
+		return patternSubsumers.inferSubsumers(dynamicPattern);
 	}
 
 	private NameSet inferSubsumersForSubsumeds(NameSet subsumeds) {
 
-		return subsumersFinder.inferSubsumersForSubsumeds(dynamicPattern, subsumeds);
+		return patternSubsumers.inferSubsumersForSubsumeds(dynamicPattern, subsumeds);
 	}
 
 	private NameSet inferSubsumedClasses() {
 
-		return subsumedsFinder.inferSubsumedClasses(nodePattern);
+		return patternSubsumeds.inferSubsumedClasses(nodePattern);
 	}
 
 	private NameSet inferSubsumedClasses(NameSet filterNames) {
 
-		return subsumedsFinder.inferSubsumedClasses(nodePattern, filterNames);
+		return patternSubsumeds.inferSubsumedClasses(nodePattern, filterNames);
 	}
 
-	private NameSet inferSubsumedInstances() {
+	private NameSet inferAllSubsumedNodes() {
 
-		return subsumedsFinder.inferSubsumedInstances(nodePattern);
+		return patternSubsumeds.inferAllSubsumedNodes(nodePattern);
 	}
 }

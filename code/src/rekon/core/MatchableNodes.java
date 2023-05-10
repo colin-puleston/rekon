@@ -39,7 +39,7 @@ class MatchableNodes {
 		addPatternNode(new PatternNode(name, profile));
 	}
 
-	void addPatternNodeDefinition(ClassName name, NodePattern defn) {
+	void addPatternNodeDefinition(NodeName name, NodePattern defn) {
 
 		resolvePatternNode(name).addDefinition(defn);
 	}

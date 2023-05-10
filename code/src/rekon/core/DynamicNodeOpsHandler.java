@@ -57,7 +57,7 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		return getSubs(ClassName.class, direct);
 	}
 
-	public Names getInstances(boolean direct) {
+	public Names getIndividuals(boolean direct) {
 
 		return getSubs(IndividualName.class, direct);
 	}

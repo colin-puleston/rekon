@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PatternSubsumersFinder {
+class PatternSubsumers {
 
 	static private EquivCheckDefineds equivCheckDefineds = new EquivCheckDefineds();
 
@@ -89,20 +89,22 @@ class PatternSubsumersFinder {
 		}
 	}
 
-	private DynamicClassifier classifier;
+	private LocalClassifier localClassifier;
 
-	PatternSubsumersFinder(Ontology ontology) {
+	PatternSubsumers(MatchableNodes matchables) {
 
-		classifier = new DynamicClassifier(ontology);
+		localClassifier = new LocalClassifier(matchables);
 	}
 
-	NameSet inferSubsumers(DynamicPattern pattern) {
+	NameSet inferSubsumers(LocalPattern pattern) {
 
-		return classifier.classify(pattern);
+		return localClassifier.classify(pattern);
 	}
 
-	NameSet inferSubsumersForSubsumeds(DynamicPattern pattern, Names subsumeds) {
+	NameSet inferSubsumersForSubsumeds(LocalPattern pattern, Names subsumeds) {
 
-		return classifier.classify(pattern, equivCheckDefineds.deriveFromSubsumeds(subsumeds));
+		return localClassifier.classify(
+					pattern,
+					equivCheckDefineds.deriveFromSubsumeds(subsumeds));
 	}
 }

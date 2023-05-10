@@ -24,80 +24,50 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends ObjectValue {
+class InstancePattern extends LocalPattern {
 
-	private NodeName node;
+	static private final String LOCAL_CLASS_NAMES_PREFIX_FORMAT = "%s(%s)";
 
-	public NodeValue(NodeName node) {
+	private InstanceName patternInstance;
 
-		this.node = node;
-	}
+	private class InstanceClasses extends LocalClasses {
 
-	NodeValue asNodeValue() {
+		private class InstanceClassName extends LocalClassName {
 
-		return this;
-	}
+			String getLabelPrefix() {
 
-	NodeName getValueNode() {
+				String gen = super.getLabelPrefix();
+				String spec = patternInstance.getLabel();
 
-		return node;
-	}
-
-	void collectNames(NameCollector collector) {
-
-		collector.collectForValueNode(node);
-	}
-
-	boolean subsumesOther(Value v) {
-
-		NodeValue nv = v.asNodeValue();
-
-		return nv != null && subsumesOtherNode(nv.node);
-	}
-
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return node.anyNewSubsumers(selector);
-	}
-
-	void render(PatternRenderer r) {
-
-		r.addLine(node.getLabel());
-	}
-
-	private boolean subsumesOtherNode(NodeName on) {
-
-		return node.local() ? anyMatchableSubsumes(on) : node.subsumes(on);
-	}
-
-	private boolean anyMatchableSubsumes(NodeName on) {
-
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
-
-			if (m.subsumesNode(on) || subsumesAnyMatchable(m, on)) {
-
-				return true;
+				return String.format(LOCAL_CLASS_NAMES_PREFIX_FORMAT, gen, spec);
 			}
 		}
 
-		return false;
+		ClassName createPatternClass() {
+
+			return new InstanceClassName();
+		}
 	}
 
-	private boolean subsumesAnyMatchable(MatchableNode<?> m, NodeName on) {
+	InstancePattern(InstanceName patternInstance, PatternCreator patternCreator) {
 
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
+		this.patternInstance = patternInstance;
 
-			if (m.subsumesMatchable(om)) {
+		initialise(patternCreator);
 
-				return true;
-			}
-		}
+		getPatternMatchables().addPatternNode(patternInstance, getPattern());
+	}
 
-		return false;
+	LocalClasses createLocalClasses() {
+
+		return new InstanceClasses();
+	}
+
+	NodeName ensurePatternNode(MatchStructures matchStructures) {
+
+		return patternInstance;
 	}
 }

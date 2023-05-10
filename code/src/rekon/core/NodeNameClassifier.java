@@ -213,7 +213,7 @@ class NodeNameClassifier extends NameClassifier {
 
 		void addDirectlyInferred(Name subsumer) {
 
-			throw new Error("Unexpected method invocation!");
+			throw new UnexpectedMethodInvocationError();
 		}
 
 		void expandLatestInferencesForMatchableNode() {
@@ -237,7 +237,7 @@ class NodeNameClassifier extends NameClassifier {
 
 		Names getMatchableNodeLatestInferreds() {
 
-			throw new Error("Unexpected method invocation!");
+			throw new UnexpectedMethodInvocationError();
 		}
 
 		private void expandForNewMatchableNodeSubsumers(Name s) {

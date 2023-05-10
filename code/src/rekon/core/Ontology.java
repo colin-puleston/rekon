@@ -31,37 +31,25 @@ import java.util.*;
  */
 public class Ontology {
 
-	private List<Name> allNames = new ArrayList<Name>();
-	private List<NodeName> nodeNames = new ArrayList<NodeName>();
+	private List<Name> allNames;
+	private List<NodeName> nodeNames;
 
-	private Collection<ObjectPropertyName> objectPropertyNames;
-	private Collection<DataPropertyName> dataPropertyNames;
+	private PatternSubsumers patternSubsumers;
+	private PatternSubsumeds patternSubsumeds;
 
-	private MatchableNodes matchables = new MatchableNodes();
+	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-	public Ontology(OntologyInitialiser initialiser) {
+		allNames = names.getAllNames();
+		nodeNames = names.getAllNodeNames();
 
-		initialiser.setMatchStructures(createMatchStructures());
-		initialiser.createNameHierarchies();
-
-		nodeNames.addAll(initialiser.getClassNames());
-		nodeNames.addAll(initialiser.getIndividualNames());
-
-		objectPropertyNames = initialiser.getObjectPropertyNames();
-		dataPropertyNames = initialiser.getDataPropertyNames();
-
-		initialiser.createNodeProfiles();
-		initialiser.createClassDefinitions();
-
-		new InverseRelationsAdder(matchables);
-
-		allNames.addAll(nodeNames);
-		allNames.addAll(objectPropertyNames);
-		allNames.addAll(dataPropertyNames);
+		MatchableNodes matchables = createStructure(structureBuilder);
 
 		processAllNamesPostAdditions();
 
-		new OntologyClassifier(this);
+		new OntologyClassifier(allNames, nodeNames, matchables);
+
+		patternSubsumers = new PatternSubsumers(matchables);
+		patternSubsumeds = new PatternSubsumeds(matchables);
 	}
 
 	public DynamicOps createDynamicOps() {
@@ -69,19 +57,25 @@ public class Ontology {
 		return new DynamicOps(this);
 	}
 
-	List<Name> getAllNames() {
+	public InstanceOps createInstanceOps() {
 
-		return allNames;
+		return new InstanceOps(this);
 	}
 
-	List<NodeName> getNodeNames() {
+	void addFreeClass(FreeClassName cn) {
 
-		return nodeNames;
+		allNames.add(cn);
+		nodeNames.add(cn);
 	}
 
-	MatchableNodes getMatchables() {
+	PatternSubsumers getPatternSubsumers() {
 
-		return matchables;
+		return patternSubsumers;
+	}
+
+	PatternSubsumeds getPatternSubsumeds() {
+
+		return patternSubsumeds;
 	}
 
 	private void processAllNamesPostAdditions() {
@@ -92,8 +86,18 @@ public class Ontology {
 		}
 	}
 
-	private MatchStructures createMatchStructures() {
+	private MatchableNodes createStructure(StructureBuilder builder) {
 
-		return new MatchStructures(matchables, new FreeOntologyClasses(nodeNames));
+		MatchableNodes matchables = new MatchableNodes();
+
+		builder.build(createMatchStructures(matchables));
+		new InverseRelationsAdder(matchables);
+
+		return matchables;
+	}
+
+	private MatchStructures createMatchStructures(MatchableNodes matchables) {
+
+		return new MatchStructures(matchables, new FreeOntologyClasses(this));
 	}
 }

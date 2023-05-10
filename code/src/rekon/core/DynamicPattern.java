@@ -27,65 +27,31 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class DynamicPattern {
+class DynamicPattern extends LocalPattern {
 
-	private NodePattern pattern;
-	private ClassName patternClass = null;
+	private class DynamicClasses extends LocalClasses {
 
-	private DynamicMatchableNodes patternMatchables = new DynamicMatchableNodes();
-	private MatchStructures matchStructures = createMatchStructures();
+		private class DynamicClassName extends LocalClassName {
+		}
+
+		ClassName createPatternClass() {
+
+			return new DynamicClassName();
+		}
+	}
 
 	DynamicPattern(PatternCreator patternCreator) {
 
-		pattern = patternCreator.createNestedPatterns(matchStructures);
+		initialise(patternCreator);
 	}
 
-	NodePattern getPattern() {
+	LocalClasses createLocalClasses() {
 
-		return pattern;
+		return new DynamicClasses();
 	}
 
-	ClassName getPatternClass() {
+	NodeName ensurePatternNode(MatchStructures matchStructures) {
 
-		checkPatternClassInitialised();
-
-		return patternClass;
-	}
-
-	DynamicMatchableNodes getPatternMatchables() {
-
-		checkPatternClassInitialised();
-
-		return patternMatchables;
-	}
-
-	private MatchStructures createMatchStructures() {
-
-		return new MatchStructures(patternMatchables, new DynamicClasses());
-	}
-
-	private void processAllDynamicNamesPostAdditions() {
-
-		for (PatternNode n : patternMatchables.getAllPatternNodes()) {
-
-			NodeName nn = n.getName();
-
-			if (nn.dynamic()) {
-
-				nn.getClassifier().onPostAssertionAdditions();
-			}
-		}
-	}
-
-	private void checkPatternClassInitialised() {
-
-		if (patternClass == null) {
-
-			patternClass = matchStructures.addPatternClass();
-
-			matchStructures.addPatternNodeDefinition(patternClass, pattern);
-
-			processAllDynamicNamesPostAdditions();
-		}
+		return matchStructures.addPatternClass();
 	}
 }

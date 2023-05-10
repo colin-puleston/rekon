@@ -31,7 +31,10 @@ import java.util.*;
  */
 class OntologyClassifier {
 
-	private Ontology ontology;
+	private List<Name> allNames;
+	private List<NodeName> nodeNames;
+
+	private MatchableNodes matchables;
 
 	private List<PatternNode> allPatternNodes;
 	private List<PatternNode> definedPatternNodes;
@@ -55,7 +58,7 @@ class OntologyClassifier {
 
 		PatternSubsumedsChecker(List<PatternNode> candidates) {
 
-			candidatesFilter = new PotentialOntologyPatternSubsumeds(candidates);
+			candidatesFilter = new PotentialCorePatternSubsumeds(candidates);
 
 			invokeListProcesses(definedPatternNodes);
 		}
@@ -197,11 +200,14 @@ class OntologyClassifier {
 		}
 	}
 
-	OntologyClassifier(Ontology ontology) {
+	OntologyClassifier(
+		List<Name> allNames,
+		List<NodeName> nodeNames,
+		MatchableNodes matchables) {
 
-		this.ontology = ontology;
-
-		MatchableNodes matchables = ontology.getMatchables();
+		this.allNames = allNames;
+		this.nodeNames = nodeNames;
+		this.matchables = matchables;
 
 		allPatternNodes = matchables.getAllPatternNodes();
 		definedPatternNodes = matchables.getDefinedPatternNodes();
@@ -217,7 +223,7 @@ class OntologyClassifier {
 		perfomExhaustivePasses(new PatternRestrictionPassConfig());
 		perfomExhaustivePasses(new PatternExpansionPassConfig());
 
-		NameClassification.completeAllClassifications(ontology.getAllNames());
+		NameClassification.completeAllClassifications(allNames);
 	}
 
 	private void perfomExhaustivePasses(PassConfig passConfig) {
@@ -244,12 +250,12 @@ class OntologyClassifier {
 
 	private void expandAllNewInferences() {
 
-		NodeNameClassifier.expandAllNewInferredSubsumers(ontology.getNodeNames());
+		NodeNameClassifier.expandAllNewInferredSubsumers(nodeNames);
 	}
 
 	private void absorbAllNewInferences() {
 
-		NodeNameClassifier.absorbAllNewInferredSubsumers(ontology.getNodeNames());
+		NodeNameClassifier.absorbAllNewInferredSubsumers(nodeNames);
 	}
 
 	private void resetPotentiallyUpdatedSignatureRefs() {

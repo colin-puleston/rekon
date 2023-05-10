@@ -22,28 +22,17 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
 
 /**
  * @author Colin Puleston
  */
-class DynamicClasses extends FreeClasses {
+public class RekonInstanceBoxException extends RuntimeException {
 
-	private class DynamicPatternClassName extends PatternClassName {
+	static private final long serialVersionUID = -1;
 
-		boolean dynamic() {
+	RekonInstanceBoxException(String message) {
 
-			return true;
-		}
-	}
-
-	ClassName createPatternClass() {
-
-		return new DynamicPatternClassName();
-	}
-
-	ClassName createGCIImpliedClass() {
-
-		throw new Error("Cannot create dynamic GCI-implied classes!");
+		super(message);
 	}
 }

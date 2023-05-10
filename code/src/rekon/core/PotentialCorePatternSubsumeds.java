@@ -29,44 +29,27 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialDynamicPatternSubsumeds extends PotentialPatternSubsumeds {
+class PotentialCorePatternSubsumeds extends PotentialPatternSubsumeds {
 
-	private int nextOptionRegRank = 0;
-	private boolean optionRegComplete = false;
-
-	PotentialDynamicPatternSubsumeds(List<PatternNode> allOptions) {
+	PotentialCorePatternSubsumeds(List<PatternNode> allOptions) {
 
 		super(allOptions);
+
+		registerDefaultNestedOptionRanks();
 	}
 
 	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return MatchNamesExpander.expand(names);
+		return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
 	}
 
 	List<Names> getRankedDefinitionNames(NodePattern defn) {
 
-		List<Names> defnNames = new FilteringLinkedNameCollector(true).collect(defn);
-
-		checkExpandOptionRanksRegister(defnNames);
-
-		return defnNames;
+		return new FilteringNameCollector(true).collect(defn);
 	}
 
 	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
 
-		return new FilteringLinkedNameCollector(false, startRank, stopRank).collect(profile);
-	}
-
-	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
-
-		int stopRank = defnNames.size();
-
-		if (!optionRegComplete && stopRank > nextOptionRegRank) {
-
-			registerOptionRanks(nextOptionRegRank, stopRank);
-
-			nextOptionRegRank = stopRank;
-		}
+		return new FilteringNameCollector(false).collect(profile);
 	}
 }

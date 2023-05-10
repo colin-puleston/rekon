@@ -31,13 +31,13 @@ import java.util.*;
  */
 class FreeOntologyClasses extends FreeClasses {
 
-	private Collection<NodeName> ontologyNodes;
+	private Ontology ontology;
 
 	private class OntologyPatternClassName extends PatternClassName {
 
 		OntologyPatternClassName() {
 
-			ontologyNodes.add(this);
+			ontology.addFreeClass(this);
 		}
 	}
 
@@ -45,13 +45,13 @@ class FreeOntologyClasses extends FreeClasses {
 
 		OntologyGCIImpliedClassName() {
 
-			ontologyNodes.add(this);
+			ontology.addFreeClass(this);
 		}
 	}
 
-	FreeOntologyClasses(Collection<NodeName> ontologyNodes) {
+	FreeOntologyClasses(Ontology ontology) {
 
-		this.ontologyNodes = ontologyNodes;
+		this.ontology = ontology;
 	}
 
 	ClassName createPatternClass() {

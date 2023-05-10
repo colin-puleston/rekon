@@ -29,21 +29,9 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public interface OntologyInitialiser {
+public interface OntologyNames {
 
-	public void setMatchStructures(MatchStructures matchStructures);
+	public List<Name> getAllNames();
 
-	public void createNameHierarchies();
-
-	public void createNodeProfiles();
-
-	public void createClassDefinitions();
-
-	public Collection<ClassName> getClassNames();
-
-	public Collection<IndividualName> getIndividualNames();
-
-	public Collection<ObjectPropertyName> getObjectPropertyNames();
-
-	public Collection<DataPropertyName> getDataPropertyNames();
+	public List<NodeName> getAllNodeNames();
 }

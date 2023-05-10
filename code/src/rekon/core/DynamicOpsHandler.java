@@ -37,7 +37,7 @@ public abstract class DynamicOpsHandler {
 
 	public abstract Names getSubs(boolean direct);
 
-	public abstract Names getInstances(boolean direct);
+	public abstract Names getIndividuals(boolean direct);
 
 	public boolean equivalentTo(DynamicOpsHandler other) {
 

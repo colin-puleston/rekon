@@ -46,7 +46,7 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 
 		for (Name d : disjuncts) {
 
-			if (!name.dynamic()) {
+			if (!name.local()) {
 
 				d.addSubsumer(name);
 			}

@@ -22,82 +22,28 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
 
-import java.util.*;
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends ObjectValue {
+abstract class ExpressionPatternCreator implements PatternCreator {
 
-	private NodeName node;
+	private OWLClassExpression expr;
 
-	public NodeValue(NodeName node) {
+	public NodePattern createNestedPatterns(MatchStructures matchStructures) {
 
-		this.node = node;
+		return createMatchComponents(matchStructures).toNodePattern(expr);
 	}
 
-	NodeValue asNodeValue() {
+	ExpressionPatternCreator(OWLClassExpression expr) {
 
-		return this;
+		this.expr = expr;
 	}
 
-	NodeName getValueNode() {
-
-		return node;
-	}
-
-	void collectNames(NameCollector collector) {
-
-		collector.collectForValueNode(node);
-	}
-
-	boolean subsumesOther(Value v) {
-
-		NodeValue nv = v.asNodeValue();
-
-		return nv != null && subsumesOtherNode(nv.node);
-	}
-
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return node.anyNewSubsumers(selector);
-	}
-
-	void render(PatternRenderer r) {
-
-		r.addLine(node.getLabel());
-	}
-
-	private boolean subsumesOtherNode(NodeName on) {
-
-		return node.local() ? anyMatchableSubsumes(on) : node.subsumes(on);
-	}
-
-	private boolean anyMatchableSubsumes(NodeName on) {
-
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
-
-			if (m.subsumesNode(on) || subsumesAnyMatchable(m, on)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean subsumesAnyMatchable(MatchableNode<?> m, NodeName on) {
-
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
-
-			if (m.subsumesMatchable(om)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
+	abstract MatchComponents createMatchComponents(MatchStructures matchStructures);
 }

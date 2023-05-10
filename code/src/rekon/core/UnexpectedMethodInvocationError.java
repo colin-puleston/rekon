@@ -24,80 +24,15 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends ObjectValue {
+class UnexpectedMethodInvocationError extends Error {
 
-	private NodeName node;
+	static private final long serialVersionUID = -1;
 
-	public NodeValue(NodeName node) {
+	UnexpectedMethodInvocationError() {
 
-		this.node = node;
-	}
-
-	NodeValue asNodeValue() {
-
-		return this;
-	}
-
-	NodeName getValueNode() {
-
-		return node;
-	}
-
-	void collectNames(NameCollector collector) {
-
-		collector.collectForValueNode(node);
-	}
-
-	boolean subsumesOther(Value v) {
-
-		NodeValue nv = v.asNodeValue();
-
-		return nv != null && subsumesOtherNode(nv.node);
-	}
-
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return node.anyNewSubsumers(selector);
-	}
-
-	void render(PatternRenderer r) {
-
-		r.addLine(node.getLabel());
-	}
-
-	private boolean subsumesOtherNode(NodeName on) {
-
-		return node.local() ? anyMatchableSubsumes(on) : node.subsumes(on);
-	}
-
-	private boolean anyMatchableSubsumes(NodeName on) {
-
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
-
-			if (m.subsumesNode(on) || subsumesAnyMatchable(m, on)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean subsumesAnyMatchable(MatchableNode<?> m, NodeName on) {
-
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
-
-			if (m.subsumesMatchable(om)) {
-
-				return true;
-			}
-		}
-
-		return false;
+		super("Unexpected method invocation!");
 	}
 }

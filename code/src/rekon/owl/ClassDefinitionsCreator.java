@@ -68,7 +68,7 @@ class ClassDefinitionsCreator {
 
 				List<NodeName> nodeDjs = resolveGCIDisjunctsToNodes(disjuncts);
 
-				matchStructures.addDisjunctionClass(c, nodeDjs);
+				matchStructures.addDisjunctionNode(c, nodeDjs);
 			}
 
 			return true;

@@ -35,7 +35,7 @@ abstract class FreeClassName extends ClassName {
 
 	public String getLabel() {
 
-		return String.format(LABEL_FORMAT, getClass().getSimpleName(), index);
+		return String.format(LABEL_FORMAT, getLabelPrefix(), index);
 	}
 
 	public boolean mapped() {
@@ -51,5 +51,10 @@ abstract class FreeClassName extends ClassName {
 	FreeClassName(int index) {
 
 		this.index = index;
+	}
+
+	String getLabelPrefix() {
+
+		return getClass().getSimpleName();
 	}
 }

@@ -29,27 +29,26 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialOntologyPatternSubsumeds extends PotentialPatternSubsumeds {
+class OrderedMatchableNodes extends MatchableNodes {
 
-	PotentialOntologyPatternSubsumeds(List<PatternNode> allOptions) {
+	private List<MatchableNode<?>> orderedNodes = new ArrayList<MatchableNode<?>>();
 
-		super(allOptions);
+	void addPatternNode(PatternNode node) {
 
-		registerDefaultNestedOptionRanks();
+		super.addPatternNode(node);
+
+		orderedNodes.add(node);
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	void addDisjunctionNode(DisjunctionNode node) {
 
-		return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
+		super.addDisjunctionNode(node);
+
+		orderedNodes.add(node);
 	}
 
-	List<Names> getRankedDefinitionNames(NodePattern defn) {
+	List<MatchableNode<?>> getOrderedNodes() {
 
-		return new FilteringNameCollector(true).collect(defn);
-	}
-
-	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
-
-		return new FilteringNameCollector(false).collect(profile);
+		return orderedNodes;
 	}
 }

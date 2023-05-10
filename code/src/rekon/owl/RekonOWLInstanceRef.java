@@ -22,33 +22,21 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
 
-import java.util.*;
+import org.semanticweb.owlapi.model.*;
+
+import uk.ac.manchester.cs.owl.owlapi.*;
 
 /**
  * @author Colin Puleston
  */
-class DynamicMatchableNodes extends MatchableNodes {
+class RekonOWLInstanceRef extends OWLClassImpl {
 
-	private List<MatchableNode<?>> matchableNodes = new ArrayList<MatchableNode<?>>();
+	static private final long serialVersionUID = -1;
 
-	void addPatternNode(PatternNode node) {
+	RekonOWLInstanceRef(IRI iri) {
 
-		super.addPatternNode(node);
-
-		matchableNodes.add(node);
-	}
-
-	void addDisjunctionNode(DisjunctionNode node) {
-
-		super.addDisjunctionNode(node);
-
-		matchableNodes.add(node);
-	}
-
-	List<MatchableNode<?>> getAllMatchableNodes() {
-
-		return matchableNodes;
+		super(iri);
 	}
 }

@@ -112,6 +112,8 @@ abstract class PotentialSubsumptions<O> {
 		}
 	}
 
+	private enum UpdateType {REGISTER_CORE, REGISTER_TRANSIENT, DEREGISTER_TRANSIENT}
+
 	private class RankMatches {
 
 		private int rank = allRankMatches.size();
@@ -119,41 +121,19 @@ abstract class PotentialSubsumptions<O> {
 		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
-		void registerOption(O option, Names rankNames) {
+		void update(O option, Names rankNames, UpdateType updateType) {
 
-			for (Name n : resolveNamesForRegistration(rankNames, rank).getNames()) {
+			for (Name n : resolveRankNamesForRegistration(rankNames)) {
 
-				registerOptionName(option, n);
-			}
-		}
+				if (updateType == UpdateType.DEREGISTER_TRANSIENT) {
 
-		private void registerOptionName(O option, Name n) {
+					deregisterOptionName(option, n);
+				}
+				else {
 
-			if (refNamesCommonToAllOptions.contains(n)) {
-
-				return;
-			}
-
-			Set<O> options = optionsByRefName.get(n);
-
-			if (options == null) {
-
-				options = new HashSet<O>();
-
-				optionsByRefName.put(n, options);
-			}
-			else {
-
-				if (options.size() == totalOptions() - 1) {
-
-					optionsByRefName.remove(n);
-					refNamesCommonToAllOptions.add(n);
-
-					return;
+					registerOptionName(option, n, updateType);
 				}
 			}
-
-			options.add(option);
 		}
 
 		OptionCollector collectOptionsFor(Names rankNames) {
@@ -171,6 +151,58 @@ abstract class PotentialSubsumptions<O> {
 			}
 
 			return rankOptions;
+		}
+
+		private Collection<Name> resolveRankNamesForRegistration(Names rankNames) {
+
+			return resolveNamesForRegistration(rankNames, rank).getNames();
+		}
+
+		private void registerOptionName(O option, Name n, UpdateType updateType) {
+
+			if (refNamesCommonToAllOptions.contains(n)) {
+
+				return;
+			}
+
+			Set<O> options = optionsByRefName.get(n);
+
+			if (options == null) {
+
+				options = new HashSet<O>();
+
+				optionsByRefName.put(n, options);
+			}
+			else {
+
+				if (updateType == UpdateType.REGISTER_CORE
+					&& options.size() == totalOptions() - 1) {
+
+					optionsByRefName.remove(n);
+					refNamesCommonToAllOptions.add(n);
+
+					return;
+				}
+			}
+
+			options.add(option);
+		}
+
+		private void deregisterOptionName(O option, Name n) {
+
+			if (refNamesCommonToAllOptions.contains(n)) {
+
+				return;
+			}
+
+			Set<O> options = optionsByRefName.get(n);
+
+			if (options == null) {
+
+				throw new Error("Referenced name not registered for option!");
+			}
+
+			options.remove(option);
 		}
 
 		private OptionUnion getOptionsFor(Name n) {
@@ -213,38 +245,114 @@ abstract class PotentialSubsumptions<O> {
 		}
 	}
 
+	private class UpdateOp {
+
+		private O option;
+		private List<Names> rankedNames;
+
+		UpdateOp(O option, int startRank, int stopRank) {
+
+			this.option = option;
+
+			rankedNames = getOptionMatchNames(option, startRank, stopRank);
+		}
+
+		UpdateType getOpType() {
+
+			return UpdateType.REGISTER_CORE;
+		}
+
+		int totalOptionRanks() {
+
+			return rankedNames.size();
+		}
+
+		boolean performOp(int rank) {
+
+			if (rankedNames.size() > rank) {
+
+				RankMatches rankMatches = allRankMatches.get(rank);
+				Names rankNames = rankedNames.get(rank);
+
+				rankMatches.update(option, rankNames, getOpType());
+
+				return true;
+			}
+
+			return false;
+		}
+	}
+
+	private class CoreRegisterOp extends UpdateOp {
+
+		private O option;
+		private List<Names> rankedNames;
+
+		CoreRegisterOp(O option, int startRank, int stopRank) {
+
+			super(option, startRank, stopRank);
+		}
+
+		UpdateType getOpType() {
+
+			return UpdateType.REGISTER_CORE;
+		}
+	}
+
+	private abstract class TransientUpdateOp extends UpdateOp {
+
+		TransientUpdateOp(O option) {
+
+			super(option, 0, allRankMatches.size());
+
+			processForCurrentRankMatches();
+		}
+
+		private void processForCurrentRankMatches() {
+
+			for (int rank = 0 ; rank < allRankMatches.size() ; rank++) {
+
+				if (!performOp(rank)) {
+
+					break;
+				}
+			}
+		}
+	}
+
+	private class TransientRegisterOp extends TransientUpdateOp {
+
+		TransientRegisterOp(O option) {
+
+			super(option);
+		}
+
+		UpdateType getOpType() {
+
+			return UpdateType.REGISTER_TRANSIENT;
+		}
+	}
+
+	private class TransientDeregisterOp extends TransientUpdateOp {
+
+		TransientDeregisterOp(O option) {
+
+			super(option);
+		}
+
+		UpdateType getOpType() {
+
+			return UpdateType.DEREGISTER_TRANSIENT;
+		}
+	}
+
 	private class MultiOptionRegistrar extends MultiThreadProcessor<Names> {
 
 		private int startRank;
 		private int stopRank;
 
-		private List<OptionReg> optionRegs = new ArrayList<OptionReg>();
+		private List<UpdateOp> registerOps = new ArrayList<UpdateOp>();
 		private boolean completedMultiReg = true;
-
-		private class OptionReg {
-
-			private O option;
-			private List<Names> rankedNames;
-
-			OptionReg(O option) {
-
-				this.option = option;
-
-				rankedNames = getOptionMatchNames(option, startRank, stopRank);
-			}
-
-			void checkRegister(RankMatches rankMatches, int rank) {
-
-				if (rankedNames.size() > rank) {
-
-					Names rankNames = rankedNames.get(rank);
-
-					rankMatches.registerOption(option, rankNames);
-
-					completedMultiReg &= (rankedNames.size() <= stopRank);
-				}
-			}
-		}
 
 		MultiOptionRegistrar(int startRank, int stopRank) {
 
@@ -256,7 +364,7 @@ abstract class PotentialSubsumptions<O> {
 
 			for (O option : getAllOptions()) {
 
-				optionRegs.add(new OptionReg(option));
+				registerOps.add(new CoreRegisterOp(option, startRank, stopRank));
 			}
 
 			execProcesses();
@@ -279,19 +387,20 @@ abstract class PotentialSubsumptions<O> {
 
 		private void registerRanks(int totalThreads, int threadIndex) {
 
-			for (int rank = startRank + threadIndex ; rank < stopRank ; rank += totalThreads) {
+			for (int r = startRank + threadIndex ; r < stopRank ; r += totalThreads) {
 
-				registerRank(rank);
+				registerRank(r);
 			}
 		}
 
 		private void registerRank(int rank) {
 
-			RankMatches rankMatches = allRankMatches.get(rank);
+			for (UpdateOp op : registerOps) {
 
-			for (OptionReg optReg : optionRegs) {
+				if (op.performOp(rank)) {
 
-				optReg.checkRegister(rankMatches, rank);
+					completedMultiReg &= (op.totalOptionRanks() <= stopRank);
+				}
 			}
 		}
 	}
@@ -309,6 +418,16 @@ abstract class PotentialSubsumptions<O> {
 	boolean registerOptionRanks(int startRank, int stopRank) {
 
 		return new MultiOptionRegistrar(startRank, stopRank).completedMultiReg();
+	}
+
+	void registerTransientOption(O option) {
+
+		new TransientRegisterOp(option);
+	}
+
+	void deregisterTransientOption(O option) {
+
+		new TransientDeregisterOp(option);
 	}
 
 	abstract List<O> getAllOptions();

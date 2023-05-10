@@ -29,9 +29,9 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DynamicClassifier {
+class LocalClassifier {
 
-	private PotentialDynamicPatternSubsumers definedPatternsFilter;
+	private PotentialLocalPatternSubsumers definedPatternsFilter;
 	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
 
 	private DefaultClassifier defaultClassifier = new DefaultClassifier();
@@ -41,11 +41,11 @@ class DynamicClassifier {
 
 		private boolean newSubsumptions = false;
 
-		NameSet classify(DynamicPattern pattern) {
+		NameSet classify(LocalPattern pattern) {
 
 			classifyMatchables(pattern.getPatternMatchables());
 
-			return pattern.getPatternClass().getClassifier().getSubsumers();
+			return pattern.getPatternNode().getClassifier().getSubsumers();
 		}
 
 		void updateNewSubsumptions(boolean newSubsumption) {
@@ -56,9 +56,9 @@ class DynamicClassifier {
 			}
 		}
 
-		private void classifyMatchables(DynamicMatchableNodes matchables) {
+		private void classifyMatchables(OrderedMatchableNodes matchables) {
 
-			for (MatchableNode<?> candidate : matchables.getAllMatchableNodes()) {
+			for (MatchableNode<?> candidate : matchables.getOrderedNodes()) {
 
 				exhaustivelyClassify(candidate);
 
@@ -199,27 +199,25 @@ class DynamicClassifier {
 		}
 	}
 
-	DynamicClassifier(Ontology ontology) {
-
-		MatchableNodes matchables = ontology.getMatchables();
+	LocalClassifier(MatchableNodes matchables) {
 
 		definedPatternsFilter = createDefinedPatternsFilter(matchables);
 		disjunctionDefnsFilter = createDisjunctionDefnsFilter(matchables);
 	}
 
-	NameSet classify(DynamicPattern pattern) {
+	NameSet classify(LocalPattern pattern) {
 
 		return defaultClassifier.classify(pattern);
 	}
 
-	NameSet classify(DynamicPattern pattern, Collection<MatchableNode<?>> preFilteredDefineds) {
+	NameSet classify(LocalPattern pattern, Collection<MatchableNode<?>> preFilteredDefineds) {
 
 		return new PreFilteredDefinedsClassifier(preFilteredDefineds).classify(pattern);
 	}
 
-	private PotentialDynamicPatternSubsumers createDefinedPatternsFilter(MatchableNodes matchables) {
+	private PotentialLocalPatternSubsumers createDefinedPatternsFilter(MatchableNodes matchables) {
 
-		return new PotentialDynamicPatternSubsumers(matchables.getAllPatternNodes());
+		return new PotentialLocalPatternSubsumers(matchables.getAllPatternNodes());
 	}
 
 	private PotentialDisjunctionSubsumers createDisjunctionDefnsFilter(MatchableNodes matchables) {

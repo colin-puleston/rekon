@@ -38,6 +38,28 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternNo
 		this.allOptions = allOptions;
 	}
 
+	void checkAddInstanceOption(InstanceName name) {
+
+		PatternNode pn = name.getPatternNode();
+
+		if (pn != null) {
+
+			allOptions.add(pn);
+			registerTransientOption(pn);
+		}
+	}
+
+	void checkRemoveInstanceOption(InstanceName name) {
+
+		PatternNode pn = name.getPatternNode();
+
+		if (pn != null) {
+
+			allOptions.remove(pn);
+			deregisterTransientOption(pn);
+		}
+	}
+
 	Collection<PatternNode> getPotentialsFor(NodePattern request) {
 
 		return getPotentialsFor(getRankedDefinitionNames(request));

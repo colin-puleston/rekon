@@ -32,9 +32,7 @@ import java.util.*;
 public class MatchStructures {
 
 	private MatchableNodes matchables;
-
 	private FreeClasses freeClasses;
-	private FreeClasses impliedClasses;
 
 	public void checkAddPatternNode(NodeName name, Collection<Relation> relations) {
 
@@ -44,12 +42,12 @@ public class MatchStructures {
 		}
 	}
 
-	public void addPatternNodeDefinition(ClassName name, NodePattern defn) {
+	public void addPatternNodeDefinition(NodeName name, NodePattern defn) {
 
 		matchables.addPatternNodeDefinition(name, defn);
 	}
 
-	public void addDisjunctionClass(ClassName name, Collection<? extends NodeName> disjuncts) {
+	public void addDisjunctionNode(ClassName name, Collection<? extends NodeName> disjuncts) {
 
 		matchables.addDisjunctionNode(name, disjuncts);
 	}

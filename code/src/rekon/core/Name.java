@@ -101,7 +101,7 @@ public abstract class Name {
 		return getClassificationHandler(NameClassification.class);
 	}
 
-	boolean dynamic() {
+	boolean local() {
 
 		return false;
 	}

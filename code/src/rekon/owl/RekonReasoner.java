@@ -41,10 +41,13 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 	private OWLOntologyManager manager;
 	private RekonOps operations = null;
 
+	private boolean instanceBoxCreated = false;
+
 	private class FlushOnUpdateInvoker implements OWLOntologyChangeListener {
 
 		public void ontologiesChanged(List<? extends OWLOntologyChange> changes) {
 
+			checkLegalOntologyUpdate();
 			flush();
 		}
 	}
@@ -56,6 +59,13 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		manager.addOntologyChangeListener(new FlushOnUpdateInvoker());
 
 		NameRenderer.SINGLETON.setDefaultLabel(manager);
+	}
+
+	public RekonInstanceBox createInstanceBox() {
+
+		instanceBoxCreated = true;
+
+		return resolveOperations().createInstanceBox();
 	}
 
 	public String getReasonerName() {
@@ -90,7 +100,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 	public NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression expr, boolean direct) {
 
-		return resolveOperations().getInstances(expr, direct);
+		return resolveOperations().getIndividuals(expr, direct);
 	}
 
 	public NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct) {
@@ -116,5 +126,15 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		}
 
 		return operations;
+	}
+
+	private void checkLegalOntologyUpdate() {
+
+		if (instanceBoxCreated) {
+
+			throw new RekonInstanceBoxException(
+						"Cannot edit ontology after "
+						+ "instance-box has been created!");
+		}
 	}
 }

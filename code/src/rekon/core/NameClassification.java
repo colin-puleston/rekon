@@ -35,6 +35,16 @@ class NameClassification extends NameClassificationHandler {
 
 	static private abstract class VerticalLinks {
 
+		void addTransientDirect(InstanceName in) {
+
+			throw new UnexpectedMethodInvocationError();
+		}
+
+		void removeTransientDirect(InstanceName in) {
+
+			throw new UnexpectedMethodInvocationError();
+		}
+
 		abstract Names get(boolean direct);
 
 		abstract boolean hasLinkTo(Name target, NameSet visited);
@@ -63,13 +73,23 @@ class NameClassification extends NameClassificationHandler {
 
 		NameSet getActiveDirects() {
 
-			throw new Error("Method should necer be invoked!");
+			throw new UnexpectedMethodInvocationError();
 		}
 	}
 
 	static private abstract class ActiveVerticalLinks extends VerticalLinks {
 
 		private NameSet directs = new NameSet();
+
+		void addTransientDirect(InstanceName in) {
+
+			directs.add(in);
+		}
+
+		void removeTransientDirect(InstanceName in) {
+
+			directs.remove(in);
+		}
 
 		Names get(boolean direct) {
 
@@ -358,6 +378,21 @@ class NameClassification extends NameClassificationHandler {
 		this.name = name;
 
 		initialiser = new Initialiser(subsumers);
+	}
+
+	void addDirectInstance(InstanceName in) {
+
+		if (subs == EMPTY_VERTICAL_LINKS) {
+
+			subs = new Subs();
+		}
+
+		subs.addTransientDirect(in);
+	}
+
+	void removeDirectInstance(InstanceName in) {
+
+		subs.removeTransientDirect(in);
 	}
 
 	boolean rootName() {

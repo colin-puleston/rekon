@@ -62,7 +62,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private void collectForDefinitionNode(NodeName n) {
 
-			if (n.dynamic()) {
+			if (n.local()) {
 
 				for (NodePattern d : n.getDefinitionPatterns()) {
 

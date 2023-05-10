@@ -28,7 +28,6 @@ import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
-import org.semanticweb.owlapi.reasoner.impl.*;
 
 import rekon.core.*;
 
@@ -40,231 +39,15 @@ class RekonOps {
 	private OWLClass owlThing;
 	private OWLClass owlNothing;
 
-	private OWLClassNode owlThingAsEquivGroup;
-	private OWLClassNode owlNothingAsEquivGroup;
+	private MappedNames mappedNames;
 
-	private OWLClassNodeSet emptyEquivClassGroups = new OWLClassNodeSet();
+	private DynamicOps dynamicOps;
+	private InstanceOps instanceOps;
 
-	private Names mappedClassNames;
-	private DynamicOpsInvoker dynamicOps;
+	private EquivalentsGrouper equivalentsGrouper;
 
 	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
 	private SameIndividualsChecker sameIndividualsChecker = new SameIndividualsChecker();
-
-	private ClassesGrouper classesGrouper = new ClassesGrouper();
-	private SuperClassesGrouper superClassesGrouper = new SuperClassesGrouper();
-	private SubClassesGrouper subClassesGrouper = new SubClassesGrouper();
-	private IndividualsGrouper individualsGrouper = new IndividualsGrouper();
-
-	private abstract class EntitiesGrouper<E extends OWLEntity> {
-
-		private Class<E> entityType;
-
-		EntitiesGrouper(Class<E> entityType) {
-
-			this.entityType = entityType;
-		}
-
-		NodeSet<E> toEquivGroups(Names names) {
-
-			return createGroupsNode(toEquivGroupsSet(names));
-		}
-
-		Set<Node<E>> toEquivGroupsSet(Names names) {
-
-			Set<Node<E>> groups = new HashSet<Node<E>>();
-			NameSet initialGroupElements = new NameSet();
-
-			for (Name n : names.getNames()) {
-
-				Names equivs = n.getEquivalents();
-
-				if (equivs.isEmpty()) {
-
-					checkAddEquivGroup(groups, n, Names.NO_NAMES);
-				}
-				else {
-
-					if (!initialGroupElements.containsAny(equivs)) {
-
-						checkAddEquivGroup(groups, n, equivs);
-
-						initialGroupElements.add(n);
-					}
-				}
-			}
-
-			return groups;
-		}
-
-		abstract Node<E> createGroupNode(Set<E> entities);
-
-		abstract NodeSet<E> createGroupsNode(Set<Node<E>> groups);
-
-		void checkAddEntities(Set<E> entities, Name name) {
-
-			if (name.mapped()) {
-
-				entities.add(MappedNames.toMappedEntity(name, entityType));
-			}
-		}
-
-		private void checkAddEquivGroup(Set<Node<E>> groups, Name name, Names equivs) {
-
-			Set<E> entities = new HashSet<E>();
-
-			checkAddEntities(entities, name);
-
-			for (Name e : equivs.getNames()) {
-
-				checkAddEntities(entities, e);
-			}
-
-			if (!entities.isEmpty()) {
-
-				groups.add(createGroupNode(entities));
-			}
-		}
-	}
-
-	private class ClassesGrouper extends EntitiesGrouper<OWLClass> {
-
-		ClassesGrouper() {
-
-			super(OWLClass.class);
-		}
-
-		Node<OWLClass> equivsToGroup(Names equivs, OWLClassExpression sourceExpr) {
-
-			Set<OWLClass> entities = new HashSet<OWLClass>();
-
-			for (Name n : equivs.getNames()) {
-
-				checkAddEntities(entities, n);
-			}
-
-			return new OWLClassNode(entities);
-		}
-
-		Node<OWLClass> createGroupNode(Set<OWLClass> entities) {
-
-			return new OWLClassNode(entities);
-		}
-
-		NodeSet<OWLClass> createGroupsNode(Set<Node<OWLClass>> groups) {
-
-			return new OWLClassNodeSet(groups);
-		}
-	}
-
-	private abstract class LinkedClassesGrouper extends ClassesGrouper {
-
-		NodeSet<OWLClass> toEquivGroups(Names names, boolean direct) {
-
-			if (direct && anyFreeNames(names)) {
-
-				names = resolveForFreeDirects(names);
-			}
-
-			Set<Node<OWLClass>> groups = toEquivGroupsSet(names);
-
-			if (!direct || groups.isEmpty()) {
-
-				groups.add(getDefaultEquivGroup());
-			}
-
-			return new OWLClassNodeSet(groups);
-		}
-
-		abstract OWLClassNode getDefaultEquivGroup();
-
-		abstract Names getLinked(Name name, boolean direct);
-
-		private Names resolveForFreeDirects(Names rawDirects) {
-
-			NameSet resDirects = new NameSet();
-
-			for (Name d : rawDirects.getNames()) {
-
-				collectLinkedMappeds(resDirects, d);
-			}
-
-			for (Name d : resDirects.copyNames()) {
-
-				resDirects.removeAll(getLinked(d, false));
-			}
-
-			return resDirects;
-		}
-
-		private void collectLinkedMappeds(NameSet collected, Name n) {
-
-			if (!n.mapped() || collected.add(n)) {
-
-				for (Name l : getLinked(n, true).getNames()) {
-
-					collectLinkedMappeds(collected, l);
-				}
-			}
-		}
-
-		private boolean anyFreeNames(Names names) {
-
-			for (Name n : names.getNames()) {
-
-				if (!n.mapped()) {
-
-					return true;
-				}
-			}
-
-			return false;
-		}
-	}
-
-	private class SuperClassesGrouper extends LinkedClassesGrouper {
-
-		OWLClassNode getDefaultEquivGroup() {
-
-			return owlThingAsEquivGroup;
-		}
-
-		Names getLinked(Name name, boolean direct) {
-
-			return name.getSupers(direct);
-		}
-	}
-
-	private class SubClassesGrouper extends LinkedClassesGrouper {
-
-		OWLClassNode getDefaultEquivGroup() {
-
-			return owlNothingAsEquivGroup;
-		}
-
-		Names getLinked(Name name, boolean direct) {
-
-			return name.getSubs(ClassName.class, direct);
-		}
-	}
-
-	private class IndividualsGrouper extends EntitiesGrouper<OWLNamedIndividual> {
-
-		IndividualsGrouper() {
-
-			super(OWLNamedIndividual.class);
-		}
-
-		Node<OWLNamedIndividual> createGroupNode(Set<OWLNamedIndividual> entities) {
-
-			return new OWLNamedIndividualNode(entities);
-		}
-
-		NodeSet<OWLNamedIndividual> createGroupsNode(Set<Node<OWLNamedIndividual>> groups) {
-
-			return new OWLNamedIndividualNodeSet(groups);
-		}
-	}
 
 	private abstract class PairwiseMatchChecker<E> {
 
@@ -297,7 +80,7 @@ class RekonOps {
 
 		boolean match(OWLClassExpression e1, OWLClassExpression e2) {
 
-			return dynamicOps.equivalents(e1, e2);
+			return toDynamicHandler(e1).equivalentTo(toDynamicHandler(e2));
 		}
 	}
 
@@ -305,7 +88,20 @@ class RekonOps {
 
 		boolean match(OWLNamedIndividual e1, OWLNamedIndividual e2) {
 
-			return dynamicOps.sameIndividuals(e1, e2);
+			return toDynamicHandler(e1).equivalentTo(toDynamicHandler(e2));
+		}
+	}
+
+	private class DynamicExprPatternCreator extends ExpressionPatternCreator {
+
+		DynamicExprPatternCreator(OWLClassExpression expr) {
+
+			super(expr);
+		}
+
+		MatchComponents createMatchComponents(MatchStructures matchStructures) {
+
+			return new MatchComponents(mappedNames, matchStructures, true);
 		}
 	}
 
@@ -316,68 +112,72 @@ class RekonOps {
 		owlThing = factory.getOWLThing();
 		owlNothing = factory.getOWLNothing();
 
-		owlThingAsEquivGroup = new OWLClassNode(owlThing);
-		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
-
 		Assertions assertions = new Assertions(manager);
-		OntologyInitialiserImpl ontoInit = new OntologyInitialiserImpl(assertions);
-		Ontology ontology = new Ontology(ontoInit);
 
-		mappedClassNames = new NameList(ontoInit.getClassNames());
-		dynamicOps = ontoInit.createDynamicOpsInvoker(ontology);
+		mappedNames = new MappedNames(assertions);
+
+		Ontology ontology = createOntology(assertions);
+
+		dynamicOps = ontology.createDynamicOps();
+		instanceOps = ontology.createInstanceOps();
+
+		equivalentsGrouper = new EquivalentsGrouper(factory);
+	}
+
+	RekonInstanceBox createInstanceBox() {
+
+		return new RekonInstanceBox(instanceOps, mappedNames);
 	}
 
 	Node<OWLClass> getEquivalentClasses(OWLClassExpression expr) {
 
 		if (expr.equals(owlThing)) {
 
-			return owlThingAsEquivGroup;
+			return equivalentsGrouper.owlThingAsEquivGroup;
 		}
 
 		if (expr.equals(owlNothing)) {
 
-			return owlNothingAsEquivGroup;
+			return equivalentsGrouper.owlNothingAsEquivGroup;
 		}
 
-		expr = resolveInputExpr(expr);
+		Names equivs = toDynamicHandler(expr).getEquivalents();
 
-		Names equivs = dynamicOps.getEquivalents(expr);
-
-		return classesGrouper.equivsToGroup(equivs, expr);
+		return equivalentsGrouper.equivsToGroup(equivs, expr);
 	}
 
 	NodeSet<OWLClass> getSuperClasses(OWLClassExpression expr, boolean direct) {
 
 		if (expr.equals(owlThing)) {
 
-			return emptyEquivClassGroups;
+			return equivalentsGrouper.emptyEquivClassGroups;
 		}
 
-		return superClassesGrouper.toEquivGroups(getSuperNames(expr, direct), direct);
+		return equivalentsGrouper.groupSupers(getSuperNames(expr, direct), direct);
 	}
 
 	NodeSet<OWLClass> getSubClasses(OWLClassExpression expr, boolean direct) {
 
 		if (expr.equals(owlNothing)) {
 
-			return emptyEquivClassGroups;
+			return equivalentsGrouper.emptyEquivClassGroups;
 		}
 
-		return subClassesGrouper.toEquivGroups(getSubNames(expr, direct), direct);
+		return equivalentsGrouper.groupSubs(getSubNames(expr, direct), direct);
 	}
 
-	NodeSet<OWLNamedIndividual> getInstances(OWLClassExpression expr, boolean direct) {
+	NodeSet<OWLNamedIndividual> getIndividuals(OWLClassExpression expr, boolean direct) {
 
-		Names insts = dynamicOps.getInstances(resolveInputExpr(expr), direct);
+		Names insts = toDynamicHandler(expr).getIndividuals(direct);
 
-		return individualsGrouper.toEquivGroups(insts);
+		return equivalentsGrouper.groupIndividuals(insts);
 	}
 
 	NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct) {
 
-		Names types = dynamicOps.getTypes(ind, direct);
+		Names types = toDynamicHandler(ind).getSupers(direct);
 
-		return classesGrouper.toEquivGroups(types);
+		return equivalentsGrouper.groupClasses(types);
 	}
 
 	boolean isEntailed(OWLAxiom axiom) {
@@ -413,9 +213,39 @@ class RekonOps {
 		return false;
 	}
 
+	private Ontology createOntology(Assertions assertions) {
+
+		return new Ontology(mappedNames, createStructureBuilder(assertions));
+	}
+
+	private StructureBuilder createStructureBuilder(Assertions assertions) {
+
+		return new RekonStructureBuilder(assertions, mappedNames);
+	}
+
+	private Names getSuperNames(OWLClassExpression expr, boolean direct) {
+
+		if (expr.equals(owlNothing)) {
+
+			if (direct) {
+
+				return getLeafClassNames();
+			}
+
+			return new NameList(mappedNames.getClassNames());
+		}
+
+		return toDynamicHandler(expr).getSupers(direct);
+	}
+
+	private Names getSubNames(OWLClassExpression expr, boolean direct) {
+
+		return toDynamicHandler(expr).getSubs(direct);
+	}
+
 	private boolean equivalents(Set<OWLClassExpression> exprs) {
 
-		return equivalenceChecker.allMatch(resolveInputExprs(exprs));
+		return equivalenceChecker.allMatch(exprs);
 	}
 
 	private boolean sameIndividuals(Set<OWLIndividual> inds) {
@@ -427,22 +257,33 @@ class RekonOps {
 
 	private boolean subsumption(OWLClassExpression sup, OWLClassExpression sub) {
 
-		return dynamicOps.subsumption(resolveInputExpr(sup), resolveInputExpr(sub));
+		return toDynamicHandler(sup).subsumes(toDynamicHandler(sub));
 	}
 
 	private boolean instanceOf(OWLClassExpression type, OWLIndividual ind) {
 
-		if (ind instanceof OWLNamedIndividual) {
-
-			return dynamicOps.instanceOf(resolveInputExpr(type), (OWLNamedIndividual)ind);
-		}
-
-		return false;
+		return ind instanceof OWLNamedIndividual
+				&& instanceOf(type, (OWLNamedIndividual)ind);
 	}
 
 	private boolean instanceOf(OWLClassExpression type, OWLNamedIndividual ind) {
 
-		return dynamicOps.instanceOf(resolveInputExpr(type), ind);
+		return toDynamicHandler(type).subsumes(toDynamicHandler(ind));
+	}
+
+	private Names getLeafClassNames() {
+
+		NameSet leafs = new NameSet();
+
+		for (Name n : mappedNames.getClassNames()) {
+
+			if (n.getSubs(ClassName.class, true).isEmpty()) {
+
+				leafs.add(n);
+			}
+		}
+
+		return leafs;
 	}
 
 	private Set<OWLNamedIndividual> toNamedIndividuals(Set<OWLIndividual> inds) {
@@ -464,16 +305,26 @@ class RekonOps {
 		return namedInds;
 	}
 
-	private Set<OWLClassExpression> resolveInputExprs(Set<OWLClassExpression> ins) {
+	private DynamicOpsHandler toDynamicHandler(OWLClassExpression expr) {
 
-		Set<OWLClassExpression> outs = new HashSet<OWLClassExpression>();
+		if (expr instanceof OWLClass) {
 
-		for (OWLClassExpression in : ins) {
-
-			outs.add(resolveInputExpr(in));
+			return toDynamicHandler((OWLClass)expr);
 		}
 
-		return outs;
+		expr = resolveInputExpr(expr);
+
+		return dynamicOps.createHandler(new DynamicExprPatternCreator(expr));
+	}
+
+	private DynamicOpsHandler toDynamicHandler(OWLClass cls) {
+
+		return dynamicOps.createHandler(mappedNames.get(cls));
+	}
+
+	private DynamicOpsHandler toDynamicHandler(OWLNamedIndividual ind) {
+
+		return dynamicOps.createHandler(mappedNames.get(ind));
 	}
 
 	private OWLClassExpression resolveInputExpr(OWLClassExpression expr) {
@@ -490,35 +341,5 @@ class RekonOps {
 		}
 
 		return expr;
-	}
-
-	private Names getSuperNames(OWLClassExpression expr, boolean direct) {
-
-		if (expr.equals(owlNothing)) {
-
-			return direct ? getLeafClassNames() : mappedClassNames;
-		}
-
-		return dynamicOps.getSupers(resolveInputExpr(expr), direct);
-	}
-
-	private Names getSubNames(OWLClassExpression expr, boolean direct) {
-
-		return dynamicOps.getSubs(resolveInputExpr(expr), direct);
-	}
-
-	private Names getLeafClassNames() {
-
-		NameSet leafs = new NameSet();
-
-		for (Name n : mappedClassNames.getNames()) {
-
-			if (n.getSubs(ClassName.class, true).isEmpty()) {
-
-				leafs.add(n);
-			}
-		}
-
-		return leafs;
 	}
 }

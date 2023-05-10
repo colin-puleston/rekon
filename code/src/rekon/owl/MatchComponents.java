@@ -530,6 +530,11 @@ class MatchComponents {
 		return dataValueRelations.checkCreate(source);
 	}
 
+	InstanceName valueToInstanceName(RekonOWLInstanceRef v) {
+
+		throw new Error("Method should never be invoked!");
+	}
+
 	private Relation toRelation(OWLClassExpression source, boolean complement) {
 
 		if (source instanceof OWLObjectComplementOf) {
@@ -592,9 +597,19 @@ class MatchComponents {
 			return valueToIndividualDisjuncts((OWLObjectOneOf)v);
 		}
 
-		ClassName cn = valueToClassName(v);
+		NodeName n = valueToNodeName(v);
 
-		return cn != null ? Collections.singleton(cn) : null;
+		return n != null ? Collections.singleton(n) : null;
+	}
+
+	private NodeName valueToNodeName(OWLClassExpression v) {
+
+		if (v instanceof RekonOWLInstanceRef) {
+
+			return valueToInstanceName((RekonOWLInstanceRef)v);
+		}
+
+		return valueToClassName(v);
 	}
 
 	private ClassName valueToClassName(OWLClassExpression v) {
@@ -659,7 +674,7 @@ class MatchComponents {
 
 		ClassName c = matchStructures.addPatternClass();
 
-		matchStructures.addDisjunctionClass(c, disjuncts);
+		matchStructures.addDisjunctionNode(c, disjuncts);
 
 		return c;
 	}
