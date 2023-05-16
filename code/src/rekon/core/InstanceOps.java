@@ -46,8 +46,8 @@ public class InstanceOps {
 			InstancePattern ip = new InstancePattern(name, profileCreator);
 
 			patternSubsumers.inferSubsumers(ip);
+			name.completeClassification();
 
-			name.addToDirectTypes();
 			patternSubsumeds.checkAddInstanceOption(name);
 
 			if (instance.addReferencers()) {
@@ -63,7 +63,7 @@ public class InstanceOps {
 
 			InstanceName name = instance.getName();
 
-			name.removeFromDirectTypes();
+			name.removeFromClassification();
 			patternSubsumeds.checkRemoveInstanceOption(name);
 
 			instance.removeFromReferenceds();
@@ -110,17 +110,22 @@ public class InstanceOps {
 		checkRegisterAsGhost(instance);
 	}
 
-	public Collection<Instance> match(PatternCreator queryCreator) {
+	public List<Instance> match(PatternCreator queryCreator) {
 
-		NodePattern np = new DynamicPattern(queryCreator).getPattern();
-		NameSet matches = patternSubsumeds.inferAllSubsumedNodes(np);
+		NodePattern qp = createDynamicPattern(queryCreator);
+		NameSet matches = patternSubsumeds.inferAllSubsumedNodes(qp);
 
-		if (matches.isEmpty()) {
+		return matches.isEmpty()
+				? Collections.emptyList()
+				: matchesToInstances(matches);
+	}
 
-			return Collections.emptySet();
-		}
+	public boolean matches(PatternCreator queryCreator, PatternCreator profileCreator) {
 
-		return toInstances(processMatches(matches));
+		NodePattern qp = createDynamicPattern(queryCreator);
+		NodePattern pp = createDynamicPattern(profileCreator);
+
+		return qp.subsumes(pp);
 	}
 
 	private void checkReplaceGhost(Instance addition) {
@@ -146,25 +151,33 @@ public class InstanceOps {
 		ghosts.put(instance.getInstanceId(), instance);
 	}
 
-	private Names processMatches(NameSet matches) {
+	private NodePattern createDynamicPattern(PatternCreator creator) {
 
-		for (Name n : matches.copyNames()) {
-
-			matches.addAll(n.getSubs(NodeName.class, false));
-		}
-
-		return matches.filterForType(InstanceName.class);
+		return new DynamicPattern(creator).getPattern();
 	}
 
-	private Set<Instance> toInstances(Names instNames) {
+	private List<Instance> matchesToInstances(NameSet matches) {
 
 		Set<Instance> instances = new HashSet<Instance>();
 
-		for (Name n : instNames.getNames()) {
+		addInstances(instances, matches.filterForType(InstanceName.class));
+
+		for (Name n : matches.getNames()) {
+
+			if (n instanceof ClassName) {
+
+				addInstances(instances, n.getSubs(InstanceName.class, false));
+			}
+		}
+
+		return new ArrayList<Instance>(instances);
+	}
+
+	private void addInstances(Set<Instance> instances, Names names) {
+
+		for (Name n : names.getNames()) {
 
 			instances.add(((InstanceName)n).getInstance());
 		}
-
-		return instances;
 	}
 }

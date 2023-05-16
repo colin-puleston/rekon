@@ -36,6 +36,11 @@ public abstract class Instance {
 
 	private PatternCreator profileRecreator = null;
 
+	public String toString() {
+
+		return getClass().getSimpleName() + "(" + getLabel() + ")";
+	}
+
 	public InstanceName getName() {
 
 		return name;

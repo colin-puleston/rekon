@@ -32,6 +32,44 @@ import java.util.*;
 public class InstanceName extends NodeName {
 
 	private Instance instance;
+	private NameSet directTypes = new NameSet();
+
+	private abstract class TypeLinksHandler {
+
+		final NameClassification classification;
+
+		TypeLinksHandler() {
+
+			classification = getClassification();
+
+			for (Name type : directTypes.getNames()) {
+
+				performAction(type);
+			}
+		}
+
+		abstract void performAction(Name type);
+	}
+
+	private class TypeLinksAdder extends TypeLinksHandler {
+
+		void performAction(Name type) {
+
+			classification.addTransientDirectSuper(type);
+
+			type.getClassification().addTransientDirectSub(InstanceName.this);
+		}
+	}
+
+	private class TypeLinksRemover extends TypeLinksHandler {
+
+		void performAction(Name type) {
+
+			classification.removeTransientDirectSuper(type);
+
+			type.getClassification().removeTransientDirectSub(InstanceName.this);
+		}
+	}
 
 	private class ReferencedsFinder {
 
@@ -110,20 +148,17 @@ public class InstanceName extends NodeName {
 		this.instance = instance;
 	}
 
-	void addToDirectTypes() {
+	void completeClassification() {
 
-		for (Name s : getSupers(true).getNames()) {
+		findDirectTypes();
+		setClassification();
 
-			s.getClassification().addDirectInstance(this);
-		}
+		new TypeLinksAdder();
 	}
 
-	void removeFromDirectTypes() {
+	void removeFromClassification() {
 
-		for (Name s : getSupers(true).getNames()) {
-
-			s.getClassification().removeDirectInstance(this);
-		}
+		new TypeLinksRemover();
 	}
 
 	Instance getInstance() {
@@ -139,5 +174,17 @@ public class InstanceName extends NodeName {
 	Set<InstanceName> getReferenceds() {
 
 		return new ReferencedsFinder().findAll();
+	}
+
+	private void findDirectTypes() {
+
+		Names all = getClassifier().getSubsumers();
+
+		directTypes.addAll(all);
+
+		for (Name s : all.getNames()) {
+
+			directTypes.removeAll(s.getSubsumers());
+		}
 	}
 }

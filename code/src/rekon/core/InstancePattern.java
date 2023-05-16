@@ -35,7 +35,7 @@ class InstancePattern extends LocalPattern {
 
 	private class InstanceClasses extends LocalClasses {
 
-		private class InstanceClassName extends LocalClassName {
+		private class InstancePatternClassName extends LocalPatternClassName {
 
 			String getLabelPrefix() {
 
@@ -48,7 +48,7 @@ class InstancePattern extends LocalPattern {
 
 		ClassName createPatternClass() {
 
-			return new InstanceClassName();
+			return new InstancePatternClassName();
 		}
 	}
 
@@ -57,8 +57,6 @@ class InstancePattern extends LocalPattern {
 		this.patternInstance = patternInstance;
 
 		initialise(patternCreator);
-
-		getPatternMatchables().addPatternNode(patternInstance, getPattern());
 	}
 
 	LocalClasses createLocalClasses() {

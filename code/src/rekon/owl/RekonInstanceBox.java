@@ -130,11 +130,6 @@ public class RekonInstanceBox {
 
 	public void add(IRI iri, OWLClassExpression profile) {
 
-		if (instances.containsKey(iri)) {
-
-			throw new RekonInstanceBoxException("Instance already exists: " + iri);
-		}
-
 		instanceOps.add(new MappedInstance(iri), new InstanceExprPatternCreator(profile));
 	}
 
@@ -150,9 +145,16 @@ public class RekonInstanceBox {
 		instanceOps.remove(instance);
 	}
 
-	public Collection<IRI> match(OWLClassExpression query) {
+	public List<IRI> match(OWLClassExpression query) {
 
 		return extractIRIs(instanceOps.match(new QueryExprPatternCreator(query)));
+	}
+
+	public boolean matches(OWLClassExpression query, OWLClassExpression profile) {
+
+		return instanceOps.matches(
+					new QueryExprPatternCreator(query),
+					new QueryExprPatternCreator(profile));
 	}
 
 	public OWLClassExpression createInstanceRef(IRI iri) {
@@ -166,9 +168,9 @@ public class RekonInstanceBox {
 		this.mappedNames = mappedNames;
 	}
 
-	private Set<IRI> extractIRIs(Collection<Instance> instances) {
+	private List<IRI> extractIRIs(Collection<Instance> instances) {
 
-		Set<IRI> iris = new HashSet<IRI>();
+		List<IRI> iris = new ArrayList<IRI>();
 
 		for (Instance inst : instances) {
 

@@ -85,6 +85,21 @@ public abstract class NodeName extends Name {
 		return pn != null ? pn.getDefinitions() : Collections.emptySet();
 	}
 
+	boolean subsumes(Name name) {
+
+		if (name == this) {
+
+			return true;
+		}
+
+		if (name instanceof NodeName) {
+
+			return local() ? anyMatchableSubsumes((NodeName)name) : super.subsumes(name);
+		}
+
+		return false;
+	}
+
 	boolean classifyTargetPatternRoot(boolean initialPass) {
 
 		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_PATTERN_ROOT);
@@ -131,6 +146,32 @@ public abstract class NodeName extends Name {
 		}
 
 		return selecteds;
+	}
+
+	private boolean anyMatchableSubsumes(NodeName name) {
+
+		for (MatchableNode<?> m : matchableNodes) {
+
+			if (m.subsumesNode(name) || name.anyMatchableSubsumedBy(m)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean anyMatchableSubsumedBy(MatchableNode<?> matchable) {
+
+		for (MatchableNode<?> m : matchableNodes) {
+
+			if (matchable.subsumesMatchable(m)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean classifyTarget(boolean initialPass, NodeSelector selector) {

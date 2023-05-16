@@ -35,7 +35,7 @@ abstract class LocalPattern {
 
 	abstract class LocalClasses extends FreeClasses {
 
-		abstract class LocalClassName extends PatternClassName {
+		abstract class LocalPatternClassName extends PatternClassName {
 
 			boolean local() {
 
@@ -56,7 +56,7 @@ abstract class LocalPattern {
 		patternNode = ensurePatternNode(matchStructures);
 		pattern = patternCreator.createNestedPatterns(matchStructures);
 
-		matchStructures.addPatternNodeDefinition(patternNode, pattern);
+		patternMatchables.addPatternNodeDefinition(patternNode, pattern);
 
 		processAllLocalNamesPostAdditions();
 	}

@@ -285,9 +285,6 @@ abstract class PotentialSubsumptions<O> {
 
 	private class CoreRegisterOp extends UpdateOp {
 
-		private O option;
-		private List<Names> rankedNames;
-
 		CoreRegisterOp(O option, int startRank, int stopRank) {
 
 			super(option, startRank, stopRank);

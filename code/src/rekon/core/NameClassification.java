@@ -35,12 +35,12 @@ class NameClassification extends NameClassificationHandler {
 
 	static private abstract class VerticalLinks {
 
-		void addTransientDirect(InstanceName in) {
+		void addTransientDirect(Name in) {
 
 			throw new UnexpectedMethodInvocationError();
 		}
 
-		void removeTransientDirect(InstanceName in) {
+		void removeTransientDirect(Name in) {
 
 			throw new UnexpectedMethodInvocationError();
 		}
@@ -81,12 +81,12 @@ class NameClassification extends NameClassificationHandler {
 
 		private NameSet directs = new NameSet();
 
-		void addTransientDirect(InstanceName in) {
+		void addTransientDirect(Name in) {
 
 			directs.add(in);
 		}
 
-		void removeTransientDirect(InstanceName in) {
+		void removeTransientDirect(Name in) {
 
 			directs.remove(in);
 		}
@@ -149,6 +149,11 @@ class NameClassification extends NameClassificationHandler {
 
 			return n.getClassification().subs;
 		}
+	}
+
+	static void completeLocalClassification(Name name) {
+
+		completeAllClassifications(Collections.singletonList(name));
 	}
 
 	static void completeAllClassifications(List<Name> allNames) {
@@ -326,20 +331,9 @@ class NameClassification extends NameClassificationHandler {
 
 		void optimiseEmptyLinks() {
 
-			if (equivalents.isEmpty()) {
-
-				equivalents = NameSet.NO_NAMES;
-			}
-
-			if (supers.getActiveDirects().isEmpty()) {
-
-				supers = EMPTY_VERTICAL_LINKS;
-			}
-
-			if (subs.getActiveDirects().isEmpty()) {
-
-				subs = EMPTY_VERTICAL_LINKS;
-			}
+			optimiseEmptyEquivs();
+			optimiseEmptySupers();
+			optimiseEmptySubs();
 		}
 
 		private boolean checkSubsumedToEquiv(Name subsumed) {
@@ -380,19 +374,38 @@ class NameClassification extends NameClassificationHandler {
 		initialiser = new Initialiser(subsumers);
 	}
 
-	void addDirectInstance(InstanceName in) {
+	void addTransientDirectSuper(Name s) {
+
+		if (supers == EMPTY_VERTICAL_LINKS) {
+
+			supers = new Supers();
+		}
+
+		supers.addTransientDirect(s);
+	}
+
+	void removeTransientDirectSuper(Name s) {
+
+		supers.removeTransientDirect(s);
+
+		optimiseEmptySupers();
+	}
+
+	void addTransientDirectSub(Name s) {
 
 		if (subs == EMPTY_VERTICAL_LINKS) {
 
 			subs = new Subs();
 		}
 
-		subs.addTransientDirect(in);
+		subs.addTransientDirect(s);
 	}
 
-	void removeDirectInstance(InstanceName in) {
+	void removeTransientDirectSub(Name s) {
 
-		subs.removeTransientDirect(in);
+		subs.removeTransientDirect(s);
+
+		optimiseEmptySubs();
 	}
 
 	boolean rootName() {
@@ -433,5 +446,29 @@ class NameClassification extends NameClassificationHandler {
 	private void completeInitialisation() {
 
 		initialiser = null;
+	}
+
+	private void optimiseEmptyEquivs() {
+
+		if (equivalents.isEmpty()) {
+
+			equivalents = NameSet.NO_NAMES;
+		}
+	}
+
+	private void optimiseEmptySupers() {
+
+		if (supers.getActiveDirects().isEmpty()) {
+
+			supers = EMPTY_VERTICAL_LINKS;
+		}
+	}
+
+	private void optimiseEmptySubs() {
+
+		if (subs.getActiveDirects().isEmpty()) {
+
+			subs = EMPTY_VERTICAL_LINKS;
+		}
 	}
 }

@@ -137,65 +137,60 @@ class MappedNames implements OntologyNames {
 
 		private Map<E, N> names = new HashMap<E, N>();
 
-		abstract class TypeNamesInitialiser {
+		void initialise(Collection<AE> entities) {
 
-			final Assertions assertions;
+			for (AE ae : entities) {
 
-			TypeNamesInitialiser(Assertions assertions, Collection<AE> entityities) {
-
-				this.assertions = assertions;
-
-				for (AE ae : entityities) {
-
-					addName(ae.getEntity());
-				}
-
-				for (AE ae : entityities) {
-
-					configureName(ae);
-				}
+				resolveName(ae.getEntity());
 			}
 
-			abstract N createName(E entity);
+			for (AE ae : entities) {
 
-			N addName(E entity) {
-
-				N n = createName(entity);
-
-				names.put(entity, n);
-
-				return n;
-			}
-
-			N configureName(AE entity) {
-
-				N n = names.get(entity.getEntity());
-
-				addAssertedEquivalents(entity, n);
-				addAssertedSupers(entity, n);
-
-				return n;
-			}
-
-			abstract void addAssertedSupers(AE entity, N name);
-
-			private void addAssertedEquivalents(AE entity, N name) {
-
-				for (E e : entity.getEquivs()) {
-
-					name.addEquivalent(names.get(e));
-				}
+				configureName(ae);
 			}
 		}
 
-		N getName(E entity) {
+		N resolveName(E entity) {
 
-			return names.get(entity);
+			N n = names.get(entity);
+
+			return n != null ? n : addName(entity);
 		}
+
+		N configureName(AE entity) {
+
+			N n = names.get(entity.getEntity());
+
+			addAssertedEquivalents(entity, n);
+			addAssertedSupers(entity, n);
+
+			return n;
+		}
+
+		abstract N createName(E entity);
+
+		abstract void addAssertedSupers(AE entity, N name);
 
 		Collection<N> getAllNames() {
 
 			return names.values();
+		}
+
+		private N addName(E entity) {
+
+			N n = createName(entity);
+
+			names.put(entity, n);
+
+			return n;
+		}
+
+		private void addAssertedEquivalents(AE entity, N name) {
+
+			for (E e : entity.getEquivs()) {
+
+				name.addEquivalent(names.get(e));
+			}
 		}
 	}
 
@@ -205,77 +200,39 @@ class MappedNames implements OntologyNames {
 								N extends Name>
 								extends TypeNames<E, AE, N> {
 
-		private N rootName;
+		final N rootName;
 
-		abstract class HierarchyNamesInitialiser extends TypeNamesInitialiser {
+		HierarchyNames(E rootEntity, Collection<AE> entities) {
 
-			HierarchyNamesInitialiser(Assertions assertions, Collection<AE> entityities) {
+			rootName = resolveName(rootEntity);
 
-				super(assertions, entityities);
-			}
-
-			N addName(E entity) {
-
-				N n = super.addName(entity);
-
-				if (rootEntity(entity)) {
-
-					rootName = n;
-				}
-
-				return n;
-			}
-
-			void addAssertedSupers(AE entity, N name) {
-
-				for (E s : entity.getSupers()) {
-
-					name.addSubsumer(getName(s));
-				}
-
-				if (name != rootName && name.rootName()) {
-
-					name.addSubsumer(rootName);
-				}
-			}
-
-			abstract boolean rootEntity(E entity);
+			initialise(entities);
 		}
 
-		N getRootName() {
+		void addAssertedSupers(AE entity, N name) {
 
-			if (rootName == null) {
+			for (E s : entity.getSupers()) {
 
-				throw new Error("Root-name has not been set!");
+				name.addSubsumer(resolveName(s));
 			}
 
-			return rootName;
+			if (name != rootName && name.rootName()) {
+
+				name.addSubsumer(rootName);
+			}
 		}
 	}
 
 	private class ClassNames extends HierarchyNames<OWLClass, AssertedClass, ClassName> {
 
-		private class Initialiser extends HierarchyNamesInitialiser {
-
-			Initialiser(Assertions assertions) {
-
-				super(assertions, assertions.getClasses());
-			}
-
-			boolean rootEntity(OWLClass entity) {
-
-				return entity.equals(assertions.owlThing);
-			}
-
-			ClassName createName(OWLClass entity) {
-
-				return new MappedClassName(entity);
-			}
-		}
-
 		ClassNames(Assertions assertions) {
 
-			new Initialiser(assertions);
+			super(assertions.owlThing, assertions.getClasses());
+		}
+
+		ClassName createName(OWLClass entity) {
+
+			return new MappedClassName(entity);
 		}
 	}
 
@@ -283,35 +240,27 @@ class MappedNames implements OntologyNames {
 					extends
 						TypeNames<OWLNamedIndividual, AssertedIndividual, IndividualName> {
 
-		private class Initialiser extends TypeNamesInitialiser {
+		IndividualNames(Assertions assertions) {
 
-			Initialiser(Assertions assertions) {
-
-				super(assertions, assertions.getIndividuals());
-			}
-
-			IndividualName createName(OWLNamedIndividual entity) {
-
-				return new MappedIndividualName(entity);
-			}
-
-			void addAssertedSupers(AssertedIndividual entity, IndividualName name) {
-
-				for (OWLClass c : entity.getTypes()) {
-
-					name.addSubsumer(classes.getName(c));
-				}
-
-				if (name.rootName()) {
-
-					name.addSubsumer(classes.getRootName());
-				}
-			}
+			initialise(assertions.getIndividuals());
 		}
 
-		IndividualNames(Assertions assertions, ClassNames classes) {
+		IndividualName createName(OWLNamedIndividual entity) {
 
-			new Initialiser(assertions);
+			return new MappedIndividualName(entity);
+		}
+
+		void addAssertedSupers(AssertedIndividual entity, IndividualName name) {
+
+			for (OWLClass c : entity.getTypes()) {
+
+				name.addSubsumer(classes.resolveName(c));
+			}
+
+			if (name.rootName()) {
+
+				name.addSubsumer(classes.rootName);
+			}
 		}
 	}
 
@@ -322,72 +271,59 @@ class MappedNames implements OntologyNames {
 								AssertedObjectProperty,
 								ObjectPropertyName> {
 
-		private class Initialiser extends HierarchyNamesInitialiser {
+		ObjectPropertyNames(Assertions assertions) {
 
-			Initialiser(Assertions assertions) {
+			super(assertions.owlTopObjectProperty, assertions.getObjectProperties());
+		}
 
-				super(assertions, assertions.getObjectProperties());
+		ObjectPropertyName configureName(AssertedObjectProperty entity) {
+
+			ObjectPropertyName n = super.configureName(entity);
+
+			addInverses(entity, n);
+			addChains(entity, n);
+
+			if (entity.symmetric()) {
+
+				n.setSymmetric();
 			}
 
-			ObjectPropertyName configureName(AssertedObjectProperty entity) {
+			return n;
+		}
 
-				ObjectPropertyName n = super.configureName(entity);
+		ObjectPropertyName createName(OWLObjectProperty entity) {
 
-				addInverses(entity, n);
-				addChains(entity, n);
+			return new MappedObjectPropertyName(entity);
+		}
 
-				if (entity.symmetric()) {
+		private void addInverses(AssertedObjectProperty entity, ObjectPropertyName name) {
 
-					n.setSymmetric();
-				}
+			name.addInverses(toNames(entity.getInverses()));
+		}
 
-				return n;
+		private void addChains(AssertedObjectProperty entity, ObjectPropertyName name) {
+
+			if (entity.transitive()) {
+
+				new PropertyChain(name);
 			}
 
-			boolean rootEntity(OWLObjectProperty entity) {
+			for (List<OWLObjectProperty> chain : entity.getChains()) {
 
-				return entity.equals(assertions.owlTopObjectProperty);
-			}
-
-			ObjectPropertyName createName(OWLObjectProperty entity) {
-
-				return new MappedObjectPropertyName(entity);
-			}
-
-			private void addInverses(AssertedObjectProperty entity, ObjectPropertyName name) {
-
-				name.addInverses(toNames(entity.getInverses()));
-			}
-
-			private void addChains(AssertedObjectProperty entity, ObjectPropertyName name) {
-
-				if (entity.transitive()) {
-
-					new PropertyChain(name);
-				}
-
-				for (List<OWLObjectProperty> chain : entity.getChains()) {
-
-					new PropertyChain(name, toNames(chain));
-				}
-			}
-
-			private List<ObjectPropertyName> toNames(Collection<OWLObjectProperty> props) {
-
-				List<ObjectPropertyName> names = new ArrayList<ObjectPropertyName>();
-
-				for (OWLObjectProperty p : props) {
-
-					names.add(getName(p));
-				}
-
-				return names;
+				new PropertyChain(name, toNames(chain));
 			}
 		}
 
-		ObjectPropertyNames(Assertions assertions) {
+		private List<ObjectPropertyName> toNames(Collection<OWLObjectProperty> props) {
 
-			new Initialiser(assertions);
+			List<ObjectPropertyName> names = new ArrayList<ObjectPropertyName>();
+
+			for (OWLObjectProperty p : props) {
+
+				names.add(resolveName(p));
+			}
+
+			return names;
 		}
 	}
 
@@ -398,27 +334,14 @@ class MappedNames implements OntologyNames {
 								AssertedDataProperty,
 								DataPropertyName> {
 
-		private class Initialiser extends HierarchyNamesInitialiser {
-
-			Initialiser(Assertions assertions) {
-
-				super(assertions, assertions.getDataProperties());
-			}
-
-			boolean rootEntity(OWLDataProperty entity) {
-
-				return entity.equals(assertions.owlTopDataProperty);
-			}
-
-			DataPropertyName createName(OWLDataProperty entity) {
-
-				return new MappedDataPropertyName(entity);
-			}
-		}
-
 		DataPropertyNames(Assertions assertions) {
 
-			new Initialiser(assertions);
+			super(assertions.owlTopDataProperty, assertions.getDataProperties());
+		}
+
+		DataPropertyName createName(OWLDataProperty entity) {
+
+			return new MappedDataPropertyName(entity);
 		}
 	}
 
@@ -447,14 +370,14 @@ class MappedNames implements OntologyNames {
 	MappedNames(Assertions assertions) {
 
 		classes = new ClassNames(assertions);
-		individuals = new IndividualNames(assertions, classes);
+		individuals = new IndividualNames(assertions);
 		objectProperties = new ObjectPropertyNames(assertions);
 		dataProperties = new DataPropertyNames(assertions);
 	}
 
 	ClassName getRootClassName() {
 
-		return classes.getRootName();
+		return classes.rootName;
 	}
 
 	Collection<ClassName> getClassNames() {
@@ -479,21 +402,21 @@ class MappedNames implements OntologyNames {
 
 	ClassName get(OWLClass entity) {
 
-		return classes.getName(entity);
+		return classes.resolveName(entity);
 	}
 
 	IndividualName get(OWLNamedIndividual entity) {
 
-		return individuals.getName(entity);
+		return individuals.resolveName(entity);
 	}
 
 	ObjectPropertyName get(OWLObjectProperty entity) {
 
-		return objectProperties.getName(entity);
+		return objectProperties.resolveName(entity);
 	}
 
 	DataPropertyName get(OWLDataProperty entity) {
 
-		return dataProperties.getName(entity);
+		return dataProperties.resolveName(entity);
 	}
 }

@@ -57,7 +57,7 @@ public class NodeValue extends ObjectValue {
 
 		NodeValue nv = v.asNodeValue();
 
-		return nv != null && subsumesOtherNode(nv.node);
+		return nv != null && node.subsumes(nv.node);
 	}
 
 	boolean anyNewSubsumers(NodeSelector selector) {
@@ -68,36 +68,5 @@ public class NodeValue extends ObjectValue {
 	void render(PatternRenderer r) {
 
 		r.addLine(node.getLabel());
-	}
-
-	private boolean subsumesOtherNode(NodeName on) {
-
-		return node.local() ? anyMatchableSubsumes(on) : node.subsumes(on);
-	}
-
-	private boolean anyMatchableSubsumes(NodeName on) {
-
-		for (MatchableNode<?> m : node.getMatchableNodes()) {
-
-			if (m.subsumesNode(on) || subsumesAnyMatchable(m, on)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean subsumesAnyMatchable(MatchableNode<?> m, NodeName on) {
-
-		for (MatchableNode<?> om : on.getMatchableNodes()) {
-
-			if (m.subsumesMatchable(om)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 }
