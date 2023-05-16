@@ -128,12 +128,12 @@ public class RekonInstanceBox {
 		}
 	}
 
-	public void add(IRI iri, OWLClassExpression profile) {
+	public synchronized void add(IRI iri, OWLClassExpression profile) {
 
 		instanceOps.add(new MappedInstance(iri), new InstanceExprPatternCreator(profile));
 	}
 
-	public void remove(IRI iri) {
+	public synchronized void remove(IRI iri) {
 
 		MappedInstance instance = instances.remove(iri);
 
@@ -145,12 +145,12 @@ public class RekonInstanceBox {
 		instanceOps.remove(instance);
 	}
 
-	public List<IRI> match(OWLClassExpression query) {
+	public synchronized List<IRI> match(OWLClassExpression query) {
 
 		return extractIRIs(instanceOps.match(new QueryExprPatternCreator(query)));
 	}
 
-	public boolean matches(OWLClassExpression query, OWLClassExpression profile) {
+	public synchronized boolean matches(OWLClassExpression query, OWLClassExpression profile) {
 
 		return instanceOps.matches(
 					new QueryExprPatternCreator(query),
