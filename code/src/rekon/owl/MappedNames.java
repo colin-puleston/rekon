@@ -150,6 +150,21 @@ class MappedNames implements OntologyNames {
 			}
 		}
 
+		N addName(E entity) {
+
+			N n = createName(entity);
+			Name ds = getDefaultSubsumer();
+
+			if (ds != null) {
+
+				n.addSubsumer(ds);
+			}
+
+			names.put(entity, n);
+
+			return n;
+		}
+
 		N resolveName(E entity) {
 
 			N n = names.get(entity);
@@ -171,18 +186,11 @@ class MappedNames implements OntologyNames {
 
 		abstract void addAssertedSupers(AE entity, N name);
 
+		abstract Name getDefaultSubsumer();
+
 		Collection<N> getAllNames() {
 
 			return names.values();
-		}
-
-		private N addName(E entity) {
-
-			N n = createName(entity);
-
-			names.put(entity, n);
-
-			return n;
 		}
 
 		private void addAssertedEquivalents(AE entity, N name) {
@@ -204,7 +212,7 @@ class MappedNames implements OntologyNames {
 
 		HierarchyNames(E rootEntity, Collection<AE> entities) {
 
-			rootName = resolveName(rootEntity);
+			rootName = addName(rootEntity);
 
 			initialise(entities);
 		}
@@ -215,11 +223,11 @@ class MappedNames implements OntologyNames {
 
 				name.addSubsumer(resolveName(s));
 			}
+		}
 
-			if (name != rootName && name.rootName()) {
+		Name getDefaultSubsumer() {
 
-				name.addSubsumer(rootName);
-			}
+			return rootName;
 		}
 	}
 
@@ -261,6 +269,11 @@ class MappedNames implements OntologyNames {
 
 				name.addSubsumer(classes.rootName);
 			}
+		}
+
+		Name getDefaultSubsumer() {
+
+			return classes.rootName;
 		}
 	}
 

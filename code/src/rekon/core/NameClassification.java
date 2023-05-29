@@ -151,11 +151,6 @@ class NameClassification extends NameClassificationHandler {
 		}
 	}
 
-	static void completeLocalClassification(Name name) {
-
-		completeAllClassifications(Collections.singletonList(name));
-	}
-
 	static void completeAllClassifications(List<Name> allNames) {
 
 		for (Name n : allNames) {
@@ -187,21 +182,21 @@ class NameClassification extends NameClassificationHandler {
 		}
 	}
 
-	static void optimiseAllLinks(List<Name> allNames) {
+	static private void optimiseAllLinks(List<Name> allNames) {
 
 		for (Name n : allNames) {
 
-			getInitialiserFor(n).combineSingleIncomingSupers();
+			n.getClassification().combineSingleIncomingSupers();
 		}
 
 		for (Name n : allNames) {
 
-			getInitialiserFor(n).combineSingleIncomingSubs();
+			n.getClassification().combineSingleIncomingSubs();
 		}
 
 		for (Name n : allNames) {
 
-			getInitialiserFor(n).optimiseEmptyLinks();
+			n.getClassification().optimiseEmptyLinks();
 		}
 	}
 
@@ -235,73 +230,6 @@ class NameClassification extends NameClassificationHandler {
 
 		private NameSet ancestors;
 
-		private abstract class SingleIncomingVerticalLinksCombiner {
-
-			SingleIncomingVerticalLinksCombiner() {
-
-				VerticalLinks commonIncomings = null;
-
-				for (Name linked : getOutgingLinks().get(true).getNames()) {
-
-					VerticalLinks incomings = getIncomingLinks(linked);
-
-					if (incomings.get(true).size() == 1) {
-
-						if (commonIncomings == null) {
-
-							commonIncomings = incomings;
-						}
-						else {
-
-							setIncomingLinks(linked, commonIncomings);
-						}
-					}
-				}
-			}
-
-			abstract VerticalLinks getOutgingLinks();
-
-			abstract VerticalLinks getIncomingLinks(Name linked);
-
-			abstract void setIncomingLinks(Name linked, VerticalLinks links);
-		}
-
-		private class SingleIncomingSupersCombiner extends SingleIncomingVerticalLinksCombiner {
-
-			VerticalLinks getOutgingLinks() {
-
-				return subs;
-			}
-
-			VerticalLinks getIncomingLinks(Name linked) {
-
-				return linked.getClassification().supers;
-			}
-
-			void setIncomingLinks(Name linked, VerticalLinks links) {
-
-				linked.getClassification().supers = links;
-			}
-		}
-
-		private class SingleIncomingSubsCombiner extends SingleIncomingVerticalLinksCombiner {
-
-			VerticalLinks getOutgingLinks() {
-
-				return supers;
-			}
-
-			VerticalLinks getIncomingLinks(Name linked) {
-
-				return linked.getClassification().subs;
-			}
-
-			void setIncomingLinks(Name linked, VerticalLinks links) {
-
-				linked.getClassification().subs = links;
-			}
-		}
-
 		Initialiser(NameSet subsumers) {
 
 			ancestors = subsumers;
@@ -319,21 +247,22 @@ class NameClassification extends NameClassificationHandler {
 			}
 		}
 
-		void combineSingleIncomingSupers() {
+		void setDirectSupers() {
 
-			new SingleIncomingSupersCombiner();
+			supers.getActiveDirects().addAll(ancestors);
+
+			for (Name a : ancestors.getNames()) {
+
+				supers.getActiveDirects().removeAll(getInitialiserFor(a).ancestors);
+			}
 		}
 
-		void combineSingleIncomingSubs() {
+		void setAsDirectSub() {
 
-			new SingleIncomingSubsCombiner();
-		}
+			for (Name d : supers.getActiveDirects().getNames()) {
 
-		void optimiseEmptyLinks() {
-
-			optimiseEmptyEquivs();
-			optimiseEmptySupers();
-			optimiseEmptySubs();
+				d.getClassification().subs.getActiveDirects().add(name);
+			}
 		}
 
 		private boolean checkSubsumedToEquiv(Name subsumed) {
@@ -347,23 +276,72 @@ class NameClassification extends NameClassificationHandler {
 
 			return false;
 		}
+	}
 
-		private void setDirectSupers() {
+	private abstract class SingleIncomingVerticalLinksCombiner {
 
-			supers.getActiveDirects().addAll(ancestors);
+		SingleIncomingVerticalLinksCombiner() {
 
-			for (Name a : ancestors.getNames()) {
+			VerticalLinks commonIncomings = null;
 
-				supers.getActiveDirects().removeAll(getInitialiserFor(a).ancestors);
+			for (Name linked : getOutgingLinks().get(true).getNames()) {
+
+				VerticalLinks incomings = getIncomingLinks(linked);
+
+				if (incomings.get(true).size() == 1) {
+
+					if (commonIncomings == null) {
+
+						commonIncomings = incomings;
+					}
+					else {
+
+						setIncomingLinks(linked, commonIncomings);
+					}
+				}
 			}
 		}
 
-		private void setAsDirectSub() {
+		abstract VerticalLinks getOutgingLinks();
 
-			for (Name d : supers.getActiveDirects().getNames()) {
+		abstract VerticalLinks getIncomingLinks(Name linked);
 
-				d.getClassification().subs.getActiveDirects().add(name);
-			}
+		abstract void setIncomingLinks(Name linked, VerticalLinks links);
+	}
+
+	private class SingleIncomingSupersCombiner extends SingleIncomingVerticalLinksCombiner {
+
+		VerticalLinks getOutgingLinks() {
+
+			return subs;
+		}
+
+		VerticalLinks getIncomingLinks(Name linked) {
+
+			return linked.getClassification().supers;
+		}
+
+		void setIncomingLinks(Name linked, VerticalLinks links) {
+
+			linked.getClassification().supers = links;
+		}
+	}
+
+	private class SingleIncomingSubsCombiner extends SingleIncomingVerticalLinksCombiner {
+
+		VerticalLinks getOutgingLinks() {
+
+			return supers;
+		}
+
+		VerticalLinks getIncomingLinks(Name linked) {
+
+			return linked.getClassification().subs;
+		}
+
+		void setIncomingLinks(Name linked, VerticalLinks links) {
+
+			linked.getClassification().subs = links;
 		}
 	}
 
@@ -399,12 +377,21 @@ class NameClassification extends NameClassificationHandler {
 		}
 
 		subs.addTransientDirect(s);
+
+		combineSingleIncomingSubs();
 	}
 
 	void removeTransientDirectSub(Name s) {
 
 		subs.removeTransientDirect(s);
 
+		optimiseEmptySubs();
+	}
+
+	void optimiseEmptyLinks() {
+
+		optimiseEmptyEquivs();
+		optimiseEmptySupers();
 		optimiseEmptySubs();
 	}
 
@@ -441,6 +428,16 @@ class NameClassification extends NameClassificationHandler {
 	Names getSubs(boolean direct) {
 
 		return subs.get(direct);
+	}
+
+	private void combineSingleIncomingSupers() {
+
+		new SingleIncomingSupersCombiner();
+	}
+
+	private void combineSingleIncomingSubs() {
+
+		new SingleIncomingSubsCombiner();
 	}
 
 	private void completeInitialisation() {

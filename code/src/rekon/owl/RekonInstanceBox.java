@@ -51,7 +51,7 @@ public class RekonInstanceBox {
 
 		public String getLabel() {
 
-			return iri.toString();
+			return iri.toURI().getFragment();
 		}
 
 		MappedInstance(IRI iri) {
