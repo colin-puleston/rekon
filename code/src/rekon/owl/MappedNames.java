@@ -141,7 +141,12 @@ class MappedNames implements OntologyNames {
 
 			for (AE ae : entities) {
 
-				resolveName(ae.getEntity());
+				E e = ae.getEntity();
+
+				if (!names.containsKey(e)) {
+
+					addName(e);
+				}
 			}
 
 			for (AE ae : entities) {
@@ -153,12 +158,6 @@ class MappedNames implements OntologyNames {
 		N addName(E entity) {
 
 			N n = createName(entity);
-			Name ds = getDefaultSubsumer();
-
-			if (ds != null) {
-
-				n.addSubsumer(ds);
-			}
 
 			names.put(entity, n);
 
@@ -169,7 +168,14 @@ class MappedNames implements OntologyNames {
 
 			N n = names.get(entity);
 
-			return n != null ? n : addName(entity);
+			if (n == null) {
+
+				n = addName(entity);
+
+				n.addSubsumer(getDefaultSubsumer());
+			}
+
+			return n;
 		}
 
 		N configureName(AE entity) {
@@ -222,6 +228,11 @@ class MappedNames implements OntologyNames {
 			for (E s : entity.getSupers()) {
 
 				name.addSubsumer(resolveName(s));
+			}
+
+			if (name != rootName && name.rootName()) {
+
+				name.addSubsumer(rootName);
 			}
 		}
 
