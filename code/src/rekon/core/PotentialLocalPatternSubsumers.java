@@ -66,7 +66,7 @@ class PotentialLocalPatternSubsumers {
 
 		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return new MatchNamesExpander(rank, true).expand(names);
+			return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
 		}
 
 		boolean unionRankOptionsForRetrieval() {

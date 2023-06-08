@@ -40,7 +40,7 @@ class PotentialCorePatternSubsumeds extends PotentialPatternSubsumeds {
 
 	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return new MatchNamesExpander(rank, false).expand(names);
+		return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
 	}
 
 	List<Names> getRankedDefinitionNames(NodePattern defn) {

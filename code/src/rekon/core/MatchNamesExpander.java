@@ -29,53 +29,36 @@ package rekon.core;
  */
 class MatchNamesExpander {
 
-	private MatchRole role;
-	private boolean mappedOnly;
+	static Names expand(Names leafNames) {
 
-	private NameSet expanded = new NameSet();
-
-	MatchNamesExpander(boolean mappedOnly) {
-
-		this(null, mappedOnly);
+		return expand(leafNames, null);
 	}
 
-	MatchNamesExpander(int rankForPatternRole, boolean mappedOnly) {
+	static Names expand(Names leafNames, MatchRole role) {
 
-		this(MatchRole.rankToPatternRole(rankForPatternRole), mappedOnly);
-	}
-
-	MatchNamesExpander(MatchRole role, boolean mappedOnly) {
-
-		this.role = role;
-		this.mappedOnly = mappedOnly;
-	}
-
-	Names expand(Names leafNames) {
+		NameSet resolved = new NameSet();
 
 		for (Name n : leafNames.getNames()) {
 
-			checkAdd(n);
+			checkAdd(resolved, n, role);
 
 			for (Name s : n.getSubsumers().getNames()) {
 
 				if (!s.rootName()) {
 
-					checkAdd(s);
+					checkAdd(resolved, s, role);
 				}
 			}
 		}
 
-		return expanded;
+		return resolved;
 	}
 
-	private void checkAdd(Name name) {
+	static private void checkAdd(Names resolved, Name name, MatchRole role) {
 
-		if (!mappedOnly || name.mapped()) {
+		if (role == null || name.definitionRefed(role)) {
 
-			if (role == null || name.definitionRefed(role)) {
-
-				expanded.add(name);
-			}
+			resolved.add(name);
 		}
 	}
 }

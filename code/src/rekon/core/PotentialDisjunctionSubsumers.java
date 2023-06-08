@@ -62,7 +62,7 @@ class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionNod
 
 	Names resolveNamesForRetrieval(Names names, int rank) {
 
-		return new MatchNamesExpander(MatchRole.DISJUNCT, false).expand(names);
+		return MatchNamesExpander.expand(names, MatchRole.DISJUNCT);
 	}
 
 	boolean unionRankOptionsForRetrieval() {
