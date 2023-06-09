@@ -137,13 +137,13 @@ class MappedNames implements OntologyNames {
 
 		private Map<E, N> names = new HashMap<E, N>();
 
-		void initialise(Collection<AE> entities) {
+		void initialise(OWLEntity rootEntity, Collection<AE> entities) {
 
 			for (AE ae : entities) {
 
 				E e = ae.getEntity();
 
-				if (!names.containsKey(e)) {
+				if (!e.equals(rootEntity)) {
 
 					addName(e);
 				}
@@ -172,7 +172,7 @@ class MappedNames implements OntologyNames {
 
 				n = addName(entity);
 
-				n.addSubsumer(getDefaultSubsumer());
+				n.addSubsumer(getRootName());
 			}
 
 			return n;
@@ -192,7 +192,7 @@ class MappedNames implements OntologyNames {
 
 		abstract void addAssertedSupers(AE entity, N name);
 
-		abstract Name getDefaultSubsumer();
+		abstract Name getRootName();
 
 		Collection<N> getAllNames() {
 
@@ -220,7 +220,7 @@ class MappedNames implements OntologyNames {
 
 			rootName = addName(rootEntity);
 
-			initialise(entities);
+			initialise(rootEntity, entities);
 		}
 
 		void addAssertedSupers(AE entity, N name) {
@@ -236,7 +236,7 @@ class MappedNames implements OntologyNames {
 			}
 		}
 
-		Name getDefaultSubsumer() {
+		Name getRootName() {
 
 			return rootName;
 		}
@@ -261,7 +261,7 @@ class MappedNames implements OntologyNames {
 
 		IndividualNames(Assertions assertions) {
 
-			initialise(assertions.getIndividuals());
+			initialise(assertions.owlThing, assertions.getIndividuals());
 		}
 
 		IndividualName createName(OWLNamedIndividual entity) {
@@ -282,7 +282,7 @@ class MappedNames implements OntologyNames {
 			}
 		}
 
-		Name getDefaultSubsumer() {
+		Name getRootName() {
 
 			return classes.rootName;
 		}
