@@ -33,19 +33,24 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class MappedNames implements OntologyNames {
+class MappedNames extends OntologyNames {
 
 	static <E extends OWLEntity>E toMappedEntity(Name name, Class<E> entityType) {
 
 		return entityType.cast(((MappedName)name).toMappedEntity());
 	}
 
-	static private interface MappedName {
+	private ClassNames classes;
+	private IndividualNames individuals;
+	private ObjectPropertyNames objectProperties;
+	private DataPropertyNames dataProperties;
+
+	private interface MappedName {
 
 		public OWLEntity toMappedEntity();
 	}
 
-	static private class MappedClassName extends ClassName implements MappedName {
+	private class MappedClassName extends ClassName implements MappedName {
 
 		private OWLClass entity;
 
@@ -65,7 +70,7 @@ class MappedNames implements OntologyNames {
 		}
 	}
 
-	static private class MappedIndividualName extends IndividualName implements MappedName {
+	private class MappedIndividualName extends IndividualName implements MappedName {
 
 		private OWLNamedIndividual entity;
 
@@ -85,7 +90,7 @@ class MappedNames implements OntologyNames {
 		}
 	}
 
-	static private class MappedObjectPropertyName extends ObjectPropertyName implements MappedName {
+	private class MappedObjectPropertyName extends ObjectPropertyName implements MappedName {
 
 		private OWLObjectProperty entity;
 
@@ -105,7 +110,7 @@ class MappedNames implements OntologyNames {
 		}
 	}
 
-	static private class MappedDataPropertyName extends DataPropertyName implements MappedName {
+	private class MappedDataPropertyName extends DataPropertyName implements MappedName {
 
 		private OWLDataProperty entity;
 
@@ -125,11 +130,6 @@ class MappedNames implements OntologyNames {
 		}
 	}
 
-	private ClassNames classes;
-	private IndividualNames individuals;
-	private ObjectPropertyNames objectProperties;
-	private DataPropertyNames dataProperties;
-
 	private abstract class TypeNames
 								<E extends OWLEntity,
 								AE extends AssertedEntity<E>,
@@ -137,16 +137,11 @@ class MappedNames implements OntologyNames {
 
 		private Map<E, N> names = new HashMap<E, N>();
 
-		void initialise(OWLEntity rootEntity, Collection<AE> entities) {
+		void initialise(Collection<AE> entities) {
 
 			for (AE ae : entities) {
 
-				E e = ae.getEntity();
-
-				if (!e.equals(rootEntity)) {
-
-					addName(e);
-				}
+				addName(ae.getEntity());
 			}
 
 			for (AE ae : entities) {
@@ -168,14 +163,7 @@ class MappedNames implements OntologyNames {
 
 			N n = names.get(entity);
 
-			if (n == null) {
-
-				n = addName(entity);
-
-				n.addSubsumer(getRootName());
-			}
-
-			return n;
+			return n != null ? n : addName(entity);
 		}
 
 		N configureName(AE entity) {
@@ -192,8 +180,6 @@ class MappedNames implements OntologyNames {
 
 		abstract void addAssertedSupers(AE entity, N name);
 
-		abstract Name getRootName();
-
 		Collection<N> getAllNames() {
 
 			return names.values();
@@ -203,7 +189,7 @@ class MappedNames implements OntologyNames {
 
 			for (E e : entity.getEquivs()) {
 
-				name.addEquivalent(names.get(e));
+				name.addEquivalent(resolveName(e));
 			}
 		}
 	}
@@ -214,13 +200,15 @@ class MappedNames implements OntologyNames {
 								N extends Name>
 								extends TypeNames<E, AE, N> {
 
-		final N rootName;
+		final N rootName = createRootName();
+
+		private E rootEntity;
 
 		HierarchyNames(E rootEntity, Collection<AE> entities) {
 
-			rootName = addName(rootEntity);
+			this.rootEntity = rootEntity;
 
-			initialise(rootEntity, entities);
+			initialise(entities);
 		}
 
 		void addAssertedSupers(AE entity, N name) {
@@ -229,17 +217,14 @@ class MappedNames implements OntologyNames {
 
 				name.addSubsumer(resolveName(s));
 			}
-
-			if (name != rootName && name.rootName()) {
-
-				name.addSubsumer(rootName);
-			}
 		}
 
-		Name getRootName() {
+		N resolveName(E entity) {
 
-			return rootName;
+			return entity.equals(rootEntity) ? rootName : super.resolveName(entity);
 		}
+
+		abstract N createRootName();
 	}
 
 	private class ClassNames extends HierarchyNames<OWLClass, AssertedClass, ClassName> {
@@ -253,6 +238,11 @@ class MappedNames implements OntologyNames {
 
 			return new MappedClassName(entity);
 		}
+
+		ClassName createRootName() {
+
+			return createRootClassName(getAllNames());
+		}
 	}
 
 	private class IndividualNames
@@ -261,7 +251,7 @@ class MappedNames implements OntologyNames {
 
 		IndividualNames(Assertions assertions) {
 
-			initialise(assertions.owlThing, assertions.getIndividuals());
+			initialise(assertions.getIndividuals());
 		}
 
 		IndividualName createName(OWLNamedIndividual entity) {
@@ -275,16 +265,6 @@ class MappedNames implements OntologyNames {
 
 				name.addSubsumer(classes.resolveName(c));
 			}
-
-			if (name.rootName()) {
-
-				name.addSubsumer(classes.rootName);
-			}
-		}
-
-		Name getRootName() {
-
-			return classes.rootName;
 		}
 	}
 
@@ -318,6 +298,11 @@ class MappedNames implements OntologyNames {
 		ObjectPropertyName createName(OWLObjectProperty entity) {
 
 			return new MappedObjectPropertyName(entity);
+		}
+
+		ObjectPropertyName createRootName() {
+
+			return createRootObjectPropertyName(getAllNames());
 		}
 
 		private void addInverses(AssertedObjectProperty entity, ObjectPropertyName name) {
@@ -367,28 +352,31 @@ class MappedNames implements OntologyNames {
 
 			return new MappedDataPropertyName(entity);
 		}
+
+		DataPropertyName createRootName() {
+
+			return createRootDataPropertyName(getAllNames());
+		}
 	}
 
-	public List<Name> getAllNames() {
+	protected Collection<ClassName> getClassNames() {
 
-		List<Name> names = new ArrayList<Name>();
-
-		names.addAll(classes.getAllNames());
-		names.addAll(individuals.getAllNames());
-		names.addAll(objectProperties.getAllNames());
-		names.addAll(dataProperties.getAllNames());
-
-		return names;
+		return classes.getAllNames();
 	}
 
-	public List<NodeName> getAllNodeNames() {
+	protected Collection<IndividualName> getIndividualNames() {
 
-		List<NodeName> names = new ArrayList<NodeName>();
+		return individuals.getAllNames();
+	}
 
-		names.addAll(classes.getAllNames());
-		names.addAll(individuals.getAllNames());
+	protected Collection<ObjectPropertyName> getObjectPropertyNames() {
 
-		return names;
+		return objectProperties.getAllNames();
+	}
+
+	protected Collection<DataPropertyName> getDataPropertyNames() {
+
+		return dataProperties.getAllNames();
 	}
 
 	MappedNames(Assertions assertions) {
@@ -397,31 +385,6 @@ class MappedNames implements OntologyNames {
 		individuals = new IndividualNames(assertions);
 		objectProperties = new ObjectPropertyNames(assertions);
 		dataProperties = new DataPropertyNames(assertions);
-	}
-
-	ClassName getRootClassName() {
-
-		return classes.rootName;
-	}
-
-	Collection<ClassName> getClassNames() {
-
-		return classes.getAllNames();
-	}
-
-	Collection<IndividualName> getIndividualNames() {
-
-		return individuals.getAllNames();
-	}
-
-	Collection<ObjectPropertyName> getObjectPropertyNames() {
-
-		return objectProperties.getAllNames();
-	}
-
-	Collection<DataPropertyName> getDataPropertyNames() {
-
-		return dataProperties.getAllNames();
 	}
 
 	ClassName get(OWLClass entity) {
@@ -442,5 +405,10 @@ class MappedNames implements OntologyNames {
 	DataPropertyName get(OWLDataProperty entity) {
 
 		return dataProperties.resolveName(entity);
+	}
+
+	ClassName getRootClassName() {
+
+		return classes.rootName;
 	}
 }

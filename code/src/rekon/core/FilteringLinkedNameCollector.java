@@ -81,19 +81,20 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (!linkNames.contains(n)) {
 
-				if (!n.getDisjunctionNodes().isEmpty()) {
+				NodePattern p = n.getProfilePattern();
 
-					collectRoot();
+				if (p != null) {
+
+					linkNames.push(n);
+					p.collectNames(this);
+					linkNames.pop();
 				}
-				else {
 
-					NodePattern p = n.getProfilePattern();
+				for (DisjunctionNode dj : n.getDisjunctionNodes()) {
 
-					if (p != null) {
+					for (Name d : dj.getDisjuncts().getNames()) {
 
-						linkNames.push(n);
-						p.collectNames(this);
-						linkNames.pop();
+						collectForSignatureNode((NodeName)d);
 					}
 				}
 			}

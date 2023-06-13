@@ -29,9 +29,86 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public interface OntologyNames {
+public abstract class OntologyNames {
 
-	public List<Name> getAllNames();
+	static private final String ROOT_NAMES_LABEL = "ROOT";
 
-	public List<NodeName> getAllNodeNames();
+	private class RootClassName extends ClassName {
+
+		public String getLabel() {
+
+			return ROOT_NAMES_LABEL;
+		}
+
+		public boolean rootName() {
+
+			return true;
+		}
+
+		RootClassName(Collection<ClassName> allSubs) {
+
+			configureAsRootName(allSubs);
+		}
+	}
+
+	private class RootObjectPropertyName extends ObjectPropertyName {
+
+		public String getLabel() {
+
+			return ROOT_NAMES_LABEL;
+		}
+
+		public boolean rootName() {
+
+			return true;
+		}
+
+		RootObjectPropertyName(Collection<ObjectPropertyName> allSubs) {
+
+			configureAsRootName(allSubs);
+		}
+	}
+
+	private class RootDataPropertyName extends DataPropertyName {
+
+		public String getLabel() {
+
+			return ROOT_NAMES_LABEL;
+		}
+
+		public boolean rootName() {
+
+			return true;
+		}
+
+		RootDataPropertyName(Collection<DataPropertyName> allSubs) {
+
+			configureAsRootName(allSubs);
+		}
+	}
+
+	protected ClassName createRootClassName(Collection<ClassName> allSubs) {
+
+		return new RootClassName(allSubs);
+	}
+
+	protected ObjectPropertyName createRootObjectPropertyName(
+									Collection<ObjectPropertyName> allSubs) {
+
+		return new RootObjectPropertyName(allSubs);
+	}
+
+	protected DataPropertyName createRootDataPropertyName(
+									Collection<DataPropertyName> allSubs) {
+
+		return new RootDataPropertyName(allSubs);
+	}
+
+	protected abstract Collection<ClassName> getClassNames();
+
+	protected abstract Collection<IndividualName> getIndividualNames();
+
+	protected abstract Collection<ObjectPropertyName> getObjectPropertyNames();
+
+	protected abstract Collection<DataPropertyName> getDataPropertyNames();
 }

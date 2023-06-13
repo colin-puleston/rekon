@@ -27,37 +27,17 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class MatchNamesExpander {
+class ProxyRootName extends Name {
 
-	static Names expand(Names leafNames) {
+	static final ProxyRootName SINGLETON = new ProxyRootName();
 
-		return expand(leafNames, null);
+	public String getLabel() {
+
+		return "PROXY ROOT";
 	}
 
-	static Names expand(Names leafNames, MatchRole role) {
+	public boolean rootName() {
 
-		NameSet resolved = new NameSet();
-
-		resolved.add(ProxyRootName.SINGLETON);
-
-		for (Name n : leafNames.getNames()) {
-
-			checkAdd(resolved, n, role);
-
-			for (Name s : n.getSubsumers().getNames()) {
-
-				checkAdd(resolved, s, role);
-			}
-		}
-
-		return resolved;
-	}
-
-	static private void checkAdd(Names resolved, Name name, MatchRole role) {
-
-		if (role == null || name.definitionRefed(role)) {
-
-			resolved.add(name);
-		}
+		return true;
 	}
 }

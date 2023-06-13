@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class NameClassifier extends NameClassificationHandler {
+class NameClassifier extends NameLinksHandler {
 
 	private Name name;
 	private NameSet subsumers = new NameSet();
@@ -46,14 +46,9 @@ class NameClassifier extends NameClassificationHandler {
 
 	void addAssertedSubsumer(Name subsumer) {
 
-		checkAddAssertedSubsumer(subsumer);
-	}
+		if (checkAddSubsumer(subsumer)) {
 
-	void addAssertedSubsumers(Names subsumers) {
-
-		for (Name s : subsumers.getNames()) {
-
-			checkAddAssertedSubsumer(s);
+			multipleAssertedSubsumers |= subsumers.size() > 1;
 		}
 	}
 
@@ -72,11 +67,6 @@ class NameClassifier extends NameClassificationHandler {
 		}
 	}
 
-	boolean rootName() {
-
-		return subsumers.isEmpty();
-	}
-
 	Name getName() {
 
 		return name;
@@ -85,6 +75,21 @@ class NameClassifier extends NameClassificationHandler {
 	NameSet getSubsumers() {
 
 		return subsumers;
+	}
+
+	Names getEquivalents() {
+
+		throw new Error("Method should never be invoked!");
+	}
+
+	Names getSupers(boolean direct) {
+
+		throw new Error("Method should never be invoked!");
+	}
+
+	Names getSubs(boolean direct) {
+
+		throw new Error("Method should never be invoked!");
 	}
 
 	boolean isSubsumer(Name test) {
@@ -110,14 +115,6 @@ class NameClassifier extends NameClassificationHandler {
 		if (checkAddSubsumer(subsumer)) {
 
 			addAndExpandPreInferredSubsumers(subsumer.getSubsumers());
-		}
-	}
-
-	private void checkAddAssertedSubsumer(Name subsumer) {
-
-		if (checkAddSubsumer(subsumer)) {
-
-			multipleAssertedSubsumers |= subsumers.size() > 1;
 		}
 	}
 

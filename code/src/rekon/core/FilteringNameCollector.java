@@ -132,14 +132,7 @@ class FilteringNameCollector {
 
 		private void extendRankedNamesList(List<Names> rankedNames) {
 
-			if (rankStatus == RankStatus.ROOT_COLLECTED) {
-
-				rankedNames.add(Names.NO_NAMES);
-			}
-			else {
-
-				rankedNames.add(rankNames);
-			}
+			rankedNames.add(rankNames);
 
 			if (nextRankCollector != null) {
 
@@ -150,6 +143,7 @@ class FilteringNameCollector {
 		private void setRootCollected() {
 
 			rankNames.clear();
+			rankNames.add(ProxyRootName.SINGLETON);
 
 			rankStatus = RankStatus.ROOT_COLLECTED;
 		}

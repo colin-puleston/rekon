@@ -27,11 +27,15 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class NameClassificationHandler {
-
-	abstract boolean rootName();
+abstract class NameLinksHandler {
 
 	abstract Names getSubsumers();
+
+	abstract Names getEquivalents();
+
+	abstract Names getSupers(boolean direct);
+
+	abstract Names getSubs(boolean direct);
 
 	abstract boolean isSubsumer(Name test);
 

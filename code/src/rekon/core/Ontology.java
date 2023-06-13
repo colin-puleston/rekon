@@ -31,16 +31,20 @@ import java.util.*;
  */
 public class Ontology {
 
-	private List<Name> allNames;
-	private List<NodeName> nodeNames;
+	private List<Name> allNames = new ArrayList<Name>();
+	private List<NodeName> nodeNames = new ArrayList<NodeName>();
 
 	private PatternSubsumers patternSubsumers;
 	private PatternSubsumeds patternSubsumeds;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		allNames = names.getAllNames();
-		nodeNames = names.getAllNodeNames();
+		nodeNames.addAll(names.getClassNames());
+		nodeNames.addAll(names.getIndividualNames());
+
+		allNames.addAll(nodeNames);
+		allNames.addAll(names.getObjectPropertyNames());
+		allNames.addAll(names.getDataPropertyNames());
 
 		MatchableNodes matchables = createStructure(structureBuilder);
 

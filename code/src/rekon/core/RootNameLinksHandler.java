@@ -24,40 +24,57 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-class MatchNamesExpander {
+class RootNameLinksHandler extends NameLinksHandler {
 
-	static Names expand(Names leafNames) {
+	private Collection<? extends Name> allSubs = null;
 
-		return expand(leafNames, null);
+	void configure(Collection<? extends Name> allSubs) {
+
+		this.allSubs = allSubs;
 	}
 
-	static Names expand(Names leafNames, MatchRole role) {
+	Names getSubsumers() {
 
-		NameSet resolved = new NameSet();
+		return Names.NO_NAMES;
+	}
 
-		resolved.add(ProxyRootName.SINGLETON);
+	Names getEquivalents() {
 
-		for (Name n : leafNames.getNames()) {
+		return Names.NO_NAMES;
+	}
 
-			checkAdd(resolved, n, role);
+	Names getSupers(boolean direct) {
 
-			for (Name s : n.getSubsumers().getNames()) {
+		return Names.NO_NAMES;
+	}
 
-				checkAdd(resolved, s, role);
+	Names getSubs(boolean direct) {
+
+		if (allSubs == null) {
+
+			throw new Error("Subs have not been set!");
+		}
+
+		Names subs = new NameList();
+
+		for (Name s : allSubs) {
+
+			if (!direct || s.getSubsumers().isEmpty()) {
+
+				subs.add(s);
 			}
 		}
 
-		return resolved;
+		return subs;
 	}
 
-	static private void checkAdd(Names resolved, Name name, MatchRole role) {
+	boolean isSubsumer(Name test) {
 
-		if (role == null || name.definitionRefed(role)) {
-
-			resolved.add(name);
-		}
+		return false;
 	}
 }

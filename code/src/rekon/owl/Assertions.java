@@ -156,7 +156,7 @@ class Assertions {
 
 					E e = getEntityOrNull(axiom);
 
-					if (e != null) {
+					if (e != null && !e.equals(getRootEntityOrNull())) {
 
 						process(axiom, ensureAssertedEntity(e));
 
@@ -195,7 +195,15 @@ class Assertions {
 				new DeclarationExtractor();
 			}
 
-			AE ensureAssertedEntity(E entity) {
+			abstract Class<E> getProcessEntityType();
+
+			abstract E getRootEntityOrNull();
+
+			abstract Map<E, AE> getEntitiesMap();
+
+			abstract AE createAssertedEntity(E entity);
+
+			private AE ensureAssertedEntity(E entity) {
 
 				Map<E, AE> map = getEntitiesMap();
 				AE ae = map.get(entity);
@@ -209,12 +217,6 @@ class Assertions {
 
 				return ae;
 			}
-
-			abstract Class<E> getProcessEntityType();
-
-			abstract Map<E, AE> getEntitiesMap();
-
-			abstract AE createAssertedEntity(E entity);
 		}
 
 		private class ClassAspectExtractors
@@ -256,13 +258,16 @@ class Assertions {
 
 				void process(OWLSubClassOfAxiom axiom, AssertedClass ae) {
 
-					ae.addSuperExpr(axiom.getSuperClass());
+					OWLClassExpression sup = axiom.getSuperClass();
+
+					if (!sup.equals(owlThing)) {
+
+						ae.addSuperExpr(sup);
+					}
 				}
 			}
 
 			ClassAspectExtractors() {
-
-				ensureAssertedEntity(owlThing);
 
 				new EquivsExtractor();
 				new SuperExtractor();
@@ -271,6 +276,11 @@ class Assertions {
 			Class<OWLClass> getProcessEntityType() {
 
 				return OWLClass.class;
+			}
+
+			OWLClass getRootEntityOrNull() {
+
+				return owlThing;
 			}
 
 			Map<OWLClass, AssertedClass> getEntitiesMap() {
@@ -391,6 +401,11 @@ class Assertions {
 				return OWLNamedIndividual.class;
 			}
 
+			OWLNamedIndividual getRootEntityOrNull() {
+
+				return null;
+			}
+
 			Map<OWLNamedIndividual, AssertedIndividual> getEntitiesMap() {
 
 				return individuals;
@@ -441,7 +456,12 @@ class Assertions {
 
 				void process(OWLSubObjectPropertyOfAxiom axiom, AssertedObjectProperty ae) {
 
-					ae.checkAddSuper(axiom.getSuperProperty());
+					OWLObjectPropertyExpression sup = axiom.getSuperProperty();
+
+					if (!sup.equals(owlTopObjectProperty)) {
+
+						ae.checkAddSuper(sup);
+					}
 				}
 			}
 
@@ -531,8 +551,6 @@ class Assertions {
 
 			ObjectPropertyAspectExtractors() {
 
-				ensureAssertedEntity(owlTopObjectProperty);
-
 				new EquivsExtractor();
 				new SuperExtractor();
 				new InverseExtractor();
@@ -544,6 +562,11 @@ class Assertions {
 			Class<OWLObjectProperty> getProcessEntityType() {
 
 				return OWLObjectProperty.class;
+			}
+
+			OWLObjectProperty getRootEntityOrNull() {
+
+				return owlTopObjectProperty;
 			}
 
 			Map<OWLObjectProperty, AssertedObjectProperty> getEntitiesMap() {
@@ -594,15 +617,18 @@ class Assertions {
 					return toTypeOrNull(axiom.getSubProperty(), OWLDataProperty.class);
 				}
 
-				void process(OWLSubDataPropertyOfAxiom axiom, AssertedDataProperty entity) {
+				void process(OWLSubDataPropertyOfAxiom axiom, AssertedDataProperty ae) {
 
-					entity.checkAddSuper(axiom.getSuperProperty());
+					OWLDataPropertyExpression sup = axiom.getSuperProperty();
+
+					if (!sup.equals(owlTopDataProperty)) {
+
+						ae.checkAddSuper(sup);
+					}
 				}
 			}
 
 			DataPropertyAspectExtractors() {
-
-				ensureAssertedEntity(owlTopDataProperty);
 
 				new EquivsExtractor();
 				new SuperExtractor();
@@ -611,6 +637,11 @@ class Assertions {
 			Class<OWLDataProperty> getProcessEntityType() {
 
 				return OWLDataProperty.class;
+			}
+
+			OWLDataProperty getRootEntityOrNull() {
+
+				return owlTopDataProperty;
 			}
 
 			Map<OWLDataProperty, AssertedDataProperty> getEntitiesMap() {

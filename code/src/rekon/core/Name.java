@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class Name {
 
-	private NameClassificationHandler classificationHandler = createClassifier();
+	private NameLinksHandler linksHandler;
 	private Set<MatchRole> definitionRoles = new HashSet<MatchRole>();
 
 	public void addSubsumer(Name subsumer) {
@@ -51,6 +51,11 @@ public abstract class Name {
 
 	public abstract String getLabel();
 
+	public boolean rootName() {
+
+		return false;
+	}
+
 	public boolean mapped() {
 
 		return true;
@@ -58,27 +63,22 @@ public abstract class Name {
 
 	public Names getEquivalents() {
 
-		return getClassification().getEquivalents();
+		return linksHandler.getEquivalents();
 	}
 
 	public Names getSupers(boolean direct) {
 
-		return getClassification().getSupers(direct);
+		return linksHandler.getSupers(direct);
 	}
 
 	public Names getSubs(boolean direct) {
 
-		return getClassification().getSubs(direct);
+		return linksHandler.getSubs(direct);
 	}
 
 	public Names getSubs(Class<? extends Name> type, boolean direct) {
 
 		return getSubs(direct).filterForType(type);
-	}
-
-	public boolean rootName() {
-
-		return classificationHandler.rootName();
 	}
 
 	void registerAsDefinitionRefed(MatchRole role) {
@@ -88,17 +88,27 @@ public abstract class Name {
 
 	void setClassification() {
 
-		classificationHandler = getClassifier().createClassification();
+		linksHandler = getClassifier().createClassification();
+	}
+
+	Name() {
+
+		linksHandler = createInitialLinksHandler();
+	}
+
+	void configureAsRootName(Collection<? extends Name> allSubs) {
+
+		getRootLinksHandler().configure(allSubs);
 	}
 
 	NameClassifier getClassifier() {
 
-		return getClassificationHandler(NameClassifier.class);
+		return getLinksHandler(NameClassifier.class);
 	}
 
 	NameClassification getClassification() {
 
-		return getClassificationHandler(NameClassification.class);
+		return getLinksHandler(NameClassification.class);
 	}
 
 	boolean local() {
@@ -118,12 +128,12 @@ public abstract class Name {
 
 	Names getSubsumers() {
 
-		return classificationHandler.getSubsumers();
+		return linksHandler.getSubsumers();
 	}
 
 	boolean subsumes(Name name) {
 
-		return name == this || name.hasSubsumer(this);
+		return rootName() || name == this || name.hasSubsumer(this);
 	}
 
 	boolean anyDefinitionRefs() {
@@ -146,7 +156,7 @@ public abstract class Name {
 
 	boolean anyNewSubsumers(NodeSelector selector) {
 
-		return classificationHandler.anyNewSubsumers(selector);
+		return linksHandler.anyNewSubsumers(selector);
 	}
 
 	NameClassifier createClassifier() {
@@ -154,21 +164,31 @@ public abstract class Name {
 		return new NameClassifier(this);
 	}
 
-	private boolean hasSubsumer(Name name) {
+	private NameLinksHandler createInitialLinksHandler() {
 
-		return classificationHandler.isSubsumer(name);
+		return rootName() ? new RootNameLinksHandler() : createClassifier();
 	}
 
-	private <T extends NameClassificationHandler>T getClassificationHandler(Class<T> type) {
+	private boolean hasSubsumer(Name name) {
 
-		if (type.isAssignableFrom(classificationHandler.getClass())) {
+		return linksHandler.isSubsumer(name);
+	}
 
-			return type.cast(classificationHandler);
+	private RootNameLinksHandler getRootLinksHandler() {
+
+		return getLinksHandler(RootNameLinksHandler.class);
+	}
+
+	private <T extends NameLinksHandler>T getLinksHandler(Class<T> type) {
+
+		if (type.isAssignableFrom(linksHandler.getClass())) {
+
+			return type.cast(linksHandler);
 		}
 
 		throw new Error(
 					"Unexpected classification-handler type: "
-					+ classificationHandler.getClass()
+					+ linksHandler.getClass()
 					+ ", for: " + this);
 	}
 }

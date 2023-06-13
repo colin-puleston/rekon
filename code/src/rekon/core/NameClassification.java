@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class NameClassification extends NameClassificationHandler {
+class NameClassification extends NameLinksHandler {
 
 	static private final EmptyVerticalLinks EMPTY_VERTICAL_LINKS = new EmptyVerticalLinks();
 
@@ -395,11 +395,6 @@ class NameClassification extends NameClassificationHandler {
 		optimiseEmptySubs();
 	}
 
-	boolean rootName() {
-
-		return supers.get(true).isEmpty();
-	}
-
 	Names getSubsumers() {
 
 		NameList ss = new NameList();
@@ -408,11 +403,6 @@ class NameClassification extends NameClassificationHandler {
 		ss.addAll(supers.get(false));
 
 		return ss;
-	}
-
-	boolean isSubsumer(Name test) {
-
-		return equivalents.contains(test) || supers.hasLinkTo(test, new NameSet());
 	}
 
 	Names getEquivalents() {
@@ -428,6 +418,11 @@ class NameClassification extends NameClassificationHandler {
 	Names getSubs(boolean direct) {
 
 		return subs.get(direct);
+	}
+
+	boolean isSubsumer(Name test) {
+
+		return equivalents.contains(test) || supers.hasLinkTo(test, new NameSet());
 	}
 
 	private void combineSingleIncomingSupers() {

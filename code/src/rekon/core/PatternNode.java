@@ -54,7 +54,8 @@ class PatternNode extends MatchableNode<PatternNode> {
 	void addDefinition(NodePattern defn) {
 
 		definitions.add(defn);
-		getName().getClassifier().addAssertedSubsumers(defn.getNames());
+
+		addNameSubsumers(defn.getNames());
 
 		profile = profile.combineWith(defn);
 
@@ -122,5 +123,18 @@ class PatternNode extends MatchableNode<PatternNode> {
 	Class<PatternNode> getMatchableClass() {
 
 		return PatternNode.class;
+	}
+
+	private void addNameSubsumers(Names subsumers) {
+
+		NameClassifier classifier = getName().getClassifier();
+
+		for (Name s : subsumers.getNames()) {
+
+			if (!s.rootName()) {
+
+				classifier.addAssertedSubsumer(s);
+			}
+		}
 	}
 }
