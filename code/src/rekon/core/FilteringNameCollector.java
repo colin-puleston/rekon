@@ -47,7 +47,7 @@ class FilteringNameCollector {
 		RankCollector() {
 
 			rank = allNames.size();
-			rankStatus = preCollectionRank(rank) ? RankStatus.PRE_COLLECT : RankStatus.COLLECT;
+			rankStatus = getRankInitialStatus();
 
 			allNames.add(rankNames);
 		}
@@ -88,14 +88,6 @@ class FilteringNameCollector {
 			}
 		}
 
-		void collectRoot() {
-
-			if (rankStatus == RankStatus.COLLECT) {
-
-				setRootCollected();
-			}
-		}
-
 		boolean continueForNextRelationsRank() {
 
 			return continueForNextRelationsRank(rank);
@@ -111,7 +103,7 @@ class FilteringNameCollector {
 			return nextRankCollector;
 		}
 
-		boolean preCollectionRank(int rank) {
+		boolean preCollectRank(int rank) {
 
 			return false;
 		}
@@ -119,6 +111,11 @@ class FilteringNameCollector {
 		boolean continueForNextRelationsRank(int rank) {
 
 			return rank == 0;
+		}
+
+		private RankStatus getRankInitialStatus() {
+
+			return preCollectRank(rank) ? RankStatus.PRE_COLLECT : RankStatus.COLLECT;
 		}
 
 		private List<Names> createRankedNamesList() {

@@ -449,15 +449,18 @@ abstract class PotentialSubsumptions<O> {
 
 		for (Names rankNames : namesByRank) {
 
-			RankMatches matches = allRankMatches.get(rank);
-			OptionCollector rankOptions = matches.collectOptionsFor(rankNames);
+			if (!rootNameRank(rankNames)) {
 
-			if (rankOptions == null) {
+				RankMatches matches = allRankMatches.get(rank);
+				OptionCollector rankOptions = matches.collectOptionsFor(rankNames);
 
-				return Collections.emptySet();
+				if (rankOptions == null) {
+
+					return Collections.emptySet();
+				}
+
+				rankOptions.absorbInto(optionsInsect);
 			}
-
-			rankOptions.absorbInto(optionsInsect);
 
 			rank++;
 		}
@@ -465,6 +468,11 @@ abstract class PotentialSubsumptions<O> {
 		return optionsInsect.anyComponents()
 				? optionsInsect.getIntersection()
 				: getAllOptions();
+	}
+
+	private boolean rootNameRank(Names rankNames) {
+
+		return rankNames.size() == 1 && rankNames.getFirstName().rootName();
 	}
 
 	private void ensureRankMatches(int count) {

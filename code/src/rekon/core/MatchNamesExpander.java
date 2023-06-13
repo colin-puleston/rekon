@@ -38,8 +38,6 @@ class MatchNamesExpander {
 
 		NameSet resolved = new NameSet();
 
-		resolved.add(ProxyRootName.SINGLETON);
-
 		for (Name n : leafNames.getNames()) {
 
 			checkAdd(resolved, n, role);

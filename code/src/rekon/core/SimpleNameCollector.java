@@ -64,9 +64,6 @@ class SimpleNameCollector extends NameCollector {
 		}
 	}
 
-	void collectRoot() {
-	}
-
 	boolean continueForNextRelationsRank() {
 
 		return !nestedRank;

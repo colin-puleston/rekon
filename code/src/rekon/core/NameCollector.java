@@ -45,8 +45,6 @@ abstract class NameCollector {
 
 	abstract void collectNames(Names ns);
 
-	abstract void collectRoot();
-
 	abstract boolean continueForNextRelationsRank();
 
 	abstract NameCollector forNextRank();
