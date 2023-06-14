@@ -33,6 +33,13 @@ class FilteringNameCollector {
 
 	static private enum RankStatus {COLLECT, PRE_COLLECT, ROOT_COLLECTED}
 
+	static private NameSet ROOT_COLLECTED_RANK_NAMES = new NameSet();
+
+	static boolean rootCollected(Names rankNames) {
+
+		return rankNames == ROOT_COLLECTED_RANK_NAMES;
+	}
+
 	private boolean definition;
 	private List<Names> allNames = new ArrayList<Names>();
 
@@ -139,9 +146,7 @@ class FilteringNameCollector {
 
 		private void setRootCollected() {
 
-			rankNames.clear();
-			rankNames.add(ProxyRootName.SINGLETON);
-
+			rankNames = ROOT_COLLECTED_RANK_NAMES;
 			rankStatus = RankStatus.ROOT_COLLECTED;
 		}
 	}

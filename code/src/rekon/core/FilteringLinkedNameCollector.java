@@ -50,7 +50,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			}
 		}
 
-		boolean preCollectionRank(int rank) {
+		boolean preCollectRank(int rank) {
 
 			return rank < startRank;
 		}
