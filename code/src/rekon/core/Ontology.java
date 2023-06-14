@@ -43,7 +43,7 @@ public class Ontology {
 		nodeNames.addAll(names.getIndividualNames());
 
 		allNames.addAll(nodeNames);
-		allNames.addAll(names.getObjectPropertyNames());
+		allNames.addAll(names.getNodePropertyNames());
 		allNames.addAll(names.getDataPropertyNames());
 
 		MatchableNodes matchables = createStructure(structureBuilder);

@@ -29,9 +29,9 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class ObjectPropertyName extends PropertyName {
+public abstract class NodePropertyName extends PropertyName {
 
-	private Set<ObjectPropertyName> inverses = new HashSet<ObjectPropertyName>();
+	private Set<NodePropertyName> inverses = new HashSet<NodePropertyName>();
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
 
 	public void setSymmetric() {
@@ -39,11 +39,11 @@ public abstract class ObjectPropertyName extends PropertyName {
 		inverses.add(this);
 	}
 
-	public void addInverses(Collection<ObjectPropertyName> invs) {
+	public void addInverses(Collection<NodePropertyName> invs) {
 
 		inverses.addAll(invs);
 
-		for (ObjectPropertyName inv : invs) {
+		for (NodePropertyName inv : invs) {
 
 			inv.inverses.add(this);
 		}
@@ -54,7 +54,7 @@ public abstract class ObjectPropertyName extends PropertyName {
 		chains.add(chain);
 	}
 
-	Collection<ObjectPropertyName> getInverses() {
+	Collection<NodePropertyName> getInverses() {
 
 		return inverses;
 	}
@@ -68,7 +68,7 @@ public abstract class ObjectPropertyName extends PropertyName {
 
 		for (Name s : getSubsumers().getNames()) {
 
-			if (!((ObjectPropertyName)s).chains.isEmpty()) {
+			if (!((NodePropertyName)s).chains.isEmpty()) {
 
 				return true;
 			}
@@ -83,7 +83,7 @@ public abstract class ObjectPropertyName extends PropertyName {
 
 		for (Name s : getSubsumers().getNames()) {
 
-			allChains.addAll(((ObjectPropertyName)s).chains);
+			allChains.addAll(((NodePropertyName)s).chains);
 		}
 
 		return allChains;

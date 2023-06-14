@@ -62,7 +62,7 @@ class InverseRelationsAdder {
 
 	private void addAnyFor(NodeName forwardSource, SomeRelation forwardRel) {
 
-		Collection<ObjectPropertyName> ips = forwardRel.getObjectProperty().getInverses();
+		Collection<NodePropertyName> ips = forwardRel.getNodeProperty().getInverses();
 
 		if (!ips.isEmpty()) {
 
@@ -71,7 +71,7 @@ class InverseRelationsAdder {
 
 			PatternNode n = resolvePatternNode(invSource.getValueNode());
 
-			for (ObjectPropertyName ip : ips) {
+			for (NodePropertyName ip : ips) {
 
 				n.addProfileRelation(new SomeRelation(ip, invTarget));
 			}

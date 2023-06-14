@@ -42,7 +42,7 @@ class NodeProfilesCreator {
 
 	private SupersRelationCreator supersRelations = new SupersRelationCreator();
 	private TypesRelationCreator typesRelations = new TypesRelationCreator();
-	private ObjectValuesRelationCreator objectValuesRelations = new ObjectValuesRelationCreator();
+	private NodeValuesRelationCreator nodeValuesRelations = new NodeValuesRelationCreator();
 	private DataValuesRelationCreator dataValuesRelations = new DataValuesRelationCreator();
 
 	private abstract class RelationCreator<E extends AssertedEntity<?>, S> {
@@ -121,7 +121,7 @@ class NodeProfilesCreator {
 		}
 	}
 
-	private class ObjectValuesRelationCreator
+	private class NodeValuesRelationCreator
 					extends
 						ValuesRelationCreator<AssertedObjectValue> {
 
@@ -132,7 +132,7 @@ class NodeProfilesCreator {
 
 		Relation toRelation(AssertedObjectValue source) {
 
-			return matchComponents.toObjectValueRelation(source);
+			return matchComponents.toNodeValueRelation(source);
 		}
 	}
 
@@ -186,7 +186,7 @@ class NodeProfilesCreator {
 		Set<Relation> rels = new HashSet<Relation>();
 
 		rels.addAll(typesRelations.getAssertedRelations(i));
-		rels.addAll(objectValuesRelations.getAssertedRelations(i));
+		rels.addAll(nodeValuesRelations.getAssertedRelations(i));
 		rels.addAll(dataValuesRelations.getAssertedRelations(i));
 
 		return rels;

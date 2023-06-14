@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class SomeRelation extends ObjectRelation {
+public class SomeRelation extends NodeRelation {
 
 	static private class ChainBasedSignatureExpander {
 
@@ -163,7 +163,7 @@ public class SomeRelation extends ObjectRelation {
 		}
 	}
 
-	public SomeRelation(ObjectPropertyName property, NodeValue target) {
+	public SomeRelation(NodePropertyName property, NodeValue target) {
 
 		super(property, target);
 	}
@@ -180,7 +180,7 @@ public class SomeRelation extends ObjectRelation {
 
 	boolean potentialNewSignatureRelations() {
 
-		ObjectPropertyName prop = getObjectProperty();
+		NodePropertyName prop = getNodeProperty();
 
 		if (prop.anyChains()) {
 
@@ -192,6 +192,6 @@ public class SomeRelation extends ObjectRelation {
 
 	private Collection<PropertyChain> getAllChains() {
 
-		return getObjectProperty().getAllChains();
+		return getNodeProperty().getAllChains();
 	}
 }

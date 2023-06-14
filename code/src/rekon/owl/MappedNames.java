@@ -42,7 +42,7 @@ class MappedNames extends OntologyNames {
 
 	private ClassNames classes;
 	private IndividualNames individuals;
-	private ObjectPropertyNames objectProperties;
+	private NodePropertyNames nodeProperties;
 	private DataPropertyNames dataProperties;
 
 	private interface MappedName {
@@ -90,7 +90,7 @@ class MappedNames extends OntologyNames {
 		}
 	}
 
-	private class MappedObjectPropertyName extends ObjectPropertyName implements MappedName {
+	private class MappedNodePropertyName extends NodePropertyName implements MappedName {
 
 		private OWLObjectProperty entity;
 
@@ -104,7 +104,7 @@ class MappedNames extends OntologyNames {
 			return NameRenderer.SINGLETON.render(entity);
 		}
 
-		MappedObjectPropertyName(OWLObjectProperty entity) {
+		MappedNodePropertyName(OWLObjectProperty entity) {
 
 			this.entity = entity;
 		}
@@ -268,21 +268,21 @@ class MappedNames extends OntologyNames {
 		}
 	}
 
-	private class ObjectPropertyNames
+	private class NodePropertyNames
 						extends
 							HierarchyNames
 								<OWLObjectProperty,
 								AssertedObjectProperty,
-								ObjectPropertyName> {
+								NodePropertyName> {
 
-		ObjectPropertyNames(Assertions assertions) {
+		NodePropertyNames(Assertions assertions) {
 
 			super(assertions.owlTopObjectProperty, assertions.getObjectProperties());
 		}
 
-		ObjectPropertyName configureName(AssertedObjectProperty entity) {
+		NodePropertyName configureName(AssertedObjectProperty entity) {
 
-			ObjectPropertyName n = super.configureName(entity);
+			NodePropertyName n = super.configureName(entity);
 
 			addInverses(entity, n);
 			addChains(entity, n);
@@ -295,22 +295,22 @@ class MappedNames extends OntologyNames {
 			return n;
 		}
 
-		ObjectPropertyName createName(OWLObjectProperty entity) {
+		NodePropertyName createName(OWLObjectProperty entity) {
 
-			return new MappedObjectPropertyName(entity);
+			return new MappedNodePropertyName(entity);
 		}
 
-		ObjectPropertyName createRootName() {
+		NodePropertyName createRootName() {
 
-			return createRootObjectPropertyName(getAllNames());
+			return createRootNodePropertyName(getAllNames());
 		}
 
-		private void addInverses(AssertedObjectProperty entity, ObjectPropertyName name) {
+		private void addInverses(AssertedObjectProperty entity, NodePropertyName name) {
 
 			name.addInverses(toNames(entity.getInverses()));
 		}
 
-		private void addChains(AssertedObjectProperty entity, ObjectPropertyName name) {
+		private void addChains(AssertedObjectProperty entity, NodePropertyName name) {
 
 			if (entity.transitive()) {
 
@@ -323,9 +323,9 @@ class MappedNames extends OntologyNames {
 			}
 		}
 
-		private List<ObjectPropertyName> toNames(Collection<OWLObjectProperty> props) {
+		private List<NodePropertyName> toNames(Collection<OWLObjectProperty> props) {
 
-			List<ObjectPropertyName> names = new ArrayList<ObjectPropertyName>();
+			List<NodePropertyName> names = new ArrayList<NodePropertyName>();
 
 			for (OWLObjectProperty p : props) {
 
@@ -369,9 +369,9 @@ class MappedNames extends OntologyNames {
 		return individuals.getAllNames();
 	}
 
-	protected Collection<ObjectPropertyName> getObjectPropertyNames() {
+	protected Collection<NodePropertyName> getNodePropertyNames() {
 
-		return objectProperties.getAllNames();
+		return nodeProperties.getAllNames();
 	}
 
 	protected Collection<DataPropertyName> getDataPropertyNames() {
@@ -383,7 +383,7 @@ class MappedNames extends OntologyNames {
 
 		classes = new ClassNames(assertions);
 		individuals = new IndividualNames(assertions);
-		objectProperties = new ObjectPropertyNames(assertions);
+		nodeProperties = new NodePropertyNames(assertions);
 		dataProperties = new DataPropertyNames(assertions);
 	}
 
@@ -397,9 +397,9 @@ class MappedNames extends OntologyNames {
 		return individuals.resolveName(entity);
 	}
 
-	ObjectPropertyName get(OWLObjectProperty entity) {
+	NodePropertyName get(OWLObjectProperty entity) {
 
-		return objectProperties.resolveName(entity);
+		return nodeProperties.resolveName(entity);
 	}
 
 	DataPropertyName get(OWLDataProperty entity) {

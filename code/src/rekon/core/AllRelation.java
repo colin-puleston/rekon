@@ -27,9 +27,9 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public class AllRelation extends ObjectRelation {
+public class AllRelation extends NodeRelation {
 
-	public AllRelation(ObjectPropertyName property, NodeValue target) {
+	public AllRelation(NodePropertyName property, NodeValue target) {
 
 		super(property, target);
 	}

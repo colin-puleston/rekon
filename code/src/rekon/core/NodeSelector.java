@@ -125,7 +125,7 @@ abstract class NodeSelector {
 
 			for (Relation r : rels) {
 
-				if (r instanceof ObjectRelation && targetFor((ObjectRelation)r)) {
+				if (r instanceof NodeRelation && targetFor((NodeRelation)r)) {
 
 					return true;
 				}
@@ -136,9 +136,9 @@ abstract class NodeSelector {
 
 		abstract MatchRole getMatchRole();
 
-		private boolean targetFor(ObjectRelation rel) {
+		private boolean targetFor(NodeRelation rel) {
 
-			ObjectPropertyName p = rel.getObjectProperty();
+			NodePropertyName p = rel.getNodeProperty();
 
 			return p.definitionRefed() && p.anyChains();
 		}

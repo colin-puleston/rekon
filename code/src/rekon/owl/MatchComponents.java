@@ -47,7 +47,7 @@ class MatchComponents {
 	private AllRelations allRelations = new AllRelations();
 	private DataRelations dataRelations = new DataRelations();
 
-	private ObjectValueRelations objectValueRelations = new ObjectValueRelations();
+	private NodeValueRelations nodeValueRelations = new NodeValueRelations();
 	private DataValueRelations dataValueRelations = new DataValueRelations();
 
 	private DataTypes dataTypes;
@@ -210,7 +210,7 @@ class MatchComponents {
 
 			if (propExpr instanceof OWLObjectProperty) {
 
-				ObjectPropertyName prop = mappedNames.get((OWLObjectProperty)propExpr);
+				NodePropertyName prop = mappedNames.get((OWLObjectProperty)propExpr);
 				OWLClassExpression filler = source.getFiller();
 
 				if (complement) {
@@ -224,7 +224,7 @@ class MatchComponents {
 			return null;
 		}
 
-		Relation checkCreate(ObjectPropertyName prop, OWLClassExpression filler) {
+		Relation checkCreate(NodePropertyName prop, OWLClassExpression filler) {
 
 			NodeValue target = toTarget(filler);
 
@@ -232,12 +232,12 @@ class MatchComponents {
 		}
 
 		abstract Relation checkCreateForComplement(
-								ObjectPropertyName prop,
+								NodePropertyName prop,
 								OWLClassExpression filler);
 
-		abstract Relation create(ObjectPropertyName prop, NodeValue target);
+		abstract Relation create(NodePropertyName prop, NodeValue target);
 
-		Relation createForNoValue(ObjectPropertyName prop) {
+		Relation createForNoValue(NodePropertyName prop) {
 
 			return new AllRelation(prop, mappedNames.getAbsentClassValue());
 		}
@@ -257,12 +257,12 @@ class MatchComponents {
 
 	private class SomeRelations extends ObjectRelations<OWLObjectSomeValuesFrom> {
 
-		Relation checkCreateForComplement(ObjectPropertyName prop, OWLClassExpression filler) {
+		Relation checkCreateForComplement(NodePropertyName prop, OWLClassExpression filler) {
 
 			return filler.isOWLThing() ? createForNoValue(prop) : null;
 		}
 
-		Relation create(ObjectPropertyName prop, NodeValue target) {
+		Relation create(NodePropertyName prop, NodeValue target) {
 
 			return new SomeRelation(prop, target);
 		}
@@ -270,19 +270,19 @@ class MatchComponents {
 
 	private class AllRelations extends ObjectRelations<OWLObjectAllValuesFrom> {
 
-		Relation checkCreate(ObjectPropertyName prop, OWLClassExpression filler) {
+		Relation checkCreate(NodePropertyName prop, OWLClassExpression filler) {
 
 			return filler.isOWLNothing()
 						? createForNoValue(prop)
 						: super.checkCreate(prop, filler);
 		}
 
-		Relation checkCreateForComplement(ObjectPropertyName prop, OWLClassExpression filler) {
+		Relation checkCreateForComplement(NodePropertyName prop, OWLClassExpression filler) {
 
 			return null;
 		}
 
-		Relation create(ObjectPropertyName prop, NodeValue target) {
+		Relation create(NodePropertyName prop, NodeValue target) {
 
 			return new AllRelation(prop, target);
 		}
@@ -313,7 +313,7 @@ class MatchComponents {
 		}
 	}
 
-	private class ObjectValueRelations extends TypeEntities<AssertedObjectValue, Relation> {
+	private class NodeValueRelations extends TypeEntities<AssertedObjectValue, Relation> {
 
 		Relation checkCreate(AssertedObjectValue source) {
 
@@ -479,7 +479,10 @@ class MatchComponents {
 			disjuncts.add(new NodePatternSpec(source));
 		}
 
-		private void addForUnions(NodePatternSpec disjunct, List<OWLObjectUnionOf> unions, int index) {
+		private void addForUnions(
+						NodePatternSpec disjunct,
+						List<OWLObjectUnionOf> unions,
+						int index) {
 
 			if (index == unions.size()) {
 
@@ -495,7 +498,10 @@ class MatchComponents {
 		}
 	}
 
-	MatchComponents(MappedNames mappedNames, MatchStructures matchStructures, boolean dynamic) {
+	MatchComponents(
+		MappedNames mappedNames,
+		MatchStructures matchStructures,
+		boolean dynamic) {
 
 		this.mappedNames = mappedNames;
 		this.matchStructures = matchStructures;
@@ -520,9 +526,9 @@ class MatchComponents {
 		return toRelation(source, false);
 	}
 
-	Relation toObjectValueRelation(AssertedObjectValue source) {
+	Relation toNodeValueRelation(AssertedObjectValue source) {
 
-		return objectValueRelations.checkCreate(source);
+		return nodeValueRelations.checkCreate(source);
 	}
 
 	Relation toDataValueRelation(AssertedDataValue source) {

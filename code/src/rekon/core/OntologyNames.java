@@ -54,7 +54,7 @@ public abstract class OntologyNames {
 		}
 	}
 
-	private class RootObjectPropertyName extends ObjectPropertyName {
+	private class RootNodePropertyName extends NodePropertyName {
 
 		public String getLabel() {
 
@@ -66,7 +66,7 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootObjectPropertyName(Collection<ObjectPropertyName> allSubs) {
+		RootNodePropertyName(Collection<NodePropertyName> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
@@ -121,10 +121,10 @@ public abstract class OntologyNames {
 		return new RootClassName(allSubs);
 	}
 
-	protected ObjectPropertyName createRootObjectPropertyName(
-									Collection<ObjectPropertyName> allSubs) {
+	protected NodePropertyName createRootNodePropertyName(
+									Collection<NodePropertyName> allSubs) {
 
-		return new RootObjectPropertyName(allSubs);
+		return new RootNodePropertyName(allSubs);
 	}
 
 	protected DataPropertyName createRootDataPropertyName(
@@ -137,7 +137,7 @@ public abstract class OntologyNames {
 
 	protected abstract Collection<IndividualName> getIndividualNames();
 
-	protected abstract Collection<ObjectPropertyName> getObjectPropertyNames();
+	protected abstract Collection<NodePropertyName> getNodePropertyNames();
 
 	protected abstract Collection<DataPropertyName> getDataPropertyNames();
 }
