@@ -29,7 +29,7 @@ package rekon.core;
  */
 public abstract class ObjectRelation extends Relation {
 
-	ObjectRelation(ObjectPropertyName property, ObjectValue target) {
+	ObjectRelation(ObjectPropertyName property, NodeValue target) {
 
 		super(property, target);
 	}
@@ -39,8 +39,13 @@ public abstract class ObjectRelation extends Relation {
 		return (ObjectPropertyName)getProperty();
 	}
 
-	ObjectValue getObjectTarget() {
+	NodeValue getNodeValueTarget() {
 
-		return (ObjectValue)getTarget();
+		return (NodeValue)getTarget();
+	}
+
+	Names getTargetNodes() {
+
+		return new NameList(getNodeValueTarget().getValueNode());
 	}
 }

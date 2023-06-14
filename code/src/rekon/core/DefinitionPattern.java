@@ -32,6 +32,11 @@ class DefinitionPattern {
 	private NodeName node;
 	private NodePattern definition;
 
+	public String toString() {
+
+		return getClass().getSimpleName() + "(" + node + ")";
+	}
+
 	DefinitionPattern(NodeName node, NodePattern definition) {
 
 		this.node = node;

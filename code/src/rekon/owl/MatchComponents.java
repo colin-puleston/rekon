@@ -226,7 +226,7 @@ class MatchComponents {
 
 		Relation checkCreate(ObjectPropertyName prop, OWLClassExpression filler) {
 
-			ObjectValue target = toTarget(filler);
+			NodeValue target = toTarget(filler);
 
 			return target != null ? create(prop, target) : null;
 		}
@@ -235,14 +235,14 @@ class MatchComponents {
 								ObjectPropertyName prop,
 								OWLClassExpression filler);
 
-		abstract Relation create(ObjectPropertyName prop, ObjectValue target);
+		abstract Relation create(ObjectPropertyName prop, NodeValue target);
 
 		Relation createForNoValue(ObjectPropertyName prop) {
 
-			return new AllRelation(prop, Nothing.SINGLETON);
+			return new AllRelation(prop, mappedNames.getAbsentClassValue());
 		}
 
-		private ObjectValue toTarget(OWLClassExpression filler) {
+		private NodeValue toTarget(OWLClassExpression filler) {
 
 			if (filler instanceof OWLObjectUnionOf) {
 
@@ -262,7 +262,7 @@ class MatchComponents {
 			return filler.isOWLThing() ? createForNoValue(prop) : null;
 		}
 
-		Relation create(ObjectPropertyName prop, ObjectValue target) {
+		Relation create(ObjectPropertyName prop, NodeValue target) {
 
 			return new SomeRelation(prop, target);
 		}
@@ -282,7 +282,7 @@ class MatchComponents {
 			return null;
 		}
 
-		Relation create(ObjectPropertyName prop, ObjectValue target) {
+		Relation create(ObjectPropertyName prop, NodeValue target) {
 
 			return new AllRelation(prop, target);
 		}

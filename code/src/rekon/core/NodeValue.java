@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends ObjectValue {
+public class NodeValue extends Value {
 
 	private NodeName node;
 

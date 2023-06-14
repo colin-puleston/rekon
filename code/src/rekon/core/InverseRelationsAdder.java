@@ -66,7 +66,7 @@ class InverseRelationsAdder {
 
 		if (!ips.isEmpty()) {
 
-			NodeValue invSource = forwardRel.getNodeTarget();
+			NodeValue invSource = forwardRel.getNodeValueTarget();
 			NodeValue invTarget = new NodeValue(forwardSource);
 
 			PatternNode n = resolvePatternNode(invSource.getValueNode());

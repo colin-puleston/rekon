@@ -44,7 +44,7 @@ public class PropertyChain {
 		this(sup, subs.get(0), subs.subList(1, subs.size()));
 	}
 
-	SomeRelation createLinkRelation(ObjectValue target) {
+	SomeRelation createLinkRelation(NodeValue target) {
 
 		return new SomeRelation(sup, target);
 	}

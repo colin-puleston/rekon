@@ -32,6 +32,9 @@ import java.util.*;
 public abstract class OntologyNames {
 
 	static private final String ROOT_NAMES_LABEL = "ROOT";
+	static private final String ABSENT_CLASS_NAME_LABEL = "NOTHING";
+
+	private AbsentClassValue absentClassValue = new AbsentClassValue();
 
 	private class RootClassName extends ClassName {
 
@@ -85,6 +88,32 @@ public abstract class OntologyNames {
 
 			configureAsRootName(allSubs);
 		}
+	}
+
+	private class AbsentClassName extends ClassName {
+
+		public String getLabel() {
+
+			return ABSENT_CLASS_NAME_LABEL;
+		}
+	}
+
+	private class AbsentClassValue extends NodeValue {
+
+		boolean subsumesOther(Value v) {
+
+			return v == this;
+		}
+
+		private AbsentClassValue() {
+
+			super(new AbsentClassName());
+		}
+	}
+
+	public AbsentClassValue getAbsentClassValue() {
+
+		return absentClassValue;
 	}
 
 	protected ClassName createRootClassName(Collection<ClassName> allSubs) {

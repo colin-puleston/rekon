@@ -99,7 +99,7 @@ public class SomeRelation extends ObjectRelation {
 
 			private SomeRelation createLinkRelation(SomeRelation endSub) {
 
-				return chain.createLinkRelation(endSub.getObjectTarget());
+				return chain.createLinkRelation(endSub.getNodeValueTarget());
 			}
 		}
 
@@ -163,19 +163,14 @@ public class SomeRelation extends ObjectRelation {
 		}
 	}
 
-	public SomeRelation(ObjectPropertyName property, ObjectValue target) {
+	public SomeRelation(ObjectPropertyName property, NodeValue target) {
 
 		super(property, target);
 	}
 
-	NodeValue getNodeTarget() {
+	NodeValue getNodeValueTarget() {
 
 		return (NodeValue)getTarget();
-	}
-
-	Names getTargetNodes() {
-
-		return new NameList(getNodeTarget().getValueNode());
 	}
 
 	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {

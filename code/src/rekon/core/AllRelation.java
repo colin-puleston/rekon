@@ -29,13 +29,13 @@ package rekon.core;
  */
 public class AllRelation extends ObjectRelation {
 
-	public AllRelation(ObjectPropertyName property, ObjectValue target) {
+	public AllRelation(ObjectPropertyName property, NodeValue target) {
 
 		super(property, target);
 	}
 
-	boolean allRelation() {
+	String renderRelationType() {
 
-		return true;
+		return "all";
 	}
 }
