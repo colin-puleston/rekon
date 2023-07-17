@@ -38,11 +38,11 @@ public class MatchStructures {
 
 		if (name.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
 
-			matchables.addPatternNode(name, new NodePattern(name, relations));
+			matchables.addPatternNode(name, new Pattern(name, relations));
 		}
 	}
 
-	public void addPatternNodeDefinition(NodeName name, NodePattern defn) {
+	public void addPatternNodeDefinition(NodeName name, Pattern defn) {
 
 		matchables.addPatternNodeDefinition(name, defn);
 	}

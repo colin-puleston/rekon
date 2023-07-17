@@ -29,5 +29,5 @@ package rekon.core;
  */
 public interface PatternCreator {
 
-	public NodePattern createNestedPatterns(MatchStructures matchStructures);
+	public Pattern createNestedPatterns(MatchStructures matchStructures);
 }

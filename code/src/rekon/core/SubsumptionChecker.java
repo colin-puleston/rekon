@@ -57,14 +57,14 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class PatternNodeChecker extends MatchableNodeChecker<NodePattern> {
+	private class PatternNodeChecker extends MatchableNodeChecker<Pattern> {
 
-		boolean check(NodeName dn, NodePattern defn, PatternNode candidate) {
+		boolean check(NodeName dn, Pattern defn, PatternNode candidate) {
 
 			return check(dn, defn, candidate.getName(), candidate.getProfile());
 		}
 
-		boolean subsumption(NodePattern defn, NodePattern candidate) {
+		boolean subsumption(Pattern defn, Pattern candidate) {
 
 			return SubsumptionChecker.this.subsumption(defn, candidate);
 		}
@@ -83,7 +83,7 @@ class SubsumptionChecker {
 		}
 	}
 
-	boolean check(PatternNode defined, NodePattern defn, PatternNode candidate) {
+	boolean check(PatternNode defined, Pattern defn, PatternNode candidate) {
 
 		return patternNodeChecker.check(defined.getName(), defn, candidate);
 	}
@@ -98,7 +98,7 @@ class SubsumptionChecker {
 		return disjunctionNodeChecker.check(defn, candidate);
 	}
 
-	boolean subsumption(NodePattern defn, NodePattern profile) {
+	boolean subsumption(Pattern defn, Pattern profile) {
 
 		return defn.subsumes(profile);
 	}

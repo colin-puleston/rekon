@@ -44,7 +44,7 @@ class PotentialLocalPatternSubsumeds extends PotentialPatternSubsumeds {
 		return MatchNamesExpander.expand(names);
 	}
 
-	List<Names> getRankedDefinitionNames(NodePattern defn) {
+	List<Names> getRankedDefinitionNames(Pattern defn) {
 
 		List<Names> defnNames = new FilteringLinkedNameCollector(true).collect(defn);
 
@@ -53,7 +53,7 @@ class PotentialLocalPatternSubsumeds extends PotentialPatternSubsumeds {
 		return defnNames;
 	}
 
-	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
+	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
 
 		return new FilteringLinkedNameCollector(false, startRank, stopRank).collect(profile);
 	}

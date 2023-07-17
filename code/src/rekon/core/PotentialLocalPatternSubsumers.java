@@ -42,7 +42,7 @@ class PotentialLocalPatternSubsumers {
 
 		private List<DefinitionPattern> categoryOptions = null;
 
-		Collection<DefinitionPattern> getPotentialsFor(NodePattern request) {
+		Collection<DefinitionPattern> getPotentialsFor(Pattern request) {
 
 			checkInitialised();
 
@@ -78,9 +78,9 @@ class PotentialLocalPatternSubsumers {
 
 		abstract boolean nestedPatterns();
 
-		abstract List<Names> getRankedDefinitionNames(NodePattern p);
+		abstract List<Names> getRankedDefinitionNames(Pattern p);
 
-		abstract List<Names> getRankedProfileNames(NodePattern p);
+		abstract List<Names> getRankedProfileNames(Pattern p);
 
 		private synchronized void checkInitialised() {
 
@@ -97,7 +97,7 @@ class PotentialLocalPatternSubsumers {
 
 			for (PatternNode n : allPatternNodes) {
 
-				for (NodePattern d : n.getDefinitions()) {
+				for (Pattern d : n.getDefinitions()) {
 
 					if (d.nestedPattern(false) == nestedPatterns()) {
 
@@ -120,17 +120,17 @@ class PotentialLocalPatternSubsumers {
 			registerSingleOptionRank();
 		}
 
-		List<Names> getRankedDefinitionNames(NodePattern p) {
+		List<Names> getRankedDefinitionNames(Pattern p) {
 
 			return getRankedNames(p);
 		}
 
-		List<Names> getRankedProfileNames(NodePattern p) {
+		List<Names> getRankedProfileNames(Pattern p) {
 
 			return getRankedNames(p);
 		}
 
-		private List<Names> getRankedNames(NodePattern p) {
+		private List<Names> getRankedNames(Pattern p) {
 
 			return Collections.singletonList(p.getNames());
 		}
@@ -148,12 +148,12 @@ class PotentialLocalPatternSubsumers {
 			registerDefaultNestedOptionRanks();
 		}
 
-		List<Names> getRankedDefinitionNames(NodePattern p) {
+		List<Names> getRankedDefinitionNames(Pattern p) {
 
 			return new FilteringNameCollector(true).collect(p);
 		}
 
-		List<Names> getRankedProfileNames(NodePattern p) {
+		List<Names> getRankedProfileNames(Pattern p) {
 
 			return new FilteringNameCollector(false).collect(p);
 		}
@@ -164,7 +164,7 @@ class PotentialLocalPatternSubsumers {
 		this.allPatternNodes = allPatternNodes;
 	}
 
-	Collection<DefinitionPattern> getPotentialsFor(NodePattern request) {
+	Collection<DefinitionPattern> getPotentialsFor(Pattern request) {
 
 		List<DefinitionPattern> all = new ArrayList<DefinitionPattern>();
 

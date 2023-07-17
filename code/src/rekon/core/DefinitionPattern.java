@@ -30,14 +30,14 @@ package rekon.core;
 class DefinitionPattern {
 
 	private NodeName node;
-	private NodePattern definition;
+	private Pattern definition;
 
 	public String toString() {
 
 		return getClass().getSimpleName() + "(" + node + ")";
 	}
 
-	DefinitionPattern(NodeName node, NodePattern definition) {
+	DefinitionPattern(NodeName node, Pattern definition) {
 
 		this.node = node;
 		this.definition = definition;
@@ -48,7 +48,7 @@ class DefinitionPattern {
 		return node;
 	}
 
-	NodePattern getDefinition() {
+	Pattern getDefinition() {
 
 		return definition;
 	}

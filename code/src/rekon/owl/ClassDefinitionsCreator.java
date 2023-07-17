@@ -44,8 +44,8 @@ class ClassDefinitionsCreator {
 
 	private abstract class EquivsBasedCreator {
 
-		private Set<NodePattern> patternDefns = new HashSet<NodePattern>();
-		private Set<List<NodePattern>> disjunctionDefns = new HashSet<List<NodePattern>>();
+		private Set<Pattern> patternDefns = new HashSet<Pattern>();
+		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
 
 		boolean create(Collection<OWLClassExpression> equivs) {
 
@@ -59,12 +59,12 @@ class ClassDefinitionsCreator {
 
 			ClassName c = resolveDefinedClass();
 
-			for (NodePattern defn : patternDefns) {
+			for (Pattern defn : patternDefns) {
 
 				matchStructures.addPatternNodeDefinition(c, defn);
 			}
 
-			for (List<NodePattern> disjuncts : disjunctionDefns) {
+			for (List<Pattern> disjuncts : disjunctionDefns) {
 
 				List<NodeName> nodeDjs = resolveGCIDisjunctsToNodes(disjuncts);
 
@@ -80,7 +80,7 @@ class ClassDefinitionsCreator {
 
 		private boolean absorbEquiv(OWLClassExpression equiv) {
 
-			List<NodePattern> djs = matchComponents.toNodePatternDisjunction(equiv);
+			List<Pattern> djs = matchComponents.toPatternDisjuncts(equiv);
 
 			if (djs == null) {
 
@@ -168,7 +168,7 @@ class ClassDefinitionsCreator {
 
 		private boolean create() {
 
-			List<NodePattern> subDjs = matchComponents.toNodePatternDisjunction(sub);
+			List<Pattern> subDjs = matchComponents.toPatternDisjuncts(sub);
 
 			if (subDjs != null) {
 
@@ -195,7 +195,7 @@ class ClassDefinitionsCreator {
 				return mappedNames.get((OWLClass)sup);
 			}
 
-			NodePattern p = matchComponents.toNodePattern(sup);
+			Pattern p = matchComponents.toPattern(sup);
 
 			return p != null ? addGCIImpliedClass(p) : null;
 		}
@@ -236,11 +236,11 @@ class ClassDefinitionsCreator {
 		logger.logSeparatorLine();
 	}
 
-	private List<NodeName> resolveGCIDisjunctsToNodes(List<NodePattern> disjuncts) {
+	private List<NodeName> resolveGCIDisjunctsToNodes(List<Pattern> disjuncts) {
 
 		List<NodeName> nodeDjs = new ArrayList<NodeName>();
 
-		for (NodePattern d : disjuncts) {
+		for (Pattern d : disjuncts) {
 
 			nodeDjs.add(resolveGCIDisjunctToNode(d));
 		}
@@ -248,14 +248,14 @@ class ClassDefinitionsCreator {
 		return nodeDjs;
 	}
 
-	private NodeName resolveGCIDisjunctToNode(NodePattern disjunct) {
+	private NodeName resolveGCIDisjunctToNode(Pattern disjunct) {
 
 		NodeName n = disjunct.toSingleName();
 
 		return n != null ? n : addGCIImpliedClass(disjunct);
 	}
 
-	private ClassName addGCIImpliedClass(NodePattern defn) {
+	private ClassName addGCIImpliedClass(Pattern defn) {
 
 		ClassName c = matchStructures.addGCIImpliedClass();
 

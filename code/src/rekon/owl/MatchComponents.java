@@ -40,7 +40,7 @@ class MatchComponents {
 
 	private NodeName rootNodeName;
 
-	private NodePatterns nodePatterns = new NodePatterns();
+	private Patterns patterns = new Patterns();
 	private Disjunctions disjunctions = new Disjunctions();
 
 	private SomeRelations someRelations = new SomeRelations();
@@ -90,14 +90,14 @@ class MatchComponents {
 		}
 	}
 
-	private class NodePatterns extends TypeEntities<NodePatternSpec, NodePattern> {
+	private class Patterns extends TypeEntities<PatternSpec, Pattern> {
 
-		NodePattern get(OWLClassExpression source) {
+		Pattern get(OWLClassExpression source) {
 
-			return get(new NodePatternSpec(source));
+			return get(new PatternSpec(source));
 		}
 
-		NodePattern checkCreate(NodePatternSpec source) {
+		Pattern checkCreate(PatternSpec source) {
 
 			List<OWLClassExpression> conjuncts = source.getConjuncts();
 
@@ -109,11 +109,11 @@ class MatchComponents {
 			return checkCreateForConjuncts(conjuncts);
 		}
 
-		private NodePattern checkCreate(OWLClassExpression source) {
+		private Pattern checkCreate(OWLClassExpression source) {
 
 			if (source instanceof OWLClass) {
 
-				return new NodePattern(mappedNames.get((OWLClass)source));
+				return new Pattern(mappedNames.get((OWLClass)source));
 			}
 
 			if (source instanceof OWLObjectIntersectionOf) {
@@ -129,7 +129,7 @@ class MatchComponents {
 			return null;
 		}
 
-		private NodePattern checkCreateForConjuncts(Collection<OWLClassExpression> conjuncts) {
+		private Pattern checkCreateForConjuncts(Collection<OWLClassExpression> conjuncts) {
 
 			NameSet names = new NameSet();
 			Set<Relation> rels = new HashSet<Relation>();
@@ -158,14 +158,14 @@ class MatchComponents {
 				names.add(rootNodeName);
 			}
 
-			return new NodePattern(names, rels);
+			return new Pattern(names, rels);
 		}
 
-		private NodePattern checkCreateForRestriction(OWLRestriction source) {
+		private Pattern checkCreateForRestriction(OWLRestriction source) {
 
 			Relation r = toRelation(source);
 
-			return r != null ? new NodePattern(rootNodeName, r) : null;
+			return r != null ? new Pattern(rootNodeName, r) : null;
 		}
 	}
 
@@ -353,13 +353,13 @@ class MatchComponents {
 		}
 	}
 
-	private class NodePatternSpec {
+	private class PatternSpec {
 
 		private List<OWLClassExpression> conjuncts = new ArrayList<OWLClassExpression>();
 
 		public boolean equals(Object other) {
 
-			return conjuncts.equals(((NodePatternSpec)other).conjuncts);
+			return conjuncts.equals(((PatternSpec)other).conjuncts);
 		}
 
 		public int hashCode() {
@@ -367,10 +367,10 @@ class MatchComponents {
 			return conjuncts.hashCode();
 		}
 
-		NodePatternSpec() {
+		PatternSpec() {
 		}
 
-		NodePatternSpec(OWLClassExpression source) {
+		PatternSpec(OWLClassExpression source) {
 
 			expandFor(source);
 		}
@@ -387,9 +387,9 @@ class MatchComponents {
 			}
 		}
 
-		NodePatternSpec copyAndExpandFor(OWLClassExpression source) {
+		PatternSpec copyAndExpandFor(OWLClassExpression source) {
 
-			NodePatternSpec copy = new NodePatternSpec(conjuncts);
+			PatternSpec copy = new PatternSpec(conjuncts);
 
 			copy.expandFor(source);
 
@@ -401,17 +401,17 @@ class MatchComponents {
 			return conjuncts;
 		}
 
-		private NodePatternSpec(List<OWLClassExpression> conjuncts) {
+		private PatternSpec(List<OWLClassExpression> conjuncts) {
 
 			this.conjuncts.addAll(conjuncts);
 		}
 	}
 
-	private class NodePatternDisjunctionSpec {
+	private class toPatternDisjunctsSpec {
 
-		private List<NodePatternSpec> disjuncts = new ArrayList<NodePatternSpec>();
+		private List<PatternSpec> disjuncts = new ArrayList<PatternSpec>();
 
-		NodePatternDisjunctionSpec(OWLClassExpression source) {
+		toPatternDisjunctsSpec(OWLClassExpression source) {
 
 			if (source instanceof OWLObjectIntersectionOf) {
 
@@ -427,13 +427,13 @@ class MatchComponents {
 			}
 		}
 
-		List<NodePattern> checkCreate() {
+		List<Pattern> checkCreate() {
 
-			List<NodePattern> patternDisjuncts = new ArrayList<NodePattern>();
+			List<Pattern> patternDisjuncts = new ArrayList<Pattern>();
 
-			for (NodePatternSpec d : disjuncts) {
+			for (PatternSpec d : disjuncts) {
 
-				NodePattern pd = nodePatterns.get(d);
+				Pattern pd = patterns.get(d);
 
 				if (pd == null) {
 
@@ -448,7 +448,7 @@ class MatchComponents {
 
 		private void addFor(OWLObjectIntersectionOf source) {
 
-			NodePatternSpec disjunct = new NodePatternSpec();
+			PatternSpec disjunct = new PatternSpec();
 			List<OWLObjectUnionOf> unions = new ArrayList<OWLObjectUnionOf>();
 
 			for (OWLClassExpression op : source.getOperands()) {
@@ -476,11 +476,11 @@ class MatchComponents {
 
 		private void addSimpleDisjunctFor(OWLClassExpression source) {
 
-			disjuncts.add(new NodePatternSpec(source));
+			disjuncts.add(new PatternSpec(source));
 		}
 
 		private void addForUnions(
-						NodePatternSpec disjunct,
+						PatternSpec disjunct,
 						List<OWLObjectUnionOf> unions,
 						int index) {
 
@@ -511,14 +511,14 @@ class MatchComponents {
 		dataTypes = new DataTypes(dynamic);
 	}
 
-	NodePattern toNodePattern(OWLClassExpression source) {
+	Pattern toPattern(OWLClassExpression source) {
 
-		return nodePatterns.get(source);
+		return patterns.get(source);
 	}
 
-	List<NodePattern> toNodePatternDisjunction(OWLClassExpression source) {
+	List<Pattern> toPatternDisjuncts(OWLClassExpression source) {
 
-		return new NodePatternDisjunctionSpec(source).checkCreate();
+		return new toPatternDisjunctsSpec(source).checkCreate();
 	}
 
 	Relation toRelation(OWLClassExpression source) {
@@ -634,7 +634,7 @@ class MatchComponents {
 
 		if (pCls == null) {
 
-			NodePattern p = nodePatterns.get(v);
+			Pattern p = patterns.get(v);
 
 			if (p != null) {
 

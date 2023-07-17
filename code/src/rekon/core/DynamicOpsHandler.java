@@ -41,13 +41,13 @@ public abstract class DynamicOpsHandler {
 
 	public boolean equivalentTo(DynamicOpsHandler other) {
 
-		Collection<NodePattern> oDefns = other.getDefinitions();
+		Collection<Pattern> oDefns = other.getDefinitions();
 
 		if (!oDefns.isEmpty()) {
 
-			for (NodePattern d : getDefinitions()) {
+			for (Pattern d : getDefinitions()) {
 
-				for (NodePattern od : oDefns) {
+				for (Pattern od : oDefns) {
 
 					if (d.subsumes(od) && od.subsumes(d)) {
 
@@ -62,13 +62,13 @@ public abstract class DynamicOpsHandler {
 
 	public boolean subsumes(DynamicOpsHandler other) {
 
-		Collection<NodePattern> ops = other.getProfiles();
+		Collection<Pattern> ops = other.getProfiles();
 
 		if (!ops.isEmpty()) {
 
-			for (NodePattern d : getDefinitions()) {
+			for (Pattern d : getDefinitions()) {
 
-				for (NodePattern op : ops) {
+				for (Pattern op : ops) {
 
 					if (d.subsumes(op)) {
 
@@ -81,7 +81,7 @@ public abstract class DynamicOpsHandler {
 		return false;
 	}
 
-	abstract Collection<NodePattern> getProfiles();
+	abstract Collection<Pattern> getProfiles();
 
-	abstract Collection<NodePattern> getDefinitions();
+	abstract Collection<Pattern> getDefinitions();
 }

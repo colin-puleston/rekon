@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class NodePattern extends Expression {
+public class Pattern extends Expression {
 
 	private NameList names = new NameList();
 
@@ -103,31 +103,31 @@ public class NodePattern extends Expression {
 		}
 	}
 
-	public NodePattern(NodeName name) {
+	public Pattern(NodeName name) {
 
 		names.add(name);
 	}
 
-	public NodePattern(Names names) {
+	public Pattern(Names names) {
 
 		this.names.addAll(names);
 	}
 
-	public NodePattern(NodeName name, Relation relation) {
+	public Pattern(NodeName name, Relation relation) {
 
 		this(name);
 
 		relations.add(relation);
 	}
 
-	public NodePattern(NodeName name, Collection<Relation> relations) {
+	public Pattern(NodeName name, Collection<Relation> relations) {
 
 		this(name);
 
 		this.relations.addAll(relations);
 	}
 
-	public NodePattern(Names names, Collection<Relation> relations) {
+	public Pattern(Names names, Collection<Relation> relations) {
 
 		this(names);
 
@@ -167,7 +167,7 @@ public class NodePattern extends Expression {
 		return additions;
 	}
 
-	NodePattern combineWith(NodePattern other) {
+	Pattern combineWith(Pattern other) {
 
 		NameSet newNames = new NameSet(names);
 		Set<Relation> newRelations = new HashSet<Relation>(relations);
@@ -178,25 +178,25 @@ public class NodePattern extends Expression {
 		purgeSubsumers(newNames, names);
 		purgeSubsumers(newNames, other.names);
 
-		return new NodePattern(newNames, newRelations);
+		return new Pattern(newNames, newRelations);
 	}
 
-	NodePattern extend(Relation extraRelation) {
+	Pattern extend(Relation extraRelation) {
 
 		Set<Relation> newRelations = new HashSet<Relation>(relations);
 
 		newRelations.add(extraRelation);
 
-		return new NodePattern(names, newRelations);
+		return new Pattern(names, newRelations);
 	}
 
-	NodePattern extend(Collection<Relation> extraRelations) {
+	Pattern extend(Collection<Relation> extraRelations) {
 
 		Set<Relation> newRelations = new HashSet<Relation>(relations);
 
 		newRelations.addAll(extraRelations);
 
-		return new NodePattern(names, newRelations);
+		return new Pattern(names, newRelations);
 	}
 
 	Names getNames() {
@@ -236,12 +236,12 @@ public class NodePattern extends Expression {
 		}
 	}
 
-	boolean subsumes(NodePattern p) {
+	boolean subsumes(Pattern p) {
 
 		return subsumesAllNames(p) && subsumesRelations(p);
 	}
 
-	boolean subsumesRelations(NodePattern p) {
+	boolean subsumesRelations(Pattern p) {
 
 		for (Relation r : relations) {
 
@@ -373,7 +373,7 @@ public class NodePattern extends Expression {
 		return new PatternSignatureRelationCollector(visitMonitor).collect();
 	}
 
-	private boolean subsumesAllNames(NodePattern p) {
+	private boolean subsumesAllNames(Pattern p) {
 
 		for (Name n : names.getNames()) {
 
@@ -386,7 +386,7 @@ public class NodePattern extends Expression {
 		return true;
 	}
 
-	private boolean subsumesAnyName(Name n, NodePattern p) {
+	private boolean subsumesAnyName(Name n, Pattern p) {
 
 		for (Name pn : p.names.getNames()) {
 
@@ -399,7 +399,7 @@ public class NodePattern extends Expression {
 		return false;
 	}
 
-	private boolean subsumesAnySignatureRelation(Relation r, NodePattern p) {
+	private boolean subsumesAnySignatureRelation(Relation r, Pattern p) {
 
 		for (Relation sr : p.getSignatureRelations()) {
 

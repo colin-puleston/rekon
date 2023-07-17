@@ -31,8 +31,8 @@ import java.util.*;
  */
 class PatternNode extends MatchableNode<PatternNode> {
 
-	private NodePattern profile;
-	private Set<NodePattern> definitions = new HashSet<NodePattern>();
+	private Pattern profile;
+	private Set<Pattern> definitions = new HashSet<Pattern>();
 
 	public String toString() {
 
@@ -41,17 +41,17 @@ class PatternNode extends MatchableNode<PatternNode> {
 
 	PatternNode(NodeName name) {
 
-		this(name, new NodePattern(name));
+		this(name, new Pattern(name));
 	}
 
-	PatternNode(NodeName name, NodePattern profile) {
+	PatternNode(NodeName name, Pattern profile) {
 
 		super(name);
 
 		this.profile = profile;
 	}
 
-	void addDefinition(NodePattern defn) {
+	void addDefinition(Pattern defn) {
 
 		definitions.add(defn);
 
@@ -67,7 +67,7 @@ class PatternNode extends MatchableNode<PatternNode> {
 		profile = profile.extend(relation);
 	}
 
-	NodePattern getProfile() {
+	Pattern getProfile() {
 
 		return profile;
 	}
@@ -77,7 +77,7 @@ class PatternNode extends MatchableNode<PatternNode> {
 		return !definitions.isEmpty();
 	}
 
-	Collection<NodePattern> getDefinitions() {
+	Collection<Pattern> getDefinitions() {
 
 		return definitions;
 	}
@@ -92,9 +92,9 @@ class PatternNode extends MatchableNode<PatternNode> {
 		return subsumes(other.profile);
 	}
 
-	boolean subsumes(NodePattern pattern) {
+	boolean subsumes(Pattern pattern) {
 
-		for (NodePattern d : definitions) {
+		for (Pattern d : definitions) {
 
 			if (d.subsumes(pattern)) {
 
@@ -105,7 +105,7 @@ class PatternNode extends MatchableNode<PatternNode> {
 		return false;
 	}
 
-	boolean subsumedBy(NodePattern pattern) {
+	boolean subsumedBy(Pattern pattern) {
 
 		return pattern.subsumes(profile);
 	}

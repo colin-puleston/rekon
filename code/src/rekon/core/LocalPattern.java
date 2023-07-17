@@ -30,7 +30,7 @@ package rekon.core;
 abstract class LocalPattern {
 
 	private NodeName patternNode;
-	private NodePattern pattern;
+	private Pattern pattern;
 	private OrderedMatchableNodes patternMatchables = new OrderedMatchableNodes();
 
 	abstract class LocalClasses extends FreeClasses {
@@ -66,7 +66,7 @@ abstract class LocalPattern {
 		return patternNode;
 	}
 
-	NodePattern getPattern() {
+	Pattern getPattern() {
 
 		return pattern;
 	}

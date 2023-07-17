@@ -60,7 +60,7 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternNo
 		}
 	}
 
-	Collection<PatternNode> getPotentialsFor(NodePattern request) {
+	Collection<PatternNode> getPotentialsFor(Pattern request) {
 
 		return getPotentialsFor(getRankedDefinitionNames(request));
 	}
@@ -85,7 +85,7 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternNo
 		return false;
 	}
 
-	abstract List<Names> getRankedDefinitionNames(NodePattern defn);
+	abstract List<Names> getRankedDefinitionNames(Pattern defn);
 
-	abstract List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank);
+	abstract List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank);
 }

@@ -112,7 +112,7 @@ public class InstanceOps {
 
 	public List<Instance> match(PatternCreator queryCreator) {
 
-		NodePattern qp = createDynamicPattern(queryCreator);
+		Pattern qp = createDynamicPattern(queryCreator);
 		NameSet matches = patternSubsumeds.inferAllSubsumedNodes(qp);
 
 		return matches.isEmpty()
@@ -122,8 +122,8 @@ public class InstanceOps {
 
 	public boolean matches(PatternCreator queryCreator, PatternCreator profileCreator) {
 
-		NodePattern qp = createDynamicPattern(queryCreator);
-		NodePattern pp = createDynamicPattern(profileCreator);
+		Pattern qp = createDynamicPattern(queryCreator);
+		Pattern pp = createDynamicPattern(profileCreator);
 
 		return qp.subsumes(pp);
 	}
@@ -151,7 +151,7 @@ public class InstanceOps {
 		ghosts.put(instance.getInstanceId(), instance);
 	}
 
-	private NodePattern createDynamicPattern(PatternCreator creator) {
+	private Pattern createDynamicPattern(PatternCreator creator) {
 
 		return new DynamicPattern(creator).getPattern();
 	}

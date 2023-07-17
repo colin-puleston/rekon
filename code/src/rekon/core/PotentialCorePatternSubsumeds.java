@@ -43,12 +43,12 @@ class PotentialCorePatternSubsumeds extends PotentialPatternSubsumeds {
 		return MatchNamesExpander.expand(names, MatchRole.rankToPatternRole(rank));
 	}
 
-	List<Names> getRankedDefinitionNames(NodePattern defn) {
+	List<Names> getRankedDefinitionNames(Pattern defn) {
 
 		return new FilteringNameCollector(true).collect(defn);
 	}
 
-	List<Names> getRankedProfileNames(NodePattern profile, int startRank, int stopRank) {
+	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
 
 		return new FilteringNameCollector(false).collect(profile);
 	}

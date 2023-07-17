@@ -112,7 +112,7 @@ public class InstanceName extends NodeName {
 			return found;
 		}
 
-		private void findFrom(NodePattern p) {
+		private void findFrom(Pattern p) {
 
 			for (Relation r : p.getDirectRelations()) {
 

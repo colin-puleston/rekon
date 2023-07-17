@@ -71,14 +71,14 @@ public abstract class NodeName extends Name {
 		return selectMatchableNodes(DisjunctionNode.class);
 	}
 
-	NodePattern getProfilePattern() {
+	Pattern getProfilePattern() {
 
 		PatternNode pn = getPatternNode();
 
 		return pn != null ? pn.getProfile() : null;
 	}
 
-	Collection<NodePattern> getDefinitionPatterns() {
+	Collection<Pattern> getDefinitionPatterns() {
 
 		PatternNode pn = getPatternNode();
 

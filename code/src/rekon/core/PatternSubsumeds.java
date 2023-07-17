@@ -38,7 +38,7 @@ class PatternSubsumeds {
 
 	private class NodeSubsumptions {
 
-		NameSet find(NodePattern pattern) {
+		NameSet find(Pattern pattern) {
 
 			NameSet matches = new NameSet();
 
@@ -65,7 +65,7 @@ class PatternSubsumeds {
 
 		private NameSet filterNames = null;
 
-		NameSet find(NodePattern pattern, NameSet filterNames) {
+		NameSet find(Pattern pattern, NameSet filterNames) {
 
 			this.filterNames = filterNames;
 
@@ -101,17 +101,17 @@ class PatternSubsumeds {
 		potentials.checkRemoveInstanceOption(name);
 	}
 
-	NameSet inferSubsumedClasses(NodePattern pattern) {
+	NameSet inferSubsumedClasses(Pattern pattern) {
 
 		return classSubsumptions.find(pattern, null);
 	}
 
-	NameSet inferSubsumedClasses(NodePattern pattern, NameSet filterNames) {
+	NameSet inferSubsumedClasses(Pattern pattern, NameSet filterNames) {
 
 		return classSubsumptions.find(pattern, filterNames);
 	}
 
-	NameSet inferAllSubsumedNodes(NodePattern pattern) {
+	NameSet inferAllSubsumedNodes(Pattern pattern) {
 
 		return allNodeSubsumptions.find(pattern);
 	}

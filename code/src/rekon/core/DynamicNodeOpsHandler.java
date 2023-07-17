@@ -77,9 +77,9 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		this.name = name;
 	}
 
-	Collection<NodePattern> getProfiles() {
+	Collection<Pattern> getProfiles() {
 
-		List<NodePattern> profs = new ArrayList<NodePattern>();
+		List<Pattern> profs = new ArrayList<Pattern>();
 
 		for (PatternNode n : getApplicablePatternNodes()) {
 
@@ -89,11 +89,11 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		return profs;
 	}
 
-	Collection<NodePattern> getDefinitions() {
+	Collection<Pattern> getDefinitions() {
 
-		List<NodePattern> defns = new ArrayList<NodePattern>();
+		List<Pattern> defns = new ArrayList<Pattern>();
 
-		defns.add(new NodePattern(name));
+		defns.add(new Pattern(name));
 
 		for (PatternNode n : getApplicablePatternNodes()) {
 

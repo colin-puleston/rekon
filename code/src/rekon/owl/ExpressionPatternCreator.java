@@ -35,9 +35,9 @@ abstract class ExpressionPatternCreator implements PatternCreator {
 
 	private OWLClassExpression expr;
 
-	public NodePattern createNestedPatterns(MatchStructures matchStructures) {
+	public Pattern createNestedPatterns(MatchStructures matchStructures) {
 
-		return createMatchComponents(matchStructures).toNodePattern(expr);
+		return createMatchComponents(matchStructures).toPattern(expr);
 	}
 
 	ExpressionPatternCreator(OWLClassExpression expr) {

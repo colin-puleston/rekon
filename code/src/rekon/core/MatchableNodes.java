@@ -34,14 +34,24 @@ class MatchableNodes {
 	private List<PatternNode> patternNodes = new ArrayList<PatternNode>();
 	private List<DisjunctionNode> disjunctionNodes = new ArrayList<DisjunctionNode>();
 
-	void addPatternNode(NodeName name, NodePattern profile) {
+	void addPatternNode(PatternNode node) {
+
+		patternNodes.add(node);
+	}
+
+	void addPatternNode(NodeName name, Pattern profile) {
 
 		addPatternNode(new PatternNode(name, profile));
 	}
 
-	void addPatternNodeDefinition(NodeName name, NodePattern defn) {
+	void addPatternNodeDefinition(NodeName name, Pattern defn) {
 
 		resolvePatternNode(name).addDefinition(defn);
+	}
+
+	void addDisjunctionNode(DisjunctionNode node) {
+
+		disjunctionNodes.add(node);
 	}
 
 	void addDisjunctionNode(ClassName name, Collection<? extends NodeName> disjuncts) {
@@ -72,16 +82,6 @@ class MatchableNodes {
 	List<DisjunctionNode> getDisjunctionNodes() {
 
 		return disjunctionNodes;
-	}
-
-	void addPatternNode(PatternNode node) {
-
-		patternNodes.add(node);
-	}
-
-	void addDisjunctionNode(DisjunctionNode node) {
-
-		disjunctionNodes.add(node);
 	}
 
 	private PatternNode resolvePatternNode(NodeName name) {

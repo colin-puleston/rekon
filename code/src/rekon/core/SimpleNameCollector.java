@@ -44,7 +44,7 @@ class SimpleNameCollector extends NameCollector {
 		return definition;
 	}
 
-	Names collect(NodePattern p) {
+	Names collect(Pattern p) {
 
 		p.collectNames(this);
 

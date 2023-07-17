@@ -71,7 +71,7 @@ class PatternSubsumers {
 
 		private void findFrom(PatternNode pn, Set<MatchableNode<?>> potentials) {
 
-			for (NodePattern d : pn.getDefinitions()) {
+			for (Pattern d : pn.getDefinitions()) {
 
 				for (Name n : getDefinitionMatchNames(d).getNames()) {
 
@@ -83,7 +83,7 @@ class PatternSubsumers {
 			}
 		}
 
-		private Names getDefinitionMatchNames(NodePattern defn) {
+		private Names getDefinitionMatchNames(Pattern defn) {
 
 			return new SimpleNameCollector(true).collect(defn);
 		}

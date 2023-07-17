@@ -88,7 +88,7 @@ class LocalClassifier {
 
 			if (n.getNodeClassifier().absorbNewInferredSubsumers()) {
 
-				NodePattern p = n.getProfilePattern();
+				Pattern p = n.getProfilePattern();
 
 				if (p != null && p.potentialSignatureUpdates()) {
 
@@ -126,7 +126,7 @@ class LocalClassifier {
 
 		private void classify(PatternNode candidate) {
 
-			NodePattern profile = candidate.getProfile();
+			Pattern profile = candidate.getProfile();
 
 			for (DefinitionPattern defn : definedPatternsFilter.getPotentialsFor(profile)) {
 
@@ -187,7 +187,7 @@ class LocalClassifier {
 
 		private void classify(PatternNode defined, PatternNode candidate) {
 
-			for (NodePattern defn : defined.getDefinitions()) {
+			for (Pattern defn : defined.getDefinitions()) {
 
 				updateNewSubsumptions(subsumptionChecker.check(defined, defn, candidate));
 			}

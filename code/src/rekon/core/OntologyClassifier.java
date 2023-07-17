@@ -46,7 +46,7 @@ class OntologyClassifier {
 
 	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
-		boolean subsumption(NodePattern defn, NodePattern profile) {
+		boolean subsumption(Pattern defn, Pattern profile) {
 
 			return defn.subsumesRelations(profile);
 		}
@@ -65,7 +65,7 @@ class OntologyClassifier {
 
 		void processElement(PatternNode defined) {
 
-			for (NodePattern defn : defined.getDefinitions()) {
+			for (Pattern defn : defined.getDefinitions()) {
 
 				for (PatternNode c : candidatesFilter.getPotentialsFor(defn)) {
 
@@ -127,13 +127,13 @@ class OntologyClassifier {
 			new DisjunctionSubsumersChecker(disjunctionMatchCandidates, initialPass());
 		}
 
-		abstract boolean potentialPatternMatchCandidate(NodePattern p);
+		abstract boolean potentialPatternMatchCandidate(Pattern p);
 
 		private void findPatternMatchCandidates(boolean initialPass) {
 
 			for (PatternNode n : allPatternNodes) {
 
-				NodePattern p = n.getProfile();
+				Pattern p = n.getProfile();
 
 				if (potentialPatternMatchCandidate(p) && p.classifiable(initialPass)) {
 
@@ -161,7 +161,7 @@ class OntologyClassifier {
 			super(false);
 		}
 
-		boolean potentialPatternMatchCandidate(NodePattern p) {
+		boolean potentialPatternMatchCandidate(Pattern p) {
 
 			return true;
 		}
@@ -179,7 +179,7 @@ class OntologyClassifier {
 			return true;
 		}
 
-		boolean potentialPatternMatchCandidate(NodePattern p) {
+		boolean potentialPatternMatchCandidate(Pattern p) {
 
 			p.setRestrictedSignature();
 
@@ -194,7 +194,7 @@ class OntologyClassifier {
 			super(true);
 		}
 
-		boolean potentialPatternMatchCandidate(NodePattern p) {
+		boolean potentialPatternMatchCandidate(Pattern p) {
 
 			return p.setExpandedSignature();
 		}

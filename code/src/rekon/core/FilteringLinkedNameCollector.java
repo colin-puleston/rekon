@@ -64,7 +64,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (n.local()) {
 
-				for (NodePattern d : n.getDefinitionPatterns()) {
+				for (Pattern d : n.getDefinitionPatterns()) {
 
 					d.collectNames(this);
 				}
@@ -81,7 +81,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (!linkNames.contains(n)) {
 
-				NodePattern p = n.getProfilePattern();
+				Pattern p = n.getProfilePattern();
 
 				if (p != null) {
 

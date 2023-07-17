@@ -156,7 +156,7 @@ class FilteringNameCollector {
 		this.definition = definition;
 	}
 
-	List<Names> collect(NodePattern p) {
+	List<Names> collect(Pattern p) {
 
 		RankCollector firstRankCollector = createRankCollector();
 

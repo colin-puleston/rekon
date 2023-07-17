@@ -103,26 +103,26 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 	private PatternSubsumeds patternSubsumeds;
 
 	private DynamicPattern dynamicPattern;
-	private NodePattern nodePattern;
+	private Pattern pattern;
 
 	public Names getEquivalents() {
 
-		return nodePattern != null ? inferEquivs() : Names.NO_NAMES;
+		return pattern != null ? inferEquivs() : Names.NO_NAMES;
 	}
 
 	public Names getSupers(boolean direct) {
 
-		return nodePattern != null ? inferSupers(direct) : Names.NO_NAMES;
+		return pattern != null ? inferSupers(direct) : Names.NO_NAMES;
 	}
 
 	public Names getSubs(boolean direct) {
 
-		return nodePattern != null ? inferSubs(direct) : Names.NO_NAMES;
+		return pattern != null ? inferSubs(direct) : Names.NO_NAMES;
 	}
 
 	public Names getIndividuals(boolean direct) {
 
-		return nodePattern != null ? inferIndividuals(direct) : Names.NO_NAMES;
+		return pattern != null ? inferIndividuals(direct) : Names.NO_NAMES;
 	}
 
 	DynamicPatternOpsHandler(Ontology ontology, PatternCreator patternCreator) {
@@ -131,14 +131,14 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		patternSubsumeds = ontology.getPatternSubsumeds();
 
 		dynamicPattern = new DynamicPattern(patternCreator);
-		nodePattern = dynamicPattern.getPattern();
+		pattern = dynamicPattern.getPattern();
 	}
 
 	DynamicOpsHandler checkResolveToNodeOpsHandler() {
 
-		if (nodePattern != null) {
+		if (pattern != null) {
 
-			NodeName n = nodePattern.toSingleName();
+			NodeName n = pattern.toSingleName();
 
 			if (n != null) {
 
@@ -149,14 +149,14 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return this;
 	}
 
-	Collection<NodePattern> getProfiles() {
+	Collection<Pattern> getProfiles() {
 
-		return nodePattern != null
-				? Collections.singletonList(nodePattern)
+		return pattern != null
+				? Collections.singletonList(pattern)
 				: Collections.emptyList();
 	}
 
-	Collection<NodePattern> getDefinitions() {
+	Collection<Pattern> getDefinitions() {
 
 		return getProfiles();
 	}
@@ -251,16 +251,16 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private NameSet inferSubsumedClasses() {
 
-		return patternSubsumeds.inferSubsumedClasses(nodePattern);
+		return patternSubsumeds.inferSubsumedClasses(pattern);
 	}
 
 	private NameSet inferSubsumedClasses(NameSet filterNames) {
 
-		return patternSubsumeds.inferSubsumedClasses(nodePattern, filterNames);
+		return patternSubsumeds.inferSubsumedClasses(pattern, filterNames);
 	}
 
 	private NameSet inferAllSubsumedNodes() {
 
-		return patternSubsumeds.inferAllSubsumedNodes(nodePattern);
+		return patternSubsumeds.inferAllSubsumedNodes(pattern);
 	}
 }
