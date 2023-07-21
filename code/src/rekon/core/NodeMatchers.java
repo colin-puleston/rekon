@@ -29,51 +29,67 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class InverseRelationsAdder {
+class NodeMatchers {
 
-	private List<PatternMatcher> newProfilePatterns = new ArrayList<PatternMatcher>();
+	private List<PatternMatcher> profilePatterns = new ArrayList<PatternMatcher>();
+	private List<PatternMatcher> definitionPatterns = new ArrayList<PatternMatcher>();
 
-	InverseRelationsAdder(NodeMatchers nodeMatchers) {
+	private List<DisjunctionMatcher> disjunctions = new ArrayList<DisjunctionMatcher>();
 
-		for (PatternMatcher p : nodeMatchers.getProfilePatterns()) {
+	void addProfilePattern(PatternMatcher profile) {
 
-			if (p.getNode() instanceof IndividualName) {
-
-				addAnyFor(p);
-			}
-		}
-
-		for (PatternMatcher p : newProfilePatterns) {
-
-			nodeMatchers.addProfilePattern(p);
-		}
+		profilePatterns.add(profile);
 	}
 
-	private void addAnyFor(PatternMatcher p) {
+	void addProfilePattern(NodeName name, Pattern profile) {
 
-		for (Relation r : p.getPattern().getDirectRelations()) {
-
-			if (r instanceof SomeRelation) {
-
-				addAnyFor(p.getNode(), (SomeRelation)r);
-			}
-		}
+		addProfilePattern(name.addProfilePatternMatcher(profile));
 	}
 
-	private void addAnyFor(NodeName forwardSource, SomeRelation forwardRel) {
+	void addDefinitionPattern(NodeName name, Pattern defn) {
 
-		Collection<NodePropertyName> ips = forwardRel.getNodeProperty().getInverses();
+		definitionPatterns.add(name.addDefinitionPatternMatcher(defn));
 
-		if (!ips.isEmpty()) {
+		addNameSubsumers(name, defn.getNames());
+		resolveProfilePattern(name).absorbDefinitionIntoProfile(defn);
 
-			NodeValue invSource = forwardRel.getNodeValueTarget();
-			NodeValue invTarget = new NodeValue(forwardSource);
+		defn.registerDefinitionRefedNames();
+	}
 
-			PatternMatcher p = resolveProfilePattern(invSource.getValueNode());
+	void addDisjunction(DisjunctionMatcher defn) {
 
-			for (NodePropertyName ip : ips) {
+		disjunctions.add(defn);
+	}
 
-				p.addRelation(new SomeRelation(ip, invTarget));
+	void addDisjunction(ClassName name, Collection<? extends NodeName> disjuncts) {
+
+		addDisjunction(name.addDisjunctionMatcher(disjuncts));
+	}
+
+	List<PatternMatcher> getProfilePatterns() {
+
+		return profilePatterns;
+	}
+
+	List<PatternMatcher> getDefinitionPatternMatchers() {
+
+		return definitionPatterns;
+	}
+
+	List<DisjunctionMatcher> getDisjunctionMatchers() {
+
+		return disjunctions;
+	}
+
+	private void addNameSubsumers(NodeName name, Names subsumers) {
+
+		NameClassifier classifier = name.getClassifier();
+
+		for (Name s : subsumers.getNames()) {
+
+			if (!s.rootName()) {
+
+				classifier.addAssertedSubsumer(s);
 			}
 		}
 	}
@@ -86,7 +102,7 @@ class InverseRelationsAdder {
 
 			p = name.addProfilePatternMatcher();
 
-			newProfilePatterns.add(p);
+			addProfilePattern(p);
 		}
 
 		return p;

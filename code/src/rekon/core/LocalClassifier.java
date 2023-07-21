@@ -31,8 +31,8 @@ import java.util.*;
  */
 class LocalClassifier {
 
-	private PotentialLocalPatternSubsumers definedPatternsFilter;
-	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
+	private PotentialLocalPatternSubsumers defnPatternsFilter;
+	private PotentialDisjunctionSubsumers defnDisjunctionsFilter;
 
 	private DefaultClassifier defaultClassifier = new DefaultClassifier();
 	private SubsumptionChecker subsumptionChecker = new SubsumptionChecker();
@@ -43,7 +43,7 @@ class LocalClassifier {
 
 		NameSet classify(LocalPattern pattern) {
 
-			classifyMatchables(pattern.getPatternMatchables());
+			classifyProfiles(pattern.getProfileMatchers());
 
 			return pattern.getPatternNode().getClassifier().getSubsumers();
 		}
@@ -56,9 +56,9 @@ class LocalClassifier {
 			}
 		}
 
-		private void classifyMatchables(OrderedMatchableNodes matchables) {
+		private void classifyProfiles(OrderedProfileMatchers matchers) {
 
-			for (MatchableNode<?> candidate : matchables.getOrderedNodes()) {
+			for (NodeMatcher candidate : matchers.getOrderedMatchers()) {
 
 				exhaustivelyClassify(candidate);
 
@@ -71,7 +71,7 @@ class LocalClassifier {
 			}
 		}
 
-		private void exhaustivelyClassify(MatchableNode<?> candidate) {
+		private void exhaustivelyClassify(NodeMatcher candidate) {
 
 			do {
 
@@ -80,19 +80,24 @@ class LocalClassifier {
 			while (checkReclassifiable(candidate));
 		}
 
-		abstract void classify(MatchableNode<?> candidate);
+		abstract void classify(NodeMatcher candidate);
 
-		private boolean checkReclassifiable(MatchableNode<?> candidate) {
+		private boolean checkReclassifiable(NodeMatcher candidate) {
 
-			NodeName n = candidate.getName();
+			NodeName n = candidate.getNode();
 
 			if (n.getNodeClassifier().absorbNewInferredSubsumers()) {
 
-				Pattern p = n.getProfilePattern();
+				PatternMatcher pp = n.getProfilePatternMatcher();
 
-				if (p != null && p.potentialSignatureUpdates()) {
+				if (pp != null) {
 
-					p.resetSignatureRefs();
+					Pattern p = pp.getPattern();
+
+					if (p.potentialSignatureUpdates()) {
+
+						p.resetSignatureRefs();
+					}
 				}
 
 				return true;
@@ -106,103 +111,103 @@ class LocalClassifier {
 
 		private TypeClassifier typeClassifier = new TypeClassifier();
 
-		private class TypeClassifier extends MatchableNodeVisitor {
+		private class TypeClassifier extends NodeMatcherVisitor {
 
-			void visit(PatternNode candidate) {
+			void visit(PatternMatcher candidate) {
 
-				classify(candidate);
+				checkSubsumptions(candidate);
 			}
 
-			void visit(DisjunctionNode candidate) {
+			void visit(DisjunctionMatcher candidate) {
 
-				classify(candidate);
+				checkSubsumptions(candidate);
 			}
 		}
 
-		void classify(MatchableNode<?> candidate) {
+		void classify(NodeMatcher candidate) {
 
 			candidate.acceptVisitor(typeClassifier);
 		}
 
-		private void classify(PatternNode candidate) {
+		private void checkSubsumptions(PatternMatcher candidate) {
 
-			Pattern profile = candidate.getProfile();
+			Pattern profile = candidate.getPattern();
 
-			for (DefinitionPattern defn : definedPatternsFilter.getPotentialsFor(profile)) {
+			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(profile)) {
 
 				updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
 			}
 		}
 
-		private void classify(DisjunctionNode candidate) {
+		private void checkSubsumptions(DisjunctionMatcher candidate) {
 
-			for (DisjunctionNode defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
+			for (DisjunctionMatcher defn : defnDisjunctionsFilter.getPotentialsFor(candidate)) {
 
 				updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
 			}
 		}
 	}
 
-	private class PreFilteredDefinedsClassifier extends ClassifierOption {
+	private class PreFilteredDefnsClassifier extends ClassifierOption {
 
-		private Collection<MatchableNode<?>> preFilteredDefineds;
+		private Collection<NodeMatcher> preFilteredDefns;
 
-		private class TypeClassifier extends MatchableNodeVisitor {
+		private class TypeClassifier extends NodeMatcherVisitor {
 
-			private MatchableNode<?> candidate;
+			private NodeMatcher candidate;
 
-			TypeClassifier(MatchableNode<?> defined, MatchableNode<?> candidate) {
+			TypeClassifier(NodeMatcher candidate) {
 
 				this.candidate = candidate;
-
-				defined.acceptVisitor(this);
 			}
 
-			void visit(PatternNode defined) {
+			void visit(PatternMatcher defn) {
 
-				classify(defined, (PatternNode)candidate);
+				if (candidate instanceof PatternMatcher) {
+
+					checkSubsumption(defn, (PatternMatcher)candidate);
+				}
 			}
 
-			void visit(DisjunctionNode defined) {
+			void visit(DisjunctionMatcher defn) {
 
-				classify(defined, (DisjunctionNode)candidate);
-			}
-		}
+				if (candidate instanceof DisjunctionMatcher) {
 
-		PreFilteredDefinedsClassifier(Collection<MatchableNode<?>> preFilteredDefineds) {
-
-			this.preFilteredDefineds = preFilteredDefineds;
-		}
-
-		void classify(MatchableNode<?> candidate) {
-
-			for (MatchableNode<?> defined : preFilteredDefineds) {
-
-				if (defined.getClass() == candidate.getClass()) {
-
-					new TypeClassifier(defined, candidate);
+					checkSubsumption(defn, (DisjunctionMatcher)candidate);
 				}
 			}
 		}
 
-		private void classify(PatternNode defined, PatternNode candidate) {
+		PreFilteredDefnsClassifier(Collection<NodeMatcher> preFilteredDefns) {
 
-			for (Pattern defn : defined.getDefinitions()) {
+			this.preFilteredDefns = preFilteredDefns;
+		}
 
-				updateNewSubsumptions(subsumptionChecker.check(defined, defn, candidate));
+		void classify(NodeMatcher candidate) {
+
+			TypeClassifier tc = new TypeClassifier(candidate);
+
+			for (NodeMatcher defn : preFilteredDefns) {
+
+				defn.acceptVisitor(tc);
 			}
 		}
 
-		private void classify(DisjunctionNode defined, DisjunctionNode candidate) {
+		private void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-			updateNewSubsumptions(subsumptionChecker.check(defined, candidate));
+			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+		}
+
+		private void checkSubsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
+
+			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
 		}
 	}
 
-	LocalClassifier(MatchableNodes matchables) {
+	LocalClassifier(NodeMatchers nodeMatchers) {
 
-		definedPatternsFilter = createDefinedPatternsFilter(matchables);
-		disjunctionDefnsFilter = createDisjunctionDefnsFilter(matchables);
+		defnPatternsFilter = createDefnPatternsFilter(nodeMatchers);
+		defnDisjunctionsFilter = createDefnDisjunctionsFilter(nodeMatchers);
 	}
 
 	NameSet classify(LocalPattern pattern) {
@@ -210,18 +215,18 @@ class LocalClassifier {
 		return defaultClassifier.classify(pattern);
 	}
 
-	NameSet classify(LocalPattern pattern, Collection<MatchableNode<?>> preFilteredDefineds) {
+	NameSet classify(LocalPattern pattern, Collection<NodeMatcher> preFilteredDefns) {
 
-		return new PreFilteredDefinedsClassifier(preFilteredDefineds).classify(pattern);
+		return new PreFilteredDefnsClassifier(preFilteredDefns).classify(pattern);
 	}
 
-	private PotentialLocalPatternSubsumers createDefinedPatternsFilter(MatchableNodes matchables) {
+	private PotentialLocalPatternSubsumers createDefnPatternsFilter(NodeMatchers nodeMatchers) {
 
-		return new PotentialLocalPatternSubsumers(matchables.getAllPatternNodes());
+		return new PotentialLocalPatternSubsumers(nodeMatchers.getDefinitionPatternMatchers());
 	}
 
-	private PotentialDisjunctionSubsumers createDisjunctionDefnsFilter(MatchableNodes matchables) {
+	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(NodeMatchers nodeMatchers) {
 
-		return new PotentialDisjunctionSubsumers(matchables.getDisjunctionNodes());
+		return new PotentialDisjunctionSubsumers(nodeMatchers.getDisjunctionMatchers());
 	}
 }

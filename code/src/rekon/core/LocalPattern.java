@@ -31,7 +31,7 @@ abstract class LocalPattern {
 
 	private NodeName patternNode;
 	private Pattern pattern;
-	private OrderedMatchableNodes patternMatchables = new OrderedMatchableNodes();
+	private OrderedProfileMatchers profileMatchers = new OrderedProfileMatchers();
 
 	abstract class LocalClasses extends FreeClasses {
 
@@ -56,7 +56,7 @@ abstract class LocalPattern {
 		patternNode = ensurePatternNode(matchStructures);
 		pattern = patternCreator.createNestedPatterns(matchStructures);
 
-		patternMatchables.addPatternNodeDefinition(patternNode, pattern);
+		profileMatchers.addDefinitionPattern(patternNode, pattern);
 
 		processAllLocalNamesPostAdditions();
 	}
@@ -71,9 +71,9 @@ abstract class LocalPattern {
 		return pattern;
 	}
 
-	OrderedMatchableNodes getPatternMatchables() {
+	OrderedProfileMatchers getProfileMatchers() {
 
-		return patternMatchables;
+		return profileMatchers;
 	}
 
 	abstract LocalClasses createLocalClasses();
@@ -82,14 +82,14 @@ abstract class LocalPattern {
 
 	private MatchStructures createMatchStructures() {
 
-		return new MatchStructures(patternMatchables, createLocalClasses());
+		return new MatchStructures(profileMatchers, createLocalClasses());
 	}
 
 	private void processAllLocalNamesPostAdditions() {
 
-		for (PatternNode n : patternMatchables.getAllPatternNodes()) {
+		for (PatternMatcher p : profileMatchers.getProfilePatterns()) {
 
-			n.getName().getClassifier().onPostAssertionAdditions();
+			p.getNode().getClassifier().onPostAssertionAdditions();
 		}
 	}
 }

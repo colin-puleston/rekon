@@ -42,11 +42,11 @@ class PatternSubsumeds {
 
 			NameSet matches = new NameSet();
 
-			for (PatternNode pn : potentials.getPotentialsFor(pattern)) {
+			for (PatternMatcher pn : potentials.getPotentialsFor(pattern)) {
 
-				Name n = pn.getName();
+				Name n = pn.getNode();
 
-				if (requiredCandidate(n) && pn.subsumedBy(pattern)) {
+				if (requiredCandidate(n) && pn.subsumedByPattern(pattern)) {
 
 					matches.add(n);
 				}
@@ -83,9 +83,9 @@ class PatternSubsumeds {
 		}
 	}
 
-	PatternSubsumeds(MatchableNodes matchables) {
+	PatternSubsumeds(NodeMatchers nodeMatchers) {
 
-		potentials = createPotentials(matchables);
+		potentials = createPotentials(nodeMatchers);
 
 		classSubsumptions = new ClassSubsumptions();
 		allNodeSubsumptions = new NodeSubsumptions();
@@ -116,20 +116,20 @@ class PatternSubsumeds {
 		return allNodeSubsumptions.find(pattern);
 	}
 
-	private PotentialPatternSubsumeds createPotentials(MatchableNodes matchables) {
+	private PotentialPatternSubsumeds createPotentials(NodeMatchers nodeMatchers) {
 
-		return new PotentialLocalPatternSubsumeds(getPotentialCandidates(matchables));
+		return new PotentialLocalPatternSubsumeds(getPotentialCandidates(nodeMatchers));
 	}
 
-	private List<PatternNode> getPotentialCandidates(MatchableNodes matchables) {
+	private List<PatternMatcher> getPotentialCandidates(NodeMatchers nodeMatchers) {
 
-		List<PatternNode> candidates = new ArrayList<PatternNode>();
+		List<PatternMatcher> candidates = new ArrayList<PatternMatcher>();
 
-		for (PatternNode pn : matchables.getAllPatternNodes()) {
+		for (PatternMatcher pp : nodeMatchers.getProfilePatterns()) {
 
-			if (pn.getName().mapped()) {
+			if (pp.getNode().mapped()) {
 
-				candidates.add(pn);
+				candidates.add(pp);
 			}
 		}
 

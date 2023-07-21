@@ -75,9 +75,9 @@ abstract class NodeSelector {
 
 		boolean select(NodeName node) {
 
-			PatternNode n = node.getPatternNode();
+			PatternMatcher p = node.getProfilePatternMatcher();
 
-			return n != null && select(n.getProfile().getSignatureRelations());
+			return p != null && select(p.getPattern().getSignatureRelations());
 		}
 
 		abstract boolean select(Collection<Relation> rels);
@@ -114,7 +114,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private abstract class ClassifyTargetPatternNode extends Structured {
+	static private abstract class ClassifyTargetPattern extends Structured {
 
 		boolean select(NodeName node) {
 
@@ -144,7 +144,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifyTargetPatternRoot extends ClassifyTargetPatternNode {
+	static private class ClassifyTargetPatternRoot extends ClassifyTargetPattern {
 
 		MatchRole getMatchRole() {
 
@@ -152,7 +152,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifyTargetPatternValue extends ClassifyTargetPatternNode {
+	static private class ClassifyTargetPatternValue extends ClassifyTargetPattern {
 
 		MatchRole getMatchRole() {
 

@@ -31,58 +31,71 @@ import java.util.*;
  */
 public abstract class NodeName extends Name {
 
-	static private final List<MatchableNode<?>> NO_MATCHABLE_NODES = Collections.emptyList();
+	static private final List<NodeMatcher> NO_MATCHERS = Collections.emptyList();
 
-	private List<MatchableNode<?>> matchableNodes = NO_MATCHABLE_NODES;
+	static private class ProfilePatternMatcher extends PatternMatcher {
 
-	void addMatchableNode(MatchableNode<?> matchable) {
+		ProfilePatternMatcher(NodeName node, Pattern pattern) {
 
-		checkNewMatchableNode(matchable);
+			super(node, pattern);
+		}
+	}
 
-		if (matchableNodes == NO_MATCHABLE_NODES) {
+	static private class DefinitionPatternMatcher extends PatternMatcher {
 
-			matchableNodes = new ArrayList<MatchableNode<?>>();
+		DefinitionPatternMatcher(NodeName node, Pattern pattern) {
 
-			getNodeClassifier().setMatchableNode();
+			super(node, pattern);
+		}
+	}
+
+	private List<NodeMatcher> matchers = NO_MATCHERS;
+
+	PatternMatcher addProfilePatternMatcher() {
+
+		return addProfilePatternMatcher(new Pattern(this));
+	}
+
+	PatternMatcher addProfilePatternMatcher(Pattern pattern) {
+
+		if (getProfilePatternMatcher() != null) {
+
+			throw new Error("Attempting to add second profile-pattern for node: " + this);
 		}
 
-		matchableNodes.add(matchable);
+		return addMatcher(new ProfilePatternMatcher(this, pattern));
+	}
+
+	PatternMatcher addDefinitionPatternMatcher(Pattern pattern) {
+
+		return addMatcher(new DefinitionPatternMatcher(this, pattern));
+	}
+
+	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends NodeName> disjuncts) {
+
+		return addMatcher(new DisjunctionMatcher(this, disjuncts));
 	}
 
 	boolean matchable() {
 
-		return !matchableNodes.isEmpty();
+		return !matchers.isEmpty();
 	}
 
-	List<MatchableNode<?>> getMatchableNodes() {
+	PatternMatcher getProfilePatternMatcher() {
 
-		return matchableNodes;
+		List<PatternMatcher> ps = selectPatternMatchers(ProfilePatternMatcher.class);
+
+		return ps.isEmpty() ? null : ps.get(0);
 	}
 
-	PatternNode getPatternNode() {
+	List<PatternMatcher> getDefinitionPatternMatchers() {
 
-		List<PatternNode> pns = selectMatchableNodes(PatternNode.class);
-
-		return pns.isEmpty() ? null : pns.get(0);
+		return selectPatternMatchers(DefinitionPatternMatcher.class);
 	}
 
-	List<DisjunctionNode> getDisjunctionNodes() {
+	List<DisjunctionMatcher> getDisjunctionMatchers() {
 
-		return selectMatchableNodes(DisjunctionNode.class);
-	}
-
-	Pattern getProfilePattern() {
-
-		PatternNode pn = getPatternNode();
-
-		return pn != null ? pn.getProfile() : null;
-	}
-
-	Collection<Pattern> getDefinitionPatterns() {
-
-		PatternNode pn = getPatternNode();
-
-		return pn != null ? pn.getDefinitions() : Collections.emptySet();
+		return selectMatchers(DisjunctionMatcher.class, DisjunctionMatcher.class);
 	}
 
 	boolean subsumes(Name name) {
@@ -94,7 +107,7 @@ public abstract class NodeName extends Name {
 
 		if (name instanceof NodeName) {
 
-			return local() ? anyMatchableSubsumes((NodeName)name) : super.subsumes(name);
+			return local() ? subsumesViaMatcher((NodeName)name) : super.subsumes(name);
 		}
 
 		return false;
@@ -125,49 +138,80 @@ public abstract class NodeName extends Name {
 		return new NodeNameClassifier(this);
 	}
 
-	private void checkNewMatchableNode(MatchableNode<?> m) {
+	private <M extends NodeMatcher>M addMatcher(M matcher) {
 
-		if (m instanceof PatternNode && getPatternNode() != null) {
+		if (matchers == NO_MATCHERS) {
 
-			throw new Error("Attempting to add second pattern-node for: " + this);
+			matchers = new ArrayList<NodeMatcher>();
+
+			getNodeClassifier().setMatchableNode();
 		}
+
+		matchers.add(matcher);
+
+		return matcher;
 	}
 
-	private <T extends MatchableNode<?>>List<T> selectMatchableNodes(Class<T> type) {
+	private <S extends PatternMatcher>List<PatternMatcher> selectPatternMatchers(Class<S> type) {
 
-		List<T> selecteds = new ArrayList<T>();
+		return selectMatchers(PatternMatcher.class, type);
+	}
 
-		for (MatchableNode<?> m : matchableNodes) {
+	private <L extends NodeMatcher, S extends L>List<L> selectMatchers(
+															Class<L> listType,
+															Class<S> selectType) {
 
-			if (type.isAssignableFrom(m.getClass())) {
+		List<L> selecteds = new ArrayList<L>();
 
-				selecteds.add(type.cast(m));
+		for (NodeMatcher m : matchers) {
+
+			if (selectType.isAssignableFrom(m.getClass())) {
+
+				selecteds.add(selectType.cast(m));
 			}
 		}
 
 		return selecteds;
 	}
 
-	private boolean anyMatchableSubsumes(NodeName name) {
+	private boolean subsumesViaMatcher(NodeName name) {
 
-		for (MatchableNode<?> m : matchableNodes) {
+		return subsumesViaPattern(name) || subsumesViaDisjunction(name);
+	}
 
-			if (m.subsumesNode(name) || name.anyMatchableSubsumedBy(m)) {
+	private boolean subsumesViaPattern(NodeName name) {
 
-				return true;
+		PatternMatcher p = name.getProfilePatternMatcher();
+
+		if (p != null) {
+
+			for (PatternMatcher d : getDefinitionPatternMatchers()) {
+
+				if (d.subsumesPattern(p)) {
+
+					return true;
+				}
 			}
 		}
 
 		return false;
 	}
 
-	private boolean anyMatchableSubsumedBy(MatchableNode<?> matchable) {
+	private boolean subsumesViaDisjunction(NodeName name) {
 
-		for (MatchableNode<?> m : matchableNodes) {
+		for (DisjunctionMatcher d : getDisjunctionMatchers()) {
 
-			if (matchable.subsumesMatchable(m)) {
+			if (d.subsumesNode(name)) {
 
 				return true;
+			}
+
+			for (DisjunctionMatcher p : name.getDisjunctionMatchers()) {
+
+				if (d.subsumesDisjunction(p)) {
+
+					return true;
+				}
 			}
 		}
 

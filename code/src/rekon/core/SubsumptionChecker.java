@@ -29,10 +29,10 @@ package rekon.core;
  */
 class SubsumptionChecker {
 
-	private PatternNodeChecker patternNodeChecker = new PatternNodeChecker();
-	private DisjunctionNodeChecker disjunctionNodeChecker = new DisjunctionNodeChecker();
+	private PatternChecker patternChecker = new PatternChecker();
+	private DisjunctionChecker disjunctionChecker = new DisjunctionChecker();
 
-	private abstract class MatchableNodeChecker<C> {
+	private abstract class NodeMatcherChecker<C> {
 
 		boolean check(NodeName dn, C defn, NodeName cn, C candidate) {
 
@@ -57,11 +57,11 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class PatternNodeChecker extends MatchableNodeChecker<Pattern> {
+	private class PatternChecker extends NodeMatcherChecker<Pattern> {
 
-		boolean check(NodeName dn, Pattern defn, PatternNode candidate) {
+		boolean check(NodeName dn, Pattern defn, PatternMatcher candidate) {
 
-			return check(dn, defn, candidate.getName(), candidate.getProfile());
+			return check(dn, defn, candidate.getNode(), candidate.getPattern());
 		}
 
 		boolean subsumption(Pattern defn, Pattern candidate) {
@@ -70,32 +70,27 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class DisjunctionNodeChecker extends MatchableNodeChecker<DisjunctionNode> {
+	private class DisjunctionChecker extends NodeMatcherChecker<DisjunctionMatcher> {
 
-		boolean check(DisjunctionNode defn, DisjunctionNode candidate) {
+		boolean check(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
 
-			return check(defn.getName(), defn, candidate.getName(), candidate);
+			return check(defn.getNode(), defn, candidate.getNode(), candidate);
 		}
 
-		boolean subsumption(DisjunctionNode defn, DisjunctionNode candidate) {
+		boolean subsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
 
-			return defn.subsumes(candidate);
+			return defn.subsumesDisjunction(candidate);
 		}
 	}
 
-	boolean check(PatternNode defined, Pattern defn, PatternNode candidate) {
+	boolean check(PatternMatcher defn, PatternMatcher candidate) {
 
-		return patternNodeChecker.check(defined.getName(), defn, candidate);
+		return patternChecker.check(defn.getNode(), defn.getPattern(), candidate);
 	}
 
-	boolean check(DefinitionPattern defn, PatternNode candidate) {
+	boolean check(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
 
-		return patternNodeChecker.check(defn.getNode(), defn.getDefinition(), candidate);
-	}
-
-	boolean check(DisjunctionNode defn, DisjunctionNode candidate) {
-
-		return disjunctionNodeChecker.check(defn, candidate);
+		return disjunctionChecker.check(defn, candidate);
 	}
 
 	boolean subsumption(Pattern defn, Pattern profile) {

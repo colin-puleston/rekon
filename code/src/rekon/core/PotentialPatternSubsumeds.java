@@ -29,50 +29,50 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternNode> {
+abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMatcher> {
 
-	private List<PatternNode> allOptions;
+	private List<PatternMatcher> allOptions;
 
-	PotentialPatternSubsumeds(List<PatternNode> allOptions) {
+	PotentialPatternSubsumeds(List<PatternMatcher> allOptions) {
 
 		this.allOptions = allOptions;
 	}
 
 	void checkAddInstanceOption(InstanceName name) {
 
-		PatternNode pn = name.getPatternNode();
+		PatternMatcher pp = name.getProfilePatternMatcher();
 
-		if (pn != null) {
+		if (pp != null) {
 
-			allOptions.add(pn);
-			registerTransientOption(pn);
+			allOptions.add(pp);
+			registerTransientOption(pp);
 		}
 	}
 
 	void checkRemoveInstanceOption(InstanceName name) {
 
-		PatternNode pn = name.getPatternNode();
+		PatternMatcher p = name.getProfilePatternMatcher();
 
-		if (pn != null) {
+		if (p != null) {
 
-			allOptions.remove(pn);
-			deregisterTransientOption(pn);
+			allOptions.remove(p);
+			deregisterTransientOption(p);
 		}
 	}
 
-	Collection<PatternNode> getPotentialsFor(Pattern request) {
+	Collection<PatternMatcher> getPotentialsFor(Pattern request) {
 
 		return getPotentialsFor(getRankedDefinitionNames(request));
 	}
 
-	List<PatternNode> getAllOptions() {
+	List<PatternMatcher> getAllOptions() {
 
 		return allOptions;
 	}
 
-	List<Names> getOptionMatchNames(PatternNode option, int startRank, int stopRank) {
+	List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
-		return getRankedProfileNames(option.getProfile(), startRank, stopRank);
+		return getRankedProfileNames(option.getPattern(), startRank, stopRank);
 	}
 
 	Names resolveNamesForRetrieval(Names names, int rank) {

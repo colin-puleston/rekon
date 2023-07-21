@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DisjunctionNode extends MatchableNode<DisjunctionNode> {
+class DisjunctionMatcher extends NodeMatcher {
 
 	private Names disjuncts;
 
@@ -38,7 +38,7 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		return getClass().getSimpleName() + "(" + getDisjunctLabelsList() + ")";
 	}
 
-	DisjunctionNode(ClassName name, Collection<? extends NodeName> disjuncts) {
+	DisjunctionMatcher(NodeName name, Collection<? extends NodeName> disjuncts) {
 
 		super(name);
 
@@ -83,7 +83,7 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		return false;
 	}
 
-	boolean subsumes(DisjunctionNode other) {
+	boolean subsumesDisjunction(DisjunctionMatcher other) {
 
 		for (Name d : other.disjuncts.getNames()) {
 
@@ -109,14 +109,9 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 		return false;
 	}
 
-	void acceptVisitor(MatchableNodeVisitor visitor) {
+	void acceptVisitor(NodeMatcherVisitor visitor) {
 
 		visitor.visit(this);
-	}
-
-	Class<DisjunctionNode> getMatchableClass() {
-
-		return DisjunctionNode.class;
 	}
 
 	private Names findCommonDisjunctSubsumers() {
@@ -150,6 +145,6 @@ class DisjunctionNode extends MatchableNode<DisjunctionNode> {
 
 	private NodeNameClassifier getClassifier() {
 
-		return getName().getNodeClassifier();
+		return getNode().getNodeClassifier();
 	}
 }

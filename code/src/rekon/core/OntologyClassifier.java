@@ -34,12 +34,12 @@ class OntologyClassifier {
 	private List<Name> allNames;
 	private List<NodeName> nodeNames;
 
-	private MatchableNodes matchables;
+	private NodeMatchers nodeMatchers;
 
-	private List<PatternNode> allPatternNodes;
-	private List<PatternNode> definedPatternNodes;
+	private List<PatternMatcher> profilePatterns;
+	private List<PatternMatcher> definitionPatterns;
 
-	private List<DisjunctionNode> disjunctionNodes;
+	private List<DisjunctionMatcher> disjunctionDefns;
 	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
 
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
@@ -52,43 +52,42 @@ class OntologyClassifier {
 		}
 	}
 
-	private class PatternSubsumedsChecker extends MultiThreadListProcessor<PatternNode> {
+	private class PatternSubsumedsChecker extends MultiThreadListProcessor<PatternMatcher> {
 
 		private PotentialPatternSubsumeds candidatesFilter;
 
-		PatternSubsumedsChecker(List<PatternNode> candidates) {
+		PatternSubsumedsChecker(List<PatternMatcher> candidates) {
 
 			candidatesFilter = new PotentialCorePatternSubsumeds(candidates);
 
-			invokeListProcesses(definedPatternNodes);
+			invokeListProcesses(definitionPatterns);
 		}
 
-		void processElement(PatternNode defined) {
+		void processElement(PatternMatcher defn) {
 
-			for (Pattern defn : defined.getDefinitions()) {
+			Pattern p = defn.getPattern();
 
-				for (PatternNode c : candidatesFilter.getPotentialsFor(defn)) {
+			for (PatternMatcher c : candidatesFilter.getPotentialsFor(p)) {
 
-					subsumptionChecker.check(defined, defn, c);
-				}
+				subsumptionChecker.check(defn, c);
 			}
 		}
 	}
 
-	private class DisjunctionSubsumersChecker extends MultiThreadListProcessor<DisjunctionNode> {
+	private class DisjunctionSubsumersChecker extends MultiThreadListProcessor<DisjunctionMatcher> {
 
 		private boolean initialPass;
 
-		DisjunctionSubsumersChecker(List<DisjunctionNode> candidates, boolean initialPass) {
+		DisjunctionSubsumersChecker(List<DisjunctionMatcher> candidates, boolean initialPass) {
 
 			this.initialPass = initialPass;
 
 			invokeListProcesses(candidates);
 		}
 
-		void processElement(DisjunctionNode candidate) {
+		void processElement(DisjunctionMatcher candidate) {
 
-			for (DisjunctionNode defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
+			for (DisjunctionMatcher defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
 
 				subsumptionChecker.check(defn, candidate);
 			}
@@ -102,8 +101,8 @@ class OntologyClassifier {
 
 	private abstract class PassConfig {
 
-		private List<PatternNode> patternMatchCandidates = new ArrayList<PatternNode>();
-		private List<DisjunctionNode> disjunctionMatchCandidates = new ArrayList<DisjunctionNode>();
+		private List<PatternMatcher> patternMatchCandidates = new ArrayList<PatternMatcher>();
+		private List<DisjunctionMatcher> disjunctionMatchCandidates = new ArrayList<DisjunctionMatcher>();
 
 		PassConfig(boolean initialPass) {
 
@@ -131,20 +130,20 @@ class OntologyClassifier {
 
 		private void findPatternMatchCandidates(boolean initialPass) {
 
-			for (PatternNode n : allPatternNodes) {
+			for (PatternMatcher pp : profilePatterns) {
 
-				Pattern p = n.getProfile();
+				Pattern p = pp.getPattern();
 
 				if (potentialPatternMatchCandidate(p) && p.classifiable(initialPass)) {
 
-					patternMatchCandidates.add(n);
+					patternMatchCandidates.add(pp);
 				}
 			}
 		}
 
 		private void findDisjunctionMatchCandidates(boolean initialPass) {
 
-			for (DisjunctionNode d : disjunctionNodes) {
+			for (DisjunctionMatcher d : disjunctionDefns) {
 
 				if (d.classifiable(initialPass)) {
 
@@ -203,17 +202,17 @@ class OntologyClassifier {
 	OntologyClassifier(
 		List<Name> allNames,
 		List<NodeName> nodeNames,
-		MatchableNodes matchables) {
+		NodeMatchers nodeMatchers) {
 
 		this.allNames = allNames;
 		this.nodeNames = nodeNames;
-		this.matchables = matchables;
+		this.nodeMatchers = nodeMatchers;
 
-		allPatternNodes = matchables.getAllPatternNodes();
-		definedPatternNodes = matchables.getDefinedPatternNodes();
+		profilePatterns = nodeMatchers.getProfilePatterns();
+		definitionPatterns = nodeMatchers.getDefinitionPatternMatchers();
 
-		disjunctionNodes = matchables.getDisjunctionNodes();
-		disjunctionDefnsFilter = new PotentialDisjunctionSubsumers(disjunctionNodes);
+		disjunctionDefns = nodeMatchers.getDisjunctionMatchers();
+		disjunctionDefnsFilter = new PotentialDisjunctionSubsumers(disjunctionDefns);
 
 		classify();
 	}
@@ -260,19 +259,19 @@ class OntologyClassifier {
 
 	private void resetPotentiallyUpdatedSignatureRefs() {
 
-		List<PatternNode> potentiallyUpdateds = new ArrayList<PatternNode>();
+		List<PatternMatcher> potentiallyUpdateds = new ArrayList<PatternMatcher>();
 
-		for (PatternNode n : allPatternNodes) {
+		for (PatternMatcher p : profilePatterns) {
 
-			if (n.getProfile().potentialSignatureUpdates()) {
+			if (p.getPattern().potentialSignatureUpdates()) {
 
-				potentiallyUpdateds.add(n);
+				potentiallyUpdateds.add(p);
 			}
 		}
 
-		for (PatternNode n : potentiallyUpdateds) {
+		for (PatternMatcher p : potentiallyUpdateds) {
 
-			n.getProfile().resetSignatureRefs();
+			p.getPattern().resetSignatureRefs();
 		}
 	}
 }

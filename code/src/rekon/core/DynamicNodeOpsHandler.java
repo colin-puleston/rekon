@@ -33,6 +33,54 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	private NodeName name;
 
+	 private abstract class PatternCollector {
+
+		Collection<Pattern> getAll() {
+
+			if (name == null) {
+
+				return Collections.emptyList();
+			}
+
+			List<Pattern> patterns = new ArrayList<Pattern>();
+
+			checkAddPattern(patterns, name);
+
+			for (Name en : name.getEquivalents().getNames()) {
+
+				checkAddPattern(patterns, (NodeName)en);
+			}
+
+			return patterns;
+		}
+
+		abstract void checkAddPattern(Collection<Pattern> patterns, NodeName n);
+	}
+
+	 private class ProfileCollector extends PatternCollector {
+
+		void checkAddPattern(Collection<Pattern> patterns, NodeName n) {
+
+			PatternMatcher p = n.getProfilePatternMatcher();
+
+			if (p != null) {
+
+				patterns.add(p.getPattern());
+			}
+		}
+	}
+
+	 private class DefinitionCollector extends PatternCollector {
+
+		void checkAddPattern(Collection<Pattern> patterns, NodeName n) {
+
+			for (PatternMatcher p : n.getDefinitionPatternMatchers()) {
+
+				patterns.add(p.getPattern());
+			}
+		}
+	}
+
 	public Names getEquivalents() {
 
 		if (name == null) {
@@ -79,61 +127,16 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	Collection<Pattern> getProfiles() {
 
-		List<Pattern> profs = new ArrayList<Pattern>();
-
-		for (PatternNode n : getApplicablePatternNodes()) {
-
-			profs.add(n.getProfile());
-		}
-
-		return profs;
+		return new ProfileCollector().getAll();
 	}
 
 	Collection<Pattern> getDefinitions() {
 
-		List<Pattern> defns = new ArrayList<Pattern>();
-
-		defns.add(new Pattern(name));
-
-		for (PatternNode n : getApplicablePatternNodes()) {
-
-			defns.addAll(n.getDefinitions());
-		}
-
-		return defns;
+		return new DefinitionCollector().getAll();
 	}
 
 	private Names getSubs(Class<? extends NodeName> type, boolean direct) {
 
 		return name != null ? name.getSubs(type, direct) : Names.NO_NAMES;
-	}
-
-	private Collection<PatternNode> getApplicablePatternNodes() {
-
-		if (name == null) {
-
-			return Collections.emptyList();
-		}
-
-		List<PatternNode> applicables = new ArrayList<PatternNode>();
-
-		checkAddPatternNode(applicables, name);
-
-		for (Name en : name.getEquivalents().getNames()) {
-
-			checkAddPatternNode(applicables, (NodeName)en);
-		}
-
-		return applicables;
-	}
-
-	private void checkAddPatternNode(Collection<PatternNode> applicables, NodeName n) {
-
-		PatternNode pn = n.getPatternNode();
-
-		if (pn != null) {
-
-			applicables.add(pn);
-		}
 	}
 }

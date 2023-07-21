@@ -177,7 +177,7 @@ class MatchComponents {
 
 			for (OWLClassExpression op : source.getOperands()) {
 
-				Set<? extends NodeName> djs = valueToNodeDisjuncts(op);
+				Set<? extends NodeName> djs = valueToNodeDisjunction(op);
 
 				if (djs == null) {
 
@@ -249,7 +249,7 @@ class MatchComponents {
 				return disjunctions.get((OWLObjectUnionOf)filler);
 			}
 
-			Set<? extends NodeName> djs = valueToNodeDisjuncts(filler);
+			Set<? extends NodeName> djs = valueToNodeDisjunction(filler);
 
 			return djs != null ? createNodeValue(djs) : null;
 		}
@@ -407,11 +407,11 @@ class MatchComponents {
 		}
 	}
 
-	private class toPatternDisjunctsSpec {
+	private class toPatternDisjunctionSpec {
 
 		private List<PatternSpec> disjuncts = new ArrayList<PatternSpec>();
 
-		toPatternDisjunctsSpec(OWLClassExpression source) {
+		toPatternDisjunctionSpec(OWLClassExpression source) {
 
 			if (source instanceof OWLObjectIntersectionOf) {
 
@@ -429,7 +429,7 @@ class MatchComponents {
 
 		List<Pattern> checkCreate() {
 
-			List<Pattern> patternDisjuncts = new ArrayList<Pattern>();
+			List<Pattern> patternDisjunction = new ArrayList<Pattern>();
 
 			for (PatternSpec d : disjuncts) {
 
@@ -440,10 +440,10 @@ class MatchComponents {
 					return null;
 				}
 
-				patternDisjuncts.add(pd);
+				patternDisjunction.add(pd);
 			}
 
-			return patternDisjuncts;
+			return patternDisjunction;
 		}
 
 		private void addFor(OWLObjectIntersectionOf source) {
@@ -516,9 +516,9 @@ class MatchComponents {
 		return patterns.get(source);
 	}
 
-	List<Pattern> toPatternDisjuncts(OWLClassExpression source) {
+	List<Pattern> toPatternDisjunction(OWLClassExpression source) {
 
-		return new toPatternDisjunctsSpec(source).checkCreate();
+		return new toPatternDisjunctionSpec(source).checkCreate();
 	}
 
 	Relation toRelation(OWLClassExpression source) {
@@ -596,11 +596,11 @@ class MatchComponents {
 		return DataTypes.toDataValueExpression(source.getFiller());
 	}
 
-	private Set<? extends NodeName> valueToNodeDisjuncts(OWLClassExpression v) {
+	private Set<? extends NodeName> valueToNodeDisjunction(OWLClassExpression v) {
 
 		if (v instanceof OWLObjectOneOf) {
 
-			return valueToIndividualDisjuncts((OWLObjectOneOf)v);
+			return valueToIndividualDisjunction((OWLObjectOneOf)v);
 		}
 
 		NodeName n = valueToNodeName(v);
@@ -640,7 +640,7 @@ class MatchComponents {
 
 				pCls = matchStructures.addPatternClass();
 
-				matchStructures.addPatternNodeDefinition(pCls, p);
+				matchStructures.addDefinitionPattern(pCls, p);
 
 				patternClasses.put(v, pCls);
 			}
@@ -649,7 +649,7 @@ class MatchComponents {
 		return pCls;
 	}
 
-	private Set<IndividualName> valueToIndividualDisjuncts(OWLObjectOneOf v) {
+	private Set<IndividualName> valueToIndividualDisjunction(OWLObjectOneOf v) {
 
 		Set<IndividualName> disjuncts = new HashSet<IndividualName>();
 
@@ -680,7 +680,7 @@ class MatchComponents {
 
 		ClassName c = matchStructures.addPatternClass();
 
-		matchStructures.addDisjunctionNode(c, disjuncts);
+		matchStructures.addDisjunction(c, disjuncts);
 
 		return c;
 	}

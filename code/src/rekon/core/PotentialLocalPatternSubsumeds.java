@@ -34,7 +34,7 @@ class PotentialLocalPatternSubsumeds extends PotentialPatternSubsumeds {
 	private int nextOptionRegRank = 0;
 	private boolean optionRegComplete = false;
 
-	PotentialLocalPatternSubsumeds(List<PatternNode> allOptions) {
+	PotentialLocalPatternSubsumeds(List<PatternMatcher> allOptions) {
 
 		super(allOptions);
 	}

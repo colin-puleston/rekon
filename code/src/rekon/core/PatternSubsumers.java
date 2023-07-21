@@ -31,13 +31,13 @@ import java.util.*;
  */
 class PatternSubsumers {
 
-	static private EquivCheckDefineds equivCheckDefineds = new EquivCheckDefineds();
+	static private EquivCheckDefinitions equivCheckDefinitions = new EquivCheckDefinitions();
 
-	static private class EquivCheckDefineds {
+	static private class EquivCheckDefinitions {
 
-		Collection<MatchableNode<?>> deriveFromSubsumeds(Names subsumeds) {
+		Collection<NodeMatcher> deriveFromSubsumeds(Names subsumeds) {
 
-			Set<MatchableNode<?>> potentials = new HashSet<MatchableNode<?>>();
+			Set<NodeMatcher> potentials = new HashSet<NodeMatcher>();
 
 			for (Name s : subsumeds.getNames()) {
 
@@ -47,7 +47,7 @@ class PatternSubsumers {
 			return potentials;
 		}
 
-		private void findAllFrom(NodeName n, Set<MatchableNode<?>> potentials) {
+		private void findAllFrom(NodeName n, Set<NodeMatcher> potentials) {
 
 			findFrom(n, potentials);
 
@@ -57,43 +57,36 @@ class PatternSubsumers {
 			}
 		}
 
-		private void findFrom(NodeName n, Set<MatchableNode<?>> potentials) {
+		private void findFrom(NodeName n, Set<NodeMatcher> potentials) {
 
-			PatternNode pn = n.getPatternNode();
+			for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
 
-			if (pn != null && pn.hasDefinitions() && potentials.add(pn)) {
+				if (potentials.add(d)) {
 
-				findFrom(pn, potentials);
-			}
+					for (Name dn : getDefinitionMatchNames(d).getNames()) {
 
-			potentials.addAll(n.getDisjunctionNodes());
-		}
+						if (dn instanceof NodeName) {
 
-		private void findFrom(PatternNode pn, Set<MatchableNode<?>> potentials) {
-
-			for (Pattern d : pn.getDefinitions()) {
-
-				for (Name n : getDefinitionMatchNames(d).getNames()) {
-
-					if (n instanceof NodeName) {
-
-						findFrom((NodeName)n, potentials);
+							findFrom((NodeName)dn, potentials);
+						}
 					}
 				}
 			}
+
+			potentials.addAll(n.getDisjunctionMatchers());
 		}
 
-		private Names getDefinitionMatchNames(Pattern defn) {
+		private Names getDefinitionMatchNames(PatternMatcher defn) {
 
-			return new SimpleNameCollector(true).collect(defn);
+			return new SimpleNameCollector(true).collect(defn.getPattern());
 		}
 	}
 
 	private LocalClassifier localClassifier;
 
-	PatternSubsumers(MatchableNodes matchables) {
+	PatternSubsumers(NodeMatchers nodeMatchers) {
 
-		localClassifier = new LocalClassifier(matchables);
+		localClassifier = new LocalClassifier(nodeMatchers);
 	}
 
 	NameSet inferSubsumers(LocalPattern pattern) {
@@ -105,6 +98,6 @@ class PatternSubsumers {
 
 		return localClassifier.classify(
 					pattern,
-					equivCheckDefineds.deriveFromSubsumeds(subsumeds));
+					equivCheckDefinitions.deriveFromSubsumeds(subsumeds));
 	}
 }

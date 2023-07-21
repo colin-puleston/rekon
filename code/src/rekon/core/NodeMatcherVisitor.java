@@ -24,32 +24,14 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-class DefinitionPattern {
+abstract class NodeMatcherVisitor {
 
-	private NodeName node;
-	private Pattern definition;
+	abstract void visit(PatternMatcher m);
 
-	public String toString() {
-
-		return getClass().getSimpleName() + "(" + node + ")";
-	}
-
-	DefinitionPattern(NodeName node, Pattern definition) {
-
-		this.node = node;
-		this.definition = definition;
-	}
-
-	NodeName getNode() {
-
-		return node;
-	}
-
-	Pattern getDefinition() {
-
-		return definition;
-	}
+	abstract void visit(DisjunctionMatcher m);
 }

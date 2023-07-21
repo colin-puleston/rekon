@@ -31,7 +31,7 @@ import java.util.*;
  */
 class PotentialCorePatternSubsumeds extends PotentialPatternSubsumeds {
 
-	PotentialCorePatternSubsumeds(List<PatternNode> allOptions) {
+	PotentialCorePatternSubsumeds(List<PatternMatcher> allOptions) {
 
 		super(allOptions);
 

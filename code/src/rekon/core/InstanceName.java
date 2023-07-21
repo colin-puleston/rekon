@@ -100,14 +100,14 @@ public class InstanceName extends NodeName {
 
 		Set<InstanceName> findAll() {
 
-			PatternNode pn = getPatternNode();
+			PatternMatcher p = getProfilePatternMatcher();
 
-			if (pn == null) {
+			if (p == null) {
 
 				return Collections.emptySet();
 			}
 
-			findFrom(pn.getProfile());
+			findFrom(p.getPattern());
 
 			return found;
 		}
@@ -139,16 +139,16 @@ public class InstanceName extends NodeName {
 
 		private void findFrom(FreeClassName c) {
 
-			PatternNode pn = c.getPatternNode();
+			PatternMatcher p = c.getProfilePatternMatcher();
 
-			if (pn != null) {
+			if (p != null) {
 
-				findFrom(pn.getProfile());
+				findFrom(p.getPattern());
 			}
 
-			for (DisjunctionNode dn : c.getDisjunctionNodes()) {
+			for (DisjunctionMatcher dj : c.getDisjunctionMatchers()) {
 
-				for (Name d : dn.getDisjuncts().getNames()) {
+				for (Name d : dj.getDisjuncts().getNames()) {
 
 					findFrom((NodeName)d);
 				}

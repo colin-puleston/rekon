@@ -29,28 +29,28 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionNode> {
+class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionMatcher> {
 
-	private List<DisjunctionNode> definitions;
+	private List<DisjunctionMatcher> definitions;
 
-	PotentialDisjunctionSubsumers(List<DisjunctionNode> definitions) {
+	PotentialDisjunctionSubsumers(List<DisjunctionMatcher> definitions) {
 
 		this.definitions = definitions;
 
 		registerSingleOptionRank();
 	}
 
-	Collection<DisjunctionNode> getPotentialsFor(DisjunctionNode request) {
+	Collection<DisjunctionMatcher> getPotentialsFor(DisjunctionMatcher request) {
 
 		return getPotentialsFor(disjunctsToSingletonNamesList(request));
 	}
 
-	List<DisjunctionNode> getAllOptions() {
+	List<DisjunctionMatcher> getAllOptions() {
 
 		return definitions;
 	}
 
-	List<Names> getOptionMatchNames(DisjunctionNode option, int startRank, int stopRank) {
+	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
 
 		return disjunctsToSingletonNamesList(option);
 	}
@@ -70,7 +70,7 @@ class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionNod
 		return true;
 	}
 
-	private List<Names> disjunctsToSingletonNamesList(DisjunctionNode d) {
+	private List<Names> disjunctsToSingletonNamesList(DisjunctionMatcher d) {
 
 		return Collections.singletonList(d.getDisjuncts());
 	}

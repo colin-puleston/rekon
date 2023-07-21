@@ -64,9 +64,9 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (n.local()) {
 
-				for (Pattern d : n.getDefinitionPatterns()) {
+				for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
 
-					d.collectNames(this);
+					d.getPattern().collectNames(this);
 				}
 			}
 			else {
@@ -81,16 +81,16 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (!linkNames.contains(n)) {
 
-				Pattern p = n.getProfilePattern();
+				PatternMatcher p = n.getProfilePatternMatcher();
 
 				if (p != null) {
 
 					linkNames.push(n);
-					p.collectNames(this);
+					p.getPattern().collectNames(this);
 					linkNames.pop();
 				}
 
-				for (DisjunctionNode dj : n.getDisjunctionNodes()) {
+				for (DisjunctionMatcher dj : n.getDisjunctionMatchers()) {
 
 					for (Name d : dj.getDisjuncts().getNames()) {
 

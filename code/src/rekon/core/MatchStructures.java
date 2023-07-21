@@ -31,25 +31,27 @@ import java.util.*;
  */
 public class MatchStructures {
 
-	private MatchableNodes matchables;
+	private NodeMatchers nodeMatchers;
 	private FreeClasses freeClasses;
 
-	public void checkAddPatternNode(NodeName name, Collection<Relation> relations) {
+	public void checkAddProfilePattern(NodeName node, Collection<Relation> relations) {
 
-		if (name.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
+		if (node.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
 
-			matchables.addPatternNode(name, new Pattern(name, relations));
+			nodeMatchers.addProfilePattern(node, new Pattern(node, relations));
 		}
 	}
 
-	public void addPatternNodeDefinition(NodeName name, Pattern defn) {
+	public void addDefinitionPattern(NodeName node, Pattern defn) {
 
-		matchables.addPatternNodeDefinition(name, defn);
+		nodeMatchers.addDefinitionPattern(node, defn);
 	}
 
-	public void addDisjunctionNode(ClassName name, Collection<? extends NodeName> disjuncts) {
+	public void addDisjunction(
+					ClassName node,
+					Collection<? extends NodeName> disjuncts) {
 
-		matchables.addDisjunctionNode(name, disjuncts);
+		nodeMatchers.addDisjunction(node, disjuncts);
 	}
 
 	public ClassName addPatternClass() {
@@ -62,9 +64,9 @@ public class MatchStructures {
 		return freeClasses.createGCIImpliedClass();
 	}
 
-	MatchStructures(MatchableNodes matchables, FreeClasses freeClasses) {
+	MatchStructures(NodeMatchers nodeMatchers, FreeClasses freeClasses) {
 
-		this.matchables = matchables;
+		this.nodeMatchers = nodeMatchers;
 		this.freeClasses = freeClasses;
 	}
 }

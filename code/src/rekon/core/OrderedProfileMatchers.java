@@ -29,26 +29,26 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class OrderedMatchableNodes extends MatchableNodes {
+class OrderedProfileMatchers extends NodeMatchers {
 
-	private List<MatchableNode<?>> orderedNodes = new ArrayList<MatchableNode<?>>();
+	private List<NodeMatcher> orderedMatchers = new ArrayList<NodeMatcher>();
 
-	void addPatternNode(PatternNode node) {
+	void addProfilePattern(PatternMatcher profile) {
 
-		super.addPatternNode(node);
+		super.addProfilePattern(profile);
 
-		orderedNodes.add(node);
+		orderedMatchers.add(profile);
 	}
 
-	void addDisjunctionNode(DisjunctionNode node) {
+	void addDisjunction(DisjunctionMatcher defn) {
 
-		super.addDisjunctionNode(node);
+		super.addDisjunction(defn);
 
-		orderedNodes.add(node);
+		orderedMatchers.add(defn);
 	}
 
-	List<MatchableNode<?>> getOrderedNodes() {
+	List<NodeMatcher> getOrderedMatchers() {
 
-		return orderedNodes;
+		return orderedMatchers;
 	}
 }

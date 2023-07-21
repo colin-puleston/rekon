@@ -27,36 +27,54 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class MatchableNode<M extends MatchableNode<?>> {
+abstract class PatternMatcher extends NodeMatcher {
 
-	private NodeName name;
+	private Pattern pattern;
 
-	MatchableNode(NodeName name) {
+	public String toString() {
 
-		this.name = name;
-
-		name.addMatchableNode(this);
+		return getClass().getSimpleName() + "(" + getNode().getLabel() + ")";
 	}
 
-	NodeName getName() {
+	PatternMatcher(NodeName node, Pattern pattern) {
 
-		return name;
+		super(node);
+
+		this.pattern = pattern;
 	}
 
-	abstract boolean subsumesNode(NodeName n);
+	void absorbDefinitionIntoProfile(Pattern defn) {
 
-	boolean subsumesMatchable(MatchableNode<?> other) {
-
-		Class<M> cls = getMatchableClass();
-
-		return other.getClass() == cls && subsumes(cls.cast(other));
+		pattern = pattern.combineWith(defn);
 	}
 
-	abstract boolean subsumes(M other);
+	void addRelation(Relation relation) {
 
-	abstract boolean classifiable(boolean initialPass);
+		pattern = pattern.extend(relation);
+	}
 
-	abstract void acceptVisitor(MatchableNodeVisitor visitor);
+	Pattern getPattern() {
 
-	abstract Class<M> getMatchableClass();
+		return pattern;
+	}
+
+	boolean subsumesPattern(PatternMatcher test) {
+
+		return subsumesPattern(test.pattern);
+	}
+
+	boolean subsumesPattern(Pattern test) {
+
+		return pattern.subsumes(test);
+	}
+
+	boolean subsumedByPattern(Pattern test) {
+
+		return test.subsumes(pattern);
+	}
+
+	void acceptVisitor(NodeMatcherVisitor visitor) {
+
+		visitor.visit(this);
+	}
 }

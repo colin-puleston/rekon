@@ -31,32 +31,32 @@ import java.util.*;
  */
 class PotentialLocalPatternSubsumers {
 
-	private Collection<PatternNode> allPatternNodes;
+	private Collection<PatternMatcher> allDefinitionPatterns;
 
 	private SimplePotentials simplePotentials = new SimplePotentials();
 	private NestedPotentials nestedPotentials = new NestedPotentials();
 
 	private abstract class CategoryPotentials
 								extends
-									PotentialSubsumptions<DefinitionPattern> {
+									PotentialSubsumptions<PatternMatcher> {
 
-		private List<DefinitionPattern> categoryOptions = null;
+		private List<PatternMatcher> categoryOptions = null;
 
-		Collection<DefinitionPattern> getPotentialsFor(Pattern request) {
+		Collection<PatternMatcher> getPotentialsFor(Pattern request) {
 
 			checkInitialised();
 
 			return getPotentialsFor(getRankedProfileNames(request));
 		}
 
-		List<DefinitionPattern> getAllOptions() {
+		List<PatternMatcher> getAllOptions() {
 
 			return categoryOptions;
 		}
 
-		List<Names> getOptionMatchNames(DefinitionPattern option, int startRank, int stopRank) {
+		List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
-			return getRankedDefinitionNames(option.getDefinition());
+			return getRankedDefinitionNames(option.getPattern());
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -86,7 +86,7 @@ class PotentialLocalPatternSubsumers {
 
 			if (categoryOptions == null) {
 
-				categoryOptions = new ArrayList<DefinitionPattern>();
+				categoryOptions = new ArrayList<PatternMatcher>();
 
 				addCategoryOptions();
 				initialiseOptionRanks();
@@ -95,14 +95,13 @@ class PotentialLocalPatternSubsumers {
 
 		private void addCategoryOptions() {
 
-			for (PatternNode n : allPatternNodes) {
+			for (PatternMatcher d : allDefinitionPatterns) {
 
-				for (Pattern d : n.getDefinitions()) {
+				Pattern p = d.getPattern();
 
-					if (d.nestedPattern(false) == nestedPatterns()) {
+				if (p.nestedPattern(false) == nestedPatterns()) {
 
-						categoryOptions.add(new DefinitionPattern(n.getName(), d));
-					}
+					categoryOptions.add(d);
 				}
 			}
 		}
@@ -159,14 +158,14 @@ class PotentialLocalPatternSubsumers {
 		}
 	}
 
-	PotentialLocalPatternSubsumers(Collection<PatternNode> allPatternNodes) {
+	PotentialLocalPatternSubsumers(Collection<PatternMatcher> allDefinitionPatterns) {
 
-		this.allPatternNodes = allPatternNodes;
+		this.allDefinitionPatterns = allDefinitionPatterns;
 	}
 
-	Collection<DefinitionPattern> getPotentialsFor(Pattern request) {
+	Collection<PatternMatcher> getPotentialsFor(Pattern request) {
 
-		List<DefinitionPattern> all = new ArrayList<DefinitionPattern>();
+		List<PatternMatcher> all = new ArrayList<PatternMatcher>();
 
 		all.addAll(simplePotentials.getPotentialsFor(request));
 

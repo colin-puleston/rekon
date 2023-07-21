@@ -46,14 +46,14 @@ public class Ontology {
 		allNames.addAll(names.getNodePropertyNames());
 		allNames.addAll(names.getDataPropertyNames());
 
-		MatchableNodes matchables = createStructure(structureBuilder);
+		NodeMatchers nodeMatchers = createStructure(structureBuilder);
 
 		processAllNamesPostAdditions();
 
-		new OntologyClassifier(allNames, nodeNames, matchables);
+		new OntologyClassifier(allNames, nodeNames, nodeMatchers);
 
-		patternSubsumers = new PatternSubsumers(matchables);
-		patternSubsumeds = new PatternSubsumeds(matchables);
+		patternSubsumers = new PatternSubsumers(nodeMatchers);
+		patternSubsumeds = new PatternSubsumeds(nodeMatchers);
 	}
 
 	public DynamicOps createDynamicOps() {
@@ -90,18 +90,18 @@ public class Ontology {
 		}
 	}
 
-	private MatchableNodes createStructure(StructureBuilder builder) {
+	private NodeMatchers createStructure(StructureBuilder builder) {
 
-		MatchableNodes matchables = new MatchableNodes();
+		NodeMatchers nodeMatchers = new NodeMatchers();
 
-		builder.build(createMatchStructures(matchables));
-		new InverseRelationsAdder(matchables);
+		builder.build(createMatchStructures(nodeMatchers));
+		new InverseRelationsAdder(nodeMatchers);
 
-		return matchables;
+		return nodeMatchers;
 	}
 
-	private MatchStructures createMatchStructures(MatchableNodes matchables) {
+	private MatchStructures createMatchStructures(NodeMatchers nodeMatchers) {
 
-		return new MatchStructures(matchables, new FreeOntologyClasses(this));
+		return new MatchStructures(nodeMatchers, new FreeOntologyClasses(this));
 	}
 }

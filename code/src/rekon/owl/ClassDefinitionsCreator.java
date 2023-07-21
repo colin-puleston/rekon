@@ -61,14 +61,14 @@ class ClassDefinitionsCreator {
 
 			for (Pattern defn : patternDefns) {
 
-				matchStructures.addPatternNodeDefinition(c, defn);
+				matchStructures.addDefinitionPattern(c, defn);
 			}
 
 			for (List<Pattern> disjuncts : disjunctionDefns) {
 
-				List<NodeName> nodeDjs = resolveGCIDisjunctsToNodes(disjuncts);
+				List<NodeName> nodeDjs = resolveGCIDisjunctionToNodes(disjuncts);
 
-				matchStructures.addDisjunctionNode(c, nodeDjs);
+				matchStructures.addDisjunction(c, nodeDjs);
 			}
 
 			return true;
@@ -80,7 +80,7 @@ class ClassDefinitionsCreator {
 
 		private boolean absorbEquiv(OWLClassExpression equiv) {
 
-			List<Pattern> djs = matchComponents.toPatternDisjuncts(equiv);
+			List<Pattern> djs = matchComponents.toPatternDisjunction(equiv);
 
 			if (djs == null) {
 
@@ -168,7 +168,7 @@ class ClassDefinitionsCreator {
 
 		private boolean create() {
 
-			List<Pattern> subDjs = matchComponents.toPatternDisjuncts(sub);
+			List<Pattern> subDjs = matchComponents.toPatternDisjunction(sub);
 
 			if (subDjs != null) {
 
@@ -176,7 +176,7 @@ class ClassDefinitionsCreator {
 
 				if (supCls != null) {
 
-					for (NodeName subCls : resolveGCIDisjunctsToNodes(subDjs)) {
+					for (NodeName subCls : resolveGCIDisjunctionToNodes(subDjs)) {
 
 						subCls.addSubsumer(supCls);
 					}
@@ -236,7 +236,7 @@ class ClassDefinitionsCreator {
 		logger.logSeparatorLine();
 	}
 
-	private List<NodeName> resolveGCIDisjunctsToNodes(List<Pattern> disjuncts) {
+	private List<NodeName> resolveGCIDisjunctionToNodes(List<Pattern> disjuncts) {
 
 		List<NodeName> nodeDjs = new ArrayList<NodeName>();
 
@@ -259,7 +259,7 @@ class ClassDefinitionsCreator {
 
 		ClassName c = matchStructures.addGCIImpliedClass();
 
-		matchStructures.addPatternNodeDefinition(c, defn);
+		matchStructures.addDefinitionPattern(c, defn);
 
 		return c;
 	}

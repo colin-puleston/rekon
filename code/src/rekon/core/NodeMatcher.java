@@ -24,14 +24,22 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-abstract class MatchableNodeVisitor {
+abstract class NodeMatcher {
 
-	abstract void visit(PatternNode node);
+	private NodeName node;
 
-	abstract void visit(DisjunctionNode node);
+	NodeMatcher(NodeName node) {
+
+		this.node = node;
+	}
+
+	NodeName getNode() {
+
+		return node;
+	}
+
+	abstract void acceptVisitor(NodeMatcherVisitor visitor);
 }
