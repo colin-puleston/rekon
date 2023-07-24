@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class InstanceNode extends NodeName {
+public class InstanceNode extends GNode {
 
 	private Instance instance;
 
@@ -125,7 +125,7 @@ public class InstanceNode extends NodeName {
 			}
 		}
 
-		private void findFrom(NodeName n) {
+		private void findFrom(GNode n) {
 
 			if (n instanceof InstanceNode) {
 
@@ -150,7 +150,7 @@ public class InstanceNode extends NodeName {
 
 				for (Name d : dj.getDisjuncts().getNames()) {
 
-					findFrom((NodeName)d);
+					findFrom((GNode)d);
 				}
 			}
 		}

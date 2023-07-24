@@ -36,7 +36,7 @@ abstract class PatternMatcher extends NodeMatcher {
 		return getClass().getSimpleName() + "(" + getNode().getLabel() + ")";
 	}
 
-	PatternMatcher(NodeName node, Pattern pattern) {
+	PatternMatcher(GNode node, Pattern pattern) {
 
 		super(node);
 

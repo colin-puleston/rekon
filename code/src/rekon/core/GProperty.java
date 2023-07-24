@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class PropertyName extends Name {
+public abstract class GProperty extends Name {
 
 	boolean classifyTargetPatternProperty() {
 

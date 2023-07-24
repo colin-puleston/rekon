@@ -50,7 +50,7 @@ class DynamicPattern extends LocalPattern {
 		return new DynamicClasses();
 	}
 
-	NodeName ensurePatternNode(MatchStructures matchStructures) {
+	GNode ensurePatternNode(MatchStructures matchStructures) {
 
 		return matchStructures.addPatternClass();
 	}

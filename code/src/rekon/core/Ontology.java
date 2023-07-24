@@ -32,7 +32,7 @@ import java.util.*;
 public class Ontology {
 
 	private List<Name> allNames = new ArrayList<Name>();
-	private List<NodeName> nodeNames = new ArrayList<NodeName>();
+	private List<GNode> nodeNames = new ArrayList<GNode>();
 
 	private PatternSubsumers patternSubsumers;
 	private PatternSubsumeds patternSubsumeds;

@@ -38,7 +38,7 @@ class DisjunctionMatcher extends NodeMatcher {
 		return getClass().getSimpleName() + "(" + getDisjunctLabelsList() + ")";
 	}
 
-	DisjunctionMatcher(NodeName node, Collection<? extends NodeName> disjuncts) {
+	DisjunctionMatcher(GNode node, Collection<? extends GNode> disjuncts) {
 
 		super(node);
 
@@ -70,7 +70,7 @@ class DisjunctionMatcher extends NodeMatcher {
 		return disjuncts;
 	}
 
-	boolean subsumesNode(NodeName n) {
+	boolean subsumesNode(GNode n) {
 
 		for (Name d : disjuncts.getNames()) {
 
@@ -87,7 +87,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		for (Name d : other.disjuncts.getNames()) {
 
-			if (!subsumesNode((NodeName)d)) {
+			if (!subsumesNode((GNode)d)) {
 
 				return false;
 			}
@@ -100,7 +100,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (((NodeName)d).classifyTargetDisjunct(initialPass)) {
+			if (((GNode)d).classifyTargetDisjunct(initialPass)) {
 
 				return true;
 			}

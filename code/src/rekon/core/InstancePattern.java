@@ -64,7 +64,7 @@ class InstancePattern extends LocalPattern {
 		return new InstanceClasses();
 	}
 
-	NodeName ensurePatternNode(MatchStructures matchStructures) {
+	GNode ensurePatternNode(MatchStructures matchStructures) {
 
 		return patternInstance;
 	}

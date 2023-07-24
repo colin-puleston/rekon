@@ -90,7 +90,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		Names getAllLinked(Name n) {
 
-			return n.getSubs(NodeName.class, false);
+			return n.getSubs(GNode.class, false);
 		}
 
 		private Names filter(Names inferreds) {
@@ -138,7 +138,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		if (pattern != null) {
 
-			NodeName n = pattern.toSingleName();
+			GNode n = pattern.toSingleName();
 
 			if (n != null) {
 

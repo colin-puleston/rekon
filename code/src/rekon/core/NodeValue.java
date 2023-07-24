@@ -31,9 +31,9 @@ import java.util.*;
  */
 public class NodeValue extends Value {
 
-	private NodeName node;
+	private GNode node;
 
-	public NodeValue(NodeName node) {
+	public NodeValue(GNode node) {
 
 		this.node = node;
 	}
@@ -43,7 +43,7 @@ public class NodeValue extends Value {
 		return this;
 	}
 
-	NodeName getValueNode() {
+	GNode getValueNode() {
 
 		return node;
 	}

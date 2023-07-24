@@ -63,7 +63,7 @@ public class Pattern extends Expression {
 
 				for (Name n : nodes.getNames()) {
 
-					collectFromSubsumers((NodeName)n);
+					collectFromSubsumers((GNode)n);
 				}
 			}
 
@@ -103,7 +103,7 @@ public class Pattern extends Expression {
 		}
 	}
 
-	public Pattern(NodeName node) {
+	public Pattern(GNode node) {
 
 		nodes.add(node);
 	}
@@ -113,14 +113,14 @@ public class Pattern extends Expression {
 		this.nodes.addAll(nodes);
 	}
 
-	public Pattern(NodeName node, Relation relation) {
+	public Pattern(GNode node, Relation relation) {
 
 		this(node);
 
 		relations.add(relation);
 	}
 
-	public Pattern(NodeName node, Collection<Relation> relations) {
+	public Pattern(GNode node, Collection<Relation> relations) {
 
 		this(node);
 
@@ -134,11 +134,11 @@ public class Pattern extends Expression {
 		this.relations.addAll(relations);
 	}
 
-	public NodeName toSingleName() {
+	public GNode toSingleName() {
 
 		if (nodes.size() == 1 && relations.isEmpty()) {
 
-			return (NodeName)nodes.getFirstName();
+			return (GNode)nodes.getFirstName();
 		}
 
 		return null;
@@ -258,7 +258,7 @@ public class Pattern extends Expression {
 
 		for (Name n : nodes.getNames()) {
 
-			if (((NodeName)n).classifyTargetPatternRoot(initialPass)) {
+			if (((GNode)n).classifyTargetPatternRoot(initialPass)) {
 
 				return true;
 			}
@@ -270,7 +270,7 @@ public class Pattern extends Expression {
 
 				for (Name tn : r.getTargetNodes().getNames()) {
 
-					if (((NodeName)tn).classifyTargetPatternValue(initialPass)) {
+					if (((GNode)tn).classifyTargetPatternValue(initialPass)) {
 
 						return true;
 					}

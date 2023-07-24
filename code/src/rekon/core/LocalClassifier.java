@@ -84,7 +84,7 @@ class LocalClassifier {
 
 		private boolean checkReclassifiable(NodeMatcher candidate) {
 
-			NodeName n = candidate.getNode();
+			GNode n = candidate.getNode();
 
 			if (n.getNodeClassifier().absorbNewInferredSubsumers()) {
 

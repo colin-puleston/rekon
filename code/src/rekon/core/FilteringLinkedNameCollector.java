@@ -38,7 +38,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 	private class LinkedRankCollector extends RankCollector {
 
-		void collectForValueNode(NodeName n) {
+		void collectForValueNode(GNode n) {
 
 			if (definition()) {
 
@@ -60,7 +60,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			return rank != stopRank - 1;
 		}
 
-		private void collectForDefinitionNode(NodeName n) {
+		private void collectForDefinitionNode(GNode n) {
 
 			if (n.local()) {
 
@@ -75,7 +75,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			}
 		}
 
-		private void collectForSignatureNode(NodeName n) {
+		private void collectForSignatureNode(GNode n) {
 
 			collectName(n);
 
@@ -94,7 +94,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 					for (Name d : dj.getDisjuncts().getNames()) {
 
-						collectForSignatureNode((NodeName)d);
+						collectForSignatureNode((GNode)d);
 					}
 				}
 			}

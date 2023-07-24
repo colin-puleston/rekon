@@ -41,23 +41,23 @@ class PatternSubsumers {
 
 			for (Name s : subsumeds.getNames()) {
 
-				findAllFrom((NodeName)s, potentials);
+				findAllFrom((GNode)s, potentials);
 			}
 
 			return potentials;
 		}
 
-		private void findAllFrom(NodeName n, Set<NodeMatcher> potentials) {
+		private void findAllFrom(GNode n, Set<NodeMatcher> potentials) {
 
 			findFrom(n, potentials);
 
 			for (Name ss : n.getSubs(ClassNode.class, false).getNames()) {
 
-				findFrom((NodeName)ss, potentials);
+				findFrom((GNode)ss, potentials);
 			}
 		}
 
-		private void findFrom(NodeName n, Set<NodeMatcher> potentials) {
+		private void findFrom(GNode n, Set<NodeMatcher> potentials) {
 
 			for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
 
@@ -65,9 +65,9 @@ class PatternSubsumers {
 
 					for (Name dn : getDefinitionMatchNames(d).getNames()) {
 
-						if (dn instanceof NodeName) {
+						if (dn instanceof GNode) {
 
-							findFrom((NodeName)dn, potentials);
+							findFrom((GNode)dn, potentials);
 						}
 					}
 				}

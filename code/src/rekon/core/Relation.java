@@ -31,16 +31,16 @@ import java.util.*;
  */
 public abstract class Relation extends Expression {
 
-	private PropertyName property;
+	private GProperty property;
 	private Value target;
 
-	Relation(PropertyName property, Value target) {
+	Relation(GProperty property, Value target) {
 
 		this.property = property;
 		this.target = target;
 	}
 
-	PropertyName getProperty() {
+	GProperty getProperty() {
 
 		return property;
 	}

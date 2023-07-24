@@ -29,7 +29,7 @@ package rekon.core;
  */
 abstract class LocalPattern {
 
-	private NodeName patternNode;
+	private GNode patternNode;
 	private Pattern pattern;
 	private OrderedProfileMatchers profileMatchers = new OrderedProfileMatchers();
 
@@ -61,7 +61,7 @@ abstract class LocalPattern {
 		processAllLocalNamesPostAdditions();
 	}
 
-	NodeName getPatternNode() {
+	GNode getPatternNode() {
 
 		return patternNode;
 	}
@@ -78,7 +78,7 @@ abstract class LocalPattern {
 
 	abstract LocalClasses createLocalClasses();
 
-	abstract NodeName ensurePatternNode(MatchStructures matchStructures);
+	abstract GNode ensurePatternNode(MatchStructures matchStructures);
 
 	private MatchStructures createMatchStructures() {
 

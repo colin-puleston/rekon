@@ -29,13 +29,13 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class NodeName extends Name {
+public abstract class GNode extends Name {
 
 	static private final List<NodeMatcher> NO_MATCHERS = Collections.emptyList();
 
 	static private class ProfilePatternMatcher extends PatternMatcher {
 
-		ProfilePatternMatcher(NodeName node, Pattern pattern) {
+		ProfilePatternMatcher(GNode node, Pattern pattern) {
 
 			super(node, pattern);
 		}
@@ -43,7 +43,7 @@ public abstract class NodeName extends Name {
 
 	static private class DefinitionPatternMatcher extends PatternMatcher {
 
-		DefinitionPatternMatcher(NodeName node, Pattern pattern) {
+		DefinitionPatternMatcher(GNode node, Pattern pattern) {
 
 			super(node, pattern);
 		}
@@ -71,7 +71,7 @@ public abstract class NodeName extends Name {
 		return addMatcher(new DefinitionPatternMatcher(this, pattern));
 	}
 
-	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends NodeName> disjuncts) {
+	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends GNode> disjuncts) {
 
 		return addMatcher(new DisjunctionMatcher(this, disjuncts));
 	}
@@ -105,9 +105,9 @@ public abstract class NodeName extends Name {
 			return true;
 		}
 
-		if (name instanceof NodeName) {
+		if (name instanceof GNode) {
 
-			return local() ? subsumesViaMatcher((NodeName)name) : super.subsumes(name);
+			return local() ? subsumesViaMatcher((GNode)name) : super.subsumes(name);
 		}
 
 		return false;
@@ -174,12 +174,12 @@ public abstract class NodeName extends Name {
 		return selecteds;
 	}
 
-	private boolean subsumesViaMatcher(NodeName node) {
+	private boolean subsumesViaMatcher(GNode node) {
 
 		return subsumesViaPattern(node) || subsumesViaDisjunction(node);
 	}
 
-	private boolean subsumesViaPattern(NodeName node) {
+	private boolean subsumesViaPattern(GNode node) {
 
 		PatternMatcher p = node.getProfilePatternMatcher();
 
@@ -197,7 +197,7 @@ public abstract class NodeName extends Name {
 		return false;
 	}
 
-	private boolean subsumesViaDisjunction(NodeName node) {
+	private boolean subsumesViaDisjunction(GNode node) {
 
 		for (DisjunctionMatcher d : getDisjunctionMatchers()) {
 

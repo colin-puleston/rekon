@@ -32,7 +32,7 @@ import java.util.*;
 class OntologyClassifier {
 
 	private List<Name> allNames;
-	private List<NodeName> nodeNames;
+	private List<GNode> nodeNames;
 
 	private NodeMatchers nodeMatchers;
 
@@ -201,7 +201,7 @@ class OntologyClassifier {
 
 	OntologyClassifier(
 		List<Name> allNames,
-		List<NodeName> nodeNames,
+		List<GNode> nodeNames,
 		NodeMatchers nodeMatchers) {
 
 		this.allNames = allNames;

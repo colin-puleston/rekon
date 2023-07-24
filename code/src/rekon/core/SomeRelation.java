@@ -60,7 +60,7 @@ public class SomeRelation extends NodeRelation {
 				}
 			}
 
-			private void collectFromTarget(NodeName target) {
+			private void collectFromTarget(GNode target) {
 
 				for (Relation r : getAllFromTarget(target)) {
 
@@ -88,7 +88,7 @@ public class SomeRelation extends NodeRelation {
 				}
 			}
 
-			private Set<Relation> getAllFromTarget(NodeName target) {
+			private Set<Relation> getAllFromTarget(GNode target) {
 
 				SignatureRelationCollector c = new SignatureRelationCollector(visitMonitor);
 

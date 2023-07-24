@@ -38,7 +38,7 @@ class MatchComponents {
 	private MappedNames mappedNames;
 	private MatchStructures matchStructures;
 
-	private NodeName rootNode;
+	private GNode rootNode;
 
 	private Patterns patterns = new Patterns();
 	private Disjunctions disjunctions = new Disjunctions();
@@ -173,11 +173,11 @@ class MatchComponents {
 
 		NodeValue checkCreate(OWLObjectUnionOf source) {
 
-			Set<NodeName> disjuncts = new HashSet<NodeName>();
+			Set<GNode> disjuncts = new HashSet<GNode>();
 
 			for (OWLClassExpression op : source.getOperands()) {
 
-				Set<? extends NodeName> djs = valueToNodeDisjunction(op);
+				Set<? extends GNode> djs = valueToNodeDisjunction(op);
 
 				if (djs == null) {
 
@@ -249,7 +249,7 @@ class MatchComponents {
 				return disjunctions.get((OWLObjectUnionOf)filler);
 			}
 
-			Set<? extends NodeName> djs = valueToNodeDisjunction(filler);
+			Set<? extends GNode> djs = valueToNodeDisjunction(filler);
 
 			return djs != null ? createNodeValue(djs) : null;
 		}
@@ -596,19 +596,19 @@ class MatchComponents {
 		return DataTypes.toDataValueExpression(source.getFiller());
 	}
 
-	private Set<? extends NodeName> valueToNodeDisjunction(OWLClassExpression v) {
+	private Set<? extends GNode> valueToNodeDisjunction(OWLClassExpression v) {
 
 		if (v instanceof OWLObjectOneOf) {
 
 			return valueToIndividualDisjunction((OWLObjectOneOf)v);
 		}
 
-		NodeName n = valueToNode(v);
+		GNode n = valueToNode(v);
 
 		return n != null ? Collections.singleton(n) : null;
 	}
 
-	private NodeName valueToNode(OWLClassExpression v) {
+	private GNode valueToNode(OWLClassExpression v) {
 
 		if (v instanceof RekonOWLInstanceRef) {
 
@@ -666,12 +666,12 @@ class MatchComponents {
 		return disjuncts;
 	}
 
-	private NodeValue createNodeValue(Collection<? extends NodeName> disjuncts) {
+	private NodeValue createNodeValue(Collection<? extends GNode> disjuncts) {
 
 		return new NodeValue(resolveValueNode(disjuncts));
 	}
 
-	private NodeName resolveValueNode(Collection<? extends NodeName> disjuncts) {
+	private GNode resolveValueNode(Collection<? extends GNode> disjuncts) {
 
 		if (disjuncts.size() == 1) {
 

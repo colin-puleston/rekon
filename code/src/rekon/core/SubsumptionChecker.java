@@ -34,7 +34,7 @@ class SubsumptionChecker {
 
 	private abstract class NodeMatcherChecker<C> {
 
-		boolean check(NodeName dn, C defn, NodeName cn, C candidate) {
+		boolean check(GNode dn, C defn, GNode cn, C candidate) {
 
 			if (defn != candidate) {
 
@@ -51,7 +51,7 @@ class SubsumptionChecker {
 
 		abstract boolean subsumption(C defn, C candidate);
 
-		private void addSubsumption(NodeName subsumer, NodeName subsumed) {
+		private void addSubsumption(GNode subsumer, GNode subsumed) {
 
 			subsumed.getNodeClassifier().addNewInferredSubsumer(subsumer);
 		}
@@ -59,7 +59,7 @@ class SubsumptionChecker {
 
 	private class PatternChecker extends NodeMatcherChecker<Pattern> {
 
-		boolean check(NodeName dn, Pattern defn, PatternMatcher candidate) {
+		boolean check(GNode dn, Pattern defn, PatternMatcher candidate) {
 
 			return check(dn, defn, candidate.getNode(), candidate.getPattern());
 		}

@@ -37,14 +37,14 @@ abstract class NodeSelector {
 	static final NodeSelector CLASSIFY_TARGET_PATTERN_VALUE = new ClassifyTargetPatternValue();
 	static final NodeSelector CLASSIFY_TARGET_DISJUNCT = new ClassifyTargetDisjunct();
 
-	static NodeSelector structureFor(PropertyName property) {
+	static NodeSelector structureFor(GProperty property) {
 
 		return new StructureFor(property);
 	}
 
 	static private class Any extends NodeSelector {
 
-		boolean select(NodeName node) {
+		boolean select(GNode node) {
 
 			return true;
 		}
@@ -61,7 +61,7 @@ abstract class NodeSelector {
 
 			for (Name n : nodes.getNames()) {
 
-				if (select((NodeName)n)) {
+				if (select((GNode)n)) {
 
 					return true;
 				}
@@ -73,7 +73,7 @@ abstract class NodeSelector {
 
 	static abstract private class StructuredNodeSelector extends SelectiveNodeSelector {
 
-		boolean select(NodeName node) {
+		boolean select(GNode node) {
 
 			PatternMatcher p = node.getProfilePatternMatcher();
 
@@ -93,9 +93,9 @@ abstract class NodeSelector {
 
 	static private class StructureFor extends StructuredNodeSelector {
 
-		private PropertyName property;
+		private GProperty property;
 
-		StructureFor(PropertyName property) {
+		StructureFor(GProperty property) {
 
 			this.property = property;
 		}
@@ -116,7 +116,7 @@ abstract class NodeSelector {
 
 	static private abstract class ClassifyTargetPattern extends Structured {
 
-		boolean select(NodeName node) {
+		boolean select(GNode node) {
 
 			return node.definitionRefed(getMatchRole()) || super.select(node);
 		}
@@ -162,13 +162,13 @@ abstract class NodeSelector {
 
 	static private class ClassifyTargetDisjunct extends SelectiveNodeSelector {
 
-		boolean select(NodeName node) {
+		boolean select(GNode node) {
 
 			return node.definitionRefed(MatchRole.DISJUNCT);
 		}
 	}
 
-	abstract boolean select(NodeName node);
+	abstract boolean select(GNode node);
 
 	abstract boolean anyMatches(Names nodes);
 }

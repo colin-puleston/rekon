@@ -41,7 +41,7 @@ class SignatureRelationCollector {
 		collected = getInitialCollected();
 	}
 
-	Set<Relation> collectFromName(NodeName node) {
+	Set<Relation> collectFromName(GNode node) {
 
 		if (collectFromRelations(node)) {
 
@@ -51,11 +51,11 @@ class SignatureRelationCollector {
 		return collected;
 	}
 
-	void collectFromSubsumers(NodeName node) {
+	void collectFromSubsumers(GNode node) {
 
 		for (Name n : node.getSubsumers().getNames()) {
 
-			collectFromRelations((NodeName)n);
+			collectFromRelations((GNode)n);
 		}
 	}
 
@@ -85,7 +85,7 @@ class SignatureRelationCollector {
 		return collected;
 	}
 
-	private boolean collectFromRelations(NodeName node) {
+	private boolean collectFromRelations(GNode node) {
 
 		if (visitMonitor.startVisit(node)) {
 
