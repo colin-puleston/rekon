@@ -41,19 +41,19 @@ class SignatureRelationCollector {
 		collected = getInitialCollected();
 	}
 
-	Set<Relation> collectFromName(NodeName name) {
+	Set<Relation> collectFromName(NodeName node) {
 
-		if (collectFromRelations(name)) {
+		if (collectFromRelations(node)) {
 
-			collectFromSubsumers(name);
+			collectFromSubsumers(node);
 		}
 
 		return collected;
 	}
 
-	void collectFromSubsumers(NodeName name) {
+	void collectFromSubsumers(NodeName node) {
 
-		for (Name n : name.getSubsumers().getNames()) {
+		for (Name n : node.getSubsumers().getNames()) {
 
 			collectFromRelations((NodeName)n);
 		}
@@ -85,11 +85,11 @@ class SignatureRelationCollector {
 		return collected;
 	}
 
-	private boolean collectFromRelations(NodeName name) {
+	private boolean collectFromRelations(NodeName node) {
 
-		if (visitMonitor.startVisit(name)) {
+		if (visitMonitor.startVisit(node)) {
 
-			PatternMatcher pp = name.getProfilePatternMatcher();
+			PatternMatcher pp = node.getProfilePatternMatcher();
 
 			if (pp != null) {
 

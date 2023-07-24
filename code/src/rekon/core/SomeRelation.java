@@ -163,7 +163,7 @@ public class SomeRelation extends NodeRelation {
 		}
 	}
 
-	public SomeRelation(NodePropertyName property, NodeValue target) {
+	public SomeRelation(NodeProperty property, NodeValue target) {
 
 		super(property, target);
 	}
@@ -180,7 +180,7 @@ public class SomeRelation extends NodeRelation {
 
 	boolean potentialNewSignatureRelations() {
 
-		NodePropertyName prop = getNodeProperty();
+		NodeProperty prop = getNodeProperty();
 
 		if (prop.anyChains()) {
 

@@ -24,68 +24,8 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public abstract class NodePropertyName extends PropertyName {
-
-	private Set<NodePropertyName> inverses = new HashSet<NodePropertyName>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
-
-	public void setSymmetric() {
-
-		inverses.add(this);
-	}
-
-	public void addInverses(Collection<NodePropertyName> invs) {
-
-		inverses.addAll(invs);
-
-		for (NodePropertyName inv : invs) {
-
-			inv.inverses.add(this);
-		}
-	}
-
-	public void addChain(PropertyChain chain) {
-
-		chains.add(chain);
-	}
-
-	Collection<NodePropertyName> getInverses() {
-
-		return inverses;
-	}
-
-	boolean anyChains() {
-
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers().getNames()) {
-
-			if (!((NodePropertyName)s).chains.isEmpty()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	Collection<PropertyChain> getAllChains() {
-
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
-
-		for (Name s : getSubsumers().getNames()) {
-
-			allChains.addAll(((NodePropertyName)s).chains);
-		}
-
-		return allChains;
-	}
+public abstract class DataProperty extends PropertyName {
 }

@@ -249,12 +249,12 @@ class OntologyClassifier {
 
 	private void expandAllNewInferences() {
 
-		NodeNameClassifier.expandAllNewInferredSubsumers(nodeNames);
+		NodeClassifier.expandAllNewInferredSubsumers(nodeNames);
 	}
 
 	private void absorbAllNewInferences() {
 
-		NodeNameClassifier.absorbAllNewInferredSubsumers(nodeNames);
+		NodeClassifier.absorbAllNewInferredSubsumers(nodeNames);
 	}
 
 	private void resetPotentiallyUpdatedSignatureRefs() {

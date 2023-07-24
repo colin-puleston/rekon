@@ -128,14 +128,14 @@ public abstract class NodeName extends Name {
 		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_DISJUNCT);
 	}
 
-	NodeNameClassifier getNodeClassifier() {
+	NodeClassifier getNodeClassifier() {
 
-		return (NodeNameClassifier)getClassifier();
+		return (NodeClassifier)getClassifier();
 	}
 
 	NameClassifier createClassifier() {
 
-		return new NodeNameClassifier(this);
+		return new NodeClassifier(this);
 	}
 
 	private <M extends NodeMatcher>M addMatcher(M matcher) {
@@ -174,14 +174,14 @@ public abstract class NodeName extends Name {
 		return selecteds;
 	}
 
-	private boolean subsumesViaMatcher(NodeName name) {
+	private boolean subsumesViaMatcher(NodeName node) {
 
-		return subsumesViaPattern(name) || subsumesViaDisjunction(name);
+		return subsumesViaPattern(node) || subsumesViaDisjunction(node);
 	}
 
-	private boolean subsumesViaPattern(NodeName name) {
+	private boolean subsumesViaPattern(NodeName node) {
 
-		PatternMatcher p = name.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfilePatternMatcher();
 
 		if (p != null) {
 
@@ -197,16 +197,16 @@ public abstract class NodeName extends Name {
 		return false;
 	}
 
-	private boolean subsumesViaDisjunction(NodeName name) {
+	private boolean subsumesViaDisjunction(NodeName node) {
 
 		for (DisjunctionMatcher d : getDisjunctionMatchers()) {
 
-			if (d.subsumesNode(name)) {
+			if (d.subsumesNode(node)) {
 
 				return true;
 			}
 
-			for (DisjunctionMatcher p : name.getDisjunctionMatchers()) {
+			for (DisjunctionMatcher p : node.getDisjunctionMatchers()) {
 
 				if (d.subsumesDisjunction(p)) {
 

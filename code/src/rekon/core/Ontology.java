@@ -39,12 +39,12 @@ public class Ontology {
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		nodeNames.addAll(names.getClassNames());
-		nodeNames.addAll(names.getIndividualNames());
+		nodeNames.addAll(names.getClassNodes());
+		nodeNames.addAll(names.getIndividualNodes());
 
 		allNames.addAll(nodeNames);
-		allNames.addAll(names.getNodePropertyNames());
-		allNames.addAll(names.getDataPropertyNames());
+		allNames.addAll(names.getNodeProperties());
+		allNames.addAll(names.getDataProperties());
 
 		NodeMatchers nodeMatchers = createStructure(structureBuilder);
 
@@ -66,7 +66,7 @@ public class Ontology {
 		return new InstanceOps(this);
 	}
 
-	void addFreeClass(FreeClassName cn) {
+	void addFreeClass(FreeClassNode cn) {
 
 		allNames.add(cn);
 		nodeNames.add(cn);

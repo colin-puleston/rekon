@@ -74,7 +74,7 @@ class PatternSubsumeds {
 
 		boolean requiredCandidate(Name n) {
 
-			if (n instanceof ClassName) {
+			if (n instanceof ClassNode) {
 
 				return filterNames == null || filterNames.contains(n);
 			}
@@ -91,14 +91,14 @@ class PatternSubsumeds {
 		allNodeSubsumptions = new NodeSubsumptions();
 	}
 
-	void checkAddInstanceOption(InstanceName name) {
+	void checkAddInstanceOption(InstanceNode node) {
 
-		potentials.checkAddInstanceOption(name);
+		potentials.checkAddInstanceOption(node);
 	}
 
-	void checkRemoveInstanceOption(InstanceName name) {
+	void checkRemoveInstanceOption(InstanceNode node) {
 
-		potentials.checkRemoveInstanceOption(name);
+		potentials.checkRemoveInstanceOption(node);
 	}
 
 	NameSet inferSubsumedClasses(Pattern pattern) {

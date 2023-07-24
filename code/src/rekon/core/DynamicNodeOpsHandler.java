@@ -31,22 +31,22 @@ import java.util.*;
  */
 class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
-	private NodeName name;
+	private NodeName node;
 
 	 private abstract class PatternCollector {
 
 		Collection<Pattern> getAll() {
 
-			if (name == null) {
+			if (node == null) {
 
 				return Collections.emptyList();
 			}
 
 			List<Pattern> patterns = new ArrayList<Pattern>();
 
-			checkAddPattern(patterns, name);
+			checkAddPattern(patterns, node);
 
-			for (Name en : name.getEquivalents().getNames()) {
+			for (Name en : node.getEquivalents().getNames()) {
 
 				checkAddPattern(patterns, (NodeName)en);
 			}
@@ -83,46 +83,46 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	public Names getEquivalents() {
 
-		if (name == null) {
+		if (node == null) {
 
 			return Names.NO_NAMES;
 		}
 
-		NameList equivs = new NameList(name);
+		NameList equivs = new NameList(node);
 
-		equivs.addAll(name.getEquivalents());
+		equivs.addAll(node.getEquivalents());
 
 		return equivs;
 	}
 
 	public Names getSupers(boolean direct) {
 
-		return name != null ? name.getSupers(direct) : Names.NO_NAMES;
+		return node != null ? node.getSupers(direct) : Names.NO_NAMES;
 	}
 
 	public Names getSubs(boolean direct) {
 
-		return getSubs(ClassName.class, direct);
+		return getSubs(ClassNode.class, direct);
 	}
 
 	public Names getIndividuals(boolean direct) {
 
-		return getSubs(IndividualName.class, direct);
+		return getSubs(IndividualNode.class, direct);
 	}
 
 	public boolean subsumes(DynamicOpsHandler other) {
 
 		if (other instanceof DynamicNodeOpsHandler) {
 
-			return name.subsumes(((DynamicNodeOpsHandler)other).name);
+			return node.subsumes(((DynamicNodeOpsHandler)other).node);
 		}
 
 		return super.subsumes(other);
 	}
 
-	DynamicNodeOpsHandler(NodeName name) {
+	DynamicNodeOpsHandler(NodeName node) {
 
-		this.name = name;
+		this.node = node;
 	}
 
 	Collection<Pattern> getProfiles() {
@@ -137,6 +137,6 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	private Names getSubs(Class<? extends NodeName> type, boolean direct) {
 
-		return name != null ? name.getSubs(type, direct) : Names.NO_NAMES;
+		return node != null ? node.getSubs(type, direct) : Names.NO_NAMES;
 	}
 }

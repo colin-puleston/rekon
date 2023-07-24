@@ -31,12 +31,12 @@ class DynamicPattern extends LocalPattern {
 
 	private class DynamicClasses extends LocalClasses {
 
-		private class DynamicPatternClassName extends LocalPatternClassName {
+		private class DynamicPatternClassNode extends LocalPatternClassNode {
 		}
 
-		ClassName createPatternClass() {
+		ClassNode createPatternClass() {
 
-			return new DynamicPatternClassName();
+			return new DynamicPatternClassNode();
 		}
 	}
 

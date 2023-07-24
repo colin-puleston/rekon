@@ -37,10 +37,8 @@ import rekon.core.*;
  */
 class EquivalentsGrouper {
 
-	final Node<OWLClass> owlThingAsEquivGroup;
-	final Node<OWLClass> owlNothingAsEquivGroup;
-
-	final NodeSet<OWLClass> emptyEquivClassGroups = new OWLClassNodeSet();
+	private Node<OWLClass> owlThingAsEquivGroup;
+	private Node<OWLClass> owlNothingAsEquivGroup;
 
 	private ClassesGrouper classesGrouper = new ClassesGrouper();
 	private SupersGrouper supersGrouper = new SupersGrouper();
@@ -235,7 +233,7 @@ class EquivalentsGrouper {
 
 		Names getLinked(Name name, boolean direct) {
 
-			return name.getSubs(ClassName.class, direct);
+			return name.getSubs(ClassNode.class, direct);
 		}
 	}
 
@@ -257,10 +255,10 @@ class EquivalentsGrouper {
 		}
 	}
 
-	EquivalentsGrouper(OWLDataFactory factory) {
+	EquivalentsGrouper(OWLClass owlThing, OWLClass owlNothing) {
 
-		owlThingAsEquivGroup = new OWLClassNode(factory.getOWLThing());
-		owlNothingAsEquivGroup = new OWLClassNode(factory.getOWLNothing());
+		owlThingAsEquivGroup = new OWLClassNode(owlThing);
+		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
 	}
 
 	Node<OWLClass> equivsToGroup(Names equivs, OWLClassExpression sourceExpr) {

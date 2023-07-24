@@ -38,7 +38,7 @@ class MatchComponents {
 	private MappedNames mappedNames;
 	private MatchStructures matchStructures;
 
-	private NodeName rootNodeName;
+	private NodeName rootNode;
 
 	private Patterns patterns = new Patterns();
 	private Disjunctions disjunctions = new Disjunctions();
@@ -52,7 +52,7 @@ class MatchComponents {
 
 	private DataTypes dataTypes;
 
-	private Map<OWLClassExpression, ClassName> patternClasses = new HashMap<OWLClassExpression, ClassName>();
+	private Map<OWLClassExpression, ClassNode> patternClasses = new HashMap<OWLClassExpression, ClassNode>();
 
 	private boolean dynamic;
 
@@ -155,7 +155,7 @@ class MatchComponents {
 
 			if (names.isEmpty()) {
 
-				names.add(rootNodeName);
+				names.add(rootNode);
 			}
 
 			return new Pattern(names, rels);
@@ -165,7 +165,7 @@ class MatchComponents {
 
 			Relation r = toRelation(source);
 
-			return r != null ? new Pattern(rootNodeName, r) : null;
+			return r != null ? new Pattern(rootNode, r) : null;
 		}
 	}
 
@@ -210,7 +210,7 @@ class MatchComponents {
 
 			if (propExpr instanceof OWLObjectProperty) {
 
-				NodePropertyName prop = mappedNames.get((OWLObjectProperty)propExpr);
+				NodeProperty prop = mappedNames.get((OWLObjectProperty)propExpr);
 				OWLClassExpression filler = source.getFiller();
 
 				if (complement) {
@@ -224,7 +224,7 @@ class MatchComponents {
 			return null;
 		}
 
-		Relation checkCreate(NodePropertyName prop, OWLClassExpression filler) {
+		Relation checkCreate(NodeProperty prop, OWLClassExpression filler) {
 
 			NodeValue target = toTarget(filler);
 
@@ -232,12 +232,12 @@ class MatchComponents {
 		}
 
 		abstract Relation checkCreateForComplement(
-								NodePropertyName prop,
+								NodeProperty prop,
 								OWLClassExpression filler);
 
-		abstract Relation create(NodePropertyName prop, NodeValue target);
+		abstract Relation create(NodeProperty prop, NodeValue target);
 
-		Relation createForNoValue(NodePropertyName prop) {
+		Relation createForNoValue(NodeProperty prop) {
 
 			return new AllRelation(prop, mappedNames.getAbsentClassValue());
 		}
@@ -257,12 +257,12 @@ class MatchComponents {
 
 	private class SomeRelations extends ObjectRelations<OWLObjectSomeValuesFrom> {
 
-		Relation checkCreateForComplement(NodePropertyName prop, OWLClassExpression filler) {
+		Relation checkCreateForComplement(NodeProperty prop, OWLClassExpression filler) {
 
 			return filler.isOWLThing() ? createForNoValue(prop) : null;
 		}
 
-		Relation create(NodePropertyName prop, NodeValue target) {
+		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new SomeRelation(prop, target);
 		}
@@ -270,19 +270,19 @@ class MatchComponents {
 
 	private class AllRelations extends ObjectRelations<OWLObjectAllValuesFrom> {
 
-		Relation checkCreate(NodePropertyName prop, OWLClassExpression filler) {
+		Relation checkCreate(NodeProperty prop, OWLClassExpression filler) {
 
 			return filler.isOWLNothing()
 						? createForNoValue(prop)
 						: super.checkCreate(prop, filler);
 		}
 
-		Relation checkCreateForComplement(NodePropertyName prop, OWLClassExpression filler) {
+		Relation checkCreateForComplement(NodeProperty prop, OWLClassExpression filler) {
 
 			return null;
 		}
 
-		Relation create(NodePropertyName prop, NodeValue target) {
+		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new AllRelation(prop, target);
 		}
@@ -507,7 +507,7 @@ class MatchComponents {
 		this.matchStructures = matchStructures;
 		this.dynamic = dynamic;
 
-		rootNodeName = mappedNames.getRootClassName();
+		rootNode = mappedNames.getRootClassNode();
 		dataTypes = new DataTypes(dynamic);
 	}
 
@@ -536,7 +536,7 @@ class MatchComponents {
 		return dataValueRelations.checkCreate(source);
 	}
 
-	InstanceName valueToInstanceName(RekonOWLInstanceRef v) {
+	InstanceNode valueToInstanceNode(RekonOWLInstanceRef v) {
 
 		throw new Error("Method should never be invoked!");
 	}
@@ -603,34 +603,34 @@ class MatchComponents {
 			return valueToIndividualDisjunction((OWLObjectOneOf)v);
 		}
 
-		NodeName n = valueToNodeName(v);
+		NodeName n = valueToNode(v);
 
 		return n != null ? Collections.singleton(n) : null;
 	}
 
-	private NodeName valueToNodeName(OWLClassExpression v) {
+	private NodeName valueToNode(OWLClassExpression v) {
 
 		if (v instanceof RekonOWLInstanceRef) {
 
-			return valueToInstanceName((RekonOWLInstanceRef)v);
+			return valueToInstanceNode((RekonOWLInstanceRef)v);
 		}
 
-		return valueToClassName(v);
+		return valueToClassNode(v);
 	}
 
-	private ClassName valueToClassName(OWLClassExpression v) {
+	private ClassNode valueToClassNode(OWLClassExpression v) {
 
 		if (v instanceof OWLClass) {
 
 			return mappedNames.get((OWLClass)v);
 		}
 
-		return valueToPatternClassName(v);
+		return valueToPatternClassNode(v);
 	}
 
-	private ClassName valueToPatternClassName(OWLClassExpression v) {
+	private ClassNode valueToPatternClassNode(OWLClassExpression v) {
 
-		ClassName pCls = patternClasses.get(v);
+		ClassNode pCls = patternClasses.get(v);
 
 		if (pCls == null) {
 
@@ -649,9 +649,9 @@ class MatchComponents {
 		return pCls;
 	}
 
-	private Set<IndividualName> valueToIndividualDisjunction(OWLObjectOneOf v) {
+	private Set<IndividualNode> valueToIndividualDisjunction(OWLObjectOneOf v) {
 
-		Set<IndividualName> disjuncts = new HashSet<IndividualName>();
+		Set<IndividualNode> disjuncts = new HashSet<IndividualNode>();
 
 		for (OWLIndividual i : v.getIndividuals()) {
 
@@ -678,7 +678,7 @@ class MatchComponents {
 			return disjuncts.iterator().next();
 		}
 
-		ClassName c = matchStructures.addPatternClass();
+		ClassNode c = matchStructures.addPatternClass();
 
 		matchStructures.addDisjunction(c, disjuncts);
 

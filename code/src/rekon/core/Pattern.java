@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class Pattern extends Expression {
 
-	private NameList names = new NameList();
+	private NameList nodes = new NameList();
 
 	private Set<Relation> relations = new HashSet<Relation>();
 	private Set<Relation> signatureRelations = null;
@@ -47,7 +47,7 @@ public class Pattern extends Expression {
 
 		PatternSignatureRelationCollector() {
 
-			this(new NodeVisitMonitor(names));
+			this(new NodeVisitMonitor(nodes));
 		}
 
 		PatternSignatureRelationCollector(NodeVisitMonitor visitMonitor) {
@@ -61,7 +61,7 @@ public class Pattern extends Expression {
 
 			if (signatureMode != SignatureMode.RESTRICTED) {
 
-				for (Name n : names.getNames()) {
+				for (Name n : nodes.getNames()) {
 
 					collectFromSubsumers((NodeName)n);
 				}
@@ -103,42 +103,42 @@ public class Pattern extends Expression {
 		}
 	}
 
-	public Pattern(NodeName name) {
+	public Pattern(NodeName node) {
 
-		names.add(name);
+		nodes.add(node);
 	}
 
-	public Pattern(Names names) {
+	public Pattern(Names nodes) {
 
-		this.names.addAll(names);
+		this.nodes.addAll(nodes);
 	}
 
-	public Pattern(NodeName name, Relation relation) {
+	public Pattern(NodeName node, Relation relation) {
 
-		this(name);
+		this(node);
 
 		relations.add(relation);
 	}
 
-	public Pattern(NodeName name, Collection<Relation> relations) {
+	public Pattern(NodeName node, Collection<Relation> relations) {
 
-		this(name);
+		this(node);
 
 		this.relations.addAll(relations);
 	}
 
-	public Pattern(Names names, Collection<Relation> relations) {
+	public Pattern(Names nodes, Collection<Relation> relations) {
 
-		this(names);
+		this(nodes);
 
 		this.relations.addAll(relations);
 	}
 
 	public NodeName toSingleName() {
 
-		if (names.size() == 1 && relations.isEmpty()) {
+		if (nodes.size() == 1 && relations.isEmpty()) {
 
-			return (NodeName)names.getFirstName();
+			return (NodeName)nodes.getFirstName();
 		}
 
 		return null;
@@ -169,14 +169,14 @@ public class Pattern extends Expression {
 
 	Pattern combineWith(Pattern other) {
 
-		NameSet newNames = new NameSet(names);
+		NameSet newNames = new NameSet(nodes);
 		Set<Relation> newRelations = new HashSet<Relation>(relations);
 
-		newNames.addAll(other.names);
+		newNames.addAll(other.nodes);
 		newRelations.addAll(other.relations);
 
-		purgeSubsumers(newNames, names);
-		purgeSubsumers(newNames, other.names);
+		purgeSubsumers(newNames, nodes);
+		purgeSubsumers(newNames, other.nodes);
 
 		return new Pattern(newNames, newRelations);
 	}
@@ -187,7 +187,7 @@ public class Pattern extends Expression {
 
 		newRelations.add(extraRelation);
 
-		return new Pattern(names, newRelations);
+		return new Pattern(nodes, newRelations);
 	}
 
 	Pattern extend(Collection<Relation> extraRelations) {
@@ -196,12 +196,12 @@ public class Pattern extends Expression {
 
 		newRelations.addAll(extraRelations);
 
-		return new Pattern(names, newRelations);
+		return new Pattern(nodes, newRelations);
 	}
 
-	Names getNames() {
+	Names getNodes() {
 
-		return names;
+		return nodes;
 	}
 
 	boolean nestedPattern(boolean signature) {
@@ -211,7 +211,7 @@ public class Pattern extends Expression {
 
 	void registerDefinitionRefedNames() {
 
-		registerAsDefinitionRefed(names, MatchRole.PATTERN_ROOT);
+		registerAsDefinitionRefed(nodes, MatchRole.PATTERN_ROOT);
 
 		for (Relation r : relations) {
 
@@ -223,7 +223,7 @@ public class Pattern extends Expression {
 
 	void collectNames(NameCollector collector) {
 
-		collector.collectNames(names);
+		collector.collectNames(nodes);
 
 		if (collector.continueForNextRelationsRank()) {
 
@@ -256,7 +256,7 @@ public class Pattern extends Expression {
 
 	boolean classifiable(boolean initialPass) {
 
-		for (Name n : names.getNames()) {
+		for (Name n : nodes.getNames()) {
 
 			if (((NodeName)n).classifyTargetPatternRoot(initialPass)) {
 
@@ -283,7 +283,7 @@ public class Pattern extends Expression {
 
 	boolean potentialSignatureUpdates() {
 
-		for (Name n : names.getNames()) {
+		for (Name n : nodes.getNames()) {
 
 			if (n.anyNewSubsumers(NodeSelector.STRUCTURED)) {
 
@@ -341,7 +341,7 @@ public class Pattern extends Expression {
 
 	void render(PatternRenderer r) {
 
-		r.addLine(namesToString());
+		r.addLine(nodesToString());
 
 		r = r.nextLevel();
 
@@ -375,7 +375,7 @@ public class Pattern extends Expression {
 
 	private boolean subsumesAllNames(Pattern p) {
 
-		for (Name n : names.getNames()) {
+		for (Name n : nodes.getNames()) {
 
 			if (!subsumesAnyName(n, p)) {
 
@@ -388,7 +388,7 @@ public class Pattern extends Expression {
 
 	private boolean subsumesAnyName(Name n, Pattern p) {
 
-		for (Name pn : p.names.getNames()) {
+		for (Name pn : p.nodes.getNames()) {
 
 			if (n.subsumes(pn)) {
 
@@ -425,16 +425,16 @@ public class Pattern extends Expression {
 		return signature ? getSignatureRelations() : relations;
 	}
 
-	private String namesToString() {
+	private String nodesToString() {
 
-		if (names.size() == 1) {
+		if (nodes.size() == 1) {
 
-			return names.getFirstName().getLabel();
+			return nodes.getFirstName().getLabel();
 		}
 
 		List<String> l = new ArrayList<String>();
 
-		for (Name n : names.getNames()) {
+		for (Name n : nodes.getNames()) {
 
 			l.add(n.getLabel());
 		}

@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class InstanceName extends NodeName {
+public class InstanceNode extends NodeName {
 
 	private Instance instance;
 
@@ -67,7 +67,7 @@ public class InstanceName extends NodeName {
 
 		void processLinkFromType(NameClassification typeClassification) {
 
-			typeClassification.addTransientDirectSub(InstanceName.this);
+			typeClassification.addTransientDirectSub(InstanceNode.this);
 		}
 	}
 
@@ -85,20 +85,20 @@ public class InstanceName extends NodeName {
 
 		void processLinkFromType(NameClassification typeClassification) {
 
-			typeClassification.removeTransientDirectSub(InstanceName.this);
+			typeClassification.removeTransientDirectSub(InstanceNode.this);
 		}
 	}
 
 	private class ReferencedsFinder {
 
-		private Set<InstanceName> found = new HashSet<InstanceName>();
+		private Set<InstanceNode> found = new HashSet<InstanceNode>();
 
 		boolean anyPresent() {
 
 			return !findAll().isEmpty();
 		}
 
-		Set<InstanceName> findAll() {
+		Set<InstanceNode> findAll() {
 
 			PatternMatcher p = getProfilePatternMatcher();
 
@@ -127,17 +127,17 @@ public class InstanceName extends NodeName {
 
 		private void findFrom(NodeName n) {
 
-			if (n instanceof InstanceName) {
+			if (n instanceof InstanceNode) {
 
-				found.add((InstanceName)n);
+				found.add((InstanceNode)n);
 			}
-			else if (n instanceof FreeClassName) {
+			else if (n instanceof FreeClassNode) {
 
-				findFrom((FreeClassName)n);
+				findFrom((FreeClassNode)n);
 			}
 		}
 
-		private void findFrom(FreeClassName c) {
+		private void findFrom(FreeClassNode c) {
 
 			PatternMatcher p = c.getProfilePatternMatcher();
 
@@ -161,7 +161,7 @@ public class InstanceName extends NodeName {
 		return instance.getLabel();
 	}
 
-	InstanceName(Instance instance) {
+	InstanceNode(Instance instance) {
 
 		this.instance = instance;
 	}
@@ -192,7 +192,7 @@ public class InstanceName extends NodeName {
 		return new ReferencedsFinder().anyPresent();
 	}
 
-	Set<InstanceName> getReferenceds() {
+	Set<InstanceNode> getReferenceds() {
 
 		return new ReferencedsFinder().findAll();
 	}

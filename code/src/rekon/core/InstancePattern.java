@@ -31,11 +31,11 @@ class InstancePattern extends LocalPattern {
 
 	static private final String LOCAL_CLASS_NAMES_PREFIX_FORMAT = "%s(%s)";
 
-	private InstanceName patternInstance;
+	private InstanceNode patternInstance;
 
 	private class InstanceClasses extends LocalClasses {
 
-		private class InstancePatternClassName extends LocalPatternClassName {
+		private class InstancePatternClassNode extends LocalPatternClassNode {
 
 			String getLabelPrefix() {
 
@@ -46,13 +46,13 @@ class InstancePattern extends LocalPattern {
 			}
 		}
 
-		ClassName createPatternClass() {
+		ClassNode createPatternClass() {
 
-			return new InstancePatternClassName();
+			return new InstancePatternClassNode();
 		}
 	}
 
-	InstancePattern(InstanceName patternInstance, PatternCreator patternCreator) {
+	InstancePattern(InstanceNode patternInstance, PatternCreator patternCreator) {
 
 		this.patternInstance = patternInstance;
 

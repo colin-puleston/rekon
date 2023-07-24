@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class NodeNameClassifier extends NameClassifier {
+class NodeClassifier extends NameClassifier {
 
 	static private class NewInferredSubsumerExpander extends MultiThreadListProcessor<NodeName> {
 
@@ -252,9 +252,9 @@ class NodeNameClassifier extends NameClassifier {
 		}
 	}
 
-	NodeNameClassifier(NodeName name) {
+	NodeClassifier(NodeName node) {
 
-		super(name);
+		super(node);
 	}
 
 	void setMatchableNode() {
@@ -266,7 +266,7 @@ class NodeNameClassifier extends NameClassifier {
 
 		super.onPostAssertionAdditions();
 
-		for (DisjunctionMatcher d : getNodeName().getDisjunctionMatchers()) {
+		for (DisjunctionMatcher d : getNode().getDisjunctionMatchers()) {
 
 			d.setPreInferredCommonDisjunctSubsumers();
 		}
@@ -298,7 +298,7 @@ class NodeNameClassifier extends NameClassifier {
 		return inferredSubsumers.anyNewInferences(selector);
 	}
 
-	private NodeName getNodeName() {
+	private NodeName getNode() {
 
 		return (NodeName)getName();
 	}
@@ -308,8 +308,8 @@ class NodeNameClassifier extends NameClassifier {
 		return s != getName() && !isSubsumer(s);
 	}
 
-	private boolean matchableNode(Name name) {
+	private boolean matchableNode(Name node) {
 
-		return ((NodeName)name).matchable();
+		return ((NodeName)node).matchable();
 	}
 }

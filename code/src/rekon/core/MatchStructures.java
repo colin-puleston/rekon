@@ -48,18 +48,18 @@ public class MatchStructures {
 	}
 
 	public void addDisjunction(
-					ClassName node,
+					ClassNode node,
 					Collection<? extends NodeName> disjuncts) {
 
 		nodeMatchers.addDisjunction(node, disjuncts);
 	}
 
-	public ClassName addPatternClass() {
+	public ClassNode addPatternClass() {
 
 		return freeClasses.createPatternClass();
 	}
 
-	public ClassName addGCIImpliedClass() {
+	public ClassNode addGCIImpliedClass() {
 
 		return freeClasses.createGCIImpliedClass();
 	}

@@ -171,12 +171,12 @@ class NodeProfilesCreator {
 		}
 	}
 
-	private void createForClass(AssertedClass c, ClassName n) {
+	private void createForClass(AssertedClass c, ClassNode n) {
 
 		matchStructures.checkAddProfilePattern(n, supersRelations.getAssertedRelations(c));
 	}
 
-	private void createForIndividual(AssertedIndividual i, IndividualName n) {
+	private void createForIndividual(AssertedIndividual i, IndividualNode n) {
 
 		matchStructures.checkAddProfilePattern(n, getAssertedIndividualRelations(i));
 	}

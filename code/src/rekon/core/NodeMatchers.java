@@ -41,17 +41,17 @@ class NodeMatchers {
 		profilePatterns.add(profile);
 	}
 
-	void addProfilePattern(NodeName name, Pattern profile) {
+	void addProfilePattern(NodeName node, Pattern profile) {
 
-		addProfilePattern(name.addProfilePatternMatcher(profile));
+		addProfilePattern(node.addProfilePatternMatcher(profile));
 	}
 
-	void addDefinitionPattern(NodeName name, Pattern defn) {
+	void addDefinitionPattern(NodeName node, Pattern defn) {
 
-		definitionPatterns.add(name.addDefinitionPatternMatcher(defn));
+		definitionPatterns.add(node.addDefinitionPatternMatcher(defn));
 
-		addNameSubsumers(name, defn.getNames());
-		resolveProfilePattern(name).absorbDefinitionIntoProfile(defn);
+		addNameSubsumers(node, defn.getNodes());
+		resolveProfilePattern(node).absorbDefinitionIntoProfile(defn);
 
 		defn.registerDefinitionRefedNames();
 	}
@@ -61,9 +61,9 @@ class NodeMatchers {
 		disjunctions.add(defn);
 	}
 
-	void addDisjunction(ClassName name, Collection<? extends NodeName> disjuncts) {
+	void addDisjunction(ClassNode node, Collection<? extends NodeName> disjuncts) {
 
-		addDisjunction(name.addDisjunctionMatcher(disjuncts));
+		addDisjunction(node.addDisjunctionMatcher(disjuncts));
 	}
 
 	List<PatternMatcher> getProfilePatterns() {
@@ -81,9 +81,9 @@ class NodeMatchers {
 		return disjunctions;
 	}
 
-	private void addNameSubsumers(NodeName name, Names subsumers) {
+	private void addNameSubsumers(NodeName node, Names subsumers) {
 
-		NameClassifier classifier = name.getClassifier();
+		NameClassifier classifier = node.getClassifier();
 
 		for (Name s : subsumers.getNames()) {
 
@@ -94,13 +94,13 @@ class NodeMatchers {
 		}
 	}
 
-	private PatternMatcher resolveProfilePattern(NodeName name) {
+	private PatternMatcher resolveProfilePattern(NodeName node) {
 
-		PatternMatcher p = name.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfilePatternMatcher();
 
 		if (p == null) {
 
-			p = name.addProfilePatternMatcher();
+			p = node.addProfilePatternMatcher();
 
 			addProfilePattern(p);
 		}

@@ -29,14 +29,14 @@ package rekon.core;
  */
 public abstract class NodeRelation extends Relation {
 
-	NodeRelation(NodePropertyName property, NodeValue target) {
+	NodeRelation(NodeProperty property, NodeValue target) {
 
 		super(property, target);
 	}
 
-	NodePropertyName getNodeProperty() {
+	NodeProperty getNodeProperty() {
 
-		return (NodePropertyName)getProperty();
+		return (NodeProperty)getProperty();
 	}
 
 	NodeValue getNodeValueTarget() {

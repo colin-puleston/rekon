@@ -138,7 +138,7 @@ abstract class NodeSelector {
 
 		private boolean targetFor(NodeRelation rel) {
 
-			NodePropertyName p = rel.getNodeProperty();
+			NodeProperty p = rel.getNodeProperty();
 
 			return p.definitionRefed() && p.anyChains();
 		}

@@ -131,7 +131,7 @@ class PotentialLocalPatternSubsumers {
 
 		private List<Names> getRankedNames(Pattern p) {
 
-			return Collections.singletonList(p.getNames());
+			return Collections.singletonList(p.getNodes());
 		}
 	}
 

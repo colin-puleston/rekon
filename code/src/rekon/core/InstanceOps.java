@@ -42,13 +42,13 @@ public class InstanceOps {
 
 		void add(Instance instance, PatternCreator profileCreator) {
 
-			InstanceName name = instance.getName();
-			InstancePattern ip = new InstancePattern(name, profileCreator);
+			InstanceNode node = instance.getNode();
+			InstancePattern ip = new InstancePattern(node, profileCreator);
 
 			patternSubsumers.inferSubsumers(ip);
-			name.completeClassification();
+			node.completeClassification();
 
-			patternSubsumeds.checkAddInstanceOption(name);
+			patternSubsumeds.checkAddInstanceOption(node);
 
 			if (instance.addReferencers()) {
 
@@ -61,10 +61,10 @@ public class InstanceOps {
 
 		void remove(Instance instance) {
 
-			InstanceName name = instance.getName();
+			InstanceNode node = instance.getNode();
 
-			name.removeFromClassification();
-			patternSubsumeds.checkRemoveInstanceOption(name);
+			node.removeFromClassification();
+			patternSubsumeds.checkRemoveInstanceOption(node);
 
 			instance.removeFromReferenceds();
 
@@ -160,24 +160,24 @@ public class InstanceOps {
 
 		Set<Instance> instances = new HashSet<Instance>();
 
-		addInstances(instances, matches.filterForType(InstanceName.class));
+		addInstances(instances, matches.filterForType(InstanceNode.class));
 
 		for (Name n : matches.getNames()) {
 
-			if (n instanceof ClassName) {
+			if (n instanceof ClassNode) {
 
-				addInstances(instances, n.getSubs(InstanceName.class, false));
+				addInstances(instances, n.getSubs(InstanceNode.class, false));
 			}
 		}
 
 		return new ArrayList<Instance>(instances);
 	}
 
-	private void addInstances(Set<Instance> instances, Names names) {
+	private void addInstances(Set<Instance> instances, Names nodes) {
 
-		for (Name n : names.getNames()) {
+		for (Name n : nodes.getNames()) {
 
-			instances.add(((InstanceName)n).getInstance());
+			instances.add(((InstanceNode)n).getInstance());
 		}
 	}
 }

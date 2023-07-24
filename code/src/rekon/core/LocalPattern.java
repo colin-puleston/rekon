@@ -35,7 +35,7 @@ abstract class LocalPattern {
 
 	abstract class LocalClasses extends FreeClasses {
 
-		abstract class LocalPatternClassName extends PatternClassName {
+		abstract class LocalPatternClassNode extends PatternClassNode {
 
 			boolean local() {
 
@@ -43,7 +43,7 @@ abstract class LocalPattern {
 			}
 		}
 
-		ClassName createGCIImpliedClass() {
+		ClassNode createGCIImpliedClass() {
 
 			throw new Error("Cannot create local GCI-implied classes!");
 		}

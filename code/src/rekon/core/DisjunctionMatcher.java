@@ -38,17 +38,17 @@ class DisjunctionMatcher extends NodeMatcher {
 		return getClass().getSimpleName() + "(" + getDisjunctLabelsList() + ")";
 	}
 
-	DisjunctionMatcher(NodeName name, Collection<? extends NodeName> disjuncts) {
+	DisjunctionMatcher(NodeName node, Collection<? extends NodeName> disjuncts) {
 
-		super(name);
+		super(node);
 
 		this.disjuncts = new NameList(disjuncts);
 
 		for (Name d : disjuncts) {
 
-			if (!name.local()) {
+			if (!node.local()) {
 
-				d.addSubsumer(name);
+				d.addSubsumer(node);
 			}
 
 			d.registerAsDefinitionRefed(MatchRole.DISJUNCT);
@@ -143,7 +143,7 @@ class DisjunctionMatcher extends NodeMatcher {
 		return s;
 	}
 
-	private NodeNameClassifier getClassifier() {
+	private NodeClassifier getClassifier() {
 
 		return getNode().getNodeClassifier();
 	}

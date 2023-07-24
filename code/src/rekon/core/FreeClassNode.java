@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class FreeClassName extends ClassName {
+abstract class FreeClassNode extends ClassNode {
 
 	static private final String LABEL_FORMAT = "[%s-%d]";
 
@@ -48,7 +48,7 @@ abstract class FreeClassName extends ClassName {
 		return false;
 	}
 
-	FreeClassName(int index) {
+	FreeClassNode(int index) {
 
 		this.index = index;
 	}

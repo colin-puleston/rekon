@@ -28,6 +28,7 @@ import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
+import org.semanticweb.owlapi.reasoner.impl.*;
 
 import rekon.core.*;
 
@@ -36,8 +37,13 @@ import rekon.core.*;
  */
 class RekonOps {
 
+	static private NodeSet<OWLClass> EMPTY_EQUIV_CLASS_GROUPS = new OWLClassNodeSet();
+
 	private OWLClass owlThing;
 	private OWLClass owlNothing;
+
+	private Node<OWLClass> owlThingAsEquivGroup;
+	private Node<OWLClass> owlNothingAsEquivGroup;
 
 	private MappedNames mappedNames;
 
@@ -112,6 +118,9 @@ class RekonOps {
 		owlThing = factory.getOWLThing();
 		owlNothing = factory.getOWLNothing();
 
+		owlThingAsEquivGroup = new OWLClassNode(owlThing);
+		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
+
 		Assertions assertions = new Assertions(manager);
 
 		mappedNames = new MappedNames(assertions);
@@ -121,7 +130,7 @@ class RekonOps {
 		dynamicOps = ontology.createDynamicOps();
 		instanceOps = ontology.createInstanceOps();
 
-		equivalentsGrouper = new EquivalentsGrouper(factory);
+		equivalentsGrouper = new EquivalentsGrouper(owlThing, owlNothing);
 	}
 
 	RekonInstanceBox createInstanceBox() {
@@ -133,12 +142,12 @@ class RekonOps {
 
 		if (expr.equals(owlThing)) {
 
-			return equivalentsGrouper.owlThingAsEquivGroup;
+			return owlThingAsEquivGroup;
 		}
 
 		if (expr.equals(owlNothing)) {
 
-			return equivalentsGrouper.owlNothingAsEquivGroup;
+			return owlNothingAsEquivGroup;
 		}
 
 		Names equivs = toDynamicHandler(expr).getEquivalents();
@@ -150,7 +159,7 @@ class RekonOps {
 
 		if (expr.equals(owlThing)) {
 
-			return equivalentsGrouper.emptyEquivClassGroups;
+			return EMPTY_EQUIV_CLASS_GROUPS;
 		}
 
 		return equivalentsGrouper.groupSupers(getSuperNames(expr, direct), direct);
@@ -160,7 +169,7 @@ class RekonOps {
 
 		if (expr.equals(owlNothing)) {
 
-			return equivalentsGrouper.emptyEquivClassGroups;
+			return EMPTY_EQUIV_CLASS_GROUPS;
 		}
 
 		return equivalentsGrouper.groupSubs(getSubNames(expr, direct), direct);
@@ -229,10 +238,10 @@ class RekonOps {
 
 			if (direct) {
 
-				return getLeafClassNames();
+				return getLeafClassNodes();
 			}
 
-			return new NameList(mappedNames.getClassNames());
+			return new NameList(mappedNames.getClassNodes());
 		}
 
 		return toDynamicHandler(expr).getSupers(direct);
@@ -271,13 +280,13 @@ class RekonOps {
 		return toDynamicHandler(type).subsumes(toDynamicHandler(ind));
 	}
 
-	private Names getLeafClassNames() {
+	private Names getLeafClassNodes() {
 
 		NameSet leafs = new NameSet();
 
-		for (Name n : mappedNames.getClassNames()) {
+		for (Name n : mappedNames.getClassNodes()) {
 
-			if (n.getSubs(ClassName.class, true).isEmpty()) {
+			if (n.getSubs(ClassNode.class, true).isEmpty()) {
 
 				leafs.add(n);
 			}

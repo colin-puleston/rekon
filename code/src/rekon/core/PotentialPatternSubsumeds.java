@@ -38,9 +38,9 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 		this.allOptions = allOptions;
 	}
 
-	void checkAddInstanceOption(InstanceName name) {
+	void checkAddInstanceOption(InstanceNode node) {
 
-		PatternMatcher pp = name.getProfilePatternMatcher();
+		PatternMatcher pp = node.getProfilePatternMatcher();
 
 		if (pp != null) {
 
@@ -49,9 +49,9 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 		}
 	}
 
-	void checkRemoveInstanceOption(InstanceName name) {
+	void checkRemoveInstanceOption(InstanceNode node) {
 
-		PatternMatcher p = name.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfilePatternMatcher();
 
 		if (p != null) {
 

@@ -29,7 +29,7 @@ package rekon.core;
  */
 public class AllRelation extends NodeRelation {
 
-	public AllRelation(NodePropertyName property, NodeValue target) {
+	public AllRelation(NodeProperty property, NodeValue target) {
 
 		super(property, target);
 	}

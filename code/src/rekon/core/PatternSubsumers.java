@@ -51,7 +51,7 @@ class PatternSubsumers {
 
 			findFrom(n, potentials);
 
-			for (Name ss : n.getSubs(ClassName.class, false).getNames()) {
+			for (Name ss : n.getSubs(ClassNode.class, false).getNames()) {
 
 				findFrom((NodeName)ss, potentials);
 			}

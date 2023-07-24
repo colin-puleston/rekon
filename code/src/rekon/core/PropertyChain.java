@@ -31,15 +31,15 @@ import java.util.*;
  */
 public class PropertyChain {
 
-	private NodePropertyName sup;
-	private List<NodePropertyName> subsTail = new ArrayList<NodePropertyName>();
+	private NodeProperty sup;
+	private List<NodeProperty> subsTail = new ArrayList<NodeProperty>();
 
-	public PropertyChain(NodePropertyName transitiveProp) {
+	public PropertyChain(NodeProperty transitiveProp) {
 
 		this(transitiveProp, transitiveProp, Collections.singletonList(transitiveProp));
 	}
 
-	public PropertyChain(NodePropertyName sup, List<NodePropertyName> subs) {
+	public PropertyChain(NodeProperty sup, List<NodeProperty> subs) {
 
 		this(sup, subs.get(0), subs.subList(1, subs.size()));
 	}
@@ -65,9 +65,9 @@ public class PropertyChain {
 	}
 
 	private PropertyChain(
-				NodePropertyName sup,
-				NodePropertyName subsHead,
-				List<NodePropertyName> subsTail) {
+				NodeProperty sup,
+				NodeProperty subsHead,
+				List<NodeProperty> subsTail) {
 
 		this.sup = sup;
 		this.subsTail = subsTail;

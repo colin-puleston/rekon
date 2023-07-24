@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class Instance {
 
-	private InstanceName name = new InstanceName(this);
+	private InstanceNode node = new InstanceNode(this);
 	private Set<Instance> referencers = new HashSet<Instance>();
 
 	private PatternCreator profileRecreator = null;
@@ -41,9 +41,9 @@ public abstract class Instance {
 		return getClass().getSimpleName() + "(" + getLabel() + ")";
 	}
 
-	public InstanceName getName() {
+	public InstanceNode getNode() {
 
-		return name;
+		return node;
 	}
 
 	public abstract Object getInstanceId();
@@ -52,7 +52,7 @@ public abstract class Instance {
 
 	void reset() {
 
-		name = new InstanceName(this);
+		node = new InstanceNode(this);
 	}
 
 	void replaceGhost(Instance ghost) {
@@ -120,7 +120,7 @@ public abstract class Instance {
 
 		Set<Instance> refs = new HashSet<Instance>();
 
-		for (InstanceName rn : name.getReferenceds()) {
+		for (InstanceNode rn : node.getReferenceds()) {
 
 			refs.add(rn.getInstance());
 		}

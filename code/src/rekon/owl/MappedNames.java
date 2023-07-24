@@ -40,17 +40,17 @@ class MappedNames extends OntologyNames {
 		return entityType.cast(((MappedName)name).toMappedEntity());
 	}
 
-	private ClassNames classes;
-	private IndividualNames individuals;
-	private NodePropertyNames nodeProperties;
-	private DataPropertyNames dataProperties;
+	private ClassNodes classes;
+	private IndividualNodes individuals;
+	private NodeProperties nodeProperties;
+	private DataProperties dataProperties;
 
 	private interface MappedName {
 
 		public OWLEntity toMappedEntity();
 	}
 
-	private class MappedClassName extends ClassName implements MappedName {
+	private class MappedClassNode extends ClassNode implements MappedName {
 
 		private OWLClass entity;
 
@@ -64,13 +64,13 @@ class MappedNames extends OntologyNames {
 			return NameRenderer.SINGLETON.render(entity);
 		}
 
-		MappedClassName(OWLClass entity) {
+		MappedClassNode(OWLClass entity) {
 
 			this.entity = entity;
 		}
 	}
 
-	private class MappedIndividualName extends IndividualName implements MappedName {
+	private class MappedIndividualNode extends IndividualNode implements MappedName {
 
 		private OWLNamedIndividual entity;
 
@@ -84,13 +84,13 @@ class MappedNames extends OntologyNames {
 			return NameRenderer.SINGLETON.render(entity);
 		}
 
-		MappedIndividualName(OWLNamedIndividual entity) {
+		MappedIndividualNode(OWLNamedIndividual entity) {
 
 			this.entity = entity;
 		}
 	}
 
-	private class MappedNodePropertyName extends NodePropertyName implements MappedName {
+	private class MappedNodeProperty extends NodeProperty implements MappedName {
 
 		private OWLObjectProperty entity;
 
@@ -104,13 +104,13 @@ class MappedNames extends OntologyNames {
 			return NameRenderer.SINGLETON.render(entity);
 		}
 
-		MappedNodePropertyName(OWLObjectProperty entity) {
+		MappedNodeProperty(OWLObjectProperty entity) {
 
 			this.entity = entity;
 		}
 	}
 
-	private class MappedDataPropertyName extends DataPropertyName implements MappedName {
+	private class MappedDataProperty extends DataProperty implements MappedName {
 
 		private OWLDataProperty entity;
 
@@ -124,7 +124,7 @@ class MappedNames extends OntologyNames {
 			return NameRenderer.SINGLETON.render(entity);
 		}
 
-		MappedDataPropertyName(OWLDataProperty entity) {
+		MappedDataProperty(OWLDataProperty entity) {
 
 			this.entity = entity;
 		}
@@ -227,62 +227,62 @@ class MappedNames extends OntologyNames {
 		abstract N createRootName();
 	}
 
-	private class ClassNames extends HierarchyNames<OWLClass, AssertedClass, ClassName> {
+	private class ClassNodes extends HierarchyNames<OWLClass, AssertedClass, ClassNode> {
 
-		ClassNames(Assertions assertions) {
+		ClassNodes(Assertions assertions) {
 
 			super(assertions.owlThing, assertions.getClasses());
 		}
 
-		ClassName createName(OWLClass entity) {
+		ClassNode createName(OWLClass entity) {
 
-			return new MappedClassName(entity);
+			return new MappedClassNode(entity);
 		}
 
-		ClassName createRootName() {
+		ClassNode createRootName() {
 
-			return createRootClassName(getAllNames());
+			return createRootClassNode(getAllNames());
 		}
 	}
 
-	private class IndividualNames
+	private class IndividualNodes
 					extends
-						TypeNames<OWLNamedIndividual, AssertedIndividual, IndividualName> {
+						TypeNames<OWLNamedIndividual, AssertedIndividual, IndividualNode> {
 
-		IndividualNames(Assertions assertions) {
+		IndividualNodes(Assertions assertions) {
 
 			initialise(assertions.getIndividuals());
 		}
 
-		IndividualName createName(OWLNamedIndividual entity) {
+		IndividualNode createName(OWLNamedIndividual entity) {
 
-			return new MappedIndividualName(entity);
+			return new MappedIndividualNode(entity);
 		}
 
-		void addAssertedSupers(AssertedIndividual entity, IndividualName name) {
+		void addAssertedSupers(AssertedIndividual entity, IndividualNode node) {
 
 			for (OWLClass c : entity.getTypes()) {
 
-				name.addSubsumer(classes.resolveName(c));
+				node.addSubsumer(classes.resolveName(c));
 			}
 		}
 	}
 
-	private class NodePropertyNames
+	private class NodeProperties
 						extends
 							HierarchyNames
 								<OWLObjectProperty,
 								AssertedObjectProperty,
-								NodePropertyName> {
+								NodeProperty> {
 
-		NodePropertyNames(Assertions assertions) {
+		NodeProperties(Assertions assertions) {
 
 			super(assertions.owlTopObjectProperty, assertions.getObjectProperties());
 		}
 
-		NodePropertyName configureName(AssertedObjectProperty entity) {
+		NodeProperty configureName(AssertedObjectProperty entity) {
 
-			NodePropertyName n = super.configureName(entity);
+			NodeProperty n = super.configureName(entity);
 
 			addInverses(entity, n);
 			addChains(entity, n);
@@ -295,119 +295,119 @@ class MappedNames extends OntologyNames {
 			return n;
 		}
 
-		NodePropertyName createName(OWLObjectProperty entity) {
+		NodeProperty createName(OWLObjectProperty entity) {
 
-			return new MappedNodePropertyName(entity);
+			return new MappedNodeProperty(entity);
 		}
 
-		NodePropertyName createRootName() {
+		NodeProperty createRootName() {
 
-			return createRootNodePropertyName(getAllNames());
+			return createRootNodeProperty(getAllNames());
 		}
 
-		private void addInverses(AssertedObjectProperty entity, NodePropertyName name) {
+		private void addInverses(AssertedObjectProperty entity, NodeProperty prop) {
 
-			name.addInverses(toNames(entity.getInverses()));
+			prop.addInverses(toNodeProperties(entity.getInverses()));
 		}
 
-		private void addChains(AssertedObjectProperty entity, NodePropertyName name) {
+		private void addChains(AssertedObjectProperty entity, NodeProperty prop) {
 
 			if (entity.transitive()) {
 
-				new PropertyChain(name);
+				new PropertyChain(prop);
 			}
 
 			for (List<OWLObjectProperty> chain : entity.getChains()) {
 
-				new PropertyChain(name, toNames(chain));
+				new PropertyChain(prop, toNodeProperties(chain));
 			}
 		}
 
-		private List<NodePropertyName> toNames(Collection<OWLObjectProperty> props) {
+		private List<NodeProperty> toNodeProperties(Collection<OWLObjectProperty> objectProps) {
 
-			List<NodePropertyName> names = new ArrayList<NodePropertyName>();
+			List<NodeProperty> props = new ArrayList<NodeProperty>();
 
-			for (OWLObjectProperty p : props) {
+			for (OWLObjectProperty p : objectProps) {
 
-				names.add(resolveName(p));
+				props.add(resolveName(p));
 			}
 
-			return names;
+			return props;
 		}
 	}
 
-	private class DataPropertyNames
+	private class DataProperties
 						extends
 							HierarchyNames
 								<OWLDataProperty,
 								AssertedDataProperty,
-								DataPropertyName> {
+								DataProperty> {
 
-		DataPropertyNames(Assertions assertions) {
+		DataProperties(Assertions assertions) {
 
 			super(assertions.owlTopDataProperty, assertions.getDataProperties());
 		}
 
-		DataPropertyName createName(OWLDataProperty entity) {
+		DataProperty createName(OWLDataProperty entity) {
 
-			return new MappedDataPropertyName(entity);
+			return new MappedDataProperty(entity);
 		}
 
-		DataPropertyName createRootName() {
+		DataProperty createRootName() {
 
-			return createRootDataPropertyName(getAllNames());
+			return createRootDataProperty(getAllNames());
 		}
 	}
 
-	protected Collection<ClassName> getClassNames() {
+	protected Collection<ClassNode> getClassNodes() {
 
 		return classes.getAllNames();
 	}
 
-	protected Collection<IndividualName> getIndividualNames() {
+	protected Collection<IndividualNode> getIndividualNodes() {
 
 		return individuals.getAllNames();
 	}
 
-	protected Collection<NodePropertyName> getNodePropertyNames() {
+	protected Collection<NodeProperty> getNodeProperties() {
 
 		return nodeProperties.getAllNames();
 	}
 
-	protected Collection<DataPropertyName> getDataPropertyNames() {
+	protected Collection<DataProperty> getDataProperties() {
 
 		return dataProperties.getAllNames();
 	}
 
 	MappedNames(Assertions assertions) {
 
-		classes = new ClassNames(assertions);
-		individuals = new IndividualNames(assertions);
-		nodeProperties = new NodePropertyNames(assertions);
-		dataProperties = new DataPropertyNames(assertions);
+		classes = new ClassNodes(assertions);
+		individuals = new IndividualNodes(assertions);
+		nodeProperties = new NodeProperties(assertions);
+		dataProperties = new DataProperties(assertions);
 	}
 
-	ClassName get(OWLClass entity) {
+	ClassNode get(OWLClass entity) {
 
 		return classes.resolveName(entity);
 	}
 
-	IndividualName get(OWLNamedIndividual entity) {
+	IndividualNode get(OWLNamedIndividual entity) {
 
 		return individuals.resolveName(entity);
 	}
 
-	NodePropertyName get(OWLObjectProperty entity) {
+	NodeProperty get(OWLObjectProperty entity) {
 
 		return nodeProperties.resolveName(entity);
 	}
 
-	DataPropertyName get(OWLDataProperty entity) {
+	DataProperty get(OWLDataProperty entity) {
 
 		return dataProperties.resolveName(entity);
 	}
 
-	ClassName getRootClassName() {
+	ClassNode getRootClassNode() {
 
 		return classes.rootName;
 	}

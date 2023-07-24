@@ -37,7 +37,7 @@ class InverseRelationsAdder {
 
 		for (PatternMatcher p : nodeMatchers.getProfilePatterns()) {
 
-			if (p.getNode() instanceof IndividualName) {
+			if (p.getNode() instanceof IndividualNode) {
 
 				addAnyFor(p);
 			}
@@ -62,7 +62,7 @@ class InverseRelationsAdder {
 
 	private void addAnyFor(NodeName forwardSource, SomeRelation forwardRel) {
 
-		Collection<NodePropertyName> ips = forwardRel.getNodeProperty().getInverses();
+		Collection<NodeProperty> ips = forwardRel.getNodeProperty().getInverses();
 
 		if (!ips.isEmpty()) {
 
@@ -71,20 +71,20 @@ class InverseRelationsAdder {
 
 			PatternMatcher p = resolveProfilePattern(invSource.getValueNode());
 
-			for (NodePropertyName ip : ips) {
+			for (NodeProperty ip : ips) {
 
 				p.addRelation(new SomeRelation(ip, invTarget));
 			}
 		}
 	}
 
-	private PatternMatcher resolveProfilePattern(NodeName name) {
+	private PatternMatcher resolveProfilePattern(NodeName node) {
 
-		PatternMatcher p = name.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfilePatternMatcher();
 
 		if (p == null) {
 
-			p = name.addProfilePatternMatcher();
+			p = node.addProfilePatternMatcher();
 
 			newProfilePatterns.add(p);
 		}

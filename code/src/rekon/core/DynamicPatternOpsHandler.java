@@ -77,7 +77,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		Names getAllLinked(Name n) {
 
-			return n.getSubs(ClassName.class, false);
+			return n.getSubs(ClassNode.class, false);
 		}
 	}
 
@@ -95,7 +95,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		private Names filter(Names inferreds) {
 
-			return inferreds.filterForType(IndividualName.class);
+			return inferreds.filterForType(IndividualNode.class);
 		}
 	}
 
@@ -205,7 +205,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 		if (!equivs.isEmpty()) {
 
-			return equivs.getFirstName().getSubs(ClassName.class, direct);
+			return equivs.getFirstName().getSubs(ClassNode.class, direct);
 		}
 
 		return subClassesResolver.resolve(subsumeds, direct);

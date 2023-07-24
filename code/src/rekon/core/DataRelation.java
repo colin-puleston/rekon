@@ -29,7 +29,7 @@ package rekon.core;
  */
 public class DataRelation extends Relation {
 
-	public DataRelation(DataPropertyName property, DataValue target) {
+	public DataRelation(DataProperty property, DataValue target) {
 
 		super(property, target);
 	}

@@ -36,7 +36,7 @@ public abstract class OntologyNames {
 
 	private AbsentClassValue absentClassValue = new AbsentClassValue();
 
-	private class RootClassName extends ClassName {
+	private class RootClassNode extends ClassNode {
 
 		public String getLabel() {
 
@@ -48,13 +48,13 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootClassName(Collection<ClassName> allSubs) {
+		RootClassNode(Collection<ClassNode> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
 	}
 
-	private class RootNodePropertyName extends NodePropertyName {
+	private class RootNodeProperty extends NodeProperty {
 
 		public String getLabel() {
 
@@ -66,13 +66,13 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootNodePropertyName(Collection<NodePropertyName> allSubs) {
+		RootNodeProperty(Collection<NodeProperty> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
 	}
 
-	private class RootDataPropertyName extends DataPropertyName {
+	private class RootDataProperty extends DataProperty {
 
 		public String getLabel() {
 
@@ -84,13 +84,13 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootDataPropertyName(Collection<DataPropertyName> allSubs) {
+		RootDataProperty(Collection<DataProperty> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
 	}
 
-	private class AbsentClassName extends ClassName {
+	private class AbsentClassNode extends ClassNode {
 
 		public String getLabel() {
 
@@ -107,7 +107,7 @@ public abstract class OntologyNames {
 
 		private AbsentClassValue() {
 
-			super(new AbsentClassName());
+			super(new AbsentClassNode());
 		}
 	}
 
@@ -116,28 +116,26 @@ public abstract class OntologyNames {
 		return absentClassValue;
 	}
 
-	protected ClassName createRootClassName(Collection<ClassName> allSubs) {
+	protected ClassNode createRootClassNode(Collection<ClassNode> allSubs) {
 
-		return new RootClassName(allSubs);
+		return new RootClassNode(allSubs);
 	}
 
-	protected NodePropertyName createRootNodePropertyName(
-									Collection<NodePropertyName> allSubs) {
+	protected NodeProperty createRootNodeProperty(Collection<NodeProperty> allSubs) {
 
-		return new RootNodePropertyName(allSubs);
+		return new RootNodeProperty(allSubs);
 	}
 
-	protected DataPropertyName createRootDataPropertyName(
-									Collection<DataPropertyName> allSubs) {
+	protected DataProperty createRootDataProperty(Collection<DataProperty> allSubs) {
 
-		return new RootDataPropertyName(allSubs);
+		return new RootDataProperty(allSubs);
 	}
 
-	protected abstract Collection<ClassName> getClassNames();
+	protected abstract Collection<ClassNode> getClassNodes();
 
-	protected abstract Collection<IndividualName> getIndividualNames();
+	protected abstract Collection<IndividualNode> getIndividualNodes();
 
-	protected abstract Collection<NodePropertyName> getNodePropertyNames();
+	protected abstract Collection<NodeProperty> getNodeProperties();
 
-	protected abstract Collection<DataPropertyName> getDataPropertyNames();
+	protected abstract Collection<DataProperty> getDataProperties();
 }

@@ -27,5 +27,5 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class DataPropertyName extends PropertyName {
+public abstract class ClassNode extends NodeName {
 }

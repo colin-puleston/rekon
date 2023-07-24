@@ -57,7 +57,7 @@ class ClassDefinitionsCreator {
 				}
 			}
 
-			ClassName c = resolveDefinedClass();
+			ClassNode c = resolveDefinedClass();
 
 			for (Pattern defn : patternDefns) {
 
@@ -76,7 +76,7 @@ class ClassDefinitionsCreator {
 
 		abstract boolean handleOutOfScopeEquiv(OWLClassExpression equiv);
 
-		abstract ClassName resolveDefinedClass();
+		abstract ClassNode resolveDefinedClass();
 
 		private boolean absorbEquiv(OWLClassExpression equiv) {
 
@@ -123,7 +123,7 @@ class ClassDefinitionsCreator {
 			return true;
 		}
 
-		ClassName resolveDefinedClass() {
+		ClassNode resolveDefinedClass() {
 
 			return mappedNames.get(assertCls.getEntity());
 		}
@@ -144,7 +144,7 @@ class ClassDefinitionsCreator {
 			return false;
 		}
 
-		ClassName resolveDefinedClass() {
+		ClassNode resolveDefinedClass() {
 
 			return matchStructures.addGCIImpliedClass();
 		}
@@ -172,7 +172,7 @@ class ClassDefinitionsCreator {
 
 			if (subDjs != null) {
 
-				ClassName supCls = resolveSuperClass();
+				ClassNode supCls = resolveSuperClass();
 
 				if (supCls != null) {
 
@@ -188,7 +188,7 @@ class ClassDefinitionsCreator {
 			return false;
 		}
 
-		private ClassName resolveSuperClass() {
+		private ClassNode resolveSuperClass() {
 
 			if (sup instanceof OWLClass) {
 
@@ -255,9 +255,9 @@ class ClassDefinitionsCreator {
 		return n != null ? n : addGCIImpliedClass(disjunct);
 	}
 
-	private ClassName addGCIImpliedClass(Pattern defn) {
+	private ClassNode addGCIImpliedClass(Pattern defn) {
 
-		ClassName c = matchStructures.addGCIImpliedClass();
+		ClassNode c = matchStructures.addGCIImpliedClass();
 
 		matchStructures.addDefinitionPattern(c, defn);
 
