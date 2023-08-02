@@ -76,25 +76,18 @@ class OntologyClassifier {
 
 	private class DisjunctionSubsumersChecker extends MultiThreadListProcessor<DisjunctionMatcher> {
 
-		private boolean initialPass;
-
-		DisjunctionSubsumersChecker(List<DisjunctionMatcher> candidates, boolean initialPass) {
-
-			this.initialPass = initialPass;
+		DisjunctionSubsumersChecker(List<DisjunctionMatcher> candidates) {
 
 			invokeListProcesses(candidates);
 		}
 
 		void processElement(DisjunctionMatcher candidate) {
 
+			candidate.inferCommonDisjunctSubsumers();
+
 			for (DisjunctionMatcher defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
 
 				subsumptionChecker.check(defn, candidate);
-			}
-
-			if (!initialPass) {
-
-				candidate.setNewInferredCommonDisjunctSubsumers();
 			}
 		}
 	}
@@ -104,15 +97,10 @@ class OntologyClassifier {
 		private List<PatternMatcher> patternMatchCandidates = new ArrayList<PatternMatcher>();
 		private List<DisjunctionMatcher> disjunctionMatchCandidates = new ArrayList<DisjunctionMatcher>();
 
-		PassConfig(boolean initialPass) {
+		PassConfig() {
 
-			findPatternMatchCandidates(initialPass);
-			findDisjunctionMatchCandidates(initialPass);
-		}
-
-		boolean initialPass() {
-
-			return false;
+			findPatternMatchCandidates();
+			findDisjunctionMatchCandidates();
 		}
 
 		boolean potentialInferences() {
@@ -123,29 +111,32 @@ class OntologyClassifier {
 		void checkSubsumptions() {
 
 			new PatternSubsumedsChecker(patternMatchCandidates);
-			new DisjunctionSubsumersChecker(disjunctionMatchCandidates, initialPass());
+			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
 		}
+
+		abstract boolean initialPhasePass();
 
 		abstract boolean potentialPatternMatchCandidate(Pattern p);
 
-		private void findPatternMatchCandidates(boolean initialPass) {
+		private void findPatternMatchCandidates() {
 
 			for (PatternMatcher pp : profilePatterns) {
 
 				Pattern p = pp.getPattern();
 
-				if (potentialPatternMatchCandidate(p) && p.classifiable(initialPass)) {
+				if (potentialPatternMatchCandidate(p)
+					&& p.classifiable(initialPhasePass())) {
 
 					patternMatchCandidates.add(pp);
 				}
 			}
 		}
 
-		private void findDisjunctionMatchCandidates(boolean initialPass) {
+		private void findDisjunctionMatchCandidates() {
 
 			for (DisjunctionMatcher d : disjunctionDefns) {
 
-				if (d.classifiable(initialPass)) {
+				if (d.classifiable(initialPhasePass())) {
 
 					disjunctionMatchCandidates.add(d);
 				}
@@ -153,30 +144,15 @@ class OntologyClassifier {
 		}
 	}
 
-	private class DefaultPassConfig extends PassConfig {
+	private abstract class InitialPhasePassConfig extends PassConfig {
 
-		DefaultPassConfig() {
-
-			super(false);
-		}
-
-		boolean potentialPatternMatchCandidate(Pattern p) {
+		boolean initialPhasePass() {
 
 			return true;
 		}
 	}
 
-	private class PatternRestrictionPassConfig extends PassConfig {
-
-		PatternRestrictionPassConfig() {
-
-			super(true);
-		}
-
-		boolean initialPass() {
-
-			return true;
-		}
+	private class PatternRestrictionPassConfig extends InitialPhasePassConfig {
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
@@ -186,16 +162,24 @@ class OntologyClassifier {
 		}
 	}
 
-	private class PatternExpansionPassConfig extends PassConfig {
-
-		PatternExpansionPassConfig() {
-
-			super(true);
-		}
+	private class PatternExpansionPassConfig extends InitialPhasePassConfig {
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
 			return p.setExpandedSignature();
+		}
+	}
+
+	private class DefaultPassConfig extends PassConfig {
+
+		boolean initialPhasePass() {
+
+			return false;
+		}
+
+		boolean potentialPatternMatchCandidate(Pattern p) {
+
+			return true;
 		}
 	}
 

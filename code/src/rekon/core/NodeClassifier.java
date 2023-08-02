@@ -262,16 +262,6 @@ class NodeClassifier extends NameClassifier {
 		inferredSubsumers = new MatcherInferredSubsumers();
 	}
 
-	void onPostAssertionAdditions() {
-
-		super.onPostAssertionAdditions();
-
-		for (DisjunctionMatcher d : getNode().getDisjunctionMatchers()) {
-
-			d.setPreInferredCommonDisjunctSubsumers();
-		}
-	}
-
 	void checkAddInferredSubsumers(Names subsumers) {
 
 		for (Name s : subsumers.getNames()) {

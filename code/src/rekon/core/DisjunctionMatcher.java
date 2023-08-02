@@ -55,12 +55,7 @@ class DisjunctionMatcher extends NodeMatcher {
 		}
 	}
 
-	void setPreInferredCommonDisjunctSubsumers() {
-
-		getClassifier().addAndExpandPreInferredSubsumers(findCommonDisjunctSubsumers());
-	}
-
-	void setNewInferredCommonDisjunctSubsumers() {
+	void inferCommonDisjunctSubsumers() {
 
 		getClassifier().checkAddInferredSubsumers(findCommonDisjunctSubsumers());
 	}
