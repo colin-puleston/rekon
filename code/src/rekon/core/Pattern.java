@@ -43,7 +43,6 @@ public class Pattern extends Expression {
 	private class PatternSignatureRelationCollector extends SignatureRelationCollector {
 
 		private Set<Relation> initialCollected;
-		private boolean additions = false;
 
 		PatternSignatureRelationCollector() {
 
@@ -84,8 +83,6 @@ public class Pattern extends Expression {
 
 			if (collected == initialCollected) {
 
-				additions = true;
-
 				if (signatureMode == SignatureMode.EXPANDING) {
 
 					return initialCollected;
@@ -95,11 +92,6 @@ public class Pattern extends Expression {
 			}
 
 			return collected;
-		}
-
-		boolean additions() {
-
-			return additions;
 		}
 	}
 
@@ -169,16 +161,16 @@ public class Pattern extends Expression {
 
 	Pattern combineWith(Pattern other) {
 
-		NameSet newNames = new NameSet(nodes);
+		NameSet newNodes = new NameSet(nodes);
 		Set<Relation> newRelations = new HashSet<Relation>(relations);
 
-		newNames.addAll(other.nodes);
+		newNodes.addAll(other.nodes);
 		newRelations.addAll(other.relations);
 
-		purgeSubsumers(newNames, nodes);
-		purgeSubsumers(newNames, other.nodes);
+		purgeSubsumers(newNodes, nodes);
+		purgeSubsumers(newNodes, other.nodes);
 
-		return new Pattern(newNames, newRelations);
+		return new Pattern(newNodes, newRelations);
 	}
 
 	Pattern extend(Relation extraRelation) {
@@ -258,7 +250,7 @@ public class Pattern extends Expression {
 
 		for (Name n : nodes.getNames()) {
 
-			if (((GNode)n).classifyTargetPatternRoot(initialPass)) {
+			if (((GNode)n).classifiablePatternRoot(initialPass)) {
 
 				return true;
 			}
@@ -266,17 +258,25 @@ public class Pattern extends Expression {
 
 		for (Relation r : getSignatureRelations()) {
 
-			if (r.getProperty().classifyTargetPatternProperty()) {
+			if (r.getProperty().classifiablePatternProperty()) {
 
 				for (Name tn : r.getTargetNodes().getNames()) {
 
-					if (((GNode)tn).classifyTargetPatternValue(initialPass)) {
+					if (((GNode)tn).classifiablePatternValue(initialPass)) {
 
 						return true;
 					}
 				}
 			}
 		}
+/*
+		for (Relation r : getSignatureRelations()) {
+
+			if (r.classifiable(initialPass)) {
+
+				return true;
+			}
+		}*/
 
 		return false;
 	}

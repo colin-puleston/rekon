@@ -32,7 +32,9 @@ import java.util.*;
 class SignatureRelationCollector {
 
 	private NodeVisitMonitor visitMonitor;
+
 	private Set<Relation> collected;
+	private boolean additions = false;
 
 	SignatureRelationCollector(NodeVisitMonitor visitMonitor) {
 
@@ -68,6 +70,11 @@ class SignatureRelationCollector {
 				checkAdd(sr);
 			}
 		}
+	}
+
+	boolean additions() {
+
+		return additions;
 	}
 
 	Set<Relation> getInitialCollected() {
@@ -123,6 +130,7 @@ class SignatureRelationCollector {
 		}
 
 		ensureUpdatable().add(r);
+		additions |= true;
 	}
 
 	private Set<Relation> ensureUpdatable() {

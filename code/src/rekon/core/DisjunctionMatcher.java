@@ -55,7 +55,7 @@ class DisjunctionMatcher extends NodeMatcher {
 		}
 	}
 
-	void inferCommonDisjunctSubsumers() {
+	void inferNewCommonDisjunctSubsumers() {
 
 		getClassifier().checkAddInferredSubsumers(findCommonDisjunctSubsumers());
 	}
@@ -95,7 +95,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		for (Name d : disjuncts.getNames()) {
 
-			if (((GNode)d).classifyTargetDisjunct(initialPass)) {
+			if (((GNode)d).classifiableDisjunct(initialPass)) {
 
 				return true;
 			}
@@ -118,7 +118,11 @@ class DisjunctionMatcher extends NodeMatcher {
 			subsSets.addSet(d.getSubsumers().getNames());
 		}
 
-		return new NameList(subsSets.intersectAll());
+		NameSet ss = new NameSet(subsSets.intersectAll());
+
+		ss.remove(getNode());
+
+		return ss;
 	}
 
 	private String getDisjunctLabelsList() {

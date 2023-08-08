@@ -113,19 +113,23 @@ public abstract class GNode extends Name {
 		return false;
 	}
 
-	boolean classifyTargetPatternRoot(boolean initialPass) {
+	boolean classifiablePatternRoot(boolean initialPass) {
 
-		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_PATTERN_ROOT);
+		return classifiablePatternNode(
+					initialPass,
+					NodeSelector.CLASSIABLE_PATTERN_ROOT);
 	}
 
-	boolean classifyTargetPatternValue(boolean initialPass) {
+	boolean classifiablePatternValue(boolean initialPass) {
 
-		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_PATTERN_VALUE);
+		return classifiablePatternNode(
+					initialPass,
+					NodeSelector.CLASSIABLE_PATTERN_VALUE);
 	}
 
-	boolean classifyTargetDisjunct(boolean initialPass) {
+	boolean classifiableDisjunct(boolean initialPass) {
 
-		return classifyTarget(initialPass, NodeSelector.CLASSIFY_TARGET_DISJUNCT);
+		return classifiable(initialPass, NodeSelector.CLASSIABLE_DISJUNCT);
 	}
 
 	NodeClassifier getNodeClassifier() {
@@ -218,7 +222,17 @@ public abstract class GNode extends Name {
 		return false;
 	}
 
-	private boolean classifyTarget(boolean initialPass, NodeSelector selector) {
+	private boolean classifiablePatternNode(boolean initialPass, NodeSelector selector) {
+
+		if (classifiable(initialPass, selector)) {
+
+			return true;
+		}
+
+		return !initialPass && anyNewDisjunctSubsumers();
+	}
+
+	private boolean classifiable(boolean initialPass, NodeSelector selector) {
 
 		return initialPass ? anyMatches(selector) : anyNewSubsumers(selector);
 	}
@@ -226,5 +240,21 @@ public abstract class GNode extends Name {
 	private boolean anyMatches(NodeSelector selector) {
 
 		return selector.select(this) || selector.anyMatches(getSubsumers());
+	}
+
+	private boolean anyNewDisjunctSubsumers() {
+
+		for (DisjunctionMatcher dm : getDisjunctionMatchers()) {
+
+			for (Name d : dm.getDisjuncts().getNames()) {
+
+				if (((GNode)d).anyNewSubsumers(NodeSelector.ANY)) {
+
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 }

@@ -83,8 +83,6 @@ class OntologyClassifier {
 
 		void processElement(DisjunctionMatcher candidate) {
 
-			candidate.inferCommonDisjunctSubsumers();
-
 			for (DisjunctionMatcher defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
 
 				subsumptionChecker.check(defn, candidate);
@@ -112,6 +110,8 @@ class OntologyClassifier {
 
 			new PatternSubsumedsChecker(patternMatchCandidates);
 			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
+
+			inferNewCommonDisjunctSubsumers();
 		}
 
 		abstract boolean initialPhasePass();
@@ -140,6 +140,14 @@ class OntologyClassifier {
 
 					disjunctionMatchCandidates.add(d);
 				}
+			}
+		}
+
+		private void inferNewCommonDisjunctSubsumers() {
+
+			for (DisjunctionMatcher d : disjunctionDefns) {
+
+				d.inferNewCommonDisjunctSubsumers();
 			}
 		}
 	}

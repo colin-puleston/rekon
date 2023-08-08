@@ -31,18 +31,18 @@ import java.util.*;
  */
 abstract class NodeSelector {
 
-	static final NodeSelector ANY = new Any();
-	static final NodeSelector STRUCTURED = new Structured();
-	static final NodeSelector CLASSIFY_TARGET_PATTERN_ROOT = new ClassifyTargetPatternRoot();
-	static final NodeSelector CLASSIFY_TARGET_PATTERN_VALUE = new ClassifyTargetPatternValue();
-	static final NodeSelector CLASSIFY_TARGET_DISJUNCT = new ClassifyTargetDisjunct();
+	static final NodeSelector ANY = new AnyNode();
+	static final NodeSelector STRUCTURED = new StructuredNode();
+	static final NodeSelector CLASSIABLE_PATTERN_ROOT = new ClassifiablePatternRoot();
+	static final NodeSelector CLASSIABLE_PATTERN_VALUE = new ClassifiablePatternValue();
+	static final NodeSelector CLASSIABLE_DISJUNCT = new ClassifiableDisjunct();
 
 	static NodeSelector structureFor(GProperty property) {
 
 		return new StructureFor(property);
 	}
 
-	static private class Any extends NodeSelector {
+	static private class AnyNode extends NodeSelector {
 
 		boolean select(GNode node) {
 
@@ -55,7 +55,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static abstract private class SelectiveNodeSelector extends NodeSelector {
+	static abstract private class SelectiveSelector extends NodeSelector {
 
 		boolean anyMatches(Names nodes) {
 
@@ -71,7 +71,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static abstract private class StructuredNodeSelector extends SelectiveNodeSelector {
+	static abstract private class StructureSelector extends SelectiveSelector {
 
 		boolean select(GNode node) {
 
@@ -83,7 +83,7 @@ abstract class NodeSelector {
 		abstract boolean select(Collection<Relation> rels);
 	}
 
-	static private class Structured extends StructuredNodeSelector {
+	static private class StructuredNode extends StructureSelector {
 
 		boolean select(Collection<Relation> rels) {
 
@@ -91,7 +91,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class StructureFor extends StructuredNodeSelector {
+	static private class StructureFor extends StructureSelector {
 
 		private GProperty property;
 
@@ -114,7 +114,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private abstract class ClassifyTargetPattern extends Structured {
+	static private abstract class ClassifiablePatternNode extends StructuredNode {
 
 		boolean select(GNode node) {
 
@@ -144,7 +144,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifyTargetPatternRoot extends ClassifyTargetPattern {
+	static private class ClassifiablePatternRoot extends ClassifiablePatternNode {
 
 		MatchRole getMatchRole() {
 
@@ -152,7 +152,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifyTargetPatternValue extends ClassifyTargetPattern {
+	static private class ClassifiablePatternValue extends ClassifiablePatternNode {
 
 		MatchRole getMatchRole() {
 
@@ -160,7 +160,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifyTargetDisjunct extends SelectiveNodeSelector {
+	static private class ClassifiableDisjunct extends SelectiveSelector {
 
 		boolean select(GNode node) {
 
