@@ -269,14 +269,6 @@ public class Pattern extends Expression {
 				}
 			}
 		}
-/*
-		for (Relation r : getSignatureRelations()) {
-
-			if (r.classifiable(initialPass)) {
-
-				return true;
-			}
-		}*/
 
 		return false;
 	}
