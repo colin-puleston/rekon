@@ -31,10 +31,10 @@ import java.util.*;
  */
 public abstract class Relation extends Expression {
 
-	private GProperty property;
+	private PropertyX property;
 	private Value target;
 
-	Relation(GProperty property, Value target) {
+	Relation(PropertyX property, Value target) {
 
 		this.property = property;
 		this.target = target;
@@ -45,7 +45,7 @@ public abstract class Relation extends Expression {
 		return false;
 	}
 
-	GProperty getProperty() {
+	PropertyX getProperty() {
 
 		return property;
 	}

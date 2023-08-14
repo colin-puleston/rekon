@@ -39,7 +39,7 @@ abstract class NodeSelector {
 
 	static private class AnyNode extends NodeSelector {
 
-		boolean select(GNode node) {
+		boolean select(NodeX node) {
 
 			return true;
 		}
@@ -56,7 +56,7 @@ abstract class NodeSelector {
 
 			for (Name n : nodes.getNames()) {
 
-				if (select((GNode)n)) {
+				if (select((NodeX)n)) {
 
 					return true;
 				}
@@ -68,7 +68,7 @@ abstract class NodeSelector {
 
 	static private class StructuredNode extends SelectiveSelector {
 
-		boolean select(GNode node) {
+		boolean select(NodeX node) {
 
 			PatternMatcher p = node.getProfilePatternMatcher();
 
@@ -83,7 +83,7 @@ abstract class NodeSelector {
 
 	static private abstract class ClassifiablePatternNode extends StructuredNode {
 
-		boolean select(GNode node) {
+		boolean select(NodeX node) {
 
 			return node.definitionRefed(getMatchRole()) || super.select(node);
 		}
@@ -129,13 +129,13 @@ abstract class NodeSelector {
 
 	static private class ClassifiableDisjunct extends SelectiveSelector {
 
-		boolean select(GNode node) {
+		boolean select(NodeX node) {
 
 			return node.definitionRefed(MatchRole.DISJUNCT);
 		}
 	}
 
-	abstract boolean select(GNode node);
+	abstract boolean select(NodeX node);
 
 	abstract boolean anyMatches(Names nodes);
 }

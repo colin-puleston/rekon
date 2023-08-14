@@ -29,14 +29,14 @@ package rekon.core;
  */
 abstract class NodeMatcher {
 
-	private GNode node;
+	private NodeX node;
 
-	NodeMatcher(GNode node) {
+	NodeMatcher(NodeX node) {
 
 		this.node = node;
 	}
 
-	GNode getNode() {
+	NodeX getNode() {
 
 		return node;
 	}

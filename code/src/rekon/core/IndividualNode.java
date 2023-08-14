@@ -27,5 +27,5 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class IndividualNode extends GNode {
+public abstract class IndividualNode extends NodeX {
 }

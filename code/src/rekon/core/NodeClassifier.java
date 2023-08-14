@@ -31,24 +31,24 @@ import java.util.*;
  */
 class NodeClassifier extends NameClassifier {
 
-	static private class NewInferredSubsumerExpander extends MultiThreadListProcessor<GNode> {
+	static private class NewInferredSubsumerExpander extends MultiThreadListProcessor<NodeX> {
 
 		private boolean forNodeMatcher;
 
-		NewInferredSubsumerExpander(List<GNode> all, boolean forNodeMatcher) {
+		NewInferredSubsumerExpander(List<NodeX> all, boolean forNodeMatcher) {
 
 			this.forNodeMatcher = forNodeMatcher;
 
 			invokeListProcesses(all);
 		}
 
-		void processElement(GNode n) {
+		void processElement(NodeX n) {
 
 			getInferredSubsumers(n).expandLatestInferences(forNodeMatcher);
 		}
 	}
 
-	static void expandAllNewInferredSubsumers(List<GNode> all) {
+	static void expandAllNewInferredSubsumers(List<NodeX> all) {
 
 		do {
 
@@ -58,19 +58,19 @@ class NodeClassifier extends NameClassifier {
 		while(configureForNextInferenceExpansion(all));
 	}
 
-	static void absorbAllNewInferredSubsumers(List<GNode> all) {
+	static void absorbAllNewInferredSubsumers(List<NodeX> all) {
 
-		for (GNode n : all) {
+		for (NodeX n : all) {
 
 			getInferredSubsumers(n).absorbNewInferences();
 		}
 	}
 
-	static private boolean configureForNextInferenceExpansion(List<GNode> all) {
+	static private boolean configureForNextInferenceExpansion(List<NodeX> all) {
 
 		boolean expansions = false;
 
-		for (GNode n : all) {
+		for (NodeX n : all) {
 
 			expansions |= getInferredSubsumers(n).configureForNextExpansion();
 		}
@@ -80,7 +80,7 @@ class NodeClassifier extends NameClassifier {
 
 	static private InferredSubsumers getInferredSubsumers(Name n) {
 
-		return ((GNode)n).getNodeClassifier().inferredSubsumers;
+		return ((NodeX)n).getNodeClassifier().inferredSubsumers;
 	}
 
 	private InferredSubsumers inferredSubsumers = new NonMatcherInferredSubsumers();
@@ -256,7 +256,7 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
-	NodeClassifier(GNode node) {
+	NodeClassifier(NodeX node) {
 
 		super(node);
 	}
@@ -306,9 +306,9 @@ class NodeClassifier extends NameClassifier {
 		return inferredSubsumers.anyNewInferences(selector);
 	}
 
-	private GNode getNode() {
+	private NodeX getNode() {
 
-		return (GNode)getName();
+		return (NodeX)getName();
 	}
 
 	private boolean newSubsumer(Name s) {
@@ -318,6 +318,6 @@ class NodeClassifier extends NameClassifier {
 
 	private boolean matchableNode(Name node) {
 
-		return ((GNode)node).matchable();
+		return ((NodeX)node).matchable();
 	}
 }

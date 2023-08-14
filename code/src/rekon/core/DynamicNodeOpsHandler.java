@@ -31,7 +31,7 @@ import java.util.*;
  */
 class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
-	private GNode node;
+	private NodeX node;
 
 	 private abstract class PatternCollector {
 
@@ -48,18 +48,18 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 			for (Name en : node.getEquivalents().getNames()) {
 
-				checkAddPattern(patterns, (GNode)en);
+				checkAddPattern(patterns, (NodeX)en);
 			}
 
 			return patterns;
 		}
 
-		abstract void checkAddPattern(Collection<Pattern> patterns, GNode n);
+		abstract void checkAddPattern(Collection<Pattern> patterns, NodeX n);
 	}
 
 	 private class ProfileCollector extends PatternCollector {
 
-		void checkAddPattern(Collection<Pattern> patterns, GNode n) {
+		void checkAddPattern(Collection<Pattern> patterns, NodeX n) {
 
 			PatternMatcher p = n.getProfilePatternMatcher();
 
@@ -72,7 +72,7 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	 private class DefinitionCollector extends PatternCollector {
 
-		void checkAddPattern(Collection<Pattern> patterns, GNode n) {
+		void checkAddPattern(Collection<Pattern> patterns, NodeX n) {
 
 			for (PatternMatcher p : n.getDefinitionPatternMatchers()) {
 
@@ -120,7 +120,7 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		return super.subsumes(other);
 	}
 
-	DynamicNodeOpsHandler(GNode node) {
+	DynamicNodeOpsHandler(NodeX node) {
 
 		this.node = node;
 	}
@@ -135,7 +135,7 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		return new DefinitionCollector().getAll();
 	}
 
-	private Names getSubs(Class<? extends GNode> type, boolean direct) {
+	private Names getSubs(Class<? extends NodeX> type, boolean direct) {
 
 		return node != null ? node.getSubs(type, direct) : Names.NO_NAMES;
 	}

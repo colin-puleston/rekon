@@ -49,12 +49,12 @@ public class PropertyChain {
 		return new SomeRelation(sup, target);
 	}
 
-	boolean hasSuper(GProperty prop) {
+	boolean hasSuper(PropertyX prop) {
 
 		return sup.subsumes(prop);
 	}
 
-	boolean hasTailSub(GProperty prop, int index) {
+	boolean hasTailSub(PropertyX prop, int index) {
 
 		return subsTail.get(index).subsumes(prop);
 	}

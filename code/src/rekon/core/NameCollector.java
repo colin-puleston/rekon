@@ -36,7 +36,7 @@ abstract class NameCollector {
 		return !definition();
 	}
 
-	void collectForValueNode(GNode n) {
+	void collectForValueNode(NodeX n) {
 
 		collectName(n);
 	}

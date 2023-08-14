@@ -34,7 +34,7 @@ public class MatchStructures {
 	private NodeMatchers nodeMatchers;
 	private FreeClasses freeClasses;
 
-	public void checkAddProfilePattern(GNode node, Collection<Relation> relations) {
+	public void checkAddProfilePattern(NodeX node, Collection<Relation> relations) {
 
 		if (node.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
 
@@ -42,14 +42,14 @@ public class MatchStructures {
 		}
 	}
 
-	public void addDefinitionPattern(GNode node, Pattern defn) {
+	public void addDefinitionPattern(NodeX node, Pattern defn) {
 
 		nodeMatchers.addDefinitionPattern(node, defn);
 	}
 
 	public void addDisjunction(
 					ClassNode node,
-					Collection<? extends GNode> disjuncts) {
+					Collection<? extends NodeX> disjuncts) {
 
 		nodeMatchers.addDisjunction(node, disjuncts);
 	}

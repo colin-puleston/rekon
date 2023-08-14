@@ -32,7 +32,7 @@ import java.util.*;
 class OntologyClassifier {
 
 	private List<Name> allNames;
-	private List<GNode> nodes;
+	private List<NodeX> nodes;
 
 	private NodeMatchers nodeMatchers;
 
@@ -187,7 +187,7 @@ class OntologyClassifier {
 
 	OntologyClassifier(
 		List<Name> allNames,
-		List<GNode> nodes,
+		List<NodeX> nodes,
 		NodeMatchers nodeMatchers) {
 
 		this.allNames = allNames;
@@ -241,7 +241,7 @@ class OntologyClassifier {
 
 		boolean anyInfs = false;
 
-		for (GNode n : nodes) {
+		for (NodeX n : nodes) {
 
 			if (n.getNodeClassifier().resetPhaseInferredSubsumers()) {
 

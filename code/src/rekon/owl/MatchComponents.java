@@ -38,7 +38,7 @@ class MatchComponents {
 	private MappedNames mappedNames;
 	private MatchStructures matchStructures;
 
-	private GNode rootNode;
+	private NodeX rootNode;
 
 	private Patterns patterns = new Patterns();
 	private Disjunctions disjunctions = new Disjunctions();
@@ -173,11 +173,11 @@ class MatchComponents {
 
 		NodeValue checkCreate(OWLObjectUnionOf source) {
 
-			Set<GNode> disjuncts = new HashSet<GNode>();
+			Set<NodeX> disjuncts = new HashSet<NodeX>();
 
 			for (OWLClassExpression op : source.getOperands()) {
 
-				Set<? extends GNode> djs = valueToNodeDisjunction(op);
+				Set<? extends NodeX> djs = valueToNodeDisjunction(op);
 
 				if (djs == null) {
 
@@ -249,7 +249,7 @@ class MatchComponents {
 				return disjunctions.get((OWLObjectUnionOf)filler);
 			}
 
-			Set<? extends GNode> djs = valueToNodeDisjunction(filler);
+			Set<? extends NodeX> djs = valueToNodeDisjunction(filler);
 
 			return djs != null ? createNodeValue(djs) : null;
 		}
@@ -596,19 +596,19 @@ class MatchComponents {
 		return DataTypes.toDataValueExpression(source.getFiller());
 	}
 
-	private Set<? extends GNode> valueToNodeDisjunction(OWLClassExpression v) {
+	private Set<? extends NodeX> valueToNodeDisjunction(OWLClassExpression v) {
 
 		if (v instanceof OWLObjectOneOf) {
 
 			return valueToIndividualDisjunction((OWLObjectOneOf)v);
 		}
 
-		GNode n = valueToNode(v);
+		NodeX n = valueToNode(v);
 
 		return n != null ? Collections.singleton(n) : null;
 	}
 
-	private GNode valueToNode(OWLClassExpression v) {
+	private NodeX valueToNode(OWLClassExpression v) {
 
 		if (v instanceof RekonOWLInstanceRef) {
 
@@ -666,12 +666,12 @@ class MatchComponents {
 		return disjuncts;
 	}
 
-	private NodeValue createNodeValue(Collection<? extends GNode> disjuncts) {
+	private NodeValue createNodeValue(Collection<? extends NodeX> disjuncts) {
 
 		return new NodeValue(resolveValueNode(disjuncts));
 	}
 
-	private GNode resolveValueNode(Collection<? extends GNode> disjuncts) {
+	private NodeX resolveValueNode(Collection<? extends NodeX> disjuncts) {
 
 		if (disjuncts.size() == 1) {
 

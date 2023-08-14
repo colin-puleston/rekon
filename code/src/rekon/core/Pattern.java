@@ -58,7 +58,7 @@ public class Pattern extends Expression {
 		}
 	}
 
-	public Pattern(GNode node) {
+	public Pattern(NodeX node) {
 
 		nodes.add(node);
 	}
@@ -68,14 +68,14 @@ public class Pattern extends Expression {
 		this.nodes.addAll(nodes);
 	}
 
-	public Pattern(GNode node, Relation relation) {
+	public Pattern(NodeX node, Relation relation) {
 
 		this(node);
 
 		relations.add(relation);
 	}
 
-	public Pattern(GNode node, Collection<Relation> relations) {
+	public Pattern(NodeX node, Collection<Relation> relations) {
 
 		this(node);
 
@@ -89,11 +89,11 @@ public class Pattern extends Expression {
 		this.relations.addAll(relations);
 	}
 
-	public GNode toSingleNode() {
+	public NodeX toSingleNode() {
 
 		if (nodes.size() == 1 && relations.isEmpty()) {
 
-			return (GNode)nodes.getFirstName();
+			return (NodeX)nodes.getFirstName();
 		}
 
 		return null;
@@ -213,7 +213,7 @@ public class Pattern extends Expression {
 
 		for (Name n : nodes.getNames()) {
 
-			if (((GNode)n).classifiablePatternRoot(initialPass)) {
+			if (((NodeX)n).classifiablePatternRoot(initialPass)) {
 
 				return true;
 			}
@@ -225,7 +225,7 @@ public class Pattern extends Expression {
 
 				for (Name tn : r.getTargetNodes().getNames()) {
 
-					if (((GNode)tn).classifiablePatternValue(initialPass)) {
+					if (((NodeX)tn).classifiablePatternValue(initialPass)) {
 
 						return true;
 					}
@@ -334,7 +334,7 @@ public class Pattern extends Expression {
 
 		for (Name n : nodes.getNames()) {
 
-			if (((GNode)n).getNodeClassifier().anyLastPhaseInferredSubsumers()) {
+			if (((NodeX)n).getNodeClassifier().anyLastPhaseInferredSubsumers()) {
 
 				return true;
 			}

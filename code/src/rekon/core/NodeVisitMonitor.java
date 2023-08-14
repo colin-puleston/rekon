@@ -39,7 +39,7 @@ class NodeVisitMonitor {
 		visited.addAll(initialNodes);
 	}
 
-	boolean startVisit(GNode node) {
+	boolean startVisit(NodeX node) {
 
 		if (visited.add(node)) {
 

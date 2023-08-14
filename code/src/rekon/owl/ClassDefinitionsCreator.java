@@ -66,7 +66,7 @@ class ClassDefinitionsCreator {
 
 			for (List<Pattern> disjuncts : disjunctionDefns) {
 
-				List<GNode> nodeDjs = resolveGCIDisjunctionToNodes(disjuncts);
+				List<NodeX> nodeDjs = resolveGCIDisjunctionToNodes(disjuncts);
 
 				matchStructures.addDisjunction(c, nodeDjs);
 			}
@@ -176,7 +176,7 @@ class ClassDefinitionsCreator {
 
 				if (supCls != null) {
 
-					for (GNode subCls : resolveGCIDisjunctionToNodes(subDjs)) {
+					for (NodeX subCls : resolveGCIDisjunctionToNodes(subDjs)) {
 
 						subCls.addSubsumer(supCls);
 					}
@@ -236,9 +236,9 @@ class ClassDefinitionsCreator {
 		logger.logSeparatorLine();
 	}
 
-	private List<GNode> resolveGCIDisjunctionToNodes(List<Pattern> disjuncts) {
+	private List<NodeX> resolveGCIDisjunctionToNodes(List<Pattern> disjuncts) {
 
-		List<GNode> nodeDjs = new ArrayList<GNode>();
+		List<NodeX> nodeDjs = new ArrayList<NodeX>();
 
 		for (Pattern d : disjuncts) {
 
@@ -248,9 +248,9 @@ class ClassDefinitionsCreator {
 		return nodeDjs;
 	}
 
-	private GNode resolveGCIDisjunctToNode(Pattern disjunct) {
+	private NodeX resolveGCIDisjunctToNode(Pattern disjunct) {
 
-		GNode n = disjunct.toSingleNode();
+		NodeX n = disjunct.toSingleNode();
 
 		return n != null ? n : addGCIImpliedClass(disjunct);
 	}

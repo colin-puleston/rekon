@@ -60,7 +60,7 @@ class InverseRelationsAdder {
 		}
 	}
 
-	private void addAnyFor(GNode forwardSource, SomeRelation forwardRel) {
+	private void addAnyFor(NodeX forwardSource, SomeRelation forwardRel) {
 
 		Collection<NodeProperty> ips = forwardRel.getNodeProperty().getInverses();
 
@@ -78,7 +78,7 @@ class InverseRelationsAdder {
 		}
 	}
 
-	private PatternMatcher resolveProfilePattern(GNode node) {
+	private PatternMatcher resolveProfilePattern(NodeX node) {
 
 		PatternMatcher p = node.getProfilePatternMatcher();
 

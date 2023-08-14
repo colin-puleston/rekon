@@ -29,13 +29,13 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class GNode extends Name {
+public abstract class NodeX extends Name {
 
 	static private final List<NodeMatcher> NO_MATCHERS = Collections.emptyList();
 
 	static private class ProfilePatternMatcher extends PatternMatcher {
 
-		ProfilePatternMatcher(GNode node, Pattern pattern) {
+		ProfilePatternMatcher(NodeX node, Pattern pattern) {
 
 			super(node, pattern);
 		}
@@ -43,7 +43,7 @@ public abstract class GNode extends Name {
 
 	static private class DefinitionPatternMatcher extends PatternMatcher {
 
-		DefinitionPatternMatcher(GNode node, Pattern pattern) {
+		DefinitionPatternMatcher(NodeX node, Pattern pattern) {
 
 			super(node, pattern);
 		}
@@ -71,7 +71,7 @@ public abstract class GNode extends Name {
 		return addMatcher(new DefinitionPatternMatcher(this, pattern));
 	}
 
-	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends GNode> disjuncts) {
+	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends NodeX> disjuncts) {
 
 		return addMatcher(new DisjunctionMatcher(this, disjuncts));
 	}
@@ -105,9 +105,9 @@ public abstract class GNode extends Name {
 			return true;
 		}
 
-		if (name instanceof GNode) {
+		if (name instanceof NodeX) {
 
-			return local() ? subsumesViaMatcher((GNode)name) : super.subsumes(name);
+			return local() ? subsumesViaMatcher((NodeX)name) : super.subsumes(name);
 		}
 
 		return false;
@@ -178,12 +178,12 @@ public abstract class GNode extends Name {
 		return selecteds;
 	}
 
-	private boolean subsumesViaMatcher(GNode node) {
+	private boolean subsumesViaMatcher(NodeX node) {
 
 		return subsumesViaPattern(node) || subsumesViaDisjunction(node);
 	}
 
-	private boolean subsumesViaPattern(GNode node) {
+	private boolean subsumesViaPattern(NodeX node) {
 
 		PatternMatcher p = node.getProfilePatternMatcher();
 
@@ -201,7 +201,7 @@ public abstract class GNode extends Name {
 		return false;
 	}
 
-	private boolean subsumesViaDisjunction(GNode node) {
+	private boolean subsumesViaDisjunction(NodeX node) {
 
 		for (DisjunctionMatcher d : getDisjunctionMatchers()) {
 
@@ -248,7 +248,7 @@ public abstract class GNode extends Name {
 
 			for (Name d : dm.getDisjuncts().getNames()) {
 
-				if (((GNode)d).anyNewSubsumers(NodeSelector.ANY)) {
+				if (((NodeX)d).anyNewSubsumers(NodeSelector.ANY)) {
 
 					return true;
 				}

@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class NodeProperty extends GProperty {
+public abstract class NodeProperty extends PropertyX {
 
 	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();

@@ -27,5 +27,5 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class DataProperty extends GProperty {
+public abstract class DataProperty extends PropertyX {
 }

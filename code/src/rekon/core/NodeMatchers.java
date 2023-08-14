@@ -41,12 +41,12 @@ class NodeMatchers {
 		profilePatterns.add(profile);
 	}
 
-	void addProfilePattern(GNode node, Pattern profile) {
+	void addProfilePattern(NodeX node, Pattern profile) {
 
 		addProfilePattern(node.addProfilePatternMatcher(profile));
 	}
 
-	void addDefinitionPattern(GNode node, Pattern defn) {
+	void addDefinitionPattern(NodeX node, Pattern defn) {
 
 		definitionPatterns.add(node.addDefinitionPatternMatcher(defn));
 
@@ -61,7 +61,7 @@ class NodeMatchers {
 		disjunctions.add(defn);
 	}
 
-	void addDisjunction(ClassNode node, Collection<? extends GNode> disjuncts) {
+	void addDisjunction(ClassNode node, Collection<? extends NodeX> disjuncts) {
 
 		addDisjunction(node.addDisjunctionMatcher(disjuncts));
 	}
@@ -81,7 +81,7 @@ class NodeMatchers {
 		return disjunctions;
 	}
 
-	private void addNameSubsumers(GNode node, Names subsumers) {
+	private void addNameSubsumers(NodeX node, Names subsumers) {
 
 		NameClassifier classifier = node.getClassifier();
 
@@ -94,7 +94,7 @@ class NodeMatchers {
 		}
 	}
 
-	private PatternMatcher resolveProfilePattern(GNode node) {
+	private PatternMatcher resolveProfilePattern(NodeX node) {
 
 		PatternMatcher p = node.getProfilePatternMatcher();
 
