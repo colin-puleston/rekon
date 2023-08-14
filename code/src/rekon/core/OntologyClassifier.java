@@ -111,7 +111,6 @@ class OntologyClassifier {
 
 		void checkSubsumptions() {
 
-			System.out.println("  PASS: " + patternMatchCandidates.size());
 			new PatternSubsumedsChecker(patternMatchCandidates);
 			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
 
@@ -208,7 +207,6 @@ class OntologyClassifier {
 
 		while (initialiseNextPhase()) {
 
-			System.out.println("PHASE: ");
 			PassConfig config = new InitialPhasePassConfig();
 
 			while (config.potentialInferences()) {
