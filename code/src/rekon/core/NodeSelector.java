@@ -37,11 +37,6 @@ abstract class NodeSelector {
 	static final NodeSelector CLASSIABLE_PATTERN_VALUE = new ClassifiablePatternValue();
 	static final NodeSelector CLASSIABLE_DISJUNCT = new ClassifiableDisjunct();
 
-	static NodeSelector structureFor(GProperty property) {
-
-		return new StructureFor(property);
-	}
-
 	static private class AnyNode extends NodeSelector {
 
 		boolean select(GNode node) {
@@ -55,7 +50,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static abstract private class SelectiveSelector extends NodeSelector {
+	static private abstract class SelectiveSelector extends NodeSelector {
 
 		boolean anyMatches(Names nodes) {
 
@@ -71,7 +66,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static abstract private class StructureSelector extends SelectiveSelector {
+	static private class StructuredNode extends SelectiveSelector {
 
 		boolean select(GNode node) {
 
@@ -80,37 +75,9 @@ abstract class NodeSelector {
 			return p != null && select(p.getPattern().getSignatureRelations());
 		}
 
-		abstract boolean select(Collection<Relation> rels);
-	}
-
-	static private class StructuredNode extends StructureSelector {
-
 		boolean select(Collection<Relation> rels) {
 
 			return !rels.isEmpty();
-		}
-	}
-
-	static private class StructureFor extends StructureSelector {
-
-		private GProperty property;
-
-		StructureFor(GProperty property) {
-
-			this.property = property;
-		}
-
-		boolean select(Collection<Relation> rels) {
-
-			for (Relation r : rels) {
-
-				if (r.getProperty() == property) {
-
-					return true;
-				}
-			}
-
-			return false;
 		}
 	}
 

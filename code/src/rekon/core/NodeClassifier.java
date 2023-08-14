@@ -85,6 +85,9 @@ class NodeClassifier extends NameClassifier {
 
 	private InferredSubsumers inferredSubsumers = new NonMatcherInferredSubsumers();
 
+	private boolean anyPhaseInferredSubsumers = false;
+	private boolean anyLastPhaseInferredSubsumers = true;
+
 	private abstract class InferredSubsumers {
 
 		final NameSet allNewInferreds = new NameSet();
@@ -124,6 +127,7 @@ class NodeClassifier extends NameClassifier {
 			getSubsumers().addAll(allNewInferreds);
 
 			allNewInferreds.clear();
+			anyPhaseInferredSubsumers = true;
 
 			return true;
 		}
@@ -260,6 +264,20 @@ class NodeClassifier extends NameClassifier {
 	void setMatchableNode() {
 
 		inferredSubsumers = new MatcherInferredSubsumers();
+	}
+
+	boolean resetPhaseInferredSubsumers() {
+
+		anyLastPhaseInferredSubsumers = anyPhaseInferredSubsumers;
+
+		anyPhaseInferredSubsumers = false;
+
+		return anyLastPhaseInferredSubsumers;
+	}
+
+	boolean anyLastPhaseInferredSubsumers() {
+
+		return anyLastPhaseInferredSubsumers;
 	}
 
 	void checkAddInferredSubsumers(Names subsumers) {

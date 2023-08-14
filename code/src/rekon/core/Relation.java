@@ -40,6 +40,11 @@ public abstract class Relation extends Expression {
 		this.target = target;
 	}
 
+	boolean expandableRelation() {
+
+		return false;
+	}
+
 	GProperty getProperty() {
 
 		return property;
@@ -67,14 +72,9 @@ public abstract class Relation extends Expression {
 		return Names.NO_NAMES;
 	}
 
-	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getExpansions(NodeVisitMonitor visitMonitor) {
 
 		return Collections.emptySet();
-	}
-
-	boolean potentialNewSignatureRelations() {
-
-		return false;
 	}
 
 	void render(PatternRenderer r) {

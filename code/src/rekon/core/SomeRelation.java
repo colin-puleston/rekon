@@ -31,7 +31,7 @@ import java.util.*;
  */
 public class SomeRelation extends NodeRelation {
 
-	static private class ChainBasedSignatureExpander {
+	static private class ChainBasedExpander {
 
 		private NodeVisitMonitor visitMonitor;
 
@@ -94,7 +94,7 @@ public class SomeRelation extends NodeRelation {
 
 				c.collectFromName(target);
 
-				return c.getCollected();
+				return c.getCollectorSet();
 			}
 
 			private SomeRelation createLinkRelation(SomeRelation endSub) {
@@ -103,7 +103,7 @@ public class SomeRelation extends NodeRelation {
 			}
 		}
 
-		ChainBasedSignatureExpander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
+		ChainBasedExpander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
 
 			this.visitMonitor = visitMonitor;
 
@@ -168,26 +168,19 @@ public class SomeRelation extends NodeRelation {
 		super(property, target);
 	}
 
+	boolean expandableRelation() {
+
+		return getNodeProperty().anyChains();
+	}
+
 	NodeValue getNodeValueTarget() {
 
 		return (NodeValue)getTarget();
 	}
 
-	Collection<Relation> getSignatureExpansions(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getExpansions(NodeVisitMonitor visitMonitor) {
 
-		return new ChainBasedSignatureExpander(this, visitMonitor).getAllExpansions();
-	}
-
-	boolean potentialNewSignatureRelations() {
-
-		NodeProperty prop = getNodeProperty();
-
-		if (prop.anyChains()) {
-
-			return getTarget().anyNewSubsumers(NodeSelector.structureFor(prop));
-		}
-
-		return false;
+		return new ChainBasedExpander(this, visitMonitor).getAllExpansions();
 	}
 
 	private Collection<PropertyChain> getAllChains() {

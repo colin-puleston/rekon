@@ -33,14 +33,21 @@ class SignatureRelationCollector {
 
 	private NodeVisitMonitor visitMonitor;
 
-	private Set<Relation> collected;
-	private boolean additions = false;
+	private Set<Relation> collectorSet;
+	private boolean anyAdditions = false;
 
 	SignatureRelationCollector(NodeVisitMonitor visitMonitor) {
 
+		this(visitMonitor, new HashSet<Relation>());
+	}
+
+	SignatureRelationCollector(
+		NodeVisitMonitor visitMonitor,
+		Set<Relation> initialCollectorSet) {
+
 		this.visitMonitor = visitMonitor;
 
-		collected = getInitialCollected();
+		collectorSet = initialCollectorSet;
 	}
 
 	Set<Relation> collectFromName(GNode node) {
@@ -50,14 +57,14 @@ class SignatureRelationCollector {
 			collectFromSubsumers(node);
 		}
 
-		return collected;
+		return collectorSet;
 	}
 
-	void collectFromSubsumers(GNode node) {
+	void collectFromSubsumers(Names nodes) {
 
-		for (Name n : node.getSubsumers().getNames()) {
+		for (Name n : nodes.getNames()) {
 
-			collectFromRelations((GNode)n);
+			collectFromSubsumers((GNode)n);
 		}
 	}
 
@@ -65,31 +72,34 @@ class SignatureRelationCollector {
 
 		for (Relation r : relations) {
 
-			for (Relation sr : r.getSignatureExpansions(visitMonitor)) {
+			for (Relation sr : r.getExpansions(visitMonitor)) {
 
 				checkAdd(sr);
 			}
 		}
 	}
 
-	boolean additions() {
+	boolean anyAdditions() {
 
-		return additions;
+		return anyAdditions;
 	}
 
-	Set<Relation> getInitialCollected() {
+	Set<Relation> getCollectorSet() {
 
-		return new HashSet<Relation>();
+		return collectorSet;
 	}
 
-	Set<Relation> getCollected() {
+	Set<Relation> ensureCollectorSetUpdatable() {
 
-		return collected;
+		return collectorSet;
 	}
 
-	Set<Relation> ensureUpdatable(Set<Relation> collected) {
+	private void collectFromSubsumers(GNode node) {
 
-		return collected;
+		for (Name s : node.getSubsumers().getNames()) {
+
+			collectFromRelations((GNode)s);
+		}
 	}
 
 	private boolean collectFromRelations(GNode node) {
@@ -102,7 +112,7 @@ class SignatureRelationCollector {
 
 				Pattern p = pp.getPattern();
 
-				for (Relation r : p.resolveSignatureRelations(visitMonitor)) {
+				for (Relation r : p.getExpandedSignatureRelations(visitMonitor)) {
 
 					checkAdd(r);
 				}
@@ -116,7 +126,12 @@ class SignatureRelationCollector {
 
 	private void checkAdd(Relation r) {
 
-		for (Relation cr : new ArrayList<Relation>(collected)) {
+		if (collectorSet.contains(r)) {
+
+			return;
+		}
+
+		for (Relation cr : new ArrayList<Relation>(collectorSet)) {
 
 			if (r.subsumes(cr)) {
 
@@ -125,18 +140,18 @@ class SignatureRelationCollector {
 
 			if (cr.subsumes(r)) {
 
-				ensureUpdatable().remove(cr);
+				resolveCollectorSet().remove(cr);
 			}
 		}
 
-		ensureUpdatable().add(r);
-		additions |= true;
+		resolveCollectorSet().add(r);
+		anyAdditions |= true;
 	}
 
-	private Set<Relation> ensureUpdatable() {
+	private Set<Relation> resolveCollectorSet() {
 
-		collected = ensureUpdatable(collected);
+		collectorSet = ensureCollectorSetUpdatable();
 
-		return collected;
+		return collectorSet;
 	}
 }

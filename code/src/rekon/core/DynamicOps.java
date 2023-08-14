@@ -31,9 +31,9 @@ public class DynamicOps {
 
 	private Ontology ontology;
 
-	public DynamicOpsHandler createHandler(GNode nodeName) {
+	public DynamicOpsHandler createHandler(GNode nodes) {
 
-		return new DynamicNodeOpsHandler(nodeName);
+		return new DynamicNodeOpsHandler(nodes);
 	}
 
 	public DynamicOpsHandler createHandler(PatternCreator patternCreator) {

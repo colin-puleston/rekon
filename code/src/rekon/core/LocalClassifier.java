@@ -75,35 +75,28 @@ class LocalClassifier {
 
 			do {
 
+				checkExpandSignature(candidate);
 				classify(candidate);
 			}
-			while (checkReclassifiable(candidate));
+			while (reclassifiable(candidate));
 		}
 
 		abstract void classify(NodeMatcher candidate);
 
-		private boolean checkReclassifiable(NodeMatcher candidate) {
+		private void checkExpandSignature(NodeMatcher candidate) {
 
-			GNode n = candidate.getNode();
+			if (candidate instanceof PatternMatcher) {
 
-			if (n.getNodeClassifier().absorbNewInferredSubsumers()) {
+				Pattern p = ((PatternMatcher)candidate).getPattern();
 
-				PatternMatcher pp = n.getProfilePatternMatcher();
-
-				if (pp != null) {
-
-					Pattern p = pp.getPattern();
-
-					if (p.potentialSignatureUpdates()) {
-
-						p.resetSignatureRefs();
-					}
-				}
-
-				return true;
+				p.setSignatureExpansionRequired();
+				p.checkSignatureExpansion();
 			}
+		}
 
-			return false;
+		private boolean reclassifiable(NodeMatcher candidate) {
+
+			return candidate.getNode().getNodeClassifier().absorbNewInferredSubsumers();
 		}
 	}
 

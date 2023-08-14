@@ -250,7 +250,7 @@ class ClassDefinitionsCreator {
 
 	private GNode resolveGCIDisjunctToNode(Pattern disjunct) {
 
-		GNode n = disjunct.toSingleName();
+		GNode n = disjunct.toSingleNode();
 
 		return n != null ? n : addGCIImpliedClass(disjunct);
 	}

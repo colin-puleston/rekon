@@ -32,7 +32,7 @@ import java.util.*;
 class OntologyClassifier {
 
 	private List<Name> allNames;
-	private List<GNode> nodeNames;
+	private List<GNode> nodes;
 
 	private NodeMatchers nodeMatchers;
 
@@ -43,6 +43,9 @@ class OntologyClassifier {
 	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
 
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
+
+	private boolean initialPhase = true;
+	private boolean nextPhaseRequired = true;
 
 	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
@@ -152,29 +155,20 @@ class OntologyClassifier {
 		}
 	}
 
-	private abstract class InitialPhasePassConfig extends PassConfig {
+	private class InitialPhasePassConfig extends PassConfig {
 
 		boolean initialPhasePass() {
 
 			return true;
 		}
-	}
-
-	private class PatternRestrictionPassConfig extends InitialPhasePassConfig {
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
-			p.setRestrictedSignature();
+			boolean expanded = p.checkSignatureExpansion();
 
-			return true;
-		}
-	}
+			nextPhaseRequired |= expanded;
 
-	private class PatternExpansionPassConfig extends InitialPhasePassConfig {
-
-		boolean potentialPatternMatchCandidate(Pattern p) {
-
-			return p.setExpandedSignature();
+			return initialPhase || expanded;
 		}
 	}
 
@@ -193,11 +187,11 @@ class OntologyClassifier {
 
 	OntologyClassifier(
 		List<Name> allNames,
-		List<GNode> nodeNames,
+		List<GNode> nodes,
 		NodeMatchers nodeMatchers) {
 
 		this.allNames = allNames;
-		this.nodeNames = nodeNames;
+		this.nodes = nodes;
 		this.nodeMatchers = nodeMatchers;
 
 		profilePatterns = nodeMatchers.getProfilePatterns();
@@ -211,17 +205,58 @@ class OntologyClassifier {
 
 	private void classify() {
 
-		perfomExhaustivePasses(new PatternRestrictionPassConfig());
-		perfomExhaustivePasses(new PatternExpansionPassConfig());
+		while (initialiseNextPhase()) {
+
+			PassConfig config = new InitialPhasePassConfig();
+
+			while (config.potentialInferences()) {
+
+				config = perfomPass(config);
+			}
+
+			initialPhase &= false;
+		}
 
 		NameClassification.completeAllClassifications(allNames);
 	}
 
-	private void perfomExhaustivePasses(PassConfig passConfig) {
+	private boolean initialiseNextPhase() {
 
-		while (passConfig.potentialInferences()) {
+		if (nextPhaseRequired) {
 
-			passConfig = perfomPass(passConfig);
+			nextPhaseRequired = false;
+
+			if (initialPhase || resetAllPhaseInferredSubsumers()) {
+
+				setAllSignatureExpansionRequireds();
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean resetAllPhaseInferredSubsumers() {
+
+		boolean anyInfs = false;
+
+		for (GNode n : nodes) {
+
+			if (n.getNodeClassifier().resetPhaseInferredSubsumers()) {
+
+				anyInfs |= true;
+			}
+		}
+
+		return anyInfs;
+	}
+
+	private void setAllSignatureExpansionRequireds() {
+
+		for (PatternMatcher p : profilePatterns) {
+
+			p.getPattern().setSignatureExpansionRequired();
 		}
 	}
 
@@ -229,41 +264,12 @@ class OntologyClassifier {
 
 		config.checkSubsumptions();
 
-		expandAllNewInferences();
+		NodeClassifier.expandAllNewInferredSubsumers(nodes);
 
-		PassConfig nextPassConfig = new DefaultPassConfig();
+		PassConfig nextConfig = new DefaultPassConfig();
 
-		absorbAllNewInferences();
-		resetPotentiallyUpdatedSignatureRefs();
+		NodeClassifier.absorbAllNewInferredSubsumers(nodes);
 
-		return nextPassConfig;
-	}
-
-	private void expandAllNewInferences() {
-
-		NodeClassifier.expandAllNewInferredSubsumers(nodeNames);
-	}
-
-	private void absorbAllNewInferences() {
-
-		NodeClassifier.absorbAllNewInferredSubsumers(nodeNames);
-	}
-
-	private void resetPotentiallyUpdatedSignatureRefs() {
-
-		List<PatternMatcher> potentiallyUpdateds = new ArrayList<PatternMatcher>();
-
-		for (PatternMatcher p : profilePatterns) {
-
-			if (p.getPattern().potentialSignatureUpdates()) {
-
-				potentiallyUpdateds.add(p);
-			}
-		}
-
-		for (PatternMatcher p : potentiallyUpdateds) {
-
-			p.getPattern().resetSignatureRefs();
-		}
+		return nextConfig;
 	}
 }

@@ -32,17 +32,17 @@ import java.util.*;
 public class Ontology {
 
 	private List<Name> allNames = new ArrayList<Name>();
-	private List<GNode> nodeNames = new ArrayList<GNode>();
+	private List<GNode> nodes = new ArrayList<GNode>();
 
 	private PatternSubsumers patternSubsumers;
 	private PatternSubsumeds patternSubsumeds;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		nodeNames.addAll(names.getClassNodes());
-		nodeNames.addAll(names.getIndividualNodes());
+		nodes.addAll(names.getClassNodes());
+		nodes.addAll(names.getIndividualNodes());
 
-		allNames.addAll(nodeNames);
+		allNames.addAll(nodes);
 		allNames.addAll(names.getNodeProperties());
 		allNames.addAll(names.getDataProperties());
 
@@ -50,7 +50,7 @@ public class Ontology {
 
 		processAllNamesPostAdditions();
 
-		new OntologyClassifier(allNames, nodeNames, nodeMatchers);
+		new OntologyClassifier(allNames, nodes, nodeMatchers);
 
 		patternSubsumers = new PatternSubsumers(nodeMatchers);
 		patternSubsumeds = new PatternSubsumeds(nodeMatchers);
@@ -69,7 +69,7 @@ public class Ontology {
 	void addFreeClass(FreeClassNode cn) {
 
 		allNames.add(cn);
-		nodeNames.add(cn);
+		nodes.add(cn);
 	}
 
 	PatternSubsumers getPatternSubsumers() {
