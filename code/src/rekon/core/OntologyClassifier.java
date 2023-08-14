@@ -164,7 +164,7 @@ class OntologyClassifier {
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
-			boolean expanded = p.updateForSignatureExpansion();
+			boolean expanded = p.updateForProfileExpansion();
 
 			nextPhaseRequired |= expanded;
 
@@ -228,7 +228,7 @@ class OntologyClassifier {
 
 			if (initialPhase || resetAllPhaseInferredSubsumers()) {
 
-				setAllSignatureExpansionCheckRequireds();
+				setAllProfileExpansionCheckRequireds();
 
 				return true;
 			}
@@ -252,11 +252,11 @@ class OntologyClassifier {
 		return anyInfs;
 	}
 
-	private void setAllSignatureExpansionCheckRequireds() {
+	private void setAllProfileExpansionCheckRequireds() {
 
 		for (PatternMatcher p : profilePatterns) {
 
-			p.getPattern().setSignatureExpansionCheckRequired();
+			p.getPattern().setProfileExpansionCheckRequired();
 		}
 	}
 

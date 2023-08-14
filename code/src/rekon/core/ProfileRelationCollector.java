@@ -29,19 +29,19 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class SignatureRelationCollector {
+class ProfileRelationCollector {
 
 	private NodeVisitMonitor visitMonitor;
 
 	private Set<Relation> collectorSet;
 	private boolean anyAdditions = false;
 
-	SignatureRelationCollector(NodeVisitMonitor visitMonitor) {
+	ProfileRelationCollector(NodeVisitMonitor visitMonitor) {
 
 		this(visitMonitor, new HashSet<Relation>());
 	}
 
-	SignatureRelationCollector(
+	ProfileRelationCollector(
 		NodeVisitMonitor visitMonitor,
 		Set<Relation> initialCollectorSet) {
 
@@ -112,7 +112,7 @@ class SignatureRelationCollector {
 
 				Pattern p = pp.getPattern();
 
-				for (Relation r : p.getExpandedSignatureRelations(visitMonitor)) {
+				for (Relation r : p.getExpandedProfileRelations(visitMonitor)) {
 
 					checkAdd(r);
 				}

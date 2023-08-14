@@ -72,7 +72,7 @@ abstract class NodeSelector {
 
 			PatternMatcher p = node.getProfilePatternMatcher();
 
-			return p != null && select(p.getPattern().getSignatureRelations());
+			return p != null && select(p.getPattern().getProfileRelations());
 		}
 
 		boolean select(Collection<Relation> rels) {

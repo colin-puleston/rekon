@@ -31,7 +31,7 @@ abstract class NameCollector {
 
 	abstract boolean definition();
 
-	boolean signature() {
+	boolean profile() {
 
 		return !definition();
 	}

@@ -75,7 +75,7 @@ class LocalClassifier {
 
 			do {
 
-				checkExpandSignature(candidate);
+				checkExpandProfile(candidate);
 				classify(candidate);
 			}
 			while (reclassifiable(candidate));
@@ -83,14 +83,14 @@ class LocalClassifier {
 
 		abstract void classify(NodeMatcher candidate);
 
-		private void checkExpandSignature(NodeMatcher candidate) {
+		private void checkExpandProfile(NodeMatcher candidate) {
 
 			if (candidate instanceof PatternMatcher) {
 
 				Pattern p = ((PatternMatcher)candidate).getPattern();
 
-				p.setSignatureExpansionCheckRequired();
-				p.updateForSignatureExpansion();
+				p.setProfileExpansionCheckRequired();
+				p.updateForProfileExpansion();
 			}
 		}
 

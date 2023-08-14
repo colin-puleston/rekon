@@ -46,7 +46,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			}
 			else {
 
-				collectForSignatureNode(n);
+				collectForProfileNode(n);
 			}
 		}
 
@@ -75,7 +75,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			}
 		}
 
-		private void collectForSignatureNode(NodeX n) {
+		private void collectForProfileNode(NodeX n) {
 
 			collectName(n);
 
@@ -94,7 +94,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 					for (Name d : dj.getDisjuncts().getNames()) {
 
-						collectForSignatureNode((NodeX)d);
+						collectForProfileNode((NodeX)d);
 					}
 				}
 			}

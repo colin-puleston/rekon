@@ -90,7 +90,7 @@ public class SomeRelation extends NodeRelation {
 
 			private Set<Relation> getAllFromTarget(NodeX target) {
 
-				SignatureRelationCollector c = new SignatureRelationCollector(visitMonitor);
+				ProfileRelationCollector c = new ProfileRelationCollector(visitMonitor);
 
 				c.collectFromName(target);
 

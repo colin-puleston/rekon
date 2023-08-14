@@ -34,27 +34,27 @@ public class Pattern extends Expression {
 	private NameList nodes = new NameList();
 
 	private Set<Relation> relations = new HashSet<Relation>();
-	private Set<Relation> signatureRelations = relations;
+	private Set<Relation> profileRelations = relations;
 
-	private SignatureExpansionOption signatureExpansionOption = SignatureExpansionOption.NONE;
+	private ProfileExpansionOption profileExpansionOption = ProfileExpansionOption.NONE;
 
-	private enum SignatureExpansionOption {NONE, PRE_EXPANDED, CHECK_EXPANSION}
+	private enum ProfileExpansionOption {NONE, PRE_EXPANDED, CHECK_EXPANSION}
 
-	private class SignatureExpander extends SignatureRelationCollector {
+	private class ProfileExpander extends ProfileRelationCollector {
 
-		SignatureExpander(NodeVisitMonitor visitMonitor) {
+		ProfileExpander(NodeVisitMonitor visitMonitor) {
 
-			super(visitMonitor, signatureRelations);
+			super(visitMonitor, profileRelations);
 		}
 
 		Set<Relation> ensureCollectorSetUpdatable() {
 
-			if (signatureRelations == relations) {
+			if (profileRelations == relations) {
 
-				signatureRelations = new HashSet<Relation>(relations);
+				profileRelations = new HashSet<Relation>(relations);
 			}
 
-			return signatureRelations;
+			return profileRelations;
 		}
 	}
 
@@ -148,19 +148,19 @@ public class Pattern extends Expression {
 		}
 	}
 
-	void setSignatureExpansionCheckRequired() {
+	void setProfileExpansionCheckRequired() {
 
-		signatureExpansionOption = SignatureExpansionOption.CHECK_EXPANSION;
+		profileExpansionOption = ProfileExpansionOption.CHECK_EXPANSION;
 	}
 
-	boolean updateForSignatureExpansion() {
+	boolean updateForProfileExpansion() {
 
 		boolean expanded = false;
 
-		switch (signatureExpansionOption) {
+		switch (profileExpansionOption) {
 
 			case CHECK_EXPANSION:
-				expanded = checkSignatureExpansion(null);
+				expanded = checkProfileExpansion(null);
 				break;
 
 			case PRE_EXPANDED:
@@ -171,7 +171,7 @@ public class Pattern extends Expression {
 				throw new Error("Should never happen!");
 		}
 
-		signatureExpansionOption = SignatureExpansionOption.NONE;
+		profileExpansionOption = ProfileExpansionOption.NONE;
 
 		return expanded;
 	}
@@ -184,7 +184,7 @@ public class Pattern extends Expression {
 
 			collector = collector.forNextRank();
 
-			for (Relation r : getRelations(collector.signature())) {
+			for (Relation r : getRelations(collector.profile())) {
 
 				r.collectNames(collector);
 			}
@@ -200,7 +200,7 @@ public class Pattern extends Expression {
 
 		for (Relation r : relations) {
 
-			if (!subsumesAnySignatureRelation(r, p)) {
+			if (!subsumesAnyProfileRelation(r, p)) {
 
 				return false;
 			}
@@ -219,7 +219,7 @@ public class Pattern extends Expression {
 			}
 		}
 
-		for (Relation r : getSignatureRelations()) {
+		for (Relation r : getProfileRelations()) {
 
 			if (r.getProperty().classifiablePatternProperty()) {
 
@@ -246,38 +246,38 @@ public class Pattern extends Expression {
 		return relations;
 	}
 
-	Collection<Relation> getSignatureRelations() {
+	Collection<Relation> getProfileRelations() {
 
-		return signatureRelations;
+		return profileRelations;
 	}
 
-	Collection<Relation> getExpandedSignatureRelations(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getExpandedProfileRelations(NodeVisitMonitor visitMonitor) {
 
-		if (signatureExpansionOption == SignatureExpansionOption.CHECK_EXPANSION) {
+		if (profileExpansionOption == ProfileExpansionOption.CHECK_EXPANSION) {
 
-			Set<Relation> preSigRels = new HashSet<Relation>(signatureRelations);
+			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
 
-			if (checkSignatureExpansion(visitMonitor)) {
+			if (checkProfileExpansion(visitMonitor)) {
 
 				if (visitMonitor.incompleteTraversal()) {
 
-					Set<Relation> postSigRels = new HashSet<Relation>(signatureRelations);
+					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
 
-					signatureRelations = preSigRels;
+					profileRelations = preProfileRels;
 
-					return postSigRels;
+					return postProfileRels;
 				}
 
-				signatureExpansionOption = SignatureExpansionOption.PRE_EXPANDED;
+				profileExpansionOption = ProfileExpansionOption.PRE_EXPANDED;
 			}
 		}
 
-		return signatureRelations;
+		return profileRelations;
 	}
 
-	boolean nestedPattern(boolean signature) {
+	boolean nestedPattern(boolean profile) {
 
-		return !getRelations(signature).isEmpty();
+		return !getRelations(profile).isEmpty();
 	}
 
 	void render(PatternRenderer r) {
@@ -300,7 +300,7 @@ public class Pattern extends Expression {
 		}
 	}
 
-	private boolean checkSignatureExpansion(NodeVisitMonitor visitMonitor) {
+	private boolean checkProfileExpansion(NodeVisitMonitor visitMonitor) {
 
 		boolean newSubsumers = anyLastPhaseInferredSubsumers();
 		boolean expandableRels = anyExpandableRelations();
@@ -312,7 +312,7 @@ public class Pattern extends Expression {
 				visitMonitor = new NodeVisitMonitor(nodes);
 			}
 
-			SignatureExpander e = new SignatureExpander(visitMonitor);
+			ProfileExpander e = new ProfileExpander(visitMonitor);
 
 			if (newSubsumers) {
 
@@ -382,9 +382,9 @@ public class Pattern extends Expression {
 		return false;
 	}
 
-	private boolean subsumesAnySignatureRelation(Relation r, Pattern p) {
+	private boolean subsumesAnyProfileRelation(Relation r, Pattern p) {
 
-		for (Relation sr : p.getSignatureRelations()) {
+		for (Relation sr : p.getProfileRelations()) {
 
 			if (r.subsumes(sr)) {
 
@@ -416,9 +416,9 @@ public class Pattern extends Expression {
 		}
 	}
 
-	private Collection<Relation> getRelations(boolean signature) {
+	private Collection<Relation> getRelations(boolean profile) {
 
-		return signature ? getSignatureRelations() : relations;
+		return profile ? getProfileRelations() : relations;
 	}
 
 	private String nodesToString() {

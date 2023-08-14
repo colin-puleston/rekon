@@ -56,7 +56,7 @@ abstract class Value extends Expression {
 		return null;
 	}
 
-	Collection<Relation> getSignatureRelations(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getProfileRelations(NodeVisitMonitor visitMonitor) {
 
 		return Collections.emptySet();
 	}
