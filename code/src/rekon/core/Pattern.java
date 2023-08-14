@@ -38,7 +38,7 @@ public class Pattern extends Expression {
 
 	private SignatureExpansionOption signatureExpansionOption = SignatureExpansionOption.NONE;
 
-	private enum SignatureExpansionOption {NONE, PRE_EXPANDED, EXPANDING}
+	private enum SignatureExpansionOption {NONE, PRE_EXPANDED, CHECK_EXPANSION}
 
 	private class SignatureExpander extends SignatureRelationCollector {
 
@@ -148,19 +148,19 @@ public class Pattern extends Expression {
 		}
 	}
 
-	void setSignatureExpansionRequired() {
+	void setSignatureExpansionCheckRequired() {
 
-		signatureExpansionOption = SignatureExpansionOption.EXPANDING;
+		signatureExpansionOption = SignatureExpansionOption.CHECK_EXPANSION;
 	}
 
-	boolean checkSignatureExpansion() {
+	boolean updateForSignatureExpansion() {
 
 		boolean expanded = false;
 
 		switch (signatureExpansionOption) {
 
-			case EXPANDING:
-				expanded = expandSignature();
+			case CHECK_EXPANSION:
+				expanded = checkSignatureExpansion(null);
 				break;
 
 			case PRE_EXPANDED:
@@ -253,11 +253,11 @@ public class Pattern extends Expression {
 
 	Collection<Relation> getExpandedSignatureRelations(NodeVisitMonitor visitMonitor) {
 
-		if (signatureExpansionOption == SignatureExpansionOption.EXPANDING) {
+		if (signatureExpansionOption == SignatureExpansionOption.CHECK_EXPANSION) {
 
 			Set<Relation> preSigRels = new HashSet<Relation>(signatureRelations);
 
-			if (expandSignature(visitMonitor)) {
+			if (checkSignatureExpansion(visitMonitor)) {
 
 				if (visitMonitor.incompleteTraversal()) {
 
@@ -300,17 +300,17 @@ public class Pattern extends Expression {
 		}
 	}
 
-	private boolean expandSignature() {
-
-		return expandSignature(new NodeVisitMonitor(nodes));
-	}
-
-	private boolean expandSignature(NodeVisitMonitor visitMonitor) {
+	private boolean checkSignatureExpansion(NodeVisitMonitor visitMonitor) {
 
 		boolean newSubsumers = anyLastPhaseInferredSubsumers();
 		boolean expandableRels = anyExpandableRelations();
 
 		if (newSubsumers || expandableRels) {
+
+			if (visitMonitor == null) {
+
+				visitMonitor = new NodeVisitMonitor(nodes);
+			}
 
 			SignatureExpander e = new SignatureExpander(visitMonitor);
 

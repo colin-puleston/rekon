@@ -111,6 +111,7 @@ class OntologyClassifier {
 
 		void checkSubsumptions() {
 
+			System.out.println("  PASS: " + patternMatchCandidates.size());
 			new PatternSubsumedsChecker(patternMatchCandidates);
 			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
 
@@ -164,7 +165,7 @@ class OntologyClassifier {
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
-			boolean expanded = p.checkSignatureExpansion();
+			boolean expanded = p.updateForSignatureExpansion();
 
 			nextPhaseRequired |= expanded;
 
@@ -207,6 +208,7 @@ class OntologyClassifier {
 
 		while (initialiseNextPhase()) {
 
+			System.out.println("PHASE: ");
 			PassConfig config = new InitialPhasePassConfig();
 
 			while (config.potentialInferences()) {
@@ -228,7 +230,7 @@ class OntologyClassifier {
 
 			if (initialPhase || resetAllPhaseInferredSubsumers()) {
 
-				setAllSignatureExpansionRequireds();
+				setAllSignatureExpansionCheckRequireds();
 
 				return true;
 			}
@@ -252,11 +254,11 @@ class OntologyClassifier {
 		return anyInfs;
 	}
 
-	private void setAllSignatureExpansionRequireds() {
+	private void setAllSignatureExpansionCheckRequireds() {
 
 		for (PatternMatcher p : profilePatterns) {
 
-			p.getPattern().setSignatureExpansionRequired();
+			p.getPattern().setSignatureExpansionCheckRequired();
 		}
 	}
 

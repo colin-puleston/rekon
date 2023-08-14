@@ -89,8 +89,8 @@ class LocalClassifier {
 
 				Pattern p = ((PatternMatcher)candidate).getPattern();
 
-				p.setSignatureExpansionRequired();
-				p.checkSignatureExpansion();
+				p.setSignatureExpansionCheckRequired();
+				p.updateForSignatureExpansion();
 			}
 		}
 
