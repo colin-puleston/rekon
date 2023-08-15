@@ -32,31 +32,9 @@ import java.util.*;
 public class Pattern extends Expression {
 
 	private NameList nodes = new NameList();
+	private Set<Relation> directRelations = new HashSet<Relation>();
 
-	private Set<Relation> relations = new HashSet<Relation>();
-	private Set<Relation> profileRelations = relations;
-
-	private ProfileExpansionOption profileExpansionOption = ProfileExpansionOption.NONE;
-
-	private enum ProfileExpansionOption {NONE, PRE_EXPANDED, CHECK_EXPANSION}
-
-	private class ProfileExpander extends ProfileRelationCollector {
-
-		ProfileExpander(NodeVisitMonitor visitMonitor) {
-
-			super(visitMonitor, profileRelations);
-		}
-
-		Set<Relation> ensureCollectorSetUpdatable() {
-
-			if (profileRelations == relations) {
-
-				profileRelations = new HashSet<Relation>(relations);
-			}
-
-			return profileRelations;
-		}
-	}
+	private ProfileRelations profileRelations = null;
 
 	public Pattern(NodeX node) {
 
@@ -68,30 +46,30 @@ public class Pattern extends Expression {
 		this.nodes.addAll(nodes);
 	}
 
-	public Pattern(NodeX node, Relation relation) {
+	public Pattern(NodeX node, Relation directRelation) {
 
 		this(node);
 
-		relations.add(relation);
+		directRelations.add(directRelation);
 	}
 
-	public Pattern(NodeX node, Collection<Relation> relations) {
+	public Pattern(NodeX node, Collection<Relation> directRelations) {
 
 		this(node);
 
-		this.relations.addAll(relations);
+		this.directRelations.addAll(directRelations);
 	}
 
-	public Pattern(Names nodes, Collection<Relation> relations) {
+	public Pattern(Names nodes, Collection<Relation> directRelations) {
 
 		this(nodes);
 
-		this.relations.addAll(relations);
+		this.directRelations.addAll(directRelations);
 	}
 
 	public NodeX toSingleNode() {
 
-		if (nodes.size() == 1 && relations.isEmpty()) {
+		if (nodes.size() == 1 && directRelations.isEmpty()) {
 
 			return (NodeX)nodes.getFirstName();
 		}
@@ -102,10 +80,10 @@ public class Pattern extends Expression {
 	Pattern combineWith(Pattern other) {
 
 		NameSet newNodes = new NameSet(nodes);
-		Set<Relation> newRelations = new HashSet<Relation>(relations);
+		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
 		newNodes.addAll(other.nodes);
-		newRelations.addAll(other.relations);
+		newRelations.addAll(other.directRelations);
 
 		if (newNodes.size() > 1) {
 
@@ -120,7 +98,7 @@ public class Pattern extends Expression {
 
 	Pattern extend(Relation extraRelation) {
 
-		Set<Relation> newRelations = new HashSet<Relation>(relations);
+		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
 		newRelations.add(extraRelation);
 
@@ -129,7 +107,7 @@ public class Pattern extends Expression {
 
 	Pattern extend(Collection<Relation> extraRelations) {
 
-		Set<Relation> newRelations = new HashSet<Relation>(relations);
+		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
 		newRelations.addAll(extraRelations);
 
@@ -140,7 +118,7 @@ public class Pattern extends Expression {
 
 		registerAsDefinitionRefed(nodes, MatchRole.PATTERN_ROOT);
 
-		for (Relation r : relations) {
+		for (Relation r : directRelations) {
 
 			r.getProperty().registerAsDefinitionRefed(MatchRole.PATTERN_RELATION);
 
@@ -150,30 +128,12 @@ public class Pattern extends Expression {
 
 	void setProfileExpansionCheckRequired() {
 
-		profileExpansionOption = ProfileExpansionOption.CHECK_EXPANSION;
+		getProfileRelations().setExpansionCheckRequired();
 	}
 
 	boolean updateForProfileExpansion() {
 
-		boolean expanded = false;
-
-		switch (profileExpansionOption) {
-
-			case CHECK_EXPANSION:
-				expanded = checkProfileExpansion(null);
-				break;
-
-			case PRE_EXPANDED:
-				expanded = true;
-				break;
-
-			case NONE:
-				throw new Error("Should never happen!");
-		}
-
-		profileExpansionOption = ProfileExpansionOption.NONE;
-
-		return expanded;
+		return getProfileRelations().updateForExpansion();
 	}
 
 	void collectNames(NameCollector collector) {
@@ -198,9 +158,9 @@ public class Pattern extends Expression {
 
 	boolean subsumesRelations(Pattern p) {
 
-		for (Relation r : relations) {
+		for (Relation r : directRelations) {
 
-			if (!subsumesAnyProfileRelation(r, p)) {
+			if (!p.getProfileRelations().anySubsumedBy(r)) {
 
 				return false;
 			}
@@ -219,7 +179,7 @@ public class Pattern extends Expression {
 			}
 		}
 
-		for (Relation r : getProfileRelations()) {
+		for (Relation r : getProfileRelations().getAll()) {
 
 			if (r.getProperty().classifiablePatternProperty()) {
 
@@ -241,35 +201,16 @@ public class Pattern extends Expression {
 		return nodes;
 	}
 
-	Collection<Relation> getDirectRelations() {
+	Set<Relation> getDirectRelations() {
 
-		return relations;
+		return directRelations;
 	}
 
-	Collection<Relation> getProfileRelations() {
+	ProfileRelations getProfileRelations() {
 
-		return profileRelations;
-	}
+		if (profileRelations == null) {
 
-	Collection<Relation> getExpandedProfileRelations(NodeVisitMonitor visitMonitor) {
-
-		if (profileExpansionOption == ProfileExpansionOption.CHECK_EXPANSION) {
-
-			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
-
-			if (checkProfileExpansion(visitMonitor)) {
-
-				if (visitMonitor.incompleteTraversal()) {
-
-					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
-
-					profileRelations = preProfileRels;
-
-					return postProfileRels;
-				}
-
-				profileExpansionOption = ProfileExpansionOption.PRE_EXPANDED;
-			}
+			profileRelations = new ProfileRelations(this);
 		}
 
 		return profileRelations;
@@ -286,7 +227,7 @@ public class Pattern extends Expression {
 
 		r = r.nextLevel();
 
-		for (Relation re : relations) {
+		for (Relation re : directRelations) {
 
 			re.render(r);
 		}
@@ -298,62 +239,6 @@ public class Pattern extends Expression {
 
 			n.registerAsDefinitionRefed(role);
 		}
-	}
-
-	private boolean checkProfileExpansion(NodeVisitMonitor visitMonitor) {
-
-		boolean newSubsumers = anyLastPhaseInferredSubsumers();
-		boolean expandableRels = anyExpandableRelations();
-
-		if (newSubsumers || expandableRels) {
-
-			if (visitMonitor == null) {
-
-				visitMonitor = new NodeVisitMonitor(nodes);
-			}
-
-			ProfileExpander e = new ProfileExpander(visitMonitor);
-
-			if (newSubsumers) {
-
-				e.collectFromSubsumers(nodes);
-			}
-
-			if (expandableRels) {
-
-				e.collectFromRelationExpansions(relations);
-			}
-
-			return e.anyAdditions();
-		}
-
-		return false;
-	}
-
-	private boolean anyLastPhaseInferredSubsumers() {
-
-		for (Name n : nodes.getNames()) {
-
-			if (((NodeX)n).getNodeClassifier().anyLastPhaseInferredSubsumers()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean anyExpandableRelations() {
-
-		for (Relation r : relations) {
-
-			if (r.expandableRelation()) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private boolean subsumesAllNames(Pattern p) {
@@ -374,19 +259,6 @@ public class Pattern extends Expression {
 		for (Name pn : p.nodes.getNames()) {
 
 			if (n.subsumes(pn)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean subsumesAnyProfileRelation(Relation r, Pattern p) {
-
-		for (Relation sr : p.getProfileRelations()) {
-
-			if (r.subsumes(sr)) {
 
 				return true;
 			}
@@ -418,7 +290,7 @@ public class Pattern extends Expression {
 
 	private Collection<Relation> getRelations(boolean profile) {
 
-		return profile ? getProfileRelations() : relations;
+		return profile ? getProfileRelations().getAll() : directRelations;
 	}
 
 	private String nodesToString() {

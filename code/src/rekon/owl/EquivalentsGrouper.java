@@ -90,7 +90,7 @@ class EquivalentsGrouper {
 
 		abstract NodeSet<E> createGroupsNode(Set<Node<E>> groups);
 
-		void checkAddEntities(Set<E> entities, Name name) {
+		void checkAddEntity(Set<E> entities, Name name) {
 
 			if (name.mapped()) {
 
@@ -102,11 +102,11 @@ class EquivalentsGrouper {
 
 			Set<E> entities = new HashSet<E>();
 
-			checkAddEntities(entities, name);
+			checkAddEntity(entities, name);
 
 			for (Name e : equivs.getNames()) {
 
-				checkAddEntities(entities, e);
+				checkAddEntity(entities, e);
 			}
 
 			if (!entities.isEmpty()) {
@@ -129,7 +129,7 @@ class EquivalentsGrouper {
 
 			for (Name n : equivs.getNames()) {
 
-				checkAddEntities(entities, n);
+				checkAddEntity(entities, n);
 			}
 
 			return new OWLClassNode(entities);

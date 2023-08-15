@@ -112,7 +112,7 @@ class ProfileRelationCollector {
 
 				Pattern p = pp.getPattern();
 
-				for (Relation r : p.getExpandedProfileRelations(visitMonitor)) {
+				for (Relation r : p.getProfileRelations().ensureExpansions(visitMonitor)) {
 
 					checkAdd(r);
 				}
