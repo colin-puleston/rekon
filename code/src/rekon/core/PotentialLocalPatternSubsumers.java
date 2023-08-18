@@ -36,27 +36,40 @@ class PotentialLocalPatternSubsumers {
 	private SimplePotentials simplePotentials = new SimplePotentials();
 	private NestedPotentials nestedPotentials = new NestedPotentials();
 
+	private class PatternMatcherRef {
+
+		final PatternMatcher matcher;
+
+		PatternMatcherRef(PatternMatcher matcher) {
+
+			this.matcher = matcher;
+		}
+	}
+
 	private abstract class CategoryPotentials
 								extends
-									PotentialSubsumptions<PatternMatcher> {
+									PotentialSubsumptions<PatternMatcherRef> {
 
-		private List<PatternMatcher> categoryOptions = null;
+		private List<PatternMatcherRef> categoryOptions = null;
 
-		Collection<PatternMatcher> getPotentialsFor(Pattern request) {
+		void collectPotentialsFor(Pattern request, List<PatternMatcher> collected) {
 
 			checkInitialised();
 
-			return getPotentialsFor(getRankedProfileNames(request));
+			for (PatternMatcherRef ref : getPotentialsFor(getRankedProfileNames(request))) {
+
+				collected.add(ref.matcher);
+			}
 		}
 
-		List<PatternMatcher> getAllOptions() {
+		List<PatternMatcherRef> getAllOptions() {
 
 			return categoryOptions;
 		}
 
-		List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
+		List<Names> getOptionMatchNames(PatternMatcherRef option, int startRank, int stopRank) {
 
-			return getRankedDefinitionNames(option.getPattern());
+			return getRankedDefinitionNames(option.matcher.getPattern());
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -86,7 +99,7 @@ class PotentialLocalPatternSubsumers {
 
 			if (categoryOptions == null) {
 
-				categoryOptions = new ArrayList<PatternMatcher>();
+				categoryOptions = new ArrayList<PatternMatcherRef>();
 
 				addCategoryOptions();
 				initialiseOptionRanks();
@@ -101,7 +114,7 @@ class PotentialLocalPatternSubsumers {
 
 				if (p.nestedPattern(false) == nestedPatterns()) {
 
-					categoryOptions.add(d);
+					categoryOptions.add(new PatternMatcherRef(d));
 				}
 			}
 		}
@@ -167,11 +180,11 @@ class PotentialLocalPatternSubsumers {
 
 		List<PatternMatcher> all = new ArrayList<PatternMatcher>();
 
-		all.addAll(simplePotentials.getPotentialsFor(request));
+		simplePotentials.collectPotentialsFor(request, all);
 
 		if (request.nestedPattern(true)) {
 
-			all.addAll(nestedPotentials.getPotentialsFor(request));
+			nestedPotentials.collectPotentialsFor(request, all);
 		}
 
 		return all;
