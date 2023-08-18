@@ -33,22 +33,6 @@ public abstract class NodeX extends Name {
 
 	static private final List<NodeMatcher> NO_MATCHERS = Collections.emptyList();
 
-	static private class ProfilePatternMatcher extends PatternMatcher {
-
-		ProfilePatternMatcher(NodeX node, Pattern pattern) {
-
-			super(node, pattern);
-		}
-	}
-
-	static private class DefinitionPatternMatcher extends PatternMatcher {
-
-		DefinitionPatternMatcher(NodeX node, Pattern pattern) {
-
-			super(node, pattern);
-		}
-	}
-
 	private List<NodeMatcher> matchers = NO_MATCHERS;
 
 	PatternMatcher addProfilePatternMatcher() {
@@ -58,17 +42,12 @@ public abstract class NodeX extends Name {
 
 	PatternMatcher addProfilePatternMatcher(Pattern pattern) {
 
-		if (getProfilePatternMatcher() != null) {
-
-			throw new Error("Attempting to add second profile-pattern for node: " + this);
-		}
-
-		return addMatcher(new ProfilePatternMatcher(this, pattern));
+		return addPatternMatcher(pattern, true);
 	}
 
 	PatternMatcher addDefinitionPatternMatcher(Pattern pattern) {
 
-		return addMatcher(new DefinitionPatternMatcher(this, pattern));
+		return addPatternMatcher(pattern, false);
 	}
 
 	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends NodeX> disjuncts) {
@@ -83,19 +62,21 @@ public abstract class NodeX extends Name {
 
 	PatternMatcher getProfilePatternMatcher() {
 
-		List<PatternMatcher> ps = selectPatternMatchers(ProfilePatternMatcher.class);
+		List<PatternMatcher> ps = selectMatchers(PatternMatcher.class);
 
 		return ps.isEmpty() ? null : ps.get(0);
 	}
 
 	List<PatternMatcher> getDefinitionPatternMatchers() {
 
-		return selectPatternMatchers(DefinitionPatternMatcher.class);
+		List<PatternMatcher> ps = selectMatchers(PatternMatcher.class);
+
+		return ps.size() > 1 ? ps.subList(1, ps.size()) : Collections.emptyList();
 	}
 
 	List<DisjunctionMatcher> getDisjunctionMatchers() {
 
-		return selectMatchers(DisjunctionMatcher.class, DisjunctionMatcher.class);
+		return selectMatchers(DisjunctionMatcher.class);
 	}
 
 	boolean subsumes(Name name) {
@@ -142,6 +123,16 @@ public abstract class NodeX extends Name {
 		return new NodeClassifier(this);
 	}
 
+	private PatternMatcher addPatternMatcher(Pattern pattern, boolean isProfile) {
+
+		if (isProfile != selectMatchers(PatternMatcher.class).isEmpty()) {
+
+			throw new Error("Pattern-matcher order-error for node: " + this);
+		}
+
+		return addMatcher(new PatternMatcher(this, pattern));
+	}
+
 	private <M extends NodeMatcher>M addMatcher(M matcher) {
 
 		if (matchers == NO_MATCHERS) {
@@ -156,22 +147,15 @@ public abstract class NodeX extends Name {
 		return matcher;
 	}
 
-	private <S extends PatternMatcher>List<PatternMatcher> selectPatternMatchers(Class<S> type) {
+	private <T extends NodeMatcher>List<T> selectMatchers(Class<T> type) {
 
-		return selectMatchers(PatternMatcher.class, type);
-	}
-
-	private <L extends NodeMatcher, S extends L>List<L> selectMatchers(
-															Class<L> listType,
-															Class<S> selectType) {
-
-		List<L> selecteds = new ArrayList<L>();
+		List<T> selecteds = new ArrayList<T>();
 
 		for (NodeMatcher m : matchers) {
 
-			if (selectType.isAssignableFrom(m.getClass())) {
+			if (type.isAssignableFrom(m.getClass())) {
 
-				selecteds.add(selectType.cast(m));
+				selecteds.add(type.cast(m));
 			}
 		}
 

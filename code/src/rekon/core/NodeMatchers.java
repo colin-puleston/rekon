@@ -48,10 +48,10 @@ class NodeMatchers {
 
 	void addDefinitionPattern(NodeX node, Pattern defn) {
 
-		definitionPatterns.add(node.addDefinitionPatternMatcher(defn));
-
 		addNameSubsumers(node, defn.getNodes());
+
 		resolveProfilePattern(node).absorbDefinitionIntoProfile(defn);
+		definitionPatterns.add(node.addDefinitionPatternMatcher(defn));
 
 		defn.registerDefinitionRefedNames();
 	}

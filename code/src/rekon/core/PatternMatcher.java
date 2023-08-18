@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class PatternMatcher extends NodeMatcher {
+class PatternMatcher extends NodeMatcher {
 
 	private Pattern pattern;
 
