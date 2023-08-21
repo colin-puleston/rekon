@@ -40,12 +40,12 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 
 	void checkAddInstanceOption(InstanceNode node) {
 
-		PatternMatcher pp = node.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfilePatternMatcher();
 
-		if (pp != null) {
+		if (p != null) {
 
-			allOptions.add(pp);
-			registerTransientOption(pp);
+			allOptions.add(p);
+			registerTransientOption(p);
 		}
 	}
 
@@ -55,7 +55,6 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 
 		if (p != null) {
 
-			allOptions.remove(p);
 			deregisterTransientOption(p);
 		}
 	}

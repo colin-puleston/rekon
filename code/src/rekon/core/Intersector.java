@@ -26,11 +26,107 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
+abstract class Intersector<C, S extends C> {
+
+	private List<C> sets = new ArrayList<C>();
+
+	private class SmallestFirstComparator implements Comparator<C> {
+
+		public int compare(C first, C second) {
+
+			int diff = collectionSize(first) - collectionSize(second);
+
+			return diff != 0 ? diff : 1;
+		}
+	}
+
+	C intersectSets(Collection<C> sets) {
+
+		if (sets.size() == 1) {
+
+			return sets.iterator().next();
+		}
+
+		S intersection = creteEmptySet();
+
+		for (C set : sort(sets)) {
+
+			if (emptySet(intersection)) {
+
+				addAll(intersection, set);
+			}
+			else {
+
+				retainAll(intersection, set);
+
+				if (emptySet(intersection)) {
+
+					break;
+				}
+			}
+		}
+
+		return intersection;
+	}
+
+	abstract S creteEmptySet();
+
+	abstract int collectionSize(C collection);
+
+	abstract boolean emptySet(S set);
+
+	abstract void addAll(S set, C adding);
+
+	abstract void retainAll(S set, C retaining);
+
+	private Collection<C> sort(Collection<? extends C> in) {
+
+		Collection<C> out = new TreeSet<C>(new SmallestFirstComparator());
+
+		out.addAll(in);
+
+		return out;
+	}
+}
+
+/*
+
+class IntSetIntersector extends Intersector<TIntSet, TIntSet> {
+
+	IntSetIntersector(Collection<TIntSet> sets) {
+
+		addSets(sets);
+	}
+
+	TIntSet creteEmptySet() {
+
+		return new TIntHashSet();
+	}
+
+	int collectionSize(TIntSet collection) {
+
+		return collection.size();
+	}
+
+	boolean emptySet(TIntSet set) {
+
+		return set.isEmpty();
+	}
+
+	void addAll(TIntSet set, TIntSet adding) {
+
+		set.addAll(adding);
+	}
+
+	void retainAll(TIntSet set, TIntSet retaining) {
+
+		set.retainAll(retaining);
+	}
+}
+
 class SetIntersector<E> extends Intersector<Collection<E>, Set<E>> {
 
 	Set<E> creteEmptySet() {
@@ -58,3 +154,5 @@ class SetIntersector<E> extends Intersector<Collection<E>, Set<E>> {
 		set.retainAll(retaining);
 	}
 }
+
+*/

@@ -111,14 +111,14 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	private Names findCommonDisjunctSubsumers() {
 
-		SetIntersector<Name> subsSets = new SetIntersector<Name>();
+		List<Collection<Name>> subsSets = new ArrayList<Collection<Name>>();
 
 		for (Name d : disjuncts.getNames()) {
 
-			subsSets.addSet(d.getSubsumers().getNames());
+			subsSets.add(d.getSubsumers().getNames());
 		}
 
-		NameSet ss = new NameSet(subsSets.intersectAll());
+		NameSet ss = new NameSet(NameSetIntersector.intersect(subsSets));
 
 		ss.remove(getNode());
 

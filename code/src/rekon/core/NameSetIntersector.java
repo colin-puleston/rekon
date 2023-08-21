@@ -26,35 +26,15 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
-class SetIntersector<E> extends Intersector<Collection<E>, Set<E>> {
+class NameSetIntersector extends SetIntersector<Name> {
 
-	Set<E> creteEmptySet() {
+	static final NameSetIntersector SINGLETON = new NameSetIntersector();
 
-		return new THashSet<E>();
-	}
+	static Collection<Name> intersect(Collection<Collection<Name>> sets) {
 
-	int collectionSize(Collection<E> collection) {
-
-		return collection.size();
-	}
-
-	boolean emptySet(Set<E> set) {
-
-		return set.isEmpty();
-	}
-
-	void addAll(Set<E> set, Collection<E> adding) {
-
-		set.addAll(adding);
-	}
-
-	void retainAll(Set<E> set, Collection<E> retaining) {
-
-		set.retainAll(retaining);
+		return SINGLETON.intersectSets(sets);
 	}
 }

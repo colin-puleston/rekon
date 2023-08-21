@@ -26,76 +26,80 @@ package rekon.core;
 
 import java.util.*;
 
+import gnu.trove.set.*;
 import gnu.trove.set.hash.*;
 import gnu.trove.map.hash.*;
+import gnu.trove.iterator.*;
 
 /**
  * @author Colin Puleston
  */
 abstract class PotentialSubsumptions<O> {
 
+	static private final TIntSet EMPTY_INT_SET = new TIntHashSet();
+
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
 	private abstract class OptionCollector {
 
-		abstract boolean absorb(Collection<O> options);
+		abstract boolean absorb(TIntSet optionIdxs);
 
 		abstract void absorbInto(OptionIntersection insect);
 	}
 
 	private class OptionIntersection extends OptionCollector {
 
-		private List<Collection<O>> optionSets = new ArrayList<Collection<O>>();
+		private List<TIntSet> optionIdxSets = new ArrayList<TIntSet>();
 
-		boolean absorb(Collection<O> options) {
+		boolean absorb(TIntSet optionIdxs) {
 
-			if (options.isEmpty()) {
+			if (optionIdxs.isEmpty()) {
 
 				return false;
 			}
 
-			optionSets.add(options);
+			optionIdxSets.add(optionIdxs);
 
 			return true;
 		}
 
 		void absorbInto(OptionIntersection insect) {
 
-			insect.optionSets.addAll(optionSets);
+			insect.optionIdxSets.addAll(optionIdxSets);
 		}
 
 		boolean anyComponents() {
 
-			return !optionSets.isEmpty();
+			return !optionIdxSets.isEmpty();
 		}
 
-		Collection<O> getIntersection() {
+		TIntSet getIdxIntersection() {
 
-			return SetIntersector.intersect(optionSets);
+			return IntSetIntersector.intersect(optionIdxSets);
 		}
 	}
 
 	private class OptionUnion extends OptionCollector {
 
-		private Collection<O> union = Collections.emptySet();
+		private TIntSet optionIdxUnion = EMPTY_INT_SET;
 		private int components = 0;
 
-		boolean absorb(Collection<O> options) {
+		boolean absorb(TIntSet optionIdxs) {
 
-			if (!options.isEmpty()) {
+			if (!optionIdxs.isEmpty()) {
 
 				if (components == 0) {
 
-					union = options;
+					optionIdxUnion = optionIdxs;
 				}
 				else {
 
 					if (components == 1) {
 
-						union = new THashSet<O>(union);
+						optionIdxUnion = new TIntHashSet(optionIdxUnion);
 					}
 
-					union.addAll(options);
+					optionIdxUnion.addAll(optionIdxs);
 				}
 
 				components++;
@@ -106,12 +110,12 @@ abstract class PotentialSubsumptions<O> {
 
 		void absorbInto(OptionIntersection insect) {
 
-			insect.absorb(union);
+			insect.absorb(optionIdxUnion);
 		}
 
-		Collection<O> getUnion() {
+		TIntSet getIdxUnion() {
 
-			return union;
+			return optionIdxUnion;
 		}
 	}
 
@@ -121,20 +125,20 @@ abstract class PotentialSubsumptions<O> {
 
 		private int rank = allRankMatches.size();
 
-		private Map<Name, Set<O>> optionsByRefName = new THashMap<Name, Set<O>>();
+		private Map<Name, TIntSet> optionIdxsByRefName = new THashMap<Name, TIntSet>();
 		private Set<Name> refNamesCommonToAllOptions = new THashSet<Name>();
 
-		void update(O option, Names rankNames, UpdateType updateType) {
+		void update(int index, O option, Names rankNames, UpdateType updateType) {
 
 			for (Name n : resolveRankNamesForRegistration(rankNames)) {
 
 				if (updateType == UpdateType.DEREGISTER_TRANSIENT) {
 
-					deregisterOptionName(option, n);
+					deregisterOptionName(index, option, n);
 				}
 				else {
 
-					registerOptionName(option, n, updateType);
+					registerOptionName(index, option, n, updateType);
 				}
 			}
 		}
@@ -147,7 +151,7 @@ abstract class PotentialSubsumptions<O> {
 
 				OptionUnion options = getOptionsFor(n);
 
-				if (options != null && !rankOptions.absorb(options.getUnion())) {
+				if (options != null && !rankOptions.absorb(options.getIdxUnion())) {
 
 					return null;
 				}
@@ -161,80 +165,80 @@ abstract class PotentialSubsumptions<O> {
 			return resolveNamesForRegistration(rankNames, rank).getNames();
 		}
 
-		private void registerOptionName(O option, Name n, UpdateType updateType) {
+		private void registerOptionName(int index, O option, Name n, UpdateType updateType) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
 				return;
 			}
 
-			Set<O> options = optionsByRefName.get(n);
+			TIntSet optIdxs = optionIdxsByRefName.get(n);
 
-			if (options == null) {
+			if (optIdxs == null) {
 
-				options = new THashSet<O>();
+				optIdxs = new TIntHashSet();
 
-				optionsByRefName.put(n, options);
+				optionIdxsByRefName.put(n, optIdxs);
 			}
 			else {
 
 				if (updateType == UpdateType.REGISTER_CORE
-					&& options.size() == totalOptions() - 1) {
+					&& optIdxs.size() == lastOptionIdx()) {
 
-					optionsByRefName.remove(n);
+					optionIdxsByRefName.remove(n);
 					refNamesCommonToAllOptions.add(n);
 
 					return;
 				}
 			}
 
-			options.add(option);
+			optIdxs.add(index);
 		}
 
-		private void deregisterOptionName(O option, Name n) {
+		private void deregisterOptionName(int index, O option, Name n) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
 				return;
 			}
 
-			Set<O> options = optionsByRefName.get(n);
+			TIntSet optIdxs = optionIdxsByRefName.get(n);
 
-			if (options == null) {
+			if (optIdxs == null) {
 
 				throw new Error("Referenced name not registered for option!");
 			}
 
-			options.remove(option);
+			optIdxs.remove(index);
 		}
 
 		private OptionUnion getOptionsFor(Name n) {
 
-			OptionUnion options = new OptionUnion();
+			OptionUnion optionIdxs = new OptionUnion();
 
 			for (Name rn : resolveNamesForRetrieval(new NameSet(n), rank).getNames()) {
 
-				if (!collectDirectOptionsFor(rn, options)) {
+				if (!collectDirectOptionsFor(rn, optionIdxs)) {
 
 					return null;
 				}
 			}
 
-			return options;
+			return optionIdxs;
 		}
 
-		private boolean collectDirectOptionsFor(Name n, OptionUnion options) {
+		private boolean collectDirectOptionsFor(Name n, OptionUnion optionIdxs) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
 				return false;
 			}
 
-			Set<O> opts = optionsByRefName.get(n);
+			TIntSet optIdxs = optionIdxsByRefName.get(n);
 
-			if (opts != null) {
+			if (optIdxs != null) {
 
-				options.absorb(opts);
+				optionIdxs.absorb(optIdxs);
 			}
 
 			return true;
@@ -250,11 +254,14 @@ abstract class PotentialSubsumptions<O> {
 
 	private class UpdateOp {
 
+		private int index;
 		private O option;
+
 		private List<Names> rankedNames;
 
-		UpdateOp(O option, int startRank, int stopRank) {
+		UpdateOp(int index, O option, int startRank, int stopRank) {
 
+			this.index = index;
 			this.option = option;
 
 			rankedNames = getOptionMatchNames(option, startRank, stopRank);
@@ -279,7 +286,7 @@ abstract class PotentialSubsumptions<O> {
 
 				if (!rootCollected(rankNames)) {
 
-					rankMatches.update(option, rankNames, getOpType());
+					rankMatches.update(index, option, rankNames, getOpType());
 				}
 
 				return true;
@@ -291,9 +298,9 @@ abstract class PotentialSubsumptions<O> {
 
 	private class CoreRegisterOp extends UpdateOp {
 
-		CoreRegisterOp(O option, int startRank, int stopRank) {
+		CoreRegisterOp(int index, O option, int startRank, int stopRank) {
 
-			super(option, startRank, stopRank);
+			super(index, option, startRank, stopRank);
 		}
 
 		UpdateType getOpType() {
@@ -304,9 +311,9 @@ abstract class PotentialSubsumptions<O> {
 
 	private abstract class TransientUpdateOp extends UpdateOp {
 
-		TransientUpdateOp(O option) {
+		TransientUpdateOp(int index, O option) {
 
-			super(option, 0, allRankMatches.size());
+			super(index, option, 0, allRankMatches.size());
 
 			processForCurrentRankMatches();
 		}
@@ -327,7 +334,7 @@ abstract class PotentialSubsumptions<O> {
 
 		TransientRegisterOp(O option) {
 
-			super(option);
+			super(lastOptionIdx(), option);
 		}
 
 		UpdateType getOpType() {
@@ -340,7 +347,7 @@ abstract class PotentialSubsumptions<O> {
 
 		TransientDeregisterOp(O option) {
 
-			super(option);
+			super(getAllOptions().indexOf(option), option);
 		}
 
 		UpdateType getOpType() {
@@ -365,9 +372,11 @@ abstract class PotentialSubsumptions<O> {
 			ensureRankMatches(stopRank);
 			setMaxProcesses(stopRank - startRank);
 
-			for (O option : getAllOptions()) {
+			List<O> opts = getAllOptions();
 
-				registerOps.add(new CoreRegisterOp(option, startRank, stopRank));
+			for (int i = 0 ; i < opts.size() ; i++) {
+
+				registerOps.add(new CoreRegisterOp(i, opts.get(i), startRank, stopRank));
 			}
 
 			execProcesses();
@@ -471,9 +480,27 @@ abstract class PotentialSubsumptions<O> {
 			rank++;
 		}
 
-		return optionsInsect.anyComponents()
-				? optionsInsect.getIntersection()
-				: getAllOptions();
+		if (optionsInsect.anyComponents()) {
+
+			return optionIdxsToOptions(optionsInsect.getIdxIntersection());
+		}
+
+		return getAllOptions();
+	}
+
+	private Collection<O> optionIdxsToOptions(TIntSet idxs) {
+
+		List<O> opts = new ArrayList<O>();
+		List<O> allOpts = getAllOptions();
+
+		TIntIterator i = idxs.iterator();
+
+		while (i.hasNext()) {
+
+			opts.add(allOpts.get(i.next()));
+		}
+
+		return opts;
 	}
 
 	private void ensureRankMatches(int count) {
@@ -484,9 +511,9 @@ abstract class PotentialSubsumptions<O> {
 		}
 	}
 
-	private int totalOptions() {
+	private int lastOptionIdx() {
 
-		return getAllOptions().size();
+		return getAllOptions().size() - 1;
 	}
 
 	private boolean rootCollected(Names rankNames) {

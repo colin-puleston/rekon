@@ -36,40 +36,27 @@ class PotentialLocalPatternSubsumers {
 	private SimplePotentials simplePotentials = new SimplePotentials();
 	private NestedPotentials nestedPotentials = new NestedPotentials();
 
-	private class PatternMatcherRef {
-
-		final PatternMatcher matcher;
-
-		PatternMatcherRef(PatternMatcher matcher) {
-
-			this.matcher = matcher;
-		}
-	}
-
 	private abstract class CategoryPotentials
 								extends
-									PotentialSubsumptions<PatternMatcherRef> {
+									PotentialSubsumptions<PatternMatcher> {
 
-		private List<PatternMatcherRef> categoryOptions = null;
+		private List<PatternMatcher> categoryOptions = null;
 
-		void collectPotentialsFor(Pattern request, List<PatternMatcher> collected) {
+		void collectPotentialsFor(Pattern request, List<PatternMatcher> collector) {
 
 			checkInitialised();
 
-			for (PatternMatcherRef ref : getPotentialsFor(getRankedProfileNames(request))) {
-
-				collected.add(ref.matcher);
-			}
+			collector.addAll(getPotentialsFor(getRankedProfileNames(request)));
 		}
 
-		List<PatternMatcherRef> getAllOptions() {
+		List<PatternMatcher> getAllOptions() {
 
 			return categoryOptions;
 		}
 
-		List<Names> getOptionMatchNames(PatternMatcherRef option, int startRank, int stopRank) {
+		List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
-			return getRankedDefinitionNames(option.matcher.getPattern());
+			return getRankedDefinitionNames(option.getPattern());
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -99,7 +86,7 @@ class PotentialLocalPatternSubsumers {
 
 			if (categoryOptions == null) {
 
-				categoryOptions = new ArrayList<PatternMatcherRef>();
+				categoryOptions = new ArrayList<PatternMatcher>();
 
 				addCategoryOptions();
 				initialiseOptionRanks();
@@ -110,11 +97,9 @@ class PotentialLocalPatternSubsumers {
 
 			for (PatternMatcher d : allDefinitionPatterns) {
 
-				Pattern p = d.getPattern();
+				if (d.getPattern().nestedPattern(false) == nestedPatterns()) {
 
-				if (p.nestedPattern(false) == nestedPatterns()) {
-
-					categoryOptions.add(new PatternMatcherRef(d));
+					categoryOptions.add(d);
 				}
 			}
 		}
