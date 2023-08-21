@@ -26,6 +26,8 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
@@ -33,8 +35,8 @@ import org.semanticweb.owlapi.model.*;
  */
 class AssertedObjectProperty extends AssertedHierarchyEntity<OWLObjectProperty> {
 
-	private Set<OWLObjectProperty> inverses = new HashSet<OWLObjectProperty>();
-	private Set<List<OWLObjectProperty>> chains = new HashSet<List<OWLObjectProperty>>();
+	private Set<OWLObjectProperty> inverses = new THashSet<OWLObjectProperty>();
+	private Set<List<OWLObjectProperty>> chains = new THashSet<List<OWLObjectProperty>>();
 
 	private boolean transitive = false;
 	private boolean symmetric = false;

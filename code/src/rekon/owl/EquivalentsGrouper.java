@@ -26,6 +26,8 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.impl.*;
@@ -61,7 +63,7 @@ class EquivalentsGrouper {
 
 		Set<Node<E>> toEquivGroupsSet(Names names) {
 
-			Set<Node<E>> groups = new HashSet<Node<E>>();
+			Set<Node<E>> groups = new THashSet<Node<E>>();
 			NameSet initialGroupElements = new NameSet();
 
 			for (Name n : names.getNames()) {
@@ -100,7 +102,7 @@ class EquivalentsGrouper {
 
 		private void checkAddEquivGroup(Set<Node<E>> groups, Name name, Names equivs) {
 
-			Set<E> entities = new HashSet<E>();
+			Set<E> entities = new THashSet<E>();
 
 			checkAddEntity(entities, name);
 
@@ -125,7 +127,7 @@ class EquivalentsGrouper {
 
 		Node<OWLClass> equivsToGroup(Names equivs, OWLClassExpression sourceExpr) {
 
-			Set<OWLClass> entities = new HashSet<OWLClass>();
+			Set<OWLClass> entities = new THashSet<OWLClass>();
 
 			for (Name n : equivs.getNames()) {
 

@@ -26,6 +26,8 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
@@ -33,11 +35,11 @@ import org.semanticweb.owlapi.model.*;
  */
 class AssertedIndividual extends AssertedEntity<OWLNamedIndividual> {
 
-	private Set<OWLClass> types = new HashSet<OWLClass>();
-	private Set<OWLClassExpression> typeExprs = new HashSet<OWLClassExpression>();
+	private Set<OWLClass> types = new THashSet<OWLClass>();
+	private Set<OWLClassExpression> typeExprs = new THashSet<OWLClassExpression>();
 
-	private Set<AssertedObjectValue> objectValues = new HashSet<AssertedObjectValue>();
-	private Set<AssertedDataValue> dataValues = new HashSet<AssertedDataValue>();
+	private Set<AssertedObjectValue> objectValues = new THashSet<AssertedObjectValue>();
+	private Set<AssertedDataValue> dataValues = new THashSet<AssertedDataValue>();
 
 	AssertedIndividual(OWLNamedIndividual entity) {
 

@@ -26,6 +26,9 @@ package rekon.core;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+import gnu.trove.map.hash.*;
+
 /**
  * @author Colin Puleston
  */
@@ -89,7 +92,7 @@ abstract class PotentialSubsumptions<O> {
 
 					if (components == 1) {
 
-						union = new HashSet<O>(union);
+						union = new THashSet<O>(union);
 					}
 
 					union.addAll(options);
@@ -118,8 +121,8 @@ abstract class PotentialSubsumptions<O> {
 
 		private int rank = allRankMatches.size();
 
-		private Map<Name, Set<O>> optionsByRefName = new HashMap<Name, Set<O>>();
-		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
+		private Map<Name, Set<O>> optionsByRefName = new THashMap<Name, Set<O>>();
+		private Set<Name> refNamesCommonToAllOptions = new THashSet<Name>();
 
 		void update(O option, Names rankNames, UpdateType updateType) {
 
@@ -169,7 +172,7 @@ abstract class PotentialSubsumptions<O> {
 
 			if (options == null) {
 
-				options = new HashSet<O>();
+				options = new THashSet<O>();
 
 				optionsByRefName.put(n, options);
 			}

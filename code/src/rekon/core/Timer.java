@@ -26,13 +26,15 @@ package rekon.core;
 
 import java.util.*;
 
+import gnu.trove.map.hash.*;
+
 /**
  * @author Colin Puleston
  */
 public class Timer {
 
-	static private Map<String, Instance> activeInstances = new HashMap<String, Instance>();
-	static private Map<String, Instance> pausedInstances = new HashMap<String, Instance>();
+	static private Map<String, Instance> activeInstances = new THashMap<String, Instance>();
+	static private Map<String, Instance> pausedInstances = new THashMap<String, Instance>();
 
 	static private class Instance {
 

@@ -26,6 +26,8 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
@@ -35,8 +37,8 @@ class AssertedClass extends AssertedHierarchyEntity<OWLClass> {
 
 	private OWLDataFactory factory;
 
-	private Set<OWLClassExpression> equivExprs = new HashSet<OWLClassExpression>();
-	private Set<OWLClassExpression> superExprs = new HashSet<OWLClassExpression>();
+	private Set<OWLClassExpression> equivExprs = new THashSet<OWLClassExpression>();
+	private Set<OWLClassExpression> superExprs = new THashSet<OWLClassExpression>();
 
 	AssertedClass(OWLClass entity, OWLDataFactory factory) {
 
@@ -75,7 +77,7 @@ class AssertedClass extends AssertedHierarchyEntity<OWLClass> {
 
 	Collection<OWLClass> getSupers() {
 
-		Set<OWLClass> sups = new HashSet<OWLClass>(super.getSupers());
+		Set<OWLClass> sups = new THashSet<OWLClass>(super.getSupers());
 
 		for (OWLClassExpression e : equivExprs) {
 

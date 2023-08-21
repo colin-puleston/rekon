@@ -26,6 +26,8 @@ package rekon.core;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 /**
  * @author Colin Puleston
  */
@@ -91,7 +93,7 @@ public class InstanceNode extends NodeX {
 
 	private class ReferencedsFinder {
 
-		private Set<InstanceNode> found = new HashSet<InstanceNode>();
+		private Set<InstanceNode> found = new THashSet<InstanceNode>();
 
 		boolean anyPresent() {
 

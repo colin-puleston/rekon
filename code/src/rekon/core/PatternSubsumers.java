@@ -26,6 +26,8 @@ package rekon.core;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 /**
  * @author Colin Puleston
  */
@@ -37,7 +39,7 @@ class PatternSubsumers {
 
 		Collection<NodeMatcher> deriveFromSubsumeds(Names subsumeds) {
 
-			Set<NodeMatcher> potentials = new HashSet<NodeMatcher>();
+			Set<NodeMatcher> potentials = new THashSet<NodeMatcher>();
 
 			for (Name s : subsumeds.getNames()) {
 

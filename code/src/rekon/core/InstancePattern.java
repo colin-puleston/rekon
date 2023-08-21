@@ -57,6 +57,13 @@ class InstancePattern extends LocalPattern {
 		this.patternInstance = patternInstance;
 
 		initialise(patternCreator);
+
+		if (getPattern() == null) {
+
+			throw new RuntimeException(
+						"Invalid description fot instance: "
+						+ patternInstance.getLabel());
+		}
 	}
 
 	LocalClasses createLocalClasses() {

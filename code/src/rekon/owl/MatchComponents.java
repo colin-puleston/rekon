@@ -26,6 +26,9 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+import gnu.trove.map.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
@@ -52,13 +55,13 @@ class MatchComponents {
 
 	private DataTypes dataTypes;
 
-	private Map<OWLClassExpression, ClassNode> patternClasses = new HashMap<OWLClassExpression, ClassNode>();
+	private Map<OWLClassExpression, ClassNode> patternClasses = new THashMap<OWLClassExpression, ClassNode>();
 
 	private boolean dynamic;
 
 	private abstract class TypeEntities<S, E> {
 
-		private Map<S, E> bySource = new HashMap<S, E>();
+		private Map<S, E> bySource = new THashMap<S, E>();
 
 		E get(S source) {
 
@@ -132,7 +135,7 @@ class MatchComponents {
 		private Pattern checkCreateForConjuncts(Collection<OWLClassExpression> conjuncts) {
 
 			NameSet names = new NameSet();
-			Set<Relation> rels = new HashSet<Relation>();
+			Set<Relation> rels = new THashSet<Relation>();
 
 			for (OWLClassExpression op : conjuncts) {
 
@@ -173,7 +176,7 @@ class MatchComponents {
 
 		NodeValue checkCreate(OWLObjectUnionOf source) {
 
-			Set<NodeX> disjuncts = new HashSet<NodeX>();
+			Set<NodeX> disjuncts = new THashSet<NodeX>();
 
 			for (OWLClassExpression op : source.getOperands()) {
 
@@ -651,7 +654,7 @@ class MatchComponents {
 
 	private Set<IndividualNode> valueToIndividualDisjunction(OWLObjectOneOf v) {
 
-		Set<IndividualNode> disjuncts = new HashSet<IndividualNode>();
+		Set<IndividualNode> disjuncts = new THashSet<IndividualNode>();
 
 		for (OWLIndividual i : v.getIndividuals()) {
 

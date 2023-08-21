@@ -26,6 +26,8 @@ package rekon.core;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 /**
  * @author Colin Puleston
  */
@@ -48,7 +50,7 @@ class SetIntersector<E> {
 			return sets.iterator().next();
 		}
 
-		Set<E> intersection = new HashSet<E>();
+		Set<E> intersection = new THashSet<E>();
 
 		for (Collection<E> set : sort(sets)) {
 

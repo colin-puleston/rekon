@@ -26,6 +26,8 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
@@ -49,7 +51,7 @@ class NodeProfilesCreator {
 
 		Set<Relation> getAssertedRelations(E entity) {
 
-			Set<Relation> rels = new HashSet<Relation>();
+			Set<Relation> rels = new THashSet<Relation>();
 
 			for (S s : getRelationSources(entity)) {
 
@@ -183,7 +185,7 @@ class NodeProfilesCreator {
 
 	private Set<Relation> getAssertedIndividualRelations(AssertedIndividual i) {
 
-		Set<Relation> rels = new HashSet<Relation>();
+		Set<Relation> rels = new THashSet<Relation>();
 
 		rels.addAll(typesRelations.getAssertedRelations(i));
 		rels.addAll(nodeValuesRelations.getAssertedRelations(i));

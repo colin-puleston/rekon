@@ -26,6 +26,8 @@ package rekon.owl;
 
 import java.util.*;
 
+import gnu.trove.set.hash.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
@@ -34,7 +36,7 @@ import org.semanticweb.owlapi.model.*;
 abstract class AssertedEntity<E extends OWLEntity> {
 
 	private E entity;
-	private Set<E> equivs = new HashSet<E>();
+	private Set<E> equivs = new THashSet<E>();
 
 	AssertedEntity(E entity) {
 

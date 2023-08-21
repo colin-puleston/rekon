@@ -56,9 +56,12 @@ abstract class LocalPattern {
 		patternNode = ensurePatternNode(matchStructures);
 		pattern = patternCreator.createNestedPatterns(matchStructures);
 
-		profileMatchers.addDefinitionPattern(patternNode, pattern);
+		if (pattern != null) {
 
-		processAllLocalNamesPostAdditions();
+			profileMatchers.addDefinitionPattern(patternNode, pattern);
+
+			processAllLocalNamesPostAdditions();
+		}
 	}
 
 	NodeX getPatternNode() {
