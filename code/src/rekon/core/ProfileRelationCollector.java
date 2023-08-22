@@ -26,8 +26,6 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
@@ -40,7 +38,7 @@ class ProfileRelationCollector {
 
 	ProfileRelationCollector(NodeVisitMonitor visitMonitor) {
 
-		this(visitMonitor, new THashSet<Relation>());
+		this(visitMonitor, new HashSet<Relation>());
 	}
 
 	ProfileRelationCollector(

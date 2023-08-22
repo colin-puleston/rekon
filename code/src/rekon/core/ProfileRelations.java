@@ -26,8 +26,6 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
@@ -51,7 +49,7 @@ class ProfileRelations {
 
 			if (profileRelations == getDirectRelations()) {
 
-				profileRelations = new THashSet<Relation>(getDirectRelations());
+				profileRelations = new HashSet<Relation>(getDirectRelations());
 			}
 
 			return profileRelations;
@@ -102,13 +100,13 @@ class ProfileRelations {
 
 		if (expansionStatus == ExpansionStatus.CHECK_EXPANSION) {
 
-			Set<Relation> preProfileRels = new THashSet<Relation>(profileRelations);
+			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
 
 			if (checkExpansion(visitMonitor)) {
 
 				if (visitMonitor.incompleteTraversal()) {
 
-					Set<Relation> postProfileRels = new THashSet<Relation>(profileRelations);
+					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
 
 					profileRelations = preProfileRels;
 

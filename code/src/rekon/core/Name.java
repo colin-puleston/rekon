@@ -26,15 +26,13 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
 public abstract class Name {
 
 	private NameLinksHandler linksHandler;
-	private Set<MatchRole> definitionRoles = new THashSet<MatchRole>();
+	private Set<MatchRole> definitionRoles = new HashSet<MatchRole>();
 
 	public void addSubsumer(Name subsumer) {
 

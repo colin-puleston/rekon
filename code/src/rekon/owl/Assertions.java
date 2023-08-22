@@ -26,9 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-import gnu.trove.map.hash.*;
-
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.*;
 
@@ -41,20 +38,20 @@ class Assertions {
 	final OWLObjectProperty owlTopObjectProperty;
 	final OWLDataProperty owlTopDataProperty;
 
-	private Map<OWLClass, AssertedClass> classes = new THashMap<OWLClass, AssertedClass>();
-	private Map<OWLNamedIndividual, AssertedIndividual> individuals = new THashMap<OWLNamedIndividual, AssertedIndividual>();
-	private Map<OWLObjectProperty, AssertedObjectProperty> objectProperties = new THashMap<OWLObjectProperty, AssertedObjectProperty>();
-	private Map<OWLDataProperty, AssertedDataProperty> dataProperties = new THashMap<OWLDataProperty, AssertedDataProperty>();
+	private Map<OWLClass, AssertedClass> classes = new HashMap<OWLClass, AssertedClass>();
+	private Map<OWLNamedIndividual, AssertedIndividual> individuals = new HashMap<OWLNamedIndividual, AssertedIndividual>();
+	private Map<OWLObjectProperty, AssertedObjectProperty> objectProperties = new HashMap<OWLObjectProperty, AssertedObjectProperty>();
+	private Map<OWLDataProperty, AssertedDataProperty> dataProperties = new HashMap<OWLDataProperty, AssertedDataProperty>();
 
-	private Set<OWLEquivalentClassesAxiom> equivGCIs = new THashSet<OWLEquivalentClassesAxiom>();
-	private Set<OWLSubClassOfAxiom> superGCIs = new THashSet<OWLSubClassOfAxiom>();
+	private Set<OWLEquivalentClassesAxiom> equivGCIs = new HashSet<OWLEquivalentClassesAxiom>();
+	private Set<OWLSubClassOfAxiom> superGCIs = new HashSet<OWLSubClassOfAxiom>();
 
 	private class AxiomProcessingInitialiser {
 
 		private OWLDataFactory factory;
 
 		private List<ProcessorGroup> processorGroups = new ArrayList<ProcessorGroup>();
-		private Set<AxiomType<?>> outOfScopeAxiomTypes = new THashSet<AxiomType<?>>();
+		private Set<AxiomType<?>> outOfScopeAxiomTypes = new HashSet<AxiomType<?>>();
 
 		private abstract class ProcessorGroup {
 

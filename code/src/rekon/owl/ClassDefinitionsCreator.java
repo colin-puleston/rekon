@@ -26,8 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
@@ -46,8 +44,8 @@ class ClassDefinitionsCreator {
 
 	private abstract class EquivsBasedCreator {
 
-		private Set<Pattern> patternDefns = new THashSet<Pattern>();
-		private Set<List<Pattern>> disjunctionDefns = new THashSet<List<Pattern>>();
+		private Set<Pattern> patternDefns = new HashSet<Pattern>();
+		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
 
 		boolean create(Collection<OWLClassExpression> equivs) {
 

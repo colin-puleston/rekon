@@ -22,67 +22,73 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.core;
 
 import java.util.*;
 
-import org.semanticweb.owlapi.model.*;
+import com.carrotsearch.hppc.*;
 
 /**
  * @author Colin Puleston
  */
-class AssertedIndividual extends AssertedEntity<OWLNamedIndividual> {
+class IntegerIntersection extends IntegerCollector {
 
-	private Set<OWLClass> types = new HashSet<OWLClass>();
-	private Set<OWLClassExpression> typeExprs = new HashSet<OWLClassExpression>();
+	static private final IntSetIntersector intersector = new IntSetIntersector();
 
-	private Set<AssertedObjectValue> objectValues = new HashSet<AssertedObjectValue>();
-	private Set<AssertedDataValue> dataValues = new HashSet<AssertedDataValue>();
+	static private class IntSetIntersector extends Intersector<IntHashSet, IntHashSet> {
 
-	AssertedIndividual(OWLNamedIndividual entity) {
+		IntHashSet creteEmptySet() {
 
-		super(entity);
-	}
-
-	void addTypeExpr(OWLClassExpression type) {
-
-		if (type instanceof OWLClass) {
-
-			types.add((OWLClass)type);
+			return new IntHashSet();
 		}
-		else {
 
-			typeExprs.add(type);
+		int collectionSize(IntHashSet collection) {
+
+			return collection.size();
+		}
+
+		boolean emptySet(IntHashSet set) {
+
+			return set.isEmpty();
+		}
+
+		void addAll(IntHashSet set, IntHashSet adding) {
+
+			set.addAll(adding);
+		}
+
+		void retainAll(IntHashSet set, IntHashSet retaining) {
+
+			set.retainAll(retaining);
 		}
 	}
 
-	void addObjectValue(AssertedObjectValue value) {
+	private List<IntHashSet> integerSets = new ArrayList<IntHashSet>();
 
-		objectValues.add(value);
+	boolean absorb(IntHashSet integers) {
+
+		if (integers.isEmpty()) {
+
+			return false;
+		}
+
+		integerSets.add(integers);
+
+		return true;
 	}
 
-	void addDataValue(AssertedDataValue value) {
+	void absorbInto(IntegerIntersection intersection) {
 
-		dataValues.add(value);
+		intersection.integerSets.addAll(integerSets);
 	}
 
-	Collection<OWLClass> getTypes() {
+	boolean anyComponents() {
 
-		return types;
+		return !integerSets.isEmpty();
 	}
 
-	Collection<OWLClassExpression> getTypeExprs() {
+	IntHashSet getIntersection() {
 
-		return typeExprs;
-	}
-
-	Collection<AssertedObjectValue> getObjectValues() {
-
-		return objectValues;
-	}
-
-	Collection<AssertedDataValue> getDataValues() {
-
-		return dataValues;
+		return intersector.intersectSets(integerSets);
 	}
 }

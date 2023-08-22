@@ -26,9 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-import gnu.trove.map.hash.*;
-
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.*;
 
@@ -39,7 +36,7 @@ import rekon.core.*;
  */
 class DataTypes {
 
-	static private Set<TypeHandler> typeHandlers = new THashSet<TypeHandler>();
+	static private Set<TypeHandler> typeHandlers = new HashSet<TypeHandler>();
 
 	static private abstract class TypeHandler {
 
@@ -108,7 +105,7 @@ class DataTypes {
 	private abstract class NumberRangeHandler<N extends Number> extends TypeHandler {
 
 		private Map<OWLDatatypeRestriction, NumberRange> cache
-					= new THashMap<OWLDatatypeRestriction, NumberRange>();
+					= new HashMap<OWLDatatypeRestriction, NumberRange>();
 
 		DataValue get(OWLDatatypeRestriction source) {
 

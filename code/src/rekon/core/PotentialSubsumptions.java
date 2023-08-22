@@ -26,98 +26,15 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.*;
-import gnu.trove.set.hash.*;
-import gnu.trove.map.hash.*;
-import gnu.trove.iterator.*;
+import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.cursors.*;
 
 /**
  * @author Colin Puleston
  */
 abstract class PotentialSubsumptions<O> {
 
-	static private final TIntSet EMPTY_INT_SET = new TIntHashSet();
-
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
-
-	private abstract class OptionCollector {
-
-		abstract boolean absorb(TIntSet optionIdxs);
-
-		abstract void absorbInto(OptionIntersection insect);
-	}
-
-	private class OptionIntersection extends OptionCollector {
-
-		private List<TIntSet> optionIdxSets = new ArrayList<TIntSet>();
-
-		boolean absorb(TIntSet optionIdxs) {
-
-			if (optionIdxs.isEmpty()) {
-
-				return false;
-			}
-
-			optionIdxSets.add(optionIdxs);
-
-			return true;
-		}
-
-		void absorbInto(OptionIntersection insect) {
-
-			insect.optionIdxSets.addAll(optionIdxSets);
-		}
-
-		boolean anyComponents() {
-
-			return !optionIdxSets.isEmpty();
-		}
-
-		TIntSet getIdxIntersection() {
-
-			return IntSetIntersector.intersect(optionIdxSets);
-		}
-	}
-
-	private class OptionUnion extends OptionCollector {
-
-		private TIntSet optionIdxUnion = EMPTY_INT_SET;
-		private int components = 0;
-
-		boolean absorb(TIntSet optionIdxs) {
-
-			if (!optionIdxs.isEmpty()) {
-
-				if (components == 0) {
-
-					optionIdxUnion = optionIdxs;
-				}
-				else {
-
-					if (components == 1) {
-
-						optionIdxUnion = new TIntHashSet(optionIdxUnion);
-					}
-
-					optionIdxUnion.addAll(optionIdxs);
-				}
-
-				components++;
-			}
-
-			return true;
-		}
-
-		void absorbInto(OptionIntersection insect) {
-
-			insect.absorb(optionIdxUnion);
-		}
-
-		TIntSet getIdxUnion() {
-
-			return optionIdxUnion;
-		}
-	}
 
 	private enum UpdateType {REGISTER_CORE, REGISTER_TRANSIENT, DEREGISTER_TRANSIENT}
 
@@ -125,8 +42,8 @@ abstract class PotentialSubsumptions<O> {
 
 		private int rank = allRankMatches.size();
 
-		private Map<Name, TIntSet> optionIdxsByRefName = new THashMap<Name, TIntSet>();
-		private Set<Name> refNamesCommonToAllOptions = new THashSet<Name>();
+		private Map<Name, IntHashSet> optionIdxsByRefName = new HashMap<Name, IntHashSet>();
+		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
 		void update(int index, O option, Names rankNames, UpdateType updateType) {
 
@@ -143,15 +60,15 @@ abstract class PotentialSubsumptions<O> {
 			}
 		}
 
-		OptionCollector collectOptionsFor(Names rankNames) {
+		IntegerCollector collectOptionsFor(Names rankNames) {
 
-			OptionCollector rankOptions = createRankOptionsCollector();
+			IntegerCollector rankOptions = createRankOptionsCollector();
 
 			for (Name n : rankNames.getNames()) {
 
-				OptionUnion options = getOptionsFor(n);
+				IntegerUnion options = getOptionsFor(n);
 
-				if (options != null && !rankOptions.absorb(options.getIdxUnion())) {
+				if (options != null && !rankOptions.absorb(options.getUnion())) {
 
 					return null;
 				}
@@ -172,11 +89,11 @@ abstract class PotentialSubsumptions<O> {
 				return;
 			}
 
-			TIntSet optIdxs = optionIdxsByRefName.get(n);
+			IntHashSet optIdxs = optionIdxsByRefName.get(n);
 
 			if (optIdxs == null) {
 
-				optIdxs = new TIntHashSet();
+				optIdxs = new IntHashSet();
 
 				optionIdxsByRefName.put(n, optIdxs);
 			}
@@ -202,7 +119,7 @@ abstract class PotentialSubsumptions<O> {
 				return;
 			}
 
-			TIntSet optIdxs = optionIdxsByRefName.get(n);
+			IntHashSet optIdxs = optionIdxsByRefName.get(n);
 
 			if (optIdxs == null) {
 
@@ -212,9 +129,9 @@ abstract class PotentialSubsumptions<O> {
 			optIdxs.remove(index);
 		}
 
-		private OptionUnion getOptionsFor(Name n) {
+		private IntegerUnion getOptionsFor(Name n) {
 
-			OptionUnion optionIdxs = new OptionUnion();
+			IntegerUnion optionIdxs = new IntegerUnion();
 
 			for (Name rn : resolveNamesForRetrieval(new NameSet(n), rank).getNames()) {
 
@@ -227,14 +144,14 @@ abstract class PotentialSubsumptions<O> {
 			return optionIdxs;
 		}
 
-		private boolean collectDirectOptionsFor(Name n, OptionUnion optionIdxs) {
+		private boolean collectDirectOptionsFor(Name n, IntegerUnion optionIdxs) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
 				return false;
 			}
 
-			TIntSet optIdxs = optionIdxsByRefName.get(n);
+			IntHashSet optIdxs = optionIdxsByRefName.get(n);
 
 			if (optIdxs != null) {
 
@@ -244,11 +161,11 @@ abstract class PotentialSubsumptions<O> {
 			return true;
 		}
 
-		private OptionCollector createRankOptionsCollector() {
+		private IntegerCollector createRankOptionsCollector() {
 
 			return unionRankOptionsForRetrieval()
-						? new OptionUnion()
-						: new OptionIntersection();
+						? new IntegerUnion()
+						: new IntegerIntersection();
 		}
 	}
 
@@ -459,7 +376,7 @@ abstract class PotentialSubsumptions<O> {
 			return Collections.emptySet();
 		}
 
-		OptionIntersection optionsInsect = new OptionIntersection();
+		IntegerIntersection optionsInsect = new IntegerIntersection();
 		int rank = 0;
 
 		for (Names rankNames : namesByRank) {
@@ -467,7 +384,7 @@ abstract class PotentialSubsumptions<O> {
 			if (!rootCollected(rankNames)) {
 
 				RankMatches matches = allRankMatches.get(rank);
-				OptionCollector rankOptions = matches.collectOptionsFor(rankNames);
+				IntegerCollector rankOptions = matches.collectOptionsFor(rankNames);
 
 				if (rankOptions == null) {
 
@@ -482,22 +399,22 @@ abstract class PotentialSubsumptions<O> {
 
 		if (optionsInsect.anyComponents()) {
 
-			return optionIdxsToOptions(optionsInsect.getIdxIntersection());
+			return optionIdxsToOptions(optionsInsect.getIntersection());
 		}
 
 		return getAllOptions();
 	}
 
-	private Collection<O> optionIdxsToOptions(TIntSet idxs) {
+	private Collection<O> optionIdxsToOptions(IntHashSet idxs) {
 
 		List<O> opts = new ArrayList<O>();
 		List<O> allOpts = getAllOptions();
 
-		TIntIterator i = idxs.iterator();
+		Iterator<IntCursor> i = idxs.iterator();
 
 		while (i.hasNext()) {
 
-			opts.add(allOpts.get(i.next()));
+			opts.add(allOpts.get(i.next().value));
 		}
 
 		return opts;

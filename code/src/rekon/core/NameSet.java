@@ -26,8 +26,6 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
@@ -39,7 +37,7 @@ public class NameSet extends Names {
 
 	public NameSet() {
 
-		names = new THashSet<Name>();
+		names = new HashSet<Name>();
 	}
 
 	public NameSet(Name name) {
@@ -56,7 +54,7 @@ public class NameSet extends Names {
 
 	public NameSet(Collection<? extends Name> names) {
 
-		this.names = new THashSet<Name>(names);
+		this.names = new HashSet<Name>(names);
 	}
 
 	public boolean remove(Name name) {

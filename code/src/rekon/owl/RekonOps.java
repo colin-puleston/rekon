@@ -26,8 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.impl.*;
@@ -299,7 +297,7 @@ class RekonOps {
 
 	private Set<OWLNamedIndividual> toNamedIndividuals(Set<OWLIndividual> inds) {
 
-		Set<OWLNamedIndividual> namedInds = new THashSet<OWLNamedIndividual>();
+		Set<OWLNamedIndividual> namedInds = new HashSet<OWLNamedIndividual>();
 
 		for (OWLIndividual ind : inds) {
 

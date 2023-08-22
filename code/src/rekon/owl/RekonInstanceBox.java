@@ -26,8 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import gnu.trove.map.hash.*;
-
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
@@ -40,7 +38,7 @@ public class RekonInstanceBox {
 	private InstanceOps instanceOps;
 	private MappedNames mappedNames;
 
-	private Map<IRI, MappedInstance> instances = new THashMap<IRI, MappedInstance>();
+	private Map<IRI, MappedInstance> instances = new HashMap<IRI, MappedInstance>();
 
 	private class MappedInstance extends Instance {
 

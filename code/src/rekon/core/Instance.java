@@ -26,15 +26,13 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
 public abstract class Instance {
 
 	private InstanceNode node = new InstanceNode(this);
-	private Set<Instance> referencers = new THashSet<Instance>();
+	private Set<Instance> referencers = new HashSet<Instance>();
 
 	private PatternCreator profileRecreator = null;
 
@@ -120,7 +118,7 @@ public abstract class Instance {
 
 	Collection<Instance> getReferenceds() {
 
-		Set<Instance> refs = new THashSet<Instance>();
+		Set<Instance> refs = new HashSet<Instance>();
 
 		for (InstanceNode rn : node.getReferenceds()) {
 

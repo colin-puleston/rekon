@@ -26,8 +26,6 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
@@ -35,7 +33,7 @@ class SetIntersector<E> extends Intersector<Collection<E>, Set<E>> {
 
 	Set<E> creteEmptySet() {
 
-		return new THashSet<E>();
+		return new HashSet<E>();
 	}
 
 	int collectionSize(Collection<E> collection) {

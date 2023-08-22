@@ -26,15 +26,13 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
 public class Pattern extends Expression {
 
 	private NameList nodes = new NameList();
-	private Set<Relation> directRelations = new THashSet<Relation>();
+	private Set<Relation> directRelations = new HashSet<Relation>();
 
 	private ProfileRelations profileRelations = null;
 
@@ -82,7 +80,7 @@ public class Pattern extends Expression {
 	Pattern combineWith(Pattern other) {
 
 		NameSet newNodes = new NameSet(nodes);
-		Set<Relation> newRelations = new THashSet<Relation>(directRelations);
+		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
 		newNodes.addAll(other.nodes);
 		newRelations.addAll(other.directRelations);
@@ -100,7 +98,7 @@ public class Pattern extends Expression {
 
 	Pattern extend(Relation extraRelation) {
 
-		Set<Relation> newRelations = new THashSet<Relation>(directRelations);
+		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
 		newRelations.add(extraRelation);
 
@@ -109,7 +107,7 @@ public class Pattern extends Expression {
 
 	Pattern extend(Collection<Relation> extraRelations) {
 
-		Set<Relation> newRelations = new THashSet<Relation>(directRelations);
+		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
 		newRelations.addAll(extraRelations);
 

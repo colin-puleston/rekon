@@ -24,45 +24,49 @@
 
 package rekon.core;
 
-import java.util.*;
-
-import gnu.trove.set.*;
-import gnu.trove.set.hash.*;
+import com.carrotsearch.hppc.*;
 
 /**
  * @author Colin Puleston
  */
-class IntSetIntersector extends Intersector<TIntSet, TIntSet> {
+class IntegerUnion extends IntegerCollector {
 
-	static final IntSetIntersector SINGLETON = new IntSetIntersector();
+	static private final IntHashSet EMPTY_UNION = new IntHashSet();
 
-	static TIntSet intersect(Collection<TIntSet> sets) {
+	private IntHashSet integerUnion = EMPTY_UNION;
+	private int components = 0;
 
-		return SINGLETON.intersectSets(sets);
+	boolean absorb(IntHashSet integers) {
+
+		if (!integers.isEmpty()) {
+
+			if (components == 0) {
+
+				integerUnion = integers;
+			}
+			else {
+
+				if (components == 1) {
+
+					integerUnion = new IntHashSet(integerUnion);
+				}
+
+				integerUnion.addAll(integers);
+			}
+
+			components++;
+		}
+
+		return true;
 	}
 
-	TIntSet creteEmptySet() {
+	void absorbInto(IntegerIntersection intersection) {
 
-		return new TIntHashSet();
+		intersection.absorb(integerUnion);
 	}
 
-	int collectionSize(TIntSet collection) {
+	IntHashSet getUnion() {
 
-		return collection.size();
-	}
-
-	boolean emptySet(TIntSet set) {
-
-		return set.isEmpty();
-	}
-
-	void addAll(TIntSet set, TIntSet adding) {
-
-		set.addAll(adding);
-	}
-
-	void retainAll(TIntSet set, TIntSet retaining) {
-
-		set.retainAll(retaining);
+		return integerUnion;
 	}
 }

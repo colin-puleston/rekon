@@ -26,14 +26,12 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-
 /**
  * @author Colin Puleston
  */
 public abstract class NodeProperty extends PropertyX {
 
-	private Set<NodeProperty> inverses = new THashSet<NodeProperty>();
+	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
 
 	public void setSymmetric() {

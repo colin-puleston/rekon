@@ -26,8 +26,6 @@ package rekon.owl;
 
 import java.util.*;
 
-import gnu.trove.map.hash.*;
-
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
@@ -137,7 +135,7 @@ class MappedNames extends OntologyNames {
 								AE extends AssertedEntity<E>,
 								N extends Name> {
 
-		private Map<E, N> names = new THashMap<E, N>();
+		private Map<E, N> names = new HashMap<E, N>();
 
 		void initialise(Collection<AE> entities) {
 

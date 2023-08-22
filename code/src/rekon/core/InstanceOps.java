@@ -26,9 +26,6 @@ package rekon.core;
 
 import java.util.*;
 
-import gnu.trove.set.hash.*;
-import gnu.trove.map.hash.*;
-
 /**
  * @author Colin Puleston
  */
@@ -37,11 +34,11 @@ public class InstanceOps {
 	private PatternSubsumers patternSubsumers;
 	private PatternSubsumeds patternSubsumeds;
 
-	private Map<Object, Instance> ghosts = new THashMap<Object, Instance>();
+	private Map<Object, Instance> ghosts = new HashMap<Object, Instance>();
 
 	private class Updater {
 
-		private Set<Instance> added = new THashSet<Instance>();
+		private Set<Instance> added = new HashSet<Instance>();
 
 		void add(Instance instance, PatternCreator profileCreator) {
 
@@ -161,7 +158,7 @@ public class InstanceOps {
 
 	private List<Instance> matchesToInstances(NameSet matches) {
 
-		Set<Instance> instances = new THashSet<Instance>();
+		Set<Instance> instances = new HashSet<Instance>();
 
 		addInstances(instances, matches.filterForType(InstanceNode.class));
 
