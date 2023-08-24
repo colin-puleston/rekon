@@ -102,6 +102,11 @@ public class Timer {
 		new Instance(prefix);
 	}
 
+	static public void startPaused(String prefix) {
+
+		new Instance(prefix).pause();
+	}
+
 	static public void pause(String prefix) {
 
 		getActive(prefix).pause();
