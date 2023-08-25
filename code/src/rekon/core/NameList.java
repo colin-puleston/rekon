@@ -57,23 +57,8 @@ public class NameList extends Names {
 		this.names = new ArrayList<Name>(names);
 	}
 
-	public void clear() {
-
-		names.clear();
-	}
-
 	public Collection<Name> getNames() {
 
 		return names;
-	}
-
-	public Name get(int index) {
-
-		return names.get(0);
-	}
-
-	public NameSet toSet() {
-
-		return new NameSet(names);
 	}
 }

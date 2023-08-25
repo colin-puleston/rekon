@@ -73,16 +73,12 @@ public abstract class Names {
 		addAll(allNames.getNames());
 	}
 
-	public abstract void clear();
-
 	public abstract Collection<Name> getNames();
 
 	public Collection<Name> copyNames() {
 
 		return new ArrayList<Name>(getNames());
 	}
-
-	public abstract NameSet toSet();
 
 	Names filterForType(Class<? extends Name> type) {
 
