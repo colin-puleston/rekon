@@ -183,7 +183,7 @@ class NodeClassifier extends NameClassifier {
 
 		private void expandDirectLatestInferences() {
 
-			for (Name s : latestInferreds.getNames()) {
+			for (Name s : latestInferreds) {
 
 				addSubsumerExpansions(s.getSubsumers());
 				addSubsumerExpansions(getInferredSubsumers(s).allNewInferreds);
@@ -192,7 +192,7 @@ class NodeClassifier extends NameClassifier {
 
 		private void expandCurrentSubsumerLatestInferences() {
 
-			for (Name s : getSubsumers().getNames()) {
+			for (Name s : getSubsumers()) {
 
 				if (matchableNode(s)) {
 
@@ -203,7 +203,7 @@ class NodeClassifier extends NameClassifier {
 
 		private void addSubsumerExpansions(Names subsumerSet) {
 
-			for (Name s : subsumerSet.getNames()) {
+			for (Name s : subsumerSet) {
 
 				if (newSubsumer(s) && !allNewInferreds.contains(s)) {
 
@@ -225,7 +225,7 @@ class NodeClassifier extends NameClassifier {
 
 		void expandLatestInferencesForNonMatchable() {
 
-			for (Name s : getSubsumers().getNames()) {
+			for (Name s : getSubsumers()) {
 
 				if (matchableNode(s)) {
 
@@ -246,7 +246,7 @@ class NodeClassifier extends NameClassifier {
 
 		private void expandForNewMatchableSubsumers(Name s) {
 
-			for (Name ss : getMatchableSubsumerLatestInferreds(s).getNames()) {
+			for (Name ss : getMatchableSubsumerLatestInferreds(s)) {
 
 				if (newSubsumer(ss)) {
 
@@ -282,7 +282,7 @@ class NodeClassifier extends NameClassifier {
 
 	void checkAddInferredSubsumers(Names subsumers) {
 
-		for (Name s : subsumers.getNames()) {
+		for (Name s : subsumers) {
 
 			if (newSubsumer(s)) {
 

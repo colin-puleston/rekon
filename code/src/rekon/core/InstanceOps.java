@@ -162,7 +162,7 @@ public class InstanceOps {
 
 		addInstances(instances, matches.filterForType(InstanceNode.class));
 
-		for (Name n : matches.getNames()) {
+		for (Name n : matches) {
 
 			if (n instanceof ClassNode) {
 
@@ -175,7 +175,7 @@ public class InstanceOps {
 
 	private void addInstances(Set<Instance> instances, Names nodes) {
 
-		for (Name n : nodes.getNames()) {
+		for (Name n : nodes) {
 
 			instances.add(((InstanceNode)n).getInstance());
 		}

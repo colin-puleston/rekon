@@ -143,7 +143,7 @@ public abstract class Name {
 			return true;
 		}
 
-		for (Name s : getSubsumers().getNames()) {
+		for (Name s : getSubsumers()) {
 
 			if (s.definitionRefed()) {
 

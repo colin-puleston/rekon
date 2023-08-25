@@ -64,7 +64,7 @@ abstract class PotentialSubsumptions<O> {
 
 			IntegerCollector rankOptions = createRankOptionsCollector();
 
-			for (Name n : rankNames.getNames()) {
+			for (Name n : rankNames) {
 
 				IntegerUnion options = getOptionsFor(n);
 
@@ -133,7 +133,7 @@ abstract class PotentialSubsumptions<O> {
 
 			IntegerUnion optionIdxs = new IntegerUnion();
 
-			for (Name rn : resolveNamesForRetrieval(new NameSet(n), rank).getNames()) {
+			for (Name rn : resolveNamesForRetrieval(new NameSet(n), rank)) {
 
 				if (!collectDirectOptionsFor(rn, optionIdxs)) {
 

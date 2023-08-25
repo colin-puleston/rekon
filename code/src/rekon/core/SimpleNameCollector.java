@@ -58,7 +58,7 @@ class SimpleNameCollector extends NameCollector {
 
 	void collectNames(Names ns) {
 
-		for (Name n : ns.getNames()) {
+		for (Name n : ns) {
 
 			names.add(n);
 		}

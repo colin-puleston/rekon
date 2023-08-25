@@ -104,7 +104,7 @@ class NameClassifier extends NameLinksHandler {
 
 	private void addAndExpandPreInferredSubsumers(Names subsumers) {
 
-		for (Name s : subsumers.getNames()) {
+		for (Name s : subsumers) {
 
 			checkAddAndExpandPreInferredSubsumer(s);
 		}

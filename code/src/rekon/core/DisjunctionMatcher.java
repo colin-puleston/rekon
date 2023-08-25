@@ -67,7 +67,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumesNode(NodeX n) {
 
-		for (Name d : disjuncts.getNames()) {
+		for (Name d : disjuncts) {
 
 			if (d.subsumes(n)) {
 
@@ -80,7 +80,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumesDisjunction(DisjunctionMatcher other) {
 
-		for (Name d : other.disjuncts.getNames()) {
+		for (Name d : other.disjuncts) {
 
 			if (!subsumesNode((NodeX)d)) {
 
@@ -93,7 +93,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean classifiable(boolean initialPass) {
 
-		for (Name d : disjuncts.getNames()) {
+		for (Name d : disjuncts) {
 
 			if (((NodeX)d).classifiableDisjunct(initialPass)) {
 
@@ -113,7 +113,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		List<Collection<Name>> subsSets = new ArrayList<Collection<Name>>();
 
-		for (Name d : disjuncts.getNames()) {
+		for (Name d : disjuncts) {
 
 			subsSets.add(d.getSubsumers().getNames());
 		}
@@ -129,7 +129,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		String s = new String();
 
-		for (Name d : disjuncts.getNames()) {
+		for (Name d : disjuncts) {
 
 			if (!s.isEmpty()) {
 

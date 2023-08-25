@@ -66,7 +66,7 @@ public abstract class NodeProperty extends PropertyX {
 			return true;
 		}
 
-		for (Name s : getSubsumers().getNames()) {
+		for (Name s : getSubsumers()) {
 
 			if (!((NodeProperty)s).chains.isEmpty()) {
 
@@ -81,7 +81,7 @@ public abstract class NodeProperty extends PropertyX {
 
 		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
 
-		for (Name s : getSubsumers().getNames()) {
+		for (Name s : getSubsumers()) {
 
 			allChains.addAll(((NodeProperty)s).chains);
 		}

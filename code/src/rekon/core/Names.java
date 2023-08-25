@@ -29,9 +29,24 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class Names {
+public abstract class Names implements Iterable<Name> {
 
 	static public final Names NO_NAMES = new NameList();
+
+	public boolean add(Name name) {
+
+		return getNames().add(name);
+	}
+
+	public void addAll(Collection<? extends Name> allNames) {
+
+		getNames().addAll(allNames);
+	}
+
+	public void addAll(Names allNames) {
+
+		addAll(allNames.getNames());
+	}
 
 	public boolean equals(Object other) {
 
@@ -48,6 +63,11 @@ public abstract class Names {
 		return getClass().getSimpleName() + "(" + getNames() + ")";
 	}
 
+	public Iterator<Name> iterator() {
+
+		return getNames().iterator();
+	}
+
 	public int size() {
 
 		return getNames().size();
@@ -56,21 +76,6 @@ public abstract class Names {
 	public boolean isEmpty() {
 
 		return getNames().isEmpty();
-	}
-
-	public boolean add(Name name) {
-
-		return getNames().add(name);
-	}
-
-	public void addAll(Collection<? extends Name> allNames) {
-
-		getNames().addAll(allNames);
-	}
-
-	public void addAll(Names allNames) {
-
-		addAll(allNames.getNames());
 	}
 
 	public abstract Collection<Name> getNames();

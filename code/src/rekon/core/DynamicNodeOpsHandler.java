@@ -46,7 +46,7 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 			checkAddPattern(patterns, node);
 
-			for (Name en : node.getEquivalents().getNames()) {
+			for (Name en : node.getEquivalents()) {
 
 				checkAddPattern(patterns, (NodeX)en);
 			}

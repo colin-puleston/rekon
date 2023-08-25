@@ -230,7 +230,7 @@ public abstract class NodeX extends Name {
 
 		for (DisjunctionMatcher dm : getDisjunctionMatchers()) {
 
-			for (Name d : dm.getDisjuncts().getNames()) {
+			for (Name d : dm.getDisjuncts()) {
 
 				if (((NodeX)d).anyNewSubsumers(NodeSelector.ANY)) {
 

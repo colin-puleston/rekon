@@ -38,11 +38,11 @@ class MatchNamesExpander {
 
 		NameSet resolved = new NameSet();
 
-		for (Name n : leafNames.getNames()) {
+		for (Name n : leafNames) {
 
 			checkAdd(resolved, n, role);
 
-			for (Name s : n.getSubsumers().getNames()) {
+			for (Name s : n.getSubsumers()) {
 
 				checkAdd(resolved, s, role);
 			}

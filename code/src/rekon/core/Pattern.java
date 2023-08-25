@@ -171,7 +171,7 @@ public class Pattern extends Expression {
 
 	boolean classifiable(boolean initialPass) {
 
-		for (Name n : nodes.getNames()) {
+		for (Name n : nodes) {
 
 			if (((NodeX)n).classifiablePatternRoot(initialPass)) {
 
@@ -183,7 +183,7 @@ public class Pattern extends Expression {
 
 			if (r.getProperty().classifiablePatternProperty()) {
 
-				for (Name tn : r.getTargetNodes().getNames()) {
+				for (Name tn : r.getTargetNodes()) {
 
 					if (((NodeX)tn).classifiablePatternValue(initialPass)) {
 
@@ -235,7 +235,7 @@ public class Pattern extends Expression {
 
 	private void registerAsDefinitionRefed(Names regNames, MatchRole role) {
 
-		for (Name n : regNames.getNames()) {
+		for (Name n : regNames) {
 
 			n.registerAsDefinitionRefed(role);
 		}
@@ -243,7 +243,7 @@ public class Pattern extends Expression {
 
 	private boolean subsumesAllNames(Pattern p) {
 
-		for (Name n : nodes.getNames()) {
+		for (Name n : nodes) {
 
 			if (!subsumesAnyName(n, p)) {
 
@@ -256,7 +256,7 @@ public class Pattern extends Expression {
 
 	private boolean subsumesAnyName(Name n, Pattern p) {
 
-		for (Name pn : p.nodes.getNames()) {
+		for (Name pn : p.nodes) {
 
 			if (n.subsumes(pn)) {
 
@@ -282,9 +282,9 @@ public class Pattern extends Expression {
 
 	private void purgeSubsumers(NameSet target, Names purger) {
 
-		for (Name n : purger.getNames()) {
+		for (Name n : purger) {
 
-			target.removeAll(n.getSubsumers().getNames());
+			target.removeAll(n.getSubsumers());
 		}
 	}
 
@@ -302,7 +302,7 @@ public class Pattern extends Expression {
 
 		List<String> l = new ArrayList<String>();
 
-		for (Name n : nodes.getNames()) {
+		for (Name n : nodes) {
 
 			l.add(n.getLabel());
 		}

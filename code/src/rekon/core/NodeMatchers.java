@@ -85,7 +85,7 @@ class NodeMatchers {
 
 		NameClassifier classifier = node.getClassifier();
 
-		for (Name s : subsumers.getNames()) {
+		for (Name s : subsumers) {
 
 			if (!s.rootName()) {
 

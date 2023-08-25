@@ -39,7 +39,7 @@ class PatternSubsumers {
 
 			Set<NodeMatcher> potentials = new HashSet<NodeMatcher>();
 
-			for (Name s : subsumeds.getNames()) {
+			for (Name s : subsumeds) {
 
 				findAllFrom((NodeX)s, potentials);
 			}
@@ -51,7 +51,7 @@ class PatternSubsumers {
 
 			findFrom(n, potentials);
 
-			for (Name ss : n.getSubs(ClassNode.class, false).getNames()) {
+			for (Name ss : n.getSubs(ClassNode.class, false)) {
 
 				findFrom((NodeX)ss, potentials);
 			}
@@ -63,7 +63,7 @@ class PatternSubsumers {
 
 				if (potentials.add(d)) {
 
-					for (Name dn : getDefinitionMatchNames(d).getNames()) {
+					for (Name dn : getDefinitionMatchNames(d)) {
 
 						if (dn instanceof NodeX) {
 

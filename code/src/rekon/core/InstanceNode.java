@@ -41,7 +41,7 @@ public class InstanceNode extends NodeX {
 
 			classification = getClassification();
 
-			for (Name type : directs.getNames()) {
+			for (Name type : directs) {
 
 				processLinkToType(type);
 				processLinkFromType(type.getClassification());
@@ -148,7 +148,7 @@ public class InstanceNode extends NodeX {
 
 			for (DisjunctionMatcher dj : c.getDisjunctionMatchers()) {
 
-				for (Name d : dj.getDisjuncts().getNames()) {
+				for (Name d : dj.getDisjuncts()) {
 
 					findFrom((NodeX)d);
 				}
@@ -204,7 +204,7 @@ public class InstanceNode extends NodeX {
 
 		directs.addAll(all);
 
-		for (Name s : all.getNames()) {
+		for (Name s : all) {
 
 			directs.removeAll(s.getSubsumers());
 		}

@@ -64,7 +64,7 @@ class EquivalentsGrouper {
 			Set<Node<E>> groups = new HashSet<Node<E>>();
 			NameSet initialGroupElements = new NameSet();
 
-			for (Name n : names.getNames()) {
+			for (Name n : names) {
 
 				Names equivs = n.getEquivalents();
 
@@ -104,7 +104,7 @@ class EquivalentsGrouper {
 
 			checkAddEntity(entities, name);
 
-			for (Name e : equivs.getNames()) {
+			for (Name e : equivs) {
 
 				checkAddEntity(entities, e);
 			}
@@ -127,7 +127,7 @@ class EquivalentsGrouper {
 
 			Set<OWLClass> entities = new HashSet<OWLClass>();
 
-			for (Name n : equivs.getNames()) {
+			for (Name n : equivs) {
 
 				checkAddEntity(entities, n);
 			}
@@ -173,7 +173,7 @@ class EquivalentsGrouper {
 
 			NameSet resDirects = new NameSet();
 
-			for (Name d : rawDirects.getNames()) {
+			for (Name d : rawDirects) {
 
 				collectLinkedMappeds(resDirects, d);
 			}
@@ -190,7 +190,7 @@ class EquivalentsGrouper {
 
 			if (!n.mapped() || collected.add(n)) {
 
-				for (Name l : getLinked(n, true).getNames()) {
+				for (Name l : getLinked(n, true)) {
 
 					collectLinkedMappeds(collected, l);
 				}
@@ -199,7 +199,7 @@ class EquivalentsGrouper {
 
 		private boolean anyFreeNames(Names names) {
 
-			for (Name n : names.getNames()) {
+			for (Name n : names) {
 
 				if (!n.mapped()) {
 

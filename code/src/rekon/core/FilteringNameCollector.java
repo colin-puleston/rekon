@@ -83,7 +83,7 @@ class FilteringNameCollector {
 
 			if (rankStatus == RankStatus.COLLECT) {
 
-				for (Name n : ns.getNames()) {
+				for (Name n : ns) {
 
 					collectName(n);
 

@@ -98,7 +98,7 @@ class NameClassification extends NameLinksHandler {
 
 		boolean hasLinkTo(Name target, NameSet visited) {
 
-			for (Name d : directs.getNames()) {
+			for (Name d : directs) {
 
 				if (d.equals(target) || hasLinkToNext(target, d, visited)) {
 
@@ -111,7 +111,7 @@ class NameClassification extends NameLinksHandler {
 
 		Names collectAll(NameSet collected) {
 
-			for (Name d : directs.getNames()) {
+			for (Name d : directs) {
 
 				if (collected.add(d)) {
 
@@ -251,7 +251,7 @@ class NameClassification extends NameLinksHandler {
 
 			supers.getActiveDirects().addAll(ancestors);
 
-			for (Name a : ancestors.getNames()) {
+			for (Name a : ancestors) {
 
 				supers.getActiveDirects().removeAll(getInitialiserFor(a).ancestors);
 			}
@@ -259,7 +259,7 @@ class NameClassification extends NameLinksHandler {
 
 		void setAsDirectSub() {
 
-			for (Name d : supers.getActiveDirects().getNames()) {
+			for (Name d : supers.getActiveDirects()) {
 
 				d.getClassification().subs.getActiveDirects().add(name);
 			}
@@ -284,7 +284,7 @@ class NameClassification extends NameLinksHandler {
 
 			VerticalLinks commonIncomings = null;
 
-			for (Name linked : getOutgingLinks().get(true).getNames()) {
+			for (Name linked : getOutgingLinks().get(true)) {
 
 				VerticalLinks incomings = getIncomingLinks(linked);
 
