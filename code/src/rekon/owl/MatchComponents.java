@@ -516,7 +516,7 @@ class MatchComponents {
 		return patterns.get(source);
 	}
 
-	List<Pattern> PatternDisjunction(OWLClassExpression source) {
+	List<Pattern> toPatternDisjunction(OWLClassExpression source) {
 
 		return new PatternDisjunctionSpec(source).checkCreate();
 	}
