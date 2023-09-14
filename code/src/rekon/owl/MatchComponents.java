@@ -407,11 +407,11 @@ class MatchComponents {
 		}
 	}
 
-	private class toPatternDisjunctionSpec {
+	private class PatternDisjunctionSpec {
 
 		private List<PatternSpec> disjuncts = new ArrayList<PatternSpec>();
 
-		toPatternDisjunctionSpec(OWLClassExpression source) {
+		PatternDisjunctionSpec(OWLClassExpression source) {
 
 			if (source instanceof OWLObjectIntersectionOf) {
 
@@ -516,9 +516,9 @@ class MatchComponents {
 		return patterns.get(source);
 	}
 
-	List<Pattern> toPatternDisjunction(OWLClassExpression source) {
+	List<Pattern> PatternDisjunction(OWLClassExpression source) {
 
-		return new toPatternDisjunctionSpec(source).checkCreate();
+		return new PatternDisjunctionSpec(source).checkCreate();
 	}
 
 	Relation toRelation(OWLClassExpression source) {
