@@ -367,15 +367,7 @@ class MatchComponents {
 			return conjuncts.hashCode();
 		}
 
-		PatternSpec() {
-		}
-
 		PatternSpec(OWLClassExpression source) {
-
-			expandFor(source);
-		}
-
-		void expandFor(OWLClassExpression source) {
 
 			if (source instanceof OWLObjectIntersectionOf) {
 
@@ -387,43 +379,25 @@ class MatchComponents {
 			}
 		}
 
-		PatternSpec copyAndExpandFor(OWLClassExpression source) {
-
-			PatternSpec copy = new PatternSpec(conjuncts);
-
-			copy.expandFor(source);
-
-			return copy;
-		}
-
 		List<OWLClassExpression> getConjuncts() {
 
 			return conjuncts;
-		}
-
-		private PatternSpec(List<OWLClassExpression> conjuncts) {
-
-			this.conjuncts.addAll(conjuncts);
 		}
 	}
 
 	private class PatternDisjunctionSpec {
 
-		private List<PatternSpec> disjuncts = new ArrayList<PatternSpec>();
+		private Set<PatternSpec> disjuncts = new HashSet<PatternSpec>();
 
 		PatternDisjunctionSpec(OWLClassExpression source) {
 
-			if (source instanceof OWLObjectIntersectionOf) {
+			if (source instanceof OWLObjectUnionOf) {
 
-				addFor((OWLObjectIntersectionOf)source);
-			}
-			else if (source instanceof OWLObjectUnionOf) {
-
-				addFor((OWLObjectUnionOf)source);
+				addDisjunctsForUnion((OWLObjectUnionOf)source);
 			}
 			else {
 
-				addSimpleDisjunctFor(source);
+				addDisjunctFor(source);
 			}
 		}
 
@@ -446,55 +420,17 @@ class MatchComponents {
 			return patternDisjunction;
 		}
 
-		private void addFor(OWLObjectIntersectionOf source) {
-
-			PatternSpec disjunct = new PatternSpec();
-			List<OWLObjectUnionOf> unions = new ArrayList<OWLObjectUnionOf>();
+		private void addDisjunctsForUnion(OWLObjectUnionOf source) {
 
 			for (OWLClassExpression op : source.getOperands()) {
 
-				if (op instanceof OWLObjectUnionOf) {
-
-					unions.add((OWLObjectUnionOf)op);
-				}
-				else {
-
-					disjunct.expandFor(op);
-				}
-			}
-
-			addForUnions(disjunct, unions, 0);
-		}
-
-		private void addFor(OWLObjectUnionOf source) {
-
-			for (OWLClassExpression op : source.getOperands()) {
-
-				addSimpleDisjunctFor(op);
+				addDisjunctFor(op);
 			}
 		}
 
-		private void addSimpleDisjunctFor(OWLClassExpression source) {
+		private void addDisjunctFor(OWLClassExpression source) {
 
 			disjuncts.add(new PatternSpec(source));
-		}
-
-		private void addForUnions(
-						PatternSpec disjunct,
-						List<OWLObjectUnionOf> unions,
-						int index) {
-
-			if (index == unions.size()) {
-
-				disjuncts.add(disjunct);
-			}
-			else {
-
-				for (OWLClassExpression op : unions.get(index).getOperands()) {
-
-					addForUnions(disjunct.copyAndExpandFor(op), unions, index + 1);
-				}
-			}
 		}
 	}
 
