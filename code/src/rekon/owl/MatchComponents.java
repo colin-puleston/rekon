@@ -41,7 +41,8 @@ class MatchComponents {
 	private NodeX rootNode;
 
 	private Patterns patterns = new Patterns();
-	private Disjunctions disjunctions = new Disjunctions();
+	private DisjunctionNodes disjunctionNodes = new DisjunctionNodes();
+	private DisjunctionNodeValues disjunctionNodeValues = new DisjunctionNodeValues();
 
 	private SomeRelations someRelations = new SomeRelations();
 	private AllRelations allRelations = new AllRelations();
@@ -131,14 +132,18 @@ class MatchComponents {
 
 		private Pattern checkCreateForConjuncts(Collection<OWLClassExpression> conjuncts) {
 
-			NameSet names = new NameSet();
+			NameSet nodes = new NameSet();
 			Set<Relation> rels = new HashSet<Relation>();
 
 			for (OWLClassExpression op : conjuncts) {
 
 				if (op instanceof OWLClass) {
 
-					names.absorb(mappedNames.get((OWLClass)op));
+					nodes.absorb(mappedNames.get((OWLClass)op));
+				}
+				else if (op instanceof OWLObjectUnionOf) {
+
+					nodes.absorb(disjunctionNodes.get((OWLObjectUnionOf)op));
 				}
 				else {
 
@@ -153,12 +158,12 @@ class MatchComponents {
 				}
 			}
 
-			if (names.isEmpty()) {
+			if (nodes.isEmpty()) {
 
-				names.add(rootNode);
+				nodes.add(rootNode);
 			}
 
-			return new Pattern(names, rels);
+			return new Pattern(nodes, rels);
 		}
 
 		private Pattern checkCreateForRestriction(OWLRestriction source) {
@@ -169,15 +174,15 @@ class MatchComponents {
 		}
 	}
 
-	private class Disjunctions extends TypeEntities<OWLObjectUnionOf, NodeValue> {
+	private class DisjunctionNodes extends TypeEntities<OWLObjectUnionOf, NodeX> {
 
-		NodeValue checkCreate(OWLObjectUnionOf source) {
+		NodeX checkCreate(OWLObjectUnionOf source) {
 
 			Set<NodeX> disjuncts = new HashSet<NodeX>();
 
 			for (OWLClassExpression op : source.getOperands()) {
 
-				Set<? extends NodeX> djs = valueToNodeDisjunction(op);
+				Set<? extends NodeX> djs = toNodeDisjunction(op);
 
 				if (djs == null) {
 
@@ -187,7 +192,15 @@ class MatchComponents {
 				disjuncts.addAll(djs);
 			}
 
-			return createNodeValue(disjuncts);
+			return resolveDisjunctsToNode(disjuncts);
+		}
+	}
+
+	private class DisjunctionNodeValues extends TypeEntities<OWLObjectUnionOf, NodeValue> {
+
+		NodeValue checkCreate(OWLObjectUnionOf source) {
+
+			return new NodeValue(disjunctionNodes.get(source));
 		}
 	}
 
@@ -246,12 +259,17 @@ class MatchComponents {
 
 			if (filler instanceof OWLObjectUnionOf) {
 
-				return disjunctions.get((OWLObjectUnionOf)filler);
+				return disjunctionNodeValues.get((OWLObjectUnionOf)filler);
 			}
 
-			Set<? extends NodeX> djs = valueToNodeDisjunction(filler);
+			Set<? extends NodeX> djs = toNodeDisjunction(filler);
 
 			return djs != null ? createNodeValue(djs) : null;
+		}
+
+		private NodeValue createNodeValue(Collection<? extends NodeX> disjuncts) {
+
+			return new NodeValue(resolveDisjunctsToNode(disjuncts));
 		}
 	}
 
@@ -472,7 +490,7 @@ class MatchComponents {
 		return dataValueRelations.checkCreate(source);
 	}
 
-	InstanceNode valueToInstanceNode(RekonOWLInstanceRef v) {
+	InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
 
 		throw new Error("Method should never be invoked!");
 	}
@@ -532,45 +550,45 @@ class MatchComponents {
 		return DataTypes.toDataValueExpression(source.getFiller());
 	}
 
-	private Set<? extends NodeX> valueToNodeDisjunction(OWLClassExpression v) {
+	private Set<? extends NodeX> toNodeDisjunction(OWLClassExpression source) {
 
-		if (v instanceof OWLObjectOneOf) {
+		if (source instanceof OWLObjectOneOf) {
 
-			return valueToIndividualDisjunction((OWLObjectOneOf)v);
+			return toIndividualDisjunction((OWLObjectOneOf)source);
 		}
 
-		NodeX n = valueToNode(v);
+		NodeX n = toNode(source);
 
 		return n != null ? Collections.singleton(n) : null;
 	}
 
-	private NodeX valueToNode(OWLClassExpression v) {
+	private NodeX toNode(OWLClassExpression source) {
 
-		if (v instanceof RekonOWLInstanceRef) {
+		if (source instanceof RekonOWLInstanceRef) {
 
-			return valueToInstanceNode((RekonOWLInstanceRef)v);
+			return toInstanceNode((RekonOWLInstanceRef)source);
 		}
 
-		return valueToClassNode(v);
+		return toClassNode(source);
 	}
 
-	private ClassNode valueToClassNode(OWLClassExpression v) {
+	private ClassNode toClassNode(OWLClassExpression source) {
 
-		if (v instanceof OWLClass) {
+		if (source instanceof OWLClass) {
 
-			return mappedNames.get((OWLClass)v);
+			return mappedNames.get((OWLClass)source);
 		}
 
-		return valueToPatternClassNode(v);
+		return toPatternClassNode(source);
 	}
 
-	private ClassNode valueToPatternClassNode(OWLClassExpression v) {
+	private ClassNode toPatternClassNode(OWLClassExpression source) {
 
-		ClassNode pCls = patternClasses.get(v);
+		ClassNode pCls = patternClasses.get(source);
 
 		if (pCls == null) {
 
-			Pattern p = patterns.get(v);
+			Pattern p = patterns.get(source);
 
 			if (p != null) {
 
@@ -578,18 +596,18 @@ class MatchComponents {
 
 				matchStructures.addDefinitionPattern(pCls, p);
 
-				patternClasses.put(v, pCls);
+				patternClasses.put(source, pCls);
 			}
 		}
 
 		return pCls;
 	}
 
-	private Set<IndividualNode> valueToIndividualDisjunction(OWLObjectOneOf v) {
+	private Set<IndividualNode> toIndividualDisjunction(OWLObjectOneOf source) {
 
 		Set<IndividualNode> disjuncts = new HashSet<IndividualNode>();
 
-		for (OWLIndividual i : v.getIndividuals()) {
+		for (OWLIndividual i : source.getIndividuals()) {
 
 			if (!(i instanceof OWLNamedIndividual)) {
 
@@ -602,12 +620,7 @@ class MatchComponents {
 		return disjuncts;
 	}
 
-	private NodeValue createNodeValue(Collection<? extends NodeX> disjuncts) {
-
-		return new NodeValue(resolveValueNode(disjuncts));
-	}
-
-	private NodeX resolveValueNode(Collection<? extends NodeX> disjuncts) {
+	private NodeX resolveDisjunctsToNode(Collection<? extends NodeX> disjuncts) {
 
 		if (disjuncts.size() == 1) {
 

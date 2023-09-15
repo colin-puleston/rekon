@@ -71,9 +71,9 @@ public class RekonInstanceBox {
 				super(mappedNames, matchStructures, true);
 			}
 
-			InstanceNode valueToInstanceNode(RekonOWLInstanceRef v) {
+			InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
 
-				IRI iri = v.getIRI();
+				IRI iri = source.getIRI();
 				Instance i = instances.get(iri);
 
 				if (i == null) {
