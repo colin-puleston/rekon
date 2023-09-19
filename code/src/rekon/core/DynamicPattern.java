@@ -34,9 +34,17 @@ class DynamicPattern extends LocalPattern {
 		private class DynamicPatternClassNode extends LocalPatternClassNode {
 		}
 
-		ClassNode createPatternClass() {
+		private class DynamicDefinitionClassNode extends LocalDefinitionClassNode {
+		}
+
+		LocalPatternClassNode createLocalPatternClass() {
 
 			return new DynamicPatternClassNode();
+		}
+
+		LocalDefinitionClassNode createLocalDefinitionClass() {
+
+			return new DynamicDefinitionClassNode();
 		}
 	}
 
@@ -50,7 +58,7 @@ class DynamicPattern extends LocalPattern {
 		return new DynamicClasses();
 	}
 
-	NodeX ensurePatternNode(MatchStructures matchStructures) {
+	NodeX ensureDefinitionNode(MatchStructures matchStructures) {
 
 		return matchStructures.addPatternClass();
 	}

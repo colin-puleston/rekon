@@ -41,9 +41,9 @@ class FreeOntologyClasses extends FreeClasses {
 		}
 	}
 
-	private class OntologyGCIImpliedClassNode extends GCIImpliedClassNode {
+	private class OntologyDefinitionClassNode extends DefinitionClassNode {
 
-		OntologyGCIImpliedClassNode() {
+		OntologyDefinitionClassNode() {
 
 			ontology.addFreeClass(this);
 		}
@@ -54,13 +54,13 @@ class FreeOntologyClasses extends FreeClasses {
 		this.ontology = ontology;
 	}
 
-	ClassNode createPatternClass() {
+	PatternClassNode createPatternClass() {
 
 		return new OntologyPatternClassNode();
 	}
 
-	ClassNode createGCIImpliedClass() {
+	DefinitionClassNode createDefinitionClass() {
 
-		return new OntologyGCIImpliedClassNode();
+		return new OntologyDefinitionClassNode();
 	}
 }

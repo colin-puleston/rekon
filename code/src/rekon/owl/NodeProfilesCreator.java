@@ -89,7 +89,7 @@ class NodeProfilesCreator {
 
 		Collection<OWLClassExpression> getRelationSources(AssertedClass entity) {
 
-			return entity.getSuperExprs();
+			return entity.getSuperNonUnionExprs();
 		}
 
 		void logOutOfScope(AssertedClass entity, OWLClassExpression source) {

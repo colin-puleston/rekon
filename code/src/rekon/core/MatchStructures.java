@@ -47,9 +47,7 @@ public class MatchStructures {
 		nodeMatchers.addDefinitionPattern(node, defn);
 	}
 
-	public void addDisjunction(
-					ClassNode node,
-					Collection<? extends NodeX> disjuncts) {
+	public void addDisjunction(ClassNode node, Collection<? extends NodeX> disjuncts) {
 
 		nodeMatchers.addDisjunction(node, disjuncts);
 	}
@@ -59,9 +57,9 @@ public class MatchStructures {
 		return freeClasses.createPatternClass();
 	}
 
-	public ClassNode addGCIImpliedClass() {
+	public ClassNode addDefinitionClass() {
 
-		return freeClasses.createGCIImpliedClass();
+		return freeClasses.createDefinitionClass();
 	}
 
 	MatchStructures(NodeMatchers nodeMatchers, FreeClasses freeClasses) {

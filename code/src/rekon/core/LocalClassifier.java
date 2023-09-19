@@ -45,7 +45,7 @@ class LocalClassifier {
 
 			classifyProfiles(pattern.getProfileMatchers());
 
-			return pattern.getPatternNode().getClassifier().getSubsumers();
+			return pattern.getDefinitionNode().getClassifier().getSubsumers();
 		}
 
 		void updateNewSubsumptions(boolean newSubsumption) {

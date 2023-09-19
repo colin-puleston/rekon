@@ -57,18 +57,19 @@ class ClassDefinitionsCreator {
 				}
 			}
 
-			ClassNode c = resolveDefinedClass();
+			if (!patternDefns.isEmpty() || !disjunctionDefns.isEmpty()) {
 
-			for (Pattern defn : patternDefns) {
+				ClassNode c = resolveDefinedClass();
 
-				matchStructures.addDefinitionPattern(c, defn);
-			}
+				for (Pattern defn : patternDefns) {
 
-			for (List<Pattern> disjuncts : disjunctionDefns) {
+					matchStructures.addDefinitionPattern(c, defn);
+				}
 
-				List<NodeX> nodeDjs = resolveGCIDisjunctionToNodes(disjuncts);
+				for (List<Pattern> disjuncts : disjunctionDefns) {
 
-				matchStructures.addDisjunction(c, nodeDjs);
+					addDisjunction(c, disjuncts);
+				}
 			}
 
 			return true;
@@ -146,7 +147,58 @@ class ClassDefinitionsCreator {
 
 		ClassNode resolveDefinedClass() {
 
-			return matchStructures.addGCIImpliedClass();
+			return matchStructures.addDefinitionClass();
+		}
+	}
+
+	private class ClassSupersBasedCreator {
+
+		private AssertedClass assertCls;
+		private ClassNode subCls;
+
+		ClassSupersBasedCreator(AssertedClass assertCls) {
+
+			subCls = mappedNames.get(assertCls.getEntity());
+
+			for (OWLObjectUnionOf sup : assertCls.getSuperUnionExprs()) {
+
+				checkCreate(sup);
+			}
+		}
+
+		private void checkCreate(OWLObjectUnionOf sup) {
+
+			ClassNode supCls = resolveSuperClass(sup);
+
+			if (sup != null) {
+
+				subCls.addSubsumer(supCls);
+			}
+			else {
+
+				handleOutOfScopeSuper(sup);
+			}
+		}
+
+		private ClassNode resolveSuperClass(OWLObjectUnionOf sup) {
+
+			List<Pattern> djs = matchComponents.toPatternDisjunction(sup);
+
+			if (djs == null) {
+
+				return null;
+			}
+
+			ClassNode c = matchStructures.addDefinitionClass();
+
+			addDisjunction(c, djs);
+
+			return c;
+		}
+
+		private void handleOutOfScopeSuper(OWLClassExpression sup) {
+
+			logOutOfScopeAxiom(SUBCLASS_AXIOM_DESCRIPTION, assertCls.superExprToAxiom(sup));
 		}
 	}
 
@@ -176,7 +228,7 @@ class ClassDefinitionsCreator {
 
 				if (supCls != null) {
 
-					for (NodeX subCls : resolveGCIDisjunctionToNodes(subDjs)) {
+					for (NodeX subCls : resolveDisjunctionToNodes(subDjs)) {
 
 						subCls.addSubsumer(supCls);
 					}
@@ -197,7 +249,7 @@ class ClassDefinitionsCreator {
 
 			Pattern p = matchComponents.toPattern(sup);
 
-			return p != null ? addGCIImpliedClass(p) : null;
+			return p != null ? addDefinitionClass(p) : null;
 		}
 	}
 
@@ -214,6 +266,7 @@ class ClassDefinitionsCreator {
 		for (AssertedClass c : assertions.getClasses()) {
 
 			new ClassEquivsBasedCreator(c);
+			new ClassSupersBasedCreator(c);
 		}
 
 		for (OWLEquivalentClassesAxiom ax : assertions.getEquivGCIs()) {
@@ -236,28 +289,33 @@ class ClassDefinitionsCreator {
 		logger.logSeparatorLine();
 	}
 
-	private List<NodeX> resolveGCIDisjunctionToNodes(List<Pattern> disjuncts) {
+	private void addDisjunction(ClassNode node, List<Pattern> disjuncts) {
+
+		matchStructures.addDisjunction(node, resolveDisjunctionToNodes(disjuncts));
+	}
+
+	private List<NodeX> resolveDisjunctionToNodes(List<Pattern> disjuncts) {
 
 		List<NodeX> nodeDjs = new ArrayList<NodeX>();
 
 		for (Pattern d : disjuncts) {
 
-			nodeDjs.add(resolveGCIDisjunctToNode(d));
+			nodeDjs.add(resolveDisjunctToNode(d));
 		}
 
 		return nodeDjs;
 	}
 
-	private NodeX resolveGCIDisjunctToNode(Pattern disjunct) {
+	private NodeX resolveDisjunctToNode(Pattern disjunct) {
 
 		NodeX n = disjunct.toSingleNode();
 
-		return n != null ? n : addGCIImpliedClass(disjunct);
+		return n != null ? n : addDefinitionClass(disjunct);
 	}
 
-	private ClassNode addGCIImpliedClass(Pattern defn) {
+	private ClassNode addDefinitionClass(Pattern defn) {
 
-		ClassNode c = matchStructures.addGCIImpliedClass();
+		ClassNode c = matchStructures.addDefinitionClass();
 
 		matchStructures.addDefinitionPattern(c, defn);
 

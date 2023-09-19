@@ -36,7 +36,8 @@ class AssertedClass extends AssertedHierarchyEntity<OWLClass> {
 	private OWLDataFactory factory;
 
 	private Set<OWLClassExpression> equivExprs = new HashSet<OWLClassExpression>();
-	private Set<OWLClassExpression> superExprs = new HashSet<OWLClassExpression>();
+	private Set<OWLClassExpression> superNonUnionExprs = new HashSet<OWLClassExpression>();
+	private Set<OWLObjectUnionOf> superUnionExprs = new HashSet<OWLObjectUnionOf>();
 
 	AssertedClass(OWLClass entity, OWLDataFactory factory) {
 
@@ -67,9 +68,13 @@ class AssertedClass extends AssertedHierarchyEntity<OWLClass> {
 
 			addSuperIntersection((OWLObjectIntersectionOf)sup);
 		}
+		else if (sup instanceof OWLObjectUnionOf) {
+
+			superUnionExprs.add((OWLObjectUnionOf)sup);
+		}
 		else {
 
-			superExprs.add(sup);
+			superNonUnionExprs.add(sup);
 		}
 	}
 
@@ -90,14 +95,24 @@ class AssertedClass extends AssertedHierarchyEntity<OWLClass> {
 		return equivExprs;
 	}
 
-	Collection<OWLClassExpression> getSuperExprs() {
+	Collection<OWLClassExpression> getSuperNonUnionExprs() {
 
-		return superExprs;
+		return superNonUnionExprs;
+	}
+
+	Collection<OWLObjectUnionOf> getSuperUnionExprs() {
+
+		return superUnionExprs;
 	}
 
 	OWLEquivalentClassesAxiom equivExprToAxiom(OWLClassExpression equiv) {
 
 		return factory.getOWLEquivalentClassesAxiom(getEntity(), equiv);
+	}
+
+	OWLSubClassOfAxiom superExprToAxiom(OWLClassExpression sup) {
+
+		return factory.getOWLSubClassOfAxiom(getEntity(), sup);
 	}
 
 	private void addSuperIntersection(OWLObjectIntersectionOf supInt) {

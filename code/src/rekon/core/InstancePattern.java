@@ -46,9 +46,14 @@ class InstancePattern extends LocalPattern {
 			}
 		}
 
-		ClassNode createPatternClass() {
+		LocalPatternClassNode createLocalPatternClass() {
 
 			return new InstancePatternClassNode();
+		}
+
+		LocalDefinitionClassNode createLocalDefinitionClass() {
+
+			throw new Error("Cannot create instance-definition class!");
 		}
 	}
 
@@ -71,7 +76,7 @@ class InstancePattern extends LocalPattern {
 		return new InstanceClasses();
 	}
 
-	NodeX ensurePatternNode(MatchStructures matchStructures) {
+	NodeX ensureDefinitionNode(MatchStructures matchStructures) {
 
 		return patternInstance;
 	}

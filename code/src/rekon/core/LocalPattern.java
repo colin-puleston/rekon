@@ -29,8 +29,9 @@ package rekon.core;
  */
 abstract class LocalPattern {
 
-	private NodeX patternNode;
+	private NodeX definitionNode;
 	private Pattern pattern;
+
 	private OrderedProfileMatchers profileMatchers = new OrderedProfileMatchers();
 
 	abstract class LocalClasses extends FreeClasses {
@@ -43,30 +44,47 @@ abstract class LocalPattern {
 			}
 		}
 
-		ClassNode createGCIImpliedClass() {
+		abstract class LocalDefinitionClassNode extends DefinitionClassNode {
 
-			throw new Error("Cannot create local GCI-implied classes!");
+			boolean local() {
+
+				return true;
+			}
 		}
+
+		LocalPatternClassNode createPatternClass() {
+
+			return createLocalPatternClass();
+		}
+
+		LocalDefinitionClassNode createDefinitionClass() {
+
+			return createLocalDefinitionClass();
+		}
+
+		abstract LocalPatternClassNode createLocalPatternClass();
+
+		abstract LocalDefinitionClassNode createLocalDefinitionClass();
 	}
 
 	void initialise(PatternCreator patternCreator) {
 
 		MatchStructures matchStructures = createMatchStructures();
 
-		patternNode = ensurePatternNode(matchStructures);
+		definitionNode = ensureDefinitionNode(matchStructures);
 		pattern = patternCreator.createNestedPatterns(matchStructures);
 
 		if (pattern != null) {
 
-			profileMatchers.addDefinitionPattern(patternNode, pattern);
+			profileMatchers.addDefinitionPattern(definitionNode, pattern);
 
 			processAllLocalNamesPostAdditions();
 		}
 	}
 
-	NodeX getPatternNode() {
+	NodeX getDefinitionNode() {
 
-		return patternNode;
+		return definitionNode;
 	}
 
 	Pattern getPattern() {
@@ -81,7 +99,7 @@ abstract class LocalPattern {
 
 	abstract LocalClasses createLocalClasses();
 
-	abstract NodeX ensurePatternNode(MatchStructures matchStructures);
+	abstract NodeX ensureDefinitionNode(MatchStructures matchStructures);
 
 	private MatchStructures createMatchStructures() {
 

@@ -29,26 +29,26 @@ package rekon.core;
  */
 abstract class FreeClasses {
 
-	private int intermediatesIndex = 0;
-	private int cgiImpliedsIndex = 0;
+	private int patternClassIndex = 0;
+	private int definitionClassIndex = 0;
 
 	class PatternClassNode extends FreeClassNode {
 
 		PatternClassNode() {
 
-			super(cgiImpliedsIndex++);
+			super(definitionClassIndex++);
 		}
 	}
 
-	class GCIImpliedClassNode extends FreeClassNode {
+	class DefinitionClassNode extends FreeClassNode {
 
-		GCIImpliedClassNode() {
+		DefinitionClassNode() {
 
-			super(intermediatesIndex++);
+			super(patternClassIndex++);
 		}
 	}
 
-	abstract ClassNode createPatternClass();
+	abstract PatternClassNode createPatternClass();
 
-	abstract ClassNode createGCIImpliedClass();
+	abstract DefinitionClassNode createDefinitionClass();
 }
