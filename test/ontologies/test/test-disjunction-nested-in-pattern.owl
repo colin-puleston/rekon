@@ -62,6 +62,12 @@
     
 
 
+    <!-- urn:test#E -->
+
+    <owl:Class rdf:about="urn:test#E"/>
+    
+
+
     <!-- urn:test#P -->
 
     <owl:Class rdf:about="urn:test#P">
@@ -75,7 +81,36 @@
                             <rdf:Description rdf:about="urn:test#B"/>
                             <owl:Restriction>
                                 <owl:onProperty rdf:resource="urn:test#p"/>
-                                <owl:someValuesFrom rdf:resource="urn:test#D"/>
+                                <owl:someValuesFrom rdf:resource="urn:test#E"/>
+                            </owl:Restriction>
+                        </owl:intersectionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#Q -->
+
+    <owl:Class rdf:about="urn:test#Q">
+        <rdfs:subClassOf rdf:resource="urn:test#A"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#p"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:intersectionOf rdf:parseType="Collection">
+                            <owl:Class>
+                                <owl:unionOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="urn:test#B"/>
+                                    <rdf:Description rdf:about="urn:test#C"/>
+                                </owl:unionOf>
+                            </owl:Class>
+                            <owl:Restriction>
+                                <owl:onProperty rdf:resource="urn:test#p"/>
+                                <owl:someValuesFrom rdf:resource="urn:test#E"/>
                             </owl:Restriction>
                         </owl:intersectionOf>
                     </owl:Class>
@@ -102,11 +137,12 @@
                                         <owl:unionOf rdf:parseType="Collection">
                                             <rdf:Description rdf:about="urn:test#B"/>
                                             <rdf:Description rdf:about="urn:test#C"/>
+                                            <rdf:Description rdf:about="urn:test#D"/>
                                         </owl:unionOf>
                                     </owl:Class>
                                     <owl:Restriction>
                                         <owl:onProperty rdf:resource="urn:test#p"/>
-                                        <owl:someValuesFrom rdf:resource="urn:test#D"/>
+                                        <owl:someValuesFrom rdf:resource="urn:test#E"/>
                                     </owl:Restriction>
                                 </owl:intersectionOf>
                             </owl:Class>
