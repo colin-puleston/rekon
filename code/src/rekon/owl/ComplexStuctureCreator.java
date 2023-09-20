@@ -33,7 +33,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class ClassDefinitionsCreator {
+class ComplexStuctureCreator {
 
 	static private final String EQUIV_AXIOM_DESCRIPTION = "EQUIVALENT-CLASSES";
 	static private final String SUBCLASS_AXIOM_DESCRIPTION = "SUB-CLASS-OF";
@@ -151,12 +151,12 @@ class ClassDefinitionsCreator {
 		}
 	}
 
-	private class ClassSupersBasedCreator {
+	private class ClassUnionSupersBasedCreator {
 
 		private AssertedClass assertCls;
 		private ClassNode subCls;
 
-		ClassSupersBasedCreator(AssertedClass assertCls) {
+		ClassUnionSupersBasedCreator(AssertedClass assertCls) {
 
 			subCls = mappedNames.get(assertCls.getEntity());
 
@@ -237,7 +237,7 @@ class ClassDefinitionsCreator {
 		}
 	}
 
-	ClassDefinitionsCreator(
+	ComplexStuctureCreator(
 		Assertions assertions,
 		MappedNames mappedNames,
 		MatchComponents matchComponents,
@@ -250,7 +250,7 @@ class ClassDefinitionsCreator {
 		for (AssertedClass c : assertions.getClasses()) {
 
 			new ClassEquivsBasedCreator(c);
-			new ClassSupersBasedCreator(c);
+			new ClassUnionSupersBasedCreator(c);
 		}
 
 		for (OWLEquivalentClassesAxiom ax : assertions.getEquivGCIs()) {
@@ -264,16 +264,10 @@ class ClassDefinitionsCreator {
 		}
 	}
 
-	private void logOutOfScopeAxiom(String axiomDesc, OWLAxiom axiom) {
-
-		Logger logger = Logger.SINGLETON;
-
-		logger.logOutOfScopeWarningLine(axiomDesc);
-		logger.logLine("AXIOM: " + axiom);
-		logger.logSeparatorLine();
-	}
-
-	private void addDisjunction(ClassNode node, List<Pattern> disjuncts, boolean definition) {
+	private void addDisjunction(
+					ClassNode node,
+					List<Pattern> disjuncts,
+					boolean definition) {
 
 		List<NodeX> nodeDjs = resolveDisjunctionToNodes(disjuncts);
 
@@ -306,5 +300,14 @@ class ClassDefinitionsCreator {
 		matchStructures.addDefinitionPattern(c, defn);
 
 		return c;
+	}
+
+	private void logOutOfScopeAxiom(String axiomDesc, OWLAxiom axiom) {
+
+		Logger logger = Logger.SINGLETON;
+
+		logger.logOutOfScopeWarningLine(axiomDesc);
+		logger.logLine("AXIOM: " + axiom);
+		logger.logSeparatorLine();
 	}
 }

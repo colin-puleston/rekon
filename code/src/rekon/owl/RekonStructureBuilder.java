@@ -39,7 +39,7 @@ class RekonStructureBuilder implements StructureBuilder {
 		MatchComponents comps = new MatchComponents(mappedNames, structures, false);
 
 		new NodeProfilesCreator(assertions, mappedNames, comps, structures);
-		new ClassDefinitionsCreator(assertions, mappedNames, comps, structures);
+		new ComplexStuctureCreator(assertions, mappedNames, comps, structures);
 	}
 
 	RekonStructureBuilder(Assertions assertions, MappedNames mappedNames) {

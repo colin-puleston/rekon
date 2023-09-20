@@ -35,6 +35,12 @@ import rekon.core.*;
  */
 class NodeProfilesCreator {
 
+	static private final String CLASS_DESCRIPTION = "CLASS";
+	static private final String SUPER_DESCRIPTION = "SUPER";
+	static private final String INDIVIDUAL_DESCRIPTION = "INDIVIDUAL";
+	static private final String TYPE_DESCRIPTION = "TYPE";
+	static private final String VALUE_DESCRIPTION = "VALUE";
+
 	private Assertions assertions;
 
 	private MatchComponents matchComponents;
@@ -94,7 +100,7 @@ class NodeProfilesCreator {
 
 		void logOutOfScope(AssertedClass entity, OWLClassExpression source) {
 
-			logOutOfScopeRef("CLASS", "SUPER", entity, source);
+			logOutOfScopeRef(CLASS_DESCRIPTION, SUPER_DESCRIPTION, entity, source);
 		}
 	}
 
@@ -107,7 +113,7 @@ class NodeProfilesCreator {
 
 		void logOutOfScope(AssertedIndividual entity, OWLClassExpression source) {
 
-			logOutOfScopeRef("INDIVIDUAL", "TYPE", entity, source);
+			logOutOfScopeRef(INDIVIDUAL_DESCRIPTION, TYPE_DESCRIPTION, entity, source);
 		}
 	}
 
@@ -117,7 +123,9 @@ class NodeProfilesCreator {
 
 		void logOutOfScope(AssertedIndividual entity, S source) {
 
-			logOutOfScopeRef("INDIVIDUAL", "VALUE", entity, source.getValue());
+			OWLObject val = source.getValue();
+
+			logOutOfScopeRef(INDIVIDUAL_DESCRIPTION, VALUE_DESCRIPTION, entity, val);
 		}
 	}
 
