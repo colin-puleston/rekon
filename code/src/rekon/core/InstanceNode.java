@@ -89,7 +89,7 @@ public class InstanceNode extends NodeX {
 		}
 	}
 
-	private class ReferencedsFinder {
+	private class ReferencedsFinder extends PatternCrawler {
 
 		private Set<InstanceNode> found = new HashSet<InstanceNode>();
 
@@ -107,52 +107,31 @@ public class InstanceNode extends NodeX {
 				return Collections.emptySet();
 			}
 
-			findFrom(p.getPattern());
+			crawlFromRelations(p.getPattern());
 
 			return found;
 		}
 
-		private void findFrom(Pattern p) {
-
-			for (Relation r : p.getDirectRelations()) {
-
-				Value t = r.getTarget();
-
-				if (t instanceof NodeValue) {
-
-					findFrom(t.asNodeValue().getValueNode());
-				}
-			}
-		}
-
-		private void findFrom(NodeX n) {
+		boolean visit(NodeX n) {
 
 			if (n instanceof InstanceNode) {
 
 				found.add((InstanceNode)n);
-			}
-			else if (n instanceof FreeClassNode) {
 
-				findFrom((FreeClassNode)n);
+				return false;
 			}
+
+			return n instanceof FreeClassNode;
 		}
 
-		private void findFrom(FreeClassNode c) {
+		boolean visit(PatternMatcher m) {
 
-			PatternMatcher p = c.getProfilePatternMatcher();
+			return true;
+		}
 
-			if (p != null) {
+		boolean visit(DisjunctionMatcher m) {
 
-				findFrom(p.getPattern());
-			}
-
-			for (DisjunctionMatcher dj : c.getDisjunctionMatchers()) {
-
-				for (Name d : dj.getDisjuncts()) {
-
-					findFrom((NodeX)d);
-				}
-			}
+			return true;
 		}
 	}
 

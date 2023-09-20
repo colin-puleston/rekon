@@ -36,6 +36,31 @@ class NodeMatchers {
 
 	private List<DisjunctionMatcher> disjunctions = new ArrayList<DisjunctionMatcher>();
 
+	private class DefinitionPropagator extends PatternCrawler {
+
+		DefinitionPropagator(Pattern defnPattern) {
+
+			crawlFrom(defnPattern);
+		}
+
+		boolean visit(NodeX n) {
+
+			return true;
+		}
+
+		boolean visit(PatternMatcher m) {
+
+			return true;
+		}
+
+		boolean visit(DisjunctionMatcher m) {
+
+			m.setAsDefinition();
+
+			return true;
+		}
+	}
+
 	void addProfilePattern(PatternMatcher profile) {
 
 		profilePatterns.add(profile);
@@ -54,16 +79,27 @@ class NodeMatchers {
 		definitionPatterns.add(node.addDefinitionPatternMatcher(defn));
 
 		defn.registerDefinitionRefedNames();
+		new DefinitionPropagator(defn);
 	}
 
-	void addDisjunction(DisjunctionMatcher defn) {
+	void addDisjunction(DisjunctionMatcher disjunction) {
 
-		disjunctions.add(defn);
+		disjunctions.add(disjunction);
 	}
 
-	void addDisjunction(ClassNode node, Collection<? extends NodeX> disjuncts) {
+	void addDisjunction(
+			ClassNode node,
+			Collection<? extends NodeX> disjuncts,
+			boolean definition) {
 
-		addDisjunction(node.addDisjunctionMatcher(disjuncts));
+		DisjunctionMatcher m = node.addDisjunctionMatcher(disjuncts);
+
+		if (definition) {
+
+			m.setAsDefinition();
+		}
+
+		addDisjunction(m);
 	}
 
 	List<PatternMatcher> getProfilePatterns() {
@@ -76,9 +112,24 @@ class NodeMatchers {
 		return definitionPatterns;
 	}
 
-	List<DisjunctionMatcher> getDisjunctionMatchers() {
+	List<DisjunctionMatcher> getAllDisjunctionMatchers() {
 
 		return disjunctions;
+	}
+
+	List<DisjunctionMatcher> getDefinitionDisjunctionMatchers() {
+
+		List<DisjunctionMatcher> defns = new ArrayList<DisjunctionMatcher>();
+
+		for (DisjunctionMatcher d : disjunctions) {
+
+			if (d.definition()) {
+
+				defns.add(d);
+			}
+		}
+
+		return defns;
 	}
 
 	private void addNameSubsumers(NodeX node, Names subsumers) {

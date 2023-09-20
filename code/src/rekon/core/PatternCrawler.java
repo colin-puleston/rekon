@@ -29,26 +29,70 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class OrderedProfileMatchers extends NodeMatchers {
+abstract class PatternCrawler {
 
-	private List<NodeMatcher> orderedMatchers = new ArrayList<NodeMatcher>();
+	private Set<NodeX> visitedNodes = new HashSet<NodeX>();
 
-	void addProfilePattern(PatternMatcher profile) {
+	void crawlFrom(Pattern p) {
 
-		super.addProfilePattern(profile);
-
-		orderedMatchers.add(profile);
+		crawlFromNodes(p);
+		crawlFromRelations(p);
 	}
 
-	void addDisjunction(DisjunctionMatcher disjunction) {
+	void crawlFromRelations(Pattern p) {
 
-		super.addDisjunction(disjunction);
+		for (Relation r : p.getDirectRelations()) {
 
-		orderedMatchers.add(disjunction);
+			Value t = r.getTarget();
+
+			if (t instanceof NodeValue) {
+
+				crawlFromNode(t.asNodeValue().getValueNode());
+			}
+		}
 	}
 
-	List<NodeMatcher> getOrderedMatchers() {
+	abstract boolean visit(NodeX n);
 
-		return orderedMatchers;
+	abstract boolean visit(PatternMatcher m);
+
+	abstract boolean visit(DisjunctionMatcher m);
+
+	private void crawlFromNodes(Pattern p) {
+
+		for (Name n : p.getNodes()) {
+
+			crawlFromNode((NodeX)n);
+		}
+	}
+
+	private void crawlFromNode(NodeX n) {
+
+		if (visitedNodes.add(n) && visit(n)) {
+
+			crawlFromMatchers(n);
+		}
+	}
+
+	private void crawlFromMatchers(NodeX c) {
+
+		for (PatternMatcher m : c.getAllPatternMatchers()) {
+
+			if (visit(m)) {
+
+				crawlFrom(m.getPattern());
+			}
+		}
+
+		for (DisjunctionMatcher m : c.getAllDisjunctionMatchers()) {
+
+			if (visit(m)) {
+
+				for (Name d : m.getDisjuncts()) {
+
+					crawlFromNode((NodeX)d);
+				}
+			}
+		}
 	}
 }

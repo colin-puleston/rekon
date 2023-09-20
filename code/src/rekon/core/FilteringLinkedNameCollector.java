@@ -90,7 +90,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 					linkNames.pop();
 				}
 
-				for (DisjunctionMatcher dj : n.getDisjunctionMatchers()) {
+				for (DisjunctionMatcher dj : n.getAllDisjunctionMatchers()) {
 
 					for (Name d : dj.getDisjuncts()) {
 

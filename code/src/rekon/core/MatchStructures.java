@@ -47,9 +47,12 @@ public class MatchStructures {
 		nodeMatchers.addDefinitionPattern(node, defn);
 	}
 
-	public void addDisjunction(ClassNode node, Collection<? extends NodeX> disjuncts) {
+	public void addDisjunction(
+					ClassNode node,
+					Collection<? extends NodeX> disjuncts,
+					boolean definition) {
 
-		nodeMatchers.addDisjunction(node, disjuncts);
+		nodeMatchers.addDisjunction(node, disjuncts, definition);
 	}
 
 	public ClassNode addPatternClass() {

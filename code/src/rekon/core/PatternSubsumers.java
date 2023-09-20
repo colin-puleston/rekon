@@ -73,7 +73,7 @@ class PatternSubsumers {
 				}
 			}
 
-			potentials.addAll(n.getDisjunctionMatchers());
+			potentials.addAll(n.getAllDisjunctionMatchers());
 		}
 
 		private Names getDefinitionMatchNames(PatternMatcher defn) {

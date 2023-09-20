@@ -34,12 +34,10 @@ class OntologyClassifier {
 	private List<Name> allNames;
 	private List<NodeX> nodes;
 
-	private NodeMatchers nodeMatchers;
-
 	private List<PatternMatcher> profilePatterns;
 	private List<PatternMatcher> definitionPatterns;
 
-	private List<DisjunctionMatcher> disjunctionDefns;
+	private List<DisjunctionMatcher> allDisjunctions;
 	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
 
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
@@ -137,7 +135,7 @@ class OntologyClassifier {
 
 		private void findDisjunctionMatchCandidates() {
 
-			for (DisjunctionMatcher d : disjunctionDefns) {
+			for (DisjunctionMatcher d : allDisjunctions) {
 
 				if (d.classifiable(initialPhasePass())) {
 
@@ -148,7 +146,7 @@ class OntologyClassifier {
 
 		private void inferNewCommonDisjunctSubsumers() {
 
-			for (DisjunctionMatcher d : disjunctionDefns) {
+			for (DisjunctionMatcher d : allDisjunctions) {
 
 				d.inferNewCommonDisjunctSubsumers();
 			}
@@ -185,20 +183,16 @@ class OntologyClassifier {
 		}
 	}
 
-	OntologyClassifier(
-		List<Name> allNames,
-		List<NodeX> nodes,
-		NodeMatchers nodeMatchers) {
+	OntologyClassifier(List<Name> allNames, List<NodeX> nodes, NodeMatchers nodeMatchers) {
 
 		this.allNames = allNames;
 		this.nodes = nodes;
-		this.nodeMatchers = nodeMatchers;
 
 		profilePatterns = nodeMatchers.getProfilePatterns();
 		definitionPatterns = nodeMatchers.getDefinitionPatternMatchers();
 
-		disjunctionDefns = nodeMatchers.getDisjunctionMatchers();
-		disjunctionDefnsFilter = new PotentialDisjunctionSubsumers(disjunctionDefns);
+		allDisjunctions = nodeMatchers.getAllDisjunctionMatchers();
+		disjunctionDefnsFilter = createDisjunctionDefnsFilter(nodeMatchers);
 
 		classify();
 	}
@@ -271,5 +265,12 @@ class OntologyClassifier {
 		NodeClassifier.absorbAllNewInferredSubsumers(nodes);
 
 		return nextConfig;
+	}
+
+	private PotentialDisjunctionSubsumers createDisjunctionDefnsFilter(NodeMatchers nodeMatchers) {
+
+		List<DisjunctionMatcher> defns = nodeMatchers.getDefinitionDisjunctionMatchers();
+
+		return new PotentialDisjunctionSubsumers(defns);
 	}
 }

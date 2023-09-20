@@ -629,7 +629,7 @@ class MatchComponents {
 
 		ClassNode c = matchStructures.addPatternClass();
 
-		matchStructures.addDisjunction(c, disjuncts);
+		matchStructures.addDisjunction(c, disjuncts, false);
 
 		return c;
 	}

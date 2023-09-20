@@ -68,7 +68,7 @@ class ClassDefinitionsCreator {
 
 				for (List<Pattern> disjuncts : disjunctionDefns) {
 
-					addDisjunction(c, disjuncts);
+					addDisjunction(c, disjuncts, true);
 				}
 			}
 
@@ -168,32 +168,16 @@ class ClassDefinitionsCreator {
 
 		private void checkCreate(OWLObjectUnionOf sup) {
 
-			ClassNode supCls = resolveSuperClass(sup);
+			List<Pattern> djs = matchComponents.toPatternDisjunction(sup);
 
-			if (sup != null) {
+			if (djs != null) {
 
-				subCls.addSubsumer(supCls);
+				addDisjunction(subCls, djs, false);
 			}
 			else {
 
 				handleOutOfScopeSuper(sup);
 			}
-		}
-
-		private ClassNode resolveSuperClass(OWLObjectUnionOf sup) {
-
-			List<Pattern> djs = matchComponents.toPatternDisjunction(sup);
-
-			if (djs == null) {
-
-				return null;
-			}
-
-			ClassNode c = matchStructures.addDefinitionClass();
-
-			addDisjunction(c, djs);
-
-			return c;
 		}
 
 		private void handleOutOfScopeSuper(OWLClassExpression sup) {
@@ -289,9 +273,11 @@ class ClassDefinitionsCreator {
 		logger.logSeparatorLine();
 	}
 
-	private void addDisjunction(ClassNode node, List<Pattern> disjuncts) {
+	private void addDisjunction(ClassNode node, List<Pattern> disjuncts, boolean definition) {
 
-		matchStructures.addDisjunction(node, resolveDisjunctionToNodes(disjuncts));
+		List<NodeX> nodeDjs = resolveDisjunctionToNodes(disjuncts);
+
+		matchStructures.addDisjunction(node, nodeDjs, definition);
 	}
 
 	private List<NodeX> resolveDisjunctionToNodes(List<Pattern> disjuncts) {

@@ -32,6 +32,7 @@ import java.util.*;
 class DisjunctionMatcher extends NodeMatcher {
 
 	private Names disjuncts;
+	private boolean definition = false;
 
 	public String toString() {
 
@@ -43,16 +44,13 @@ class DisjunctionMatcher extends NodeMatcher {
 		super(node);
 
 		this.disjuncts = new NameList(disjuncts);
+	}
 
-		for (Name d : disjuncts) {
+	void setAsDefinition() {
 
-			if (!node.local()) {
+		definition = true;
 
-				d.addSubsumer(node);
-			}
-
-			d.registerAsDefinitionRefed(MatchRole.DISJUNCT);
-		}
+		configureAsDefinition(getNode());
 	}
 
 	void inferNewCommonDisjunctSubsumers() {
@@ -63,6 +61,11 @@ class DisjunctionMatcher extends NodeMatcher {
 	Names getDisjuncts() {
 
 		return disjuncts;
+	}
+
+	boolean definition() {
+
+		return definition;
 	}
 
 	boolean subsumesNode(NodeX n) {
@@ -107,6 +110,19 @@ class DisjunctionMatcher extends NodeMatcher {
 	void acceptVisitor(NodeMatcherVisitor visitor) {
 
 		visitor.visit(this);
+	}
+
+	private void configureAsDefinition(NodeX node) {
+
+		for (Name d : disjuncts) {
+
+			if (!node.local()) {
+
+				d.addSubsumer(node);
+			}
+
+			d.registerAsDefinitionRefed(MatchRole.DISJUNCT);
+		}
 	}
 
 	private Names findCommonDisjunctSubsumers() {

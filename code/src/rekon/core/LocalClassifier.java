@@ -220,6 +220,6 @@ class LocalClassifier {
 
 	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(NodeMatchers nodeMatchers) {
 
-		return new PotentialDisjunctionSubsumers(nodeMatchers.getDisjunctionMatchers());
+		return new PotentialDisjunctionSubsumers(nodeMatchers.getDefinitionDisjunctionMatchers());
 	}
 }

@@ -60,21 +60,26 @@ public abstract class NodeX extends Name {
 		return !matchers.isEmpty();
 	}
 
+	List<PatternMatcher> getAllPatternMatchers() {
+
+		return selectMatchers(PatternMatcher.class);
+	}
+
 	PatternMatcher getProfilePatternMatcher() {
 
-		List<PatternMatcher> ps = selectMatchers(PatternMatcher.class);
+		List<PatternMatcher> ps = getAllPatternMatchers();
 
 		return ps.isEmpty() ? null : ps.get(0);
 	}
 
 	List<PatternMatcher> getDefinitionPatternMatchers() {
 
-		List<PatternMatcher> ps = selectMatchers(PatternMatcher.class);
+		List<PatternMatcher> ps = getAllPatternMatchers();
 
 		return ps.size() > 1 ? ps.subList(1, ps.size()) : Collections.emptyList();
 	}
 
-	List<DisjunctionMatcher> getDisjunctionMatchers() {
+	List<DisjunctionMatcher> getAllDisjunctionMatchers() {
 
 		return selectMatchers(DisjunctionMatcher.class);
 	}
@@ -187,14 +192,14 @@ public abstract class NodeX extends Name {
 
 	private boolean subsumesViaDisjunction(NodeX node) {
 
-		for (DisjunctionMatcher d : getDisjunctionMatchers()) {
+		for (DisjunctionMatcher d : getAllDisjunctionMatchers()) {
 
 			if (d.subsumesNode(node)) {
 
 				return true;
 			}
 
-			for (DisjunctionMatcher p : node.getDisjunctionMatchers()) {
+			for (DisjunctionMatcher p : node.getAllDisjunctionMatchers()) {
 
 				if (d.subsumesDisjunction(p)) {
 
@@ -228,7 +233,7 @@ public abstract class NodeX extends Name {
 
 	private boolean anyNewDisjunctSubsumers() {
 
-		for (DisjunctionMatcher dm : getDisjunctionMatchers()) {
+		for (DisjunctionMatcher dm : getAllDisjunctionMatchers()) {
 
 			for (Name d : dm.getDisjuncts()) {
 
