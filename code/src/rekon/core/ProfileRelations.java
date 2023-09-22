@@ -167,7 +167,9 @@ class ProfileRelations {
 
 		for (Name n : getNodes()) {
 
-			if (((NodeX)n).getNodeClassifier().anyLastPhaseInferredSubsumers()) {
+			NodeX nd = (NodeX)n;
+
+			if (!nd.rootName() && nd.getNodeClassifier().anyLastPhaseInferredSubsumers()) {
 
 				return true;
 			}

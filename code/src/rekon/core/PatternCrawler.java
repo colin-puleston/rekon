@@ -35,8 +35,18 @@ abstract class PatternCrawler {
 
 	void crawlFrom(Pattern p) {
 
-		crawlFromNodes(p);
+		crawlFromNodes(p.getNodes());
 		crawlFromRelations(p);
+	}
+
+	void crawlFrom(PatternMatcher m) {
+
+		crawlFrom(m.getPattern());
+	}
+
+	void crawlFrom(DisjunctionMatcher m) {
+
+		crawlFromNodes(m.getDisjuncts());
 	}
 
 	void crawlFromRelations(Pattern p) {
@@ -58,9 +68,9 @@ abstract class PatternCrawler {
 
 	abstract boolean visit(DisjunctionMatcher m);
 
-	private void crawlFromNodes(Pattern p) {
+	private void crawlFromNodes(Names nodes) {
 
-		for (Name n : p.getNodes()) {
+		for (Name n : nodes) {
 
 			crawlFromNode((NodeX)n);
 		}
@@ -80,7 +90,7 @@ abstract class PatternCrawler {
 
 			if (visit(m)) {
 
-				crawlFrom(m.getPattern());
+				crawlFrom(m);
 			}
 		}
 
@@ -88,10 +98,7 @@ abstract class PatternCrawler {
 
 			if (visit(m)) {
 
-				for (Name d : m.getDisjuncts()) {
-
-					crawlFromNode((NodeX)d);
-				}
+				crawlFrom(m);
 			}
 		}
 	}

@@ -46,11 +46,14 @@ class DisjunctionMatcher extends NodeMatcher {
 		this.disjuncts = new NameList(disjuncts);
 	}
 
-	void setAsDefinition() {
+	void ensureDefinition() {
 
-		definition = true;
+		if (!definition) {
 
-		configureAsDefinition(getNode());
+			definition = true;
+
+			configureAsDefinition(getNode());
+		}
 	}
 
 	void inferNewCommonDisjunctSubsumers() {

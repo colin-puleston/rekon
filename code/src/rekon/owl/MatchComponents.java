@@ -41,8 +41,7 @@ class MatchComponents {
 	private NodeX rootNode;
 
 	private Patterns patterns = new Patterns();
-	private DisjunctionNodes disjunctionNodes = new DisjunctionNodes();
-	private DisjunctionNodeValues disjunctionNodeValues = new DisjunctionNodeValues();
+	private Disjunctions disjunctions = new Disjunctions();
 
 	private SomeRelations someRelations = new SomeRelations();
 	private AllRelations allRelations = new AllRelations();
@@ -143,7 +142,7 @@ class MatchComponents {
 				}
 				else if (op instanceof OWLObjectUnionOf) {
 
-					nodes.absorb(disjunctionNodes.get((OWLObjectUnionOf)op));
+					nodes.absorb(createNodeForUnion((OWLObjectUnionOf)op));
 				}
 				else {
 
@@ -172,11 +171,16 @@ class MatchComponents {
 
 			return r != null ? new Pattern(rootNode, r) : null;
 		}
+
+		private NodeX createNodeForUnion(OWLObjectUnionOf source) {
+
+			return resolveDisjunctsToNode(disjunctions.get(source));
+		}
 	}
 
-	private class DisjunctionNodes extends TypeEntities<OWLObjectUnionOf, NodeX> {
+	private class Disjunctions extends TypeEntities<OWLObjectUnionOf, Set<NodeX>> {
 
-		NodeX checkCreate(OWLObjectUnionOf source) {
+		Set<NodeX> checkCreate(OWLObjectUnionOf source) {
 
 			Set<NodeX> disjuncts = new HashSet<NodeX>();
 
@@ -192,15 +196,7 @@ class MatchComponents {
 				disjuncts.addAll(djs);
 			}
 
-			return resolveDisjunctsToNode(disjuncts);
-		}
-	}
-
-	private class DisjunctionNodeValues extends TypeEntities<OWLObjectUnionOf, NodeValue> {
-
-		NodeValue checkCreate(OWLObjectUnionOf source) {
-
-			return new NodeValue(disjunctionNodes.get(source));
+			return disjuncts;
 		}
 	}
 
@@ -259,12 +255,17 @@ class MatchComponents {
 
 			if (filler instanceof OWLObjectUnionOf) {
 
-				return disjunctionNodeValues.get((OWLObjectUnionOf)filler);
+				return createNodeValue((OWLObjectUnionOf)filler);
 			}
 
 			Set<? extends NodeX> djs = toNodeDisjunction(filler);
 
 			return djs != null ? createNodeValue(djs) : null;
+		}
+
+		private NodeValue createNodeValue(OWLObjectUnionOf union) {
+
+			return createNodeValue(disjunctions.get(union));
 		}
 
 		private NodeValue createNodeValue(Collection<? extends NodeX> disjuncts) {
@@ -594,7 +595,7 @@ class MatchComponents {
 
 				pCls = matchStructures.addPatternClass();
 
-				matchStructures.addDefinitionPattern(pCls, p);
+				matchStructures.addProfilePattern(pCls, p);
 
 				patternClasses.put(source, pCls);
 			}

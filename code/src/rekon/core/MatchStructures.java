@@ -42,6 +42,11 @@ public class MatchStructures {
 		}
 	}
 
+	public void addProfilePattern(NodeX node, Pattern profile) {
+
+		nodeMatchers.addProfilePattern(node, profile);
+	}
+
 	public void addDefinitionPattern(NodeX node, Pattern defn) {
 
 		nodeMatchers.addDefinitionPattern(node, defn);

@@ -36,26 +36,28 @@ class NodeMatchers {
 
 	private List<DisjunctionMatcher> disjunctions = new ArrayList<DisjunctionMatcher>();
 
+	private DefinitionPropagator definitionPropagator = new DefinitionPropagator();
+
 	private class DefinitionPropagator extends PatternCrawler {
-
-		DefinitionPropagator(Pattern defnPattern) {
-
-			crawlFrom(defnPattern);
-		}
 
 		boolean visit(NodeX n) {
 
-			return true;
+			return n instanceof FreeClassNode;
 		}
 
 		boolean visit(PatternMatcher m) {
+
+			if (m.profileMatcher()) {
+
+				ensureDefinitionForNode(m);
+			}
 
 			return true;
 		}
 
 		boolean visit(DisjunctionMatcher m) {
 
-			m.setAsDefinition();
+			m.ensureDefinition();
 
 			return true;
 		}
@@ -73,18 +75,19 @@ class NodeMatchers {
 
 	void addDefinitionPattern(NodeX node, Pattern defn) {
 
-		addNameSubsumers(node, defn.getNodes());
+		addDefinitionPattern(createTopLevelDefinitionPattern(node, defn));
 
-		resolveProfilePattern(node).absorbDefinitionIntoProfile(defn);
-		definitionPatterns.add(node.addDefinitionPatternMatcher(defn));
-
-		defn.registerDefinitionRefedNames();
-		new DefinitionPropagator(defn);
+		definitionPropagator.crawlFrom(defn);
 	}
 
 	void addDisjunction(DisjunctionMatcher disjunction) {
 
 		disjunctions.add(disjunction);
+
+		if (disjunction.definition()) {
+
+			definitionPropagator.crawlFrom(disjunction);
+		}
 	}
 
 	void addDisjunction(
@@ -96,7 +99,7 @@ class NodeMatchers {
 
 		if (definition) {
 
-			m.setAsDefinition();
+			m.ensureDefinition();
 		}
 
 		addDisjunction(m);
@@ -130,6 +133,29 @@ class NodeMatchers {
 		}
 
 		return defns;
+	}
+
+	private PatternMatcher createTopLevelDefinitionPattern(NodeX node, Pattern defn) {
+
+		addNameSubsumers(node, defn.getNodes());
+		resolveProfilePattern(node).absorbDefinitionIntoProfile(defn);
+
+		return node.addDefinitionPatternMatcher(defn);
+	}
+
+	private void ensureDefinitionForNode(PatternMatcher defn) {
+
+		if (defn.getNode().ensureDefined()) {
+
+			addDefinitionPattern(defn);
+		}
+	}
+
+	private void addDefinitionPattern(PatternMatcher defn) {
+
+		definitionPatterns.add(defn);
+
+		defn.getPattern().registerDefinitionRefedNames();
 	}
 
 	private void addNameSubsumers(NodeX node, Names subsumers) {

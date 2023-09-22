@@ -55,6 +55,21 @@ public abstract class NodeX extends Name {
 		return addMatcher(new DisjunctionMatcher(this, disjuncts));
 	}
 
+	boolean ensureDefined() {
+
+		PatternMatcher prof = getProfilePatternMatcher();
+		List<PatternMatcher> defns = getDefinitionPatternMatchers();
+
+		if (defns.isEmpty()) {
+
+			matchers.add(prof);
+
+			return true;
+		}
+
+		return false;
+	}
+
 	boolean matchable() {
 
 		return !matchers.isEmpty();
