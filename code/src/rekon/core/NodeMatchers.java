@@ -110,17 +110,17 @@ class NodeMatchers {
 		return profilePatterns;
 	}
 
-	List<PatternMatcher> getDefinitionPatternMatchers() {
+	List<PatternMatcher> getDefinitionPatterns() {
 
 		return definitionPatterns;
 	}
 
-	List<DisjunctionMatcher> getAllDisjunctionMatchers() {
+	List<DisjunctionMatcher> getAllDisjunctions() {
 
 		return disjunctions;
 	}
 
-	List<DisjunctionMatcher> getDefinitionDisjunctionMatchers() {
+	List<DisjunctionMatcher> getDefinitionDisjunctions() {
 
 		List<DisjunctionMatcher> defns = new ArrayList<DisjunctionMatcher>();
 

@@ -215,11 +215,11 @@ class LocalClassifier {
 
 	private PotentialLocalPatternSubsumers createDefnPatternsFilter(NodeMatchers nodeMatchers) {
 
-		return new PotentialLocalPatternSubsumers(nodeMatchers.getDefinitionPatternMatchers());
+		return new PotentialLocalPatternSubsumers(nodeMatchers.getDefinitionPatterns());
 	}
 
 	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(NodeMatchers nodeMatchers) {
 
-		return new PotentialDisjunctionSubsumers(nodeMatchers.getDefinitionDisjunctionMatchers());
+		return new PotentialDisjunctionSubsumers(nodeMatchers.getDefinitionDisjunctions());
 	}
 }

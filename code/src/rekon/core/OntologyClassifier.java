@@ -189,9 +189,9 @@ class OntologyClassifier {
 		this.nodes = nodes;
 
 		profilePatterns = nodeMatchers.getProfilePatterns();
-		definitionPatterns = nodeMatchers.getDefinitionPatternMatchers();
+		definitionPatterns = nodeMatchers.getDefinitionPatterns();
 
-		allDisjunctions = nodeMatchers.getAllDisjunctionMatchers();
+		allDisjunctions = nodeMatchers.getAllDisjunctions();
 		disjunctionDefnsFilter = createDisjunctionDefnsFilter(nodeMatchers);
 
 		classify();
@@ -269,8 +269,6 @@ class OntologyClassifier {
 
 	private PotentialDisjunctionSubsumers createDisjunctionDefnsFilter(NodeMatchers nodeMatchers) {
 
-		List<DisjunctionMatcher> defns = nodeMatchers.getDefinitionDisjunctionMatchers();
-
-		return new PotentialDisjunctionSubsumers(defns);
+		return new PotentialDisjunctionSubsumers(nodeMatchers.getDefinitionDisjunctions());
 	}
 }
