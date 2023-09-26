@@ -40,14 +40,16 @@ public abstract class NodeX extends Name {
 		return addProfilePatternMatcher(new Pattern(this));
 	}
 
-	PatternMatcher addProfilePatternMatcher(Pattern pattern) {
+	PatternMatcher addProfilePatternMatcher(Pattern profile) {
 
-		return addPatternMatcher(pattern, true);
+		return addPatternMatcher(profile, true);
 	}
 
-	PatternMatcher addDefinitionPatternMatcher(Pattern pattern) {
+	PatternMatcher addDefinitionPatternMatcher(Pattern defn) {
 
-		return addPatternMatcher(pattern, false);
+		defn.registerDefinitionRefedNames();
+
+		return addPatternMatcher(defn, false);
 	}
 
 	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends NodeX> disjuncts) {
@@ -55,14 +57,15 @@ public abstract class NodeX extends Name {
 		return addMatcher(new DisjunctionMatcher(this, disjuncts));
 	}
 
-	boolean ensureDefined() {
+	boolean ensurePatternProfiledImpliesPatternDefined() {
 
 		PatternMatcher prof = getProfilePatternMatcher();
-		List<PatternMatcher> defns = getDefinitionPatternMatchers();
 
-		if (defns.isEmpty()) {
+		if (prof != null && getDefinitionPatternMatchers().isEmpty()) {
 
 			matchers.add(prof);
+
+			prof.getPattern().registerDefinitionRefedNames();
 
 			return true;
 		}
@@ -87,6 +90,15 @@ public abstract class NodeX extends Name {
 		return ps.isEmpty() ? null : ps.get(0);
 	}
 
+	List<PatternMatcher> getProfilePatternMatcherAsList() {
+
+		List<PatternMatcher> ps = getAllPatternMatchers();
+
+		return ps.isEmpty()
+				? Collections.emptyList()
+				: Collections.singletonList(ps.get(0));
+	}
+
 	List<PatternMatcher> getDefinitionPatternMatchers() {
 
 		List<PatternMatcher> ps = getAllPatternMatchers();
@@ -97,6 +109,21 @@ public abstract class NodeX extends Name {
 	List<DisjunctionMatcher> getAllDisjunctionMatchers() {
 
 		return selectMatchers(DisjunctionMatcher.class);
+	}
+
+	List<DisjunctionMatcher> getDefinitionDisjunctionMatchers() {
+
+		List<DisjunctionMatcher> defns = new ArrayList<DisjunctionMatcher>();
+
+		for (DisjunctionMatcher d : getAllDisjunctionMatchers()) {
+
+			if (d.definition()) {
+
+				defns.add(d);
+			}
+		}
+
+		return defns;
 	}
 
 	boolean subsumes(Name name) {
@@ -150,7 +177,20 @@ public abstract class NodeX extends Name {
 			throw new Error("Pattern-matcher order-error for node: " + this);
 		}
 
+		addNonRootSubsumers(pattern.getNodes());
+
 		return addMatcher(new PatternMatcher(this, pattern));
+	}
+
+	private void addNonRootSubsumers(Names subsumers) {
+
+		for (Name s : subsumers) {
+
+			if (!s.rootName()) {
+
+				addSubsumer(s);
+			}
+		}
 	}
 
 	private <M extends NodeMatcher>M addMatcher(M matcher) {

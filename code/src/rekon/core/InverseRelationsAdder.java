@@ -33,19 +33,17 @@ class InverseRelationsAdder {
 
 	private List<PatternMatcher> newProfilePatterns = new ArrayList<PatternMatcher>();
 
-	InverseRelationsAdder(NodeMatchers nodeMatchers) {
+	InverseRelationsAdder(List<NodeX> nodes) {
 
-		for (PatternMatcher p : nodeMatchers.getProfilePatterns()) {
+		for (NodeX n : nodes) {
 
-			if (p.getNode() instanceof IndividualNode) {
+			if (n instanceof IndividualNode) {
 
-				addAnyFor(p);
+				for (PatternMatcher p : n.getProfilePatternMatcherAsList()) {
+
+					addAnyFor(p);
+				}
 			}
-		}
-
-		for (PatternMatcher p : newProfilePatterns) {
-
-			nodeMatchers.addProfilePattern(p);
 		}
 	}
 
@@ -85,8 +83,6 @@ class InverseRelationsAdder {
 		if (p == null) {
 
 			p = node.addProfilePatternMatcher();
-
-			newProfilePatterns.add(p);
 		}
 
 		return p;

@@ -53,11 +53,6 @@ class PatternMatcher extends NodeMatcher {
 		pattern = pattern.extend(relation);
 	}
 
-	boolean profileMatcher() {
-
-		return this == getNode().getProfilePatternMatcher();
-	}
-
 	Pattern getPattern() {
 
 		return pattern;

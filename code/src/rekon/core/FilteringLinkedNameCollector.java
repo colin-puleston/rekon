@@ -90,11 +90,11 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 					linkNames.pop();
 				}
 
-				for (DisjunctionMatcher dj : n.getAllDisjunctionMatchers()) {
+				for (DisjunctionMatcher d : n.getAllDisjunctionMatchers()) {
 
-					for (Name d : dj.getDisjuncts()) {
+					for (Name dj : d.getDisjuncts()) {
 
-						collectForProfileNode((NodeX)d);
+						collectForProfileNode((NodeX)dj);
 					}
 				}
 			}

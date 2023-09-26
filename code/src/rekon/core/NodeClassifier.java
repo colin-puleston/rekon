@@ -132,6 +132,14 @@ class NodeClassifier extends NameClassifier {
 			return true;
 		}
 
+		void expandNewLocallyInferredSubsumers() {
+
+			for (Name n : allNewInferreds.copyNames()) {
+
+				allNewInferreds.addAll(n.getSubsumers());
+			}
+		}
+
 		Names getMatchableSubsumerLatestInferreds(Name s) {
 
 			return getInferredSubsumers(s).getMatchableLatestInferreds();
@@ -296,7 +304,9 @@ class NodeClassifier extends NameClassifier {
 		inferredSubsumers.addDirectlyInferred(subsumer);
 	}
 
-	boolean absorbNewInferredSubsumers() {
+	boolean absorbNewLocallyInferredSubsumerExpansions() {
+
+		inferredSubsumers.expandNewLocallyInferredSubsumers();
 
 		return inferredSubsumers.absorbNewInferences();
 	}

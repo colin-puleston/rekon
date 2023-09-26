@@ -43,22 +43,24 @@ class LocalClassifier {
 
 		NameSet classify(LocalPattern pattern) {
 
-			classifyProfiles(pattern.getProfileMatchers());
+			classifyProfiles(pattern);
 
 			return pattern.getDefinitionNode().getClassifier().getSubsumers();
 		}
 
-		void updateNewSubsumptions(boolean newSubsumption) {
+		void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-			if (newSubsumption && !newSubsumptions) {
-
-				newSubsumptions = true;
-			}
+			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
 		}
 
-		private void classifyProfiles(OrderedProfileMatchers matchers) {
+		void checkSubsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
 
-			for (NodeMatcher candidate : matchers.getOrderedMatchers()) {
+			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+		}
+
+		private void classifyProfiles(LocalPattern pattern) {
+
+			for (NodeMatcher candidate : pattern.getOrderedProfileMatchers()) {
 
 				exhaustivelyClassify(candidate);
 
@@ -78,7 +80,7 @@ class LocalClassifier {
 				checkExpandProfile(candidate);
 				classify(candidate);
 			}
-			while (reclassifiable(candidate));
+			while (absorbNewSubsumerExpansions(candidate));
 		}
 
 		abstract void classify(NodeMatcher candidate);
@@ -94,9 +96,19 @@ class LocalClassifier {
 			}
 		}
 
-		private boolean reclassifiable(NodeMatcher candidate) {
+		private boolean absorbNewSubsumerExpansions(NodeMatcher candidate) {
 
-			return candidate.getNode().getNodeClassifier().absorbNewInferredSubsumers();
+			NodeClassifier c = candidate.getNode().getNodeClassifier();
+
+			return c.absorbNewLocallyInferredSubsumerExpansions();
+		}
+
+		private void updateNewSubsumptions(boolean newSubsumption) {
+
+			if (newSubsumption && !newSubsumptions) {
+
+				newSubsumptions = true;
+			}
 		}
 	}
 
@@ -128,7 +140,7 @@ class LocalClassifier {
 
 			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(profile)) {
 
-				updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+				checkSubsumption(defn, candidate);
 			}
 		}
 
@@ -136,7 +148,7 @@ class LocalClassifier {
 
 			for (DisjunctionMatcher defn : defnDisjunctionsFilter.getPotentialsFor(candidate)) {
 
-				updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+				checkSubsumption(defn, candidate);
 			}
 		}
 	}
@@ -184,16 +196,6 @@ class LocalClassifier {
 
 				defn.acceptVisitor(tc);
 			}
-		}
-
-		private void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
-
-			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
-		}
-
-		private void checkSubsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
-
-			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
 		}
 	}
 

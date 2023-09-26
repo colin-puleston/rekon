@@ -101,6 +101,11 @@ public abstract class Name {
 		getRootLinksHandler().configure(allSubs);
 	}
 
+	boolean classified() {
+
+		return !(linksHandler instanceof NameClassifier);
+	}
+
 	NameClassifier getClassifier() {
 
 		return getLinksHandler(NameClassifier.class);

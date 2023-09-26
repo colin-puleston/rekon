@@ -31,25 +31,56 @@ import java.util.*;
  */
 public class MatchStructures {
 
-	private NodeMatchers nodeMatchers;
 	private FreeClasses freeClasses;
+	private DefinitionPropagator definitionPropagator = new DefinitionPropagator();
+
+	private class DefinitionPropagator extends PatternCrawler {
+
+		boolean visit(NodeX n) {
+
+			if (n instanceof FreeClassNode) {
+
+				n.ensurePatternProfiledImpliesPatternDefined();
+
+				return true;
+			}
+
+			return false;
+		}
+
+		boolean visit(PatternMatcher m) {
+
+			return true;
+		}
+
+		boolean visit(DisjunctionMatcher m) {
+
+			m.ensureDefinition();
+
+			return true;
+		}
+	}
 
 	public void checkAddProfilePattern(NodeX node, Collection<Relation> relations) {
 
 		if (node.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
 
-			nodeMatchers.addProfilePattern(node, new Pattern(node, relations));
+			addProfilePattern(node, new Pattern(node, relations));
 		}
 	}
 
 	public void addProfilePattern(NodeX node, Pattern profile) {
 
-		nodeMatchers.addProfilePattern(node, profile);
+		onAddedProfileMatcher(node.addProfilePatternMatcher(profile));
 	}
 
 	public void addDefinitionPattern(NodeX node, Pattern defn) {
 
-		nodeMatchers.addDefinitionPattern(node, defn);
+		ensureProfilePatternMatcher(node).absorbDefinitionIntoProfile(defn);
+
+		node.addDefinitionPatternMatcher(defn);
+
+		definitionPropagator.crawlFrom(defn);
 	}
 
 	public void addDisjunction(
@@ -57,7 +88,16 @@ public class MatchStructures {
 					Collection<? extends NodeX> disjuncts,
 					boolean definition) {
 
-		nodeMatchers.addDisjunction(node, disjuncts, definition);
+		DisjunctionMatcher m = node.addDisjunctionMatcher(disjuncts);
+
+		if (definition) {
+
+			m.ensureDefinition();
+
+			definitionPropagator.crawlFrom(m);
+		}
+
+		onAddedProfileMatcher(m);
 	}
 
 	public ClassNode addPatternClass() {
@@ -70,9 +110,25 @@ public class MatchStructures {
 		return freeClasses.createDefinitionClass();
 	}
 
-	MatchStructures(NodeMatchers nodeMatchers, FreeClasses freeClasses) {
+	MatchStructures(FreeClasses freeClasses) {
 
-		this.nodeMatchers = nodeMatchers;
 		this.freeClasses = freeClasses;
+	}
+
+	void onAddedProfileMatcher(NodeMatcher matcher) {
+	}
+
+	private PatternMatcher ensureProfilePatternMatcher(NodeX node) {
+
+		PatternMatcher p = node.getProfilePatternMatcher();
+
+		if (p == null) {
+
+			p = node.addProfilePatternMatcher();
+
+			onAddedProfileMatcher(p);
+		}
+
+		return p;
 	}
 }

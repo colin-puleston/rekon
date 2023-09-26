@@ -24,6 +24,8 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -32,7 +34,7 @@ abstract class LocalPattern {
 	private NodeX definitionNode;
 	private Pattern pattern;
 
-	private OrderedProfileMatchers profileMatchers = new OrderedProfileMatchers();
+	private List<NodeMatcher> orderedProfileMatchers = new ArrayList<NodeMatcher>();
 
 	abstract class LocalClasses extends FreeClasses {
 
@@ -67,16 +69,29 @@ abstract class LocalPattern {
 		abstract LocalDefinitionClassNode createLocalDefinitionClass();
 	}
 
+	private class LocalMatchStructures extends MatchStructures {
+
+		LocalMatchStructures() {
+
+			super(createLocalClasses());
+		}
+
+		void onAddedProfileMatcher(NodeMatcher matcher) {
+
+			orderedProfileMatchers.add(matcher);
+		}
+	}
+
 	void initialise(PatternCreator patternCreator) {
 
-		MatchStructures matchStructures = createMatchStructures();
+		MatchStructures matchStructures = new LocalMatchStructures();
 
 		definitionNode = ensureDefinitionNode(matchStructures);
 		pattern = patternCreator.createNestedPatterns(matchStructures);
 
 		if (pattern != null) {
 
-			profileMatchers.addDefinitionPattern(definitionNode, pattern);
+			matchStructures.addDefinitionPattern(definitionNode, pattern);
 
 			processAllLocalNamesPostAdditions();
 		}
@@ -92,25 +107,20 @@ abstract class LocalPattern {
 		return pattern;
 	}
 
-	OrderedProfileMatchers getProfileMatchers() {
+	List<NodeMatcher> getOrderedProfileMatchers() {
 
-		return profileMatchers;
+		return orderedProfileMatchers;
 	}
 
 	abstract LocalClasses createLocalClasses();
 
 	abstract NodeX ensureDefinitionNode(MatchStructures matchStructures);
 
-	private MatchStructures createMatchStructures() {
-
-		return new MatchStructures(profileMatchers, createLocalClasses());
-	}
-
 	private void processAllLocalNamesPostAdditions() {
 
-		for (PatternMatcher p : profileMatchers.getProfilePatterns()) {
+		for (NodeMatcher m : orderedProfileMatchers) {
 
-			p.getNode().getClassifier().onPostAssertionAdditions();
+			m.getNode().getClassifier().onPostAssertionAdditions();
 		}
 	}
 }

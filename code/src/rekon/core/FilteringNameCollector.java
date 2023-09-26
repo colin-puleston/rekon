@@ -74,7 +74,10 @@ class FilteringNameCollector {
 				}
 				else {
 
-					rankNames.add(n);
+					if (profile() || !n.local()) {
+
+						rankNames.add(n);
+					}
 				}
 			}
 		}
