@@ -31,80 +31,74 @@ import java.util.*;
  */
 public class Timer {
 
-	static private Map<String, Instance> activeInstances = new HashMap<String, Instance>();
-	static private Map<String, Instance> pausedInstances = new HashMap<String, Instance>();
+	static private Map<String, Instance> instances = new HashMap<String, Instance>();
 
 	static private class Instance {
 
 		private String prefix;
+		private boolean active;
 
 		private long startMillis = System.currentTimeMillis();
 		private long totalMillis = 0;
 
-		Instance() {
-
-			this(null);
-		}
-
-		Instance(String prefix) {
+		Instance(String prefix, boolean active) {
 
 			this.prefix = prefix;
+			this.active = active;
 
-			activeInstances.put(prefix, this);
+			instances.put(prefix, this);
 		}
 
 		void pause() {
 
-			switchState(activeInstances, pausedInstances);
+			active = false;
 
 			totalMillis += currentPointMillis();
 		}
 
 		void restart() {
 
-			switchState(pausedInstances, activeInstances);
+			active = true;
 
 			startMillis = System.currentTimeMillis();
-		}
-
-		void show() {
-
-			doShow(prefix != null ? prefix : "TIME");
 		}
 
 		void show(String suffix) {
 
-			doShow(prefix != null ? (prefix + "-" + suffix) : suffix);
-		}
-
-		private void switchState(Map<String, Instance> from, Map<String, Instance> to) {
-
-			from.remove(prefix);
-			to.put(prefix, this);
-		}
-
-		private void doShow(String title) {
-
-			totalMillis += currentPointMillis();
 			startMillis = System.currentTimeMillis();
 
-			System.out.println("\n" + title + " TIME: " + (totalMillis / 1000));
+			if (active) {
+
+				totalMillis += currentPointMillis();
+			}
+
+			System.out.println("\n" + getTitle(suffix) + " TIME: " + (totalMillis / 1000));
+		}
+
+		boolean active() {
+
+			return active;
 		}
 
 		private long currentPointMillis() {
 
 			return System.currentTimeMillis() - startMillis;
 		}
+
+		private String getTitle(String suffix) {
+
+			return suffix != null ? (prefix + "-" + suffix) : prefix;
+		}
 	}
 
 	static public void start(String prefix) {
 
-		new Instance(prefix);
+		new Instance(prefix, true);
 	}
 
 	static public void startPaused(String prefix) {
 
-		new Instance(prefix).pause();
+		new Instance(prefix, false);
 	}
 
 	static public void pause(String prefix) {
@@ -119,7 +113,7 @@ public class Timer {
 
 	static public void show(String prefix) {
 
-		getActive(prefix).show();
+		getActive(prefix).show(null);
 	}
 
 	static public void show(String prefix, String suffix) {
@@ -129,7 +123,7 @@ public class Timer {
 
 	static public void stop(String prefix) {
 
-		remove(prefix).show();
+		remove(prefix).show(null);
 	}
 
 	static public void stop(String prefix, String suffix) {
@@ -139,33 +133,35 @@ public class Timer {
 
 	static private Instance getActive(String prefix) {
 
-		return check(activeInstances.get(prefix), "active", prefix);
+		return get(prefix, true, "active");
 	}
 
 	static private Instance getPaused(String prefix) {
 
-		return check(pausedInstances.get(prefix), "paused", prefix);
+		return get(prefix, false, "paused");
+	}
+
+	static private Instance get(String prefix, boolean active, String type) {
+
+		Instance i = instances.get(prefix);
+
+		if (i != null && i.active() == active) {
+
+			return i;
+		}
+
+		throw new Error("No " + type + " instance: " + prefix);
 	}
 
 	static private Instance remove(String prefix) {
 
-		Instance i = activeInstances.remove(prefix);
+		Instance i = instances.remove(prefix);
 
 		if (i != null) {
 
 			return i;
 		}
 
-		return check(pausedInstances.remove(prefix), "active/paused", prefix);
-	}
-
-	static private Instance check(Instance i, String type, String prefix) {
-
-		if (i == null) {
-
-			throw new Error("No " + type + " instance: " + prefix);
-		}
-
-		return i;
+		throw new Error("No current instance: " + prefix);
 	}
 }
