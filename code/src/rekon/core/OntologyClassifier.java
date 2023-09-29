@@ -47,9 +47,9 @@ class OntologyClassifier {
 
 	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
-		boolean subsumption(Pattern defn, Pattern profile) {
+		boolean subsumption(Pattern defn, Pattern candidate) {
 
-			return defn.subsumesRelations(profile);
+			return defn.subsumesRelations(candidate);
 		}
 	}
 

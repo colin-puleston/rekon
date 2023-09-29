@@ -50,6 +50,11 @@ class SubsumptionChecker {
 		}
 
 		abstract boolean subsumption(C defn, C candidate);
+
+		private void addSubsumption(NodeX subsumer, NodeX subsumed) {
+
+			subsumed.getNodeClassifier().addNewInferredSubsumer(subsumer);
+		}
 	}
 
 	private class PatternChecker extends NodeMatcherChecker<Pattern> {
@@ -88,13 +93,8 @@ class SubsumptionChecker {
 		return disjunctionChecker.check(defn, candidate);
 	}
 
-	boolean subsumption(Pattern defn, Pattern profile) {
+	boolean subsumption(Pattern defn, Pattern candidate) {
 
-		return defn.subsumes(profile);
-	}
-
-	private void addSubsumption(NodeX subsumer, NodeX subsumed) {
-
-		subsumed.getNodeClassifier().addNewInferredSubsumer(subsumer);
+		return defn.subsumes(candidate);
 	}
 }

@@ -76,6 +76,8 @@ public class MatchStructures {
 
 	public void addDefinitionPattern(NodeX node, Pattern defn) {
 
+		addNonRootSubsumers(node, defn.getNodes());
+
 		ensureProfilePatternMatcher(node).absorbDefinitionIntoProfile(defn);
 
 		node.addDefinitionPatternMatcher(defn);
@@ -130,5 +132,16 @@ public class MatchStructures {
 		}
 
 		return p;
+	}
+
+	private void addNonRootSubsumers(NodeX node, Names subsumers) {
+
+		for (Name s : subsumers) {
+
+			if (!s.rootName()) {
+
+				node.addSubsumer(s);
+			}
+		}
 	}
 }

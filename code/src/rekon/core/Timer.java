@@ -36,15 +36,14 @@ public class Timer {
 	static private class Instance {
 
 		private String prefix;
-		private boolean active;
+		private boolean active = true;
 
 		private long startMillis = System.currentTimeMillis();
 		private long totalMillis = 0;
 
-		Instance(String prefix, boolean active) {
+		Instance(String prefix) {
 
 			this.prefix = prefix;
-			this.active = active;
 
 			instances.put(prefix, this);
 		}
@@ -65,11 +64,10 @@ public class Timer {
 
 		void show(String suffix) {
 
-			startMillis = System.currentTimeMillis();
-
 			if (active) {
 
 				totalMillis += currentPointMillis();
+				startMillis = System.currentTimeMillis();
 			}
 
 			System.out.println("\n" + getTitle(suffix) + " TIME: " + (totalMillis / 1000));
@@ -93,12 +91,12 @@ public class Timer {
 
 	static public void start(String prefix) {
 
-		new Instance(prefix, true);
+		new Instance(prefix);
 	}
 
 	static public void startPaused(String prefix) {
 
-		new Instance(prefix, false);
+		new Instance(prefix).pause();
 	}
 
 	static public void pause(String prefix) {

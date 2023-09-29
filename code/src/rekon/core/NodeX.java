@@ -177,20 +177,7 @@ public abstract class NodeX extends Name {
 			throw new Error("Pattern-matcher order-error for node: " + this);
 		}
 
-		addNonRootSubsumers(pattern.getNodes());
-
 		return addMatcher(new PatternMatcher(this, pattern));
-	}
-
-	private void addNonRootSubsumers(Names subsumers) {
-
-		for (Name s : subsumers) {
-
-			if (!s.rootName()) {
-
-				addSubsumer(s);
-			}
-		}
 	}
 
 	private <M extends NodeMatcher>M addMatcher(M matcher) {
