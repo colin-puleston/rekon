@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DynamicPatternOpsHandler extends DynamicOpsHandler {
+class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 	static private SuperClassesResolver superClassesResolver = new SuperClassesResolver();
 	static private SubClassesResolver subClassesResolver = new SubClassesResolver();
@@ -99,69 +99,12 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		}
 	}
 
-	private PatternSubsumers patternSubsumers;
-	private PatternSubsumeds patternSubsumeds;
+	private DynamicSubsumers dynamicSubsumers;
+	private DynamicSubsumeds dynamicSubsumeds;
 
-	private DynamicPattern dynamicPattern;
-	private Pattern pattern;
+	private DynamicExpression expression;
 
 	public Names getEquivalents() {
-
-		return pattern != null ? inferEquivs() : Names.NO_NAMES;
-	}
-
-	public Names getSupers(boolean direct) {
-
-		return pattern != null ? inferSupers(direct) : Names.NO_NAMES;
-	}
-
-	public Names getSubs(boolean direct) {
-
-		return pattern != null ? inferSubs(direct) : Names.NO_NAMES;
-	}
-
-	public Names getIndividuals(boolean direct) {
-
-		return pattern != null ? inferIndividuals(direct) : Names.NO_NAMES;
-	}
-
-	DynamicPatternOpsHandler(Ontology ontology, PatternCreator patternCreator) {
-
-		patternSubsumers = ontology.getPatternSubsumers();
-		patternSubsumeds = ontology.getPatternSubsumeds();
-
-		dynamicPattern = new DynamicPattern(patternCreator);
-		pattern = dynamicPattern.getPattern();
-	}
-
-	DynamicOpsHandler checkResolveToNodeOpsHandler() {
-
-		if (pattern != null) {
-
-			NodeX n = pattern.toSingleNode();
-
-			if (n != null) {
-
-				return new DynamicNodeOpsHandler(n);
-			}
-		}
-
-		return this;
-	}
-
-	Collection<Pattern> getProfiles() {
-
-		return pattern != null
-				? Collections.singletonList(pattern)
-				: Collections.emptyList();
-	}
-
-	Collection<Pattern> getDefinitions() {
-
-		return getProfiles();
-	}
-
-	private Names inferEquivs() {
 
 		NameSet subsumeds = inferSubsumedClasses();
 
@@ -173,7 +116,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return inferEquivsForSubsumeds(subsumeds);
 	}
 
-	private Names inferSupers(boolean direct) {
+	public Names getSupers(boolean direct) {
 
 		NameSet subsumers = inferSubsumers();
 
@@ -192,7 +135,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return superClassesResolver.resolve(subsumers, direct);
 	}
 
-	private Names inferSubs(boolean direct) {
+	public Names getSubs(boolean direct) {
 
 		NameSet subsumeds = inferSubsumedClasses();
 
@@ -211,7 +154,7 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		return subClassesResolver.resolve(subsumeds, direct);
 	}
 
-	private Names inferIndividuals(boolean direct) {
+	public Names getIndividuals(boolean direct) {
 
 		NameSet subs = inferAllSubsumedNodes();
 
@@ -221,6 +164,53 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 		}
 
 		return individualsResolver.resolve(subs, direct);
+	}
+
+	public boolean equivalentTo(DynamicOpsHandler other) {
+
+		return false;
+	}
+
+	public boolean subsumes(DynamicOpsHandler other) {
+
+		return false;
+	}
+
+	DynamicExpressionOpsHandler(Ontology ontology, DynamicExpression expression) {
+
+		this.expression = expression;
+
+		dynamicSubsumers = ontology.getDynamicSubsumers();
+		dynamicSubsumeds = ontology.getDynamicSubsumeds();
+	}
+
+	Collection<NodeMatcher> getAllProfileMatchers() {
+
+		return Collections.singleton(expression.getExpressionMatcher());
+	}
+
+	Collection<NodeMatcher> getAllDefinitionMatchers() {
+
+		return getAllProfileMatchers();
+	}
+
+	Names getPotentialSubNodes() {
+
+		NodeMatcher m = expression.getExpressionMatcher();
+
+		if (m instanceof PatternMatcher) {
+
+			PatternMatcher pm = (PatternMatcher)m;
+
+			return pm.getPattern().getNodes();
+		}
+
+		return Names.NO_NAMES;
+	}
+
+	void inferExpressionSubsumers() {
+
+		inferSubsumers();
 	}
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {
@@ -241,26 +231,26 @@ class DynamicPatternOpsHandler extends DynamicOpsHandler {
 
 	private NameSet inferSubsumers() {
 
-		return patternSubsumers.inferSubsumers(dynamicPattern);
+		return dynamicSubsumers.inferSubsumers(expression);
 	}
 
 	private NameSet inferSubsumersForSubsumeds(NameSet subsumeds) {
 
-		return patternSubsumers.inferSubsumersForSubsumeds(dynamicPattern, subsumeds);
+		return dynamicSubsumers.inferSubsumersForSubsumeds(expression, subsumeds);
 	}
 
 	private NameSet inferSubsumedClasses() {
 
-		return patternSubsumeds.inferSubsumedClasses(pattern);
+		return dynamicSubsumeds.inferSubsumedClasses(expression);
 	}
 
 	private NameSet inferSubsumedClasses(NameSet filterNames) {
 
-		return patternSubsumeds.inferSubsumedClasses(pattern, filterNames);
+		return dynamicSubsumeds.inferSubsumedClasses(expression, filterNames);
 	}
 
 	private NameSet inferAllSubsumedNodes() {
 
-		return patternSubsumeds.inferAllSubsumedNodes(pattern);
+		return dynamicSubsumeds.inferAllSubsumedNodes(expression);
 	}
 }

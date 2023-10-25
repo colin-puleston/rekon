@@ -36,7 +36,7 @@ abstract class FreeClasses {
 
 		PatternClassNode() {
 
-			super(definitionClassIndex++);
+			super(patternClassIndex++);
 		}
 	}
 
@@ -44,7 +44,7 @@ abstract class FreeClasses {
 
 		DefinitionClassNode() {
 
-			super(patternClassIndex++);
+			super(definitionClassIndex++);
 		}
 	}
 

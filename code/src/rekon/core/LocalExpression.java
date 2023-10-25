@@ -29,11 +29,9 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class LocalPattern {
+abstract class LocalExpression {
 
-	private NodeX definitionNode;
-	private Pattern pattern;
-
+	private NodeX expressionNode = null;
 	private List<NodeMatcher> orderedProfileMatchers = new ArrayList<NodeMatcher>();
 
 	abstract class LocalClasses extends FreeClasses {
@@ -71,9 +69,9 @@ abstract class LocalPattern {
 
 	private class LocalMatchStructures extends MatchStructures {
 
-		LocalMatchStructures() {
+		LocalMatchStructures(LocalClasses localClasses) {
 
-			super(createLocalClasses());
+			super(localClasses);
 		}
 
 		void onAddedProfileMatcher(NodeMatcher matcher) {
@@ -82,39 +80,34 @@ abstract class LocalPattern {
 		}
 	}
 
-	void initialise(PatternCreator patternCreator) {
+	void initialise(LocalClasses localClasses) {
 
-		MatchStructures matchStructures = new LocalMatchStructures();
+		expressionNode = createStructures(new LocalMatchStructures(localClasses));
 
-		definitionNode = ensureDefinitionNode(matchStructures);
-		pattern = patternCreator.createNestedPatterns(matchStructures);
-
-		if (pattern != null) {
-
-			matchStructures.addDefinitionPattern(definitionNode, pattern);
+		if (expressionNode != null) {
 
 			processAllLocalNamesPostAdditions();
 		}
 	}
 
-	NodeX getDefinitionNode() {
+	abstract NodeX createStructures(MatchStructures matchStructures);
 
-		return definitionNode;
+	boolean expressionCreated() {
+
+		return expressionNode != null;
 	}
 
-	Pattern getPattern() {
+	NodeX getExpressionNode() {
 
-		return pattern;
+		return expressionNode;
 	}
+
+	abstract NodeMatcher getExpressionMatcher();
 
 	List<NodeMatcher> getOrderedProfileMatchers() {
 
 		return orderedProfileMatchers;
 	}
-
-	abstract LocalClasses createLocalClasses();
-
-	abstract NodeX ensureDefinitionNode(MatchStructures matchStructures);
 
 	private void processAllLocalNamesPostAdditions() {
 

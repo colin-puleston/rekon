@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PatternSubsumers {
+class DynamicSubsumers {
 
 	static private EquivCheckDefinitions equivCheckDefinitions = new EquivCheckDefinitions();
 
@@ -84,20 +84,20 @@ class PatternSubsumers {
 
 	private LocalClassifier localClassifier;
 
-	PatternSubsumers(NodeMatchers nodeMatchers) {
+	DynamicSubsumers(NodeMatchers nodeMatchers) {
 
 		localClassifier = new LocalClassifier(nodeMatchers);
 	}
 
-	NameSet inferSubsumers(LocalPattern pattern) {
+	NameSet inferSubsumers(LocalExpression expr) {
 
-		return localClassifier.classify(pattern);
+		return localClassifier.classify(expr);
 	}
 
-	NameSet inferSubsumersForSubsumeds(LocalPattern pattern, Names subsumeds) {
+	NameSet inferSubsumersForSubsumeds(LocalExpression expr, Names subsumeds) {
 
 		return localClassifier.classify(
-					pattern,
+					expr,
 					equivCheckDefinitions.deriveFromSubsumeds(subsumeds));
 	}
 }

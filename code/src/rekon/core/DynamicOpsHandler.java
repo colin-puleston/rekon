@@ -29,59 +29,17 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class DynamicOpsHandler {
+public interface DynamicOpsHandler {
 
-	public abstract Names getEquivalents();
+	public Names getEquivalents();
 
-	public abstract Names getSupers(boolean direct);
+	public Names getSupers(boolean direct);
 
-	public abstract Names getSubs(boolean direct);
+	public Names getSubs(boolean direct);
 
-	public abstract Names getIndividuals(boolean direct);
+	public Names getIndividuals(boolean direct);
 
-	public boolean equivalentTo(DynamicOpsHandler other) {
+	public boolean equivalentTo(DynamicOpsHandler other);
 
-		Collection<Pattern> oDefns = other.getDefinitions();
-
-		if (!oDefns.isEmpty()) {
-
-			for (Pattern d : getDefinitions()) {
-
-				for (Pattern od : oDefns) {
-
-					if (d.subsumes(od) && od.subsumes(d)) {
-
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public boolean subsumes(DynamicOpsHandler other) {
-
-		Collection<Pattern> ops = other.getProfiles();
-
-		if (!ops.isEmpty()) {
-
-			for (Pattern d : getDefinitions()) {
-
-				for (Pattern op : ops) {
-
-					if (d.subsumes(op)) {
-
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
-	}
-
-	abstract Collection<Pattern> getProfiles();
-
-	abstract Collection<Pattern> getDefinitions();
+	public boolean subsumes(DynamicOpsHandler other);
 }

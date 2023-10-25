@@ -34,8 +34,8 @@ public class Ontology {
 	private List<Name> allNames = new ArrayList<Name>();
 	private List<NodeX> nodes = new ArrayList<NodeX>();
 
-	private PatternSubsumers patternSubsumers;
-	private PatternSubsumeds patternSubsumeds;
+	private DynamicSubsumers dynamicSubsumers;
+	private DynamicSubsumeds dynamicSubsumeds;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
@@ -53,8 +53,8 @@ public class Ontology {
 
 		new OntologyClassifier(allNames, nodes, nodeMatchers);
 
-		patternSubsumers = new PatternSubsumers(nodeMatchers);
-		patternSubsumeds = new PatternSubsumeds(nodeMatchers);
+		dynamicSubsumers = new DynamicSubsumers(nodeMatchers);
+		dynamicSubsumeds = new DynamicSubsumeds(nodeMatchers);
 	}
 
 	public DynamicOps createDynamicOps() {
@@ -73,14 +73,14 @@ public class Ontology {
 		nodes.add(cn);
 	}
 
-	PatternSubsumers getPatternSubsumers() {
+	DynamicSubsumers getDynamicSubsumers() {
 
-		return patternSubsumers;
+		return dynamicSubsumers;
 	}
 
-	PatternSubsumeds getPatternSubsumeds() {
+	DynamicSubsumeds getDynamicSubsumeds() {
 
-		return patternSubsumeds;
+		return dynamicSubsumeds;
 	}
 
 	private void processAllNamesPostAdditions() {

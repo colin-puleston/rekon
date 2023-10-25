@@ -22,28 +22,21 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.core;
 
-import org.semanticweb.owlapi.model.*;
-
-import rekon.core.*;
+import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class ExpressionPatternCreator implements PatternCreator {
+public abstract class SinglePatternCreator implements PatternCreator {
 
-	private OWLClassExpression expr;
+	public final Collection<Pattern> createAll(MatchStructures matchStructures) {
 
-	public Pattern createNestedPatterns(MatchStructures matchStructures) {
+		Pattern p = create(matchStructures);
 
-		return createMatchComponents(matchStructures).toPattern(expr);
+		return p != null ? Collections.singleton(p) : null;
 	}
 
-	ExpressionPatternCreator(OWLClassExpression expr) {
-
-		this.expr = expr;
-	}
-
-	abstract MatchComponents createMatchComponents(MatchStructures matchStructures);
+	protected abstract Pattern create(MatchStructures matchStructures);
 }

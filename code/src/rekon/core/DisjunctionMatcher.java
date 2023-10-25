@@ -84,9 +84,14 @@ class DisjunctionMatcher extends NodeMatcher {
 		return false;
 	}
 
-	boolean subsumesDisjunction(DisjunctionMatcher other) {
+	boolean subsumes(NodeMatcher test) {
 
-		for (Name d : other.disjuncts) {
+		return test instanceof DisjunctionMatcher && subsumes((DisjunctionMatcher)test);
+	}
+
+	boolean subsumes(DisjunctionMatcher test) {
+
+		for (Name d : test.disjuncts) {
 
 			if (!subsumesNode((NodeX)d)) {
 

@@ -29,64 +29,51 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DynamicNodeOpsHandler extends DynamicOpsHandler {
+class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 
 	private NodeX node;
 
-	 private abstract class PatternCollector {
+	private abstract class MatcherCollector {
 
-		Collection<Pattern> getAll() {
+		Collection<NodeMatcher> getAll() {
 
-			if (node == null) {
+			List<NodeMatcher> matchers = new ArrayList<NodeMatcher>();
 
-				return Collections.emptyList();
-			}
-
-			List<Pattern> patterns = new ArrayList<Pattern>();
-
-			checkAddPattern(patterns, node);
+			addMatchers(matchers, node);
 
 			for (Name en : node.getEquivalents()) {
 
-				checkAddPattern(patterns, (NodeX)en);
+				addMatchers(matchers, (NodeX)en);
 			}
 
-			return patterns;
+			return matchers;
 		}
 
-		abstract void checkAddPattern(Collection<Pattern> patterns, NodeX n);
-	}
+		abstract Collection<NodeMatcher> getCandidateMatchers(NodeX n);
 
-	 private class ProfileCollector extends PatternCollector {
+		private void addMatchers(Collection<NodeMatcher> matchers, NodeX n) {
 
-		void checkAddPattern(Collection<Pattern> patterns, NodeX n) {
-
-			PatternMatcher p = n.getProfilePatternMatcher();
-
-			if (p != null) {
-
-				patterns.add(p.getPattern());
-			}
+			matchers.addAll(getCandidateMatchers(n));
 		}
 	}
 
-	 private class DefinitionCollector extends PatternCollector {
+	private class ProfileMatcherCollector extends MatcherCollector {
 
-		void checkAddPattern(Collection<Pattern> patterns, NodeX n) {
+		Collection<NodeMatcher> getCandidateMatchers(NodeX n) {
 
-			for (PatternMatcher p : n.getDefinitionPatternMatchers()) {
+			return n.getAllProfileMatchers();
+		}
+	}
 
-				patterns.add(p.getPattern());
-			}
+	private class DefinitionMatcherCollector extends MatcherCollector {
+
+		Collection<NodeMatcher> getCandidateMatchers(NodeX n) {
+
+			return n.getAllDefinitionMatchers();
 		}
 	}
 
 	public Names getEquivalents() {
-
-		if (node == null) {
-
-			return Names.NO_NAMES;
-		}
 
 		NameList equivs = new NameList(node);
 
@@ -97,27 +84,17 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 
 	public Names getSupers(boolean direct) {
 
-		return node != null ? node.getSupers(direct) : Names.NO_NAMES;
+		return node.getSupers(direct);
 	}
 
 	public Names getSubs(boolean direct) {
 
-		return getSubs(ClassNode.class, direct);
+		return node.getSubs(ClassNode.class, direct);
 	}
 
 	public Names getIndividuals(boolean direct) {
 
-		return getSubs(IndividualNode.class, direct);
-	}
-
-	public boolean subsumes(DynamicOpsHandler other) {
-
-		if (other instanceof DynamicNodeOpsHandler) {
-
-			return node.subsumes(((DynamicNodeOpsHandler)other).node);
-		}
-
-		return super.subsumes(other);
+		return node.getSubs(IndividualNode.class, direct);
 	}
 
 	DynamicNodeOpsHandler(NodeX node) {
@@ -125,18 +102,46 @@ class DynamicNodeOpsHandler extends DynamicOpsHandler {
 		this.node = node;
 	}
 
-	Collection<Pattern> getProfiles() {
+	boolean equivalentTo(ValidInputDynamicOpsHandler other) {
 
-		return new ProfileCollector().getAll();
+		if (other instanceof DynamicNodeOpsHandler) {
+
+			DynamicNodeOpsHandler o = (DynamicNodeOpsHandler)other;
+
+			return node.getEquivalents().getNames().contains(o.node);
+		}
+
+		return super.equivalentTo(other);
 	}
 
-	Collection<Pattern> getDefinitions() {
+	boolean subsumes(ValidInputDynamicOpsHandler other) {
 
-		return new DefinitionCollector().getAll();
+		for (Name ps : other.getPotentialSubNodes().getNames()) {
+
+			if (node.subsumes((NodeX)ps)) {
+
+				return true;
+			}
+		}
+
+		return super.subsumes(other);
 	}
 
-	private Names getSubs(Class<? extends NodeX> type, boolean direct) {
+	Collection<NodeMatcher> getAllProfileMatchers() {
 
-		return node != null ? node.getSubs(type, direct) : Names.NO_NAMES;
+		return new ProfileMatcherCollector().getAll();
+	}
+
+	Collection<NodeMatcher> getAllDefinitionMatchers() {
+
+		return new DefinitionMatcherCollector().getAll();
+	}
+
+	Names getPotentialSubNodes() {
+
+		return new NameList(node);
+	}
+
+	void inferExpressionSubsumers() {
 	}
 }

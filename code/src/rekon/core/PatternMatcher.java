@@ -58,19 +58,14 @@ class PatternMatcher extends NodeMatcher {
 		return pattern;
 	}
 
-	boolean subsumesPattern(PatternMatcher test) {
+	boolean subsumes(NodeMatcher test) {
 
-		return subsumesPattern(test.pattern);
+		return test instanceof PatternMatcher && subsumes((PatternMatcher)test);
 	}
 
-	boolean subsumesPattern(Pattern test) {
+	boolean subsumes(PatternMatcher test) {
 
-		return pattern.subsumes(test);
-	}
-
-	boolean subsumedByPattern(Pattern test) {
-
-		return test.subsumes(pattern);
+		return pattern.subsumes(test.pattern);
 	}
 
 	void acceptVisitor(NodeMatcherVisitor visitor) {

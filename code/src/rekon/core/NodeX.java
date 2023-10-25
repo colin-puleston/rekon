@@ -126,6 +126,26 @@ public abstract class NodeX extends Name {
 		return defns;
 	}
 
+	List<NodeMatcher> getAllProfileMatchers() {
+
+		List<NodeMatcher> all = new ArrayList<NodeMatcher>();
+
+		all.addAll(getProfilePatternMatcherAsList());
+		all.addAll(getAllDisjunctionMatchers());
+
+		return all;
+	}
+
+	List<NodeMatcher> getAllDefinitionMatchers() {
+
+		List<NodeMatcher> all = new ArrayList<NodeMatcher>();
+
+		all.addAll(getDefinitionPatternMatchers());
+		all.addAll(getDefinitionDisjunctionMatchers());
+
+		return all;
+	}
+
 	boolean subsumes(Name name) {
 
 		if (name == this) {
@@ -222,7 +242,7 @@ public abstract class NodeX extends Name {
 
 			for (PatternMatcher d : getDefinitionPatternMatchers()) {
 
-				if (d.subsumesPattern(p)) {
+				if (d.subsumes(p)) {
 
 					return true;
 				}
@@ -243,7 +263,7 @@ public abstract class NodeX extends Name {
 
 			for (DisjunctionMatcher p : node.getAllDisjunctionMatchers()) {
 
-				if (d.subsumesDisjunction(p)) {
+				if (d.subsumes(p)) {
 
 					return true;
 				}

@@ -98,14 +98,21 @@ class RekonOps {
 		}
 	}
 
-	private class DynamicExprPatternCreator extends ExpressionPatternCreator {
+	private class DynamicExprPatternCreator implements PatternCreator {
+
+		private OWLClassExpression expr;
+
+		public Collection<Pattern> createAll(MatchStructures matchStructures) {
+
+			return createMatchComponents(matchStructures).toPatternDisjunction(expr);
+		}
 
 		DynamicExprPatternCreator(OWLClassExpression expr) {
 
-			super(expr);
+			this.expr = expr;
 		}
 
-		MatchComponents createMatchComponents(MatchStructures matchStructures) {
+		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
 
 			return new MatchComponents(mappedNames, matchStructures, true);
 		}
@@ -321,8 +328,6 @@ class RekonOps {
 			return toDynamicHandler((OWLClass)expr);
 		}
 
-		expr = resolveInputExpr(expr);
-
 		return dynamicOps.createHandler(new DynamicExprPatternCreator(expr));
 	}
 
@@ -334,21 +339,5 @@ class RekonOps {
 	private DynamicOpsHandler toDynamicHandler(OWLNamedIndividual ind) {
 
 		return dynamicOps.createHandler(mappedNames.get(ind));
-	}
-
-	private OWLClassExpression resolveInputExpr(OWLClassExpression expr) {
-
-		if (expr instanceof OWLNaryBooleanClassExpression) {
-
-			OWLNaryBooleanClassExpression bExpr = (OWLNaryBooleanClassExpression)expr;
-			Set<OWLClassExpression> ops = bExpr.getOperands();
-
-			if (ops.size() == 1) {
-
-				return ops.iterator().next();
-			}
-		}
-
-		return expr;
 	}
 }

@@ -24,6 +24,8 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -36,18 +38,26 @@ public class DynamicOps {
 		return new DynamicNodeOpsHandler(nodes);
 	}
 
-	public DynamicOpsHandler createHandler(PatternCreator patternCreator) {
+	public DynamicOpsHandler createHandler(PatternCreator disjunctsCreator) {
 
-		return createPatternOpsHandler(patternCreator).checkResolveToNodeOpsHandler();
+		DynamicExpression expr = new DynamicExpression(disjunctsCreator);
+		NodeX node = expr.toSingleNode();
+
+		if (node != null) {
+
+			return new DynamicNodeOpsHandler(node);
+		}
+
+		if (expr.expressionCreated()) {
+
+			return new DynamicExpressionOpsHandler(ontology, expr);
+		}
+
+		return InvalidInputDynamicOpsHandler.SINGLETON;
 	}
 
 	DynamicOps(Ontology ontology) {
 
 		this.ontology = ontology;
-	}
-
-	private DynamicPatternOpsHandler createPatternOpsHandler(PatternCreator patternCreator) {
-
-		return new DynamicPatternOpsHandler(ontology, patternCreator);
 	}
 }

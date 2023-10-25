@@ -41,5 +41,7 @@ abstract class NodeMatcher {
 		return node;
 	}
 
+	abstract boolean subsumes(NodeMatcher test);
+
 	abstract void acceptVisitor(NodeMatcherVisitor visitor);
 }

@@ -41,11 +41,11 @@ class LocalClassifier {
 
 		private boolean newSubsumptions = false;
 
-		NameSet classify(LocalPattern pattern) {
+		NameSet classify(LocalExpression expr) {
 
-			classifyProfiles(pattern);
+			classifyProfiles(expr);
 
-			return pattern.getDefinitionNode().getClassifier().getSubsumers();
+			return expr.getExpressionNode().getClassifier().getSubsumers();
 		}
 
 		void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
@@ -58,9 +58,9 @@ class LocalClassifier {
 			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
 		}
 
-		private void classifyProfiles(LocalPattern pattern) {
+		private void classifyProfiles(LocalExpression expr) {
 
-			for (NodeMatcher candidate : pattern.getOrderedProfileMatchers()) {
+			for (NodeMatcher candidate : expr.getOrderedProfileMatchers()) {
 
 				exhaustivelyClassify(candidate);
 
@@ -205,14 +205,14 @@ class LocalClassifier {
 		defnDisjunctionsFilter = createDefnDisjunctionsFilter(nodeMatchers);
 	}
 
-	NameSet classify(LocalPattern pattern) {
+	NameSet classify(LocalExpression expr) {
 
-		return defaultClassifier.classify(pattern);
+		return defaultClassifier.classify(expr);
 	}
 
-	NameSet classify(LocalPattern pattern, Collection<NodeMatcher> preFilteredDefns) {
+	NameSet classify(LocalExpression expr, Collection<NodeMatcher> preFilteredDefns) {
 
-		return new PreFilteredDefnsClassifier(preFilteredDefns).classify(pattern);
+		return new PreFilteredDefnsClassifier(preFilteredDefns).classify(expr);
 	}
 
 	private PotentialLocalPatternSubsumers createDefnPatternsFilter(NodeMatchers nodeMatchers) {

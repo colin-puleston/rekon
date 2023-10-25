@@ -27,11 +27,14 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class InstancePattern extends LocalPattern {
+class InstancePattern extends LocalExpression {
 
 	static private final String LOCAL_CLASS_NAMES_PREFIX_FORMAT = "%s(%s)";
 
-	private InstanceNode patternInstance;
+	private SinglePatternCreator patternCreator;
+
+	private InstanceNode instanceNode;
+	private PatternMatcher patternMatcher;
 
 	private class InstanceClasses extends LocalClasses {
 
@@ -40,7 +43,7 @@ class InstancePattern extends LocalPattern {
 			String getLabelPrefix() {
 
 				String gen = super.getLabelPrefix();
-				String spec = patternInstance.getLabel();
+				String spec = instanceNode.getLabel();
 
 				return String.format(LOCAL_CLASS_NAMES_PREFIX_FORMAT, gen, spec);
 			}
@@ -53,31 +56,43 @@ class InstancePattern extends LocalPattern {
 
 		LocalDefinitionClassNode createLocalDefinitionClass() {
 
-			throw new Error("Cannot create instance-definition class!");
+			throw new Error("Cannot create instanceNode-definition class!");
 		}
 	}
 
-	InstancePattern(InstanceNode patternInstance, PatternCreator patternCreator) {
+	InstancePattern(InstanceNode instanceNode, SinglePatternCreator patternCreator) {
 
-		this.patternInstance = patternInstance;
+		this.instanceNode = instanceNode;
+		this.patternCreator = patternCreator;
 
-		initialise(patternCreator);
+		initialise(new InstanceClasses());
+	}
 
-		if (getPattern() == null) {
+	NodeX createStructures(MatchStructures matchStructures) {
+
+		Pattern p = createPattern(matchStructures);
+
+		patternMatcher = matchStructures.addDefinitionPattern(instanceNode, p);
+
+		return instanceNode;
+	}
+
+	NodeMatcher getExpressionMatcher() {
+
+		return patternMatcher;
+	}
+
+	private Pattern createPattern(MatchStructures matchStructures) {
+
+		Pattern p = patternCreator.create(matchStructures);
+
+		if (p == null) {
 
 			throw new RuntimeException(
-						"Invalid description fot instance: "
-						+ patternInstance.getLabel());
+						"Invalid description fot instanceNode: "
+						+ instanceNode.getLabel());
 		}
-	}
 
-	LocalClasses createLocalClasses() {
-
-		return new InstanceClasses();
-	}
-
-	NodeX ensureDefinitionNode(MatchStructures matchStructures) {
-
-		return patternInstance;
+		return p;
 	}
 }

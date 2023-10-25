@@ -31,8 +31,8 @@ import java.util.*;
  */
 public class InstanceOps {
 
-	private PatternSubsumers patternSubsumers;
-	private PatternSubsumeds patternSubsumeds;
+	private DynamicSubsumers dynamicSubsumers;
+	private DynamicSubsumeds dynamicSubsumeds;
 
 	private Map<Object, Instance> ghosts = new HashMap<Object, Instance>();
 
@@ -40,15 +40,15 @@ public class InstanceOps {
 
 		private Set<Instance> added = new HashSet<Instance>();
 
-		void add(Instance instance, PatternCreator profileCreator) {
+		void add(Instance instance, SinglePatternCreator profileCreator) {
 
 			InstanceNode node = instance.getNode();
 			InstancePattern ip = new InstancePattern(node, profileCreator);
 
-			patternSubsumers.inferSubsumers(ip);
+			dynamicSubsumers.inferSubsumers(ip);
 			node.completeClassification();
 
-			patternSubsumeds.checkAddInstanceOption(node);
+			dynamicSubsumeds.checkAddInstanceOption(node);
 
 			if (instance.addReferencers()) {
 
@@ -64,7 +64,7 @@ public class InstanceOps {
 			InstanceNode node = instance.getNode();
 
 			node.removeFromClassification();
-			patternSubsumeds.checkRemoveInstanceOption(node);
+			dynamicSubsumeds.checkRemoveInstanceOption(node);
 
 			instance.removeFromReferenceds();
 
@@ -87,8 +87,8 @@ public class InstanceOps {
 
 	public InstanceOps(Ontology ontology) {
 
-		patternSubsumers = ontology.getPatternSubsumers();
-		patternSubsumeds = ontology.getPatternSubsumeds();
+		dynamicSubsumers = ontology.getDynamicSubsumers();
+		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
 	public void add(Instance instance) {
@@ -96,7 +96,7 @@ public class InstanceOps {
 		registerAsGhost(instance);
 	}
 
-	public void add(Instance instance, PatternCreator profileCreator) {
+	public void add(Instance instance, SinglePatternCreator profileCreator) {
 
 		checkReplaceGhost(instance);
 
@@ -112,20 +112,20 @@ public class InstanceOps {
 
 	public List<Instance> match(PatternCreator queryCreator) {
 
-		Pattern qp = createDynamicPattern(queryCreator);
-		NameSet matches = patternSubsumeds.inferAllSubsumedNodes(qp);
+		DynamicExpression q = new DynamicExpression(queryCreator);
+		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
 
 		return matches.isEmpty()
 				? Collections.emptyList()
 				: matchesToInstances(matches);
 	}
 
-	public boolean matches(PatternCreator queryCreator, PatternCreator profileCreator) {
+	public boolean matches(PatternCreator queryCreator, SinglePatternCreator profileCreator) {
 
-		Pattern qp = createDynamicPattern(queryCreator);
-		Pattern pp = createDynamicPattern(profileCreator);
+		DynamicExpression q = new DynamicExpression(queryCreator);
+		DynamicExpression p = new DynamicExpression(profileCreator);
 
-		return qp.subsumes(pp);
+		return q.getExpressionMatcher().subsumes(p.getExpressionMatcher());
 	}
 
 	private void checkReplaceGhost(Instance addition) {
@@ -149,11 +149,6 @@ public class InstanceOps {
 	private void registerAsGhost(Instance instance) {
 
 		ghosts.put(instance.getInstanceId(), instance);
-	}
-
-	private Pattern createDynamicPattern(PatternCreator creator) {
-
-		return new DynamicPattern(creator).getPattern();
 	}
 
 	private List<Instance> matchesToInstances(NameSet matches) {

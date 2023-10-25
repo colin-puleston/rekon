@@ -34,7 +34,7 @@ public abstract class Instance {
 	private InstanceNode node = new InstanceNode(this);
 	private Set<Instance> referencers = new HashSet<Instance>();
 
-	private PatternCreator profileRecreator = null;
+	private SinglePatternCreator profileRecreator = null;
 
 	public String toString() {
 
@@ -66,7 +66,7 @@ public abstract class Instance {
 		}
 	}
 
-	void setProfileRecreator(PatternCreator profileRecreator) {
+	void setProfileRecreator(SinglePatternCreator profileRecreator) {
 
 		this.profileRecreator = profileRecreator;
 	}
@@ -96,7 +96,7 @@ public abstract class Instance {
 		}
 	}
 
-	PatternCreator getProfileRecreator() {
+	SinglePatternCreator getProfileRecreator() {
 
 		if (profileRecreator == null) {
 

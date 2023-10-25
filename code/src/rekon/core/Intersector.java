@@ -31,8 +31,6 @@ import java.util.*;
  */
 abstract class Intersector<C, S extends C> {
 
-	private List<C> sets = new ArrayList<C>();
-
 	private class SmallestFirstComparator implements Comparator<C> {
 
 		public int compare(C first, C second) {

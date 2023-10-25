@@ -24,42 +24,46 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-class DynamicPattern extends LocalPattern {
+class InvalidInputDynamicOpsHandler implements DynamicOpsHandler {
 
-	private class DynamicClasses extends LocalClasses {
+	static final InvalidInputDynamicOpsHandler SINGLETON
+						= new InvalidInputDynamicOpsHandler();
 
-		private class DynamicPatternClassNode extends LocalPatternClassNode {
-		}
+	public Names getEquivalents() {
 
-		private class DynamicDefinitionClassNode extends LocalDefinitionClassNode {
-		}
-
-		LocalPatternClassNode createLocalPatternClass() {
-
-			return new DynamicPatternClassNode();
-		}
-
-		LocalDefinitionClassNode createLocalDefinitionClass() {
-
-			return new DynamicDefinitionClassNode();
-		}
+		return Names.NO_NAMES;
 	}
 
-	DynamicPattern(PatternCreator patternCreator) {
+	public Names getSupers(boolean direct) {
 
-		initialise(patternCreator);
+		return Names.NO_NAMES;
 	}
 
-	LocalClasses createLocalClasses() {
+	public Names getSubs(boolean direct) {
 
-		return new DynamicClasses();
+		return Names.NO_NAMES;
 	}
 
-	NodeX ensureDefinitionNode(MatchStructures matchStructures) {
+	public Names getIndividuals(boolean direct) {
 
-		return matchStructures.addPatternClass();
+		return Names.NO_NAMES;
+	}
+
+	public boolean equivalentTo(DynamicOpsHandler other) {
+
+		return false;
+	}
+
+	public boolean subsumes(DynamicOpsHandler other) {
+
+		return false;
+	}
+
+	private InvalidInputDynamicOpsHandler() {
 	}
 }

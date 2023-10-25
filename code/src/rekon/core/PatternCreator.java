@@ -24,10 +24,12 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
 public interface PatternCreator {
 
-	public Pattern createNestedPatterns(MatchStructures matchStructures);
+	public Collection<Pattern> createAll(MatchStructures matchStructures);
 }

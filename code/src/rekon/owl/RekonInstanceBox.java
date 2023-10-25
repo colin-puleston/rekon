@@ -62,7 +62,9 @@ public class RekonInstanceBox {
 		}
 	}
 
-	private abstract class InstanceBoxExprPatternCreator extends ExpressionPatternCreator {
+	private abstract class InstanceBoxExprPatternCreator extends SinglePatternCreator {
+
+		private OWLClassExpression expr;
 
 		private class InstanceBoxMatchComponents extends MatchComponents {
 
@@ -85,14 +87,14 @@ public class RekonInstanceBox {
 			}
 		}
 
-		InstanceBoxExprPatternCreator(OWLClassExpression expr) {
+		protected Pattern create(MatchStructures matchStructures) {
 
-			super(expr);
+			return new InstanceBoxMatchComponents(matchStructures).toPattern(expr);
 		}
 
-		MatchComponents createMatchComponents(MatchStructures matchStructures) {
+		InstanceBoxExprPatternCreator(OWLClassExpression expr) {
 
-			return new InstanceBoxMatchComponents(matchStructures);
+			this.expr = expr;
 		}
 
 		abstract Instance checkCreateRefedInstance(IRI iri);

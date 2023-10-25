@@ -69,26 +69,31 @@ public class MatchStructures {
 		}
 	}
 
-	public void addProfilePattern(NodeX node, Pattern profile) {
+	public PatternMatcher addProfilePattern(NodeX node, Pattern profile) {
 
-		onAddedProfileMatcher(node.addProfilePatternMatcher(profile));
+		PatternMatcher m = node.addProfilePatternMatcher(profile);
+
+		onAddedProfileMatcher(m);
+
+		return m;
 	}
 
-	public void addDefinitionPattern(NodeX node, Pattern defn) {
+	public PatternMatcher addDefinitionPattern(NodeX node, Pattern defn) {
 
 		addNonRootSubsumers(node, defn.getNodes());
-
 		ensureProfilePatternMatcher(node).absorbDefinitionIntoProfile(defn);
 
-		node.addDefinitionPatternMatcher(defn);
+		PatternMatcher m = node.addDefinitionPatternMatcher(defn);
 
 		definitionPropagator.crawlFrom(defn);
+
+		return m;
 	}
 
-	public void addDisjunction(
-					ClassNode node,
-					Collection<? extends NodeX> disjuncts,
-					boolean definition) {
+	public DisjunctionMatcher addDisjunction(
+									ClassNode node,
+									Collection<? extends NodeX> disjuncts,
+									boolean definition) {
 
 		DisjunctionMatcher m = node.addDisjunctionMatcher(disjuncts);
 
@@ -100,6 +105,8 @@ public class MatchStructures {
 		}
 
 		onAddedProfileMatcher(m);
+
+		return m;
 	}
 
 	public ClassNode addPatternClass() {

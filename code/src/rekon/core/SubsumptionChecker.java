@@ -79,7 +79,7 @@ class SubsumptionChecker {
 
 		boolean subsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
 
-			return defn.subsumesDisjunction(candidate);
+			return defn.subsumes(candidate);
 		}
 	}
 
