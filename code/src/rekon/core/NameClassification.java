@@ -45,7 +45,9 @@ class NameClassification extends NameLinksHandler {
 			throw new UnexpectedMethodInvocationError();
 		}
 
-		abstract Names get(boolean direct);
+		abstract Names getInternal(boolean direct);
+
+		abstract Names getExternal(boolean direct);
 
 		abstract boolean hasLinkTo(Name target, NameSet visited);
 
@@ -56,7 +58,12 @@ class NameClassification extends NameLinksHandler {
 
 	static private class EmptyVerticalLinks extends VerticalLinks {
 
-		Names get(boolean direct) {
+		Names getInternal(boolean direct) {
+
+			return Names.NO_NAMES;
+		}
+
+		Names getExternal(boolean direct) {
 
 			return Names.NO_NAMES;
 		}
@@ -91,9 +98,14 @@ class NameClassification extends NameLinksHandler {
 			directs.remove(in);
 		}
 
-		Names get(boolean direct) {
+		Names getInternal(boolean direct) {
 
-			return direct ? directs : collectAll(new NameSet());
+			return direct ? directs : getAll();
+		}
+
+		Names getExternal(boolean direct) {
+
+			return direct ? new NameList(directs) : getAll();
 		}
 
 		boolean hasLinkTo(Name target, NameSet visited) {
@@ -132,6 +144,11 @@ class NameClassification extends NameLinksHandler {
 		private boolean hasLinkToNext(Name target, Name next, NameSet visited) {
 
 			return visited.add(next) && getSameLinksFor(next).hasLinkTo(target, visited);
+		}
+
+		private Names getAll() {
+
+			return collectAll(new NameSet());
 		}
 	}
 
@@ -284,11 +301,11 @@ class NameClassification extends NameLinksHandler {
 
 			VerticalLinks commonIncomings = null;
 
-			for (Name linked : getOutgingLinks().get(true)) {
+			for (Name linked : getOutgingLinks().getInternal(true)) {
 
 				VerticalLinks incomings = getIncomingLinks(linked);
 
-				if (incomings.get(true).size() == 1) {
+				if (incomings.getInternal(true).size() == 1) {
 
 					if (commonIncomings == null) {
 
@@ -400,7 +417,7 @@ class NameClassification extends NameLinksHandler {
 		NameList ss = new NameList();
 
 		ss.addAll(equivalents);
-		ss.addAll(supers.get(false));
+		ss.addAll(supers.getInternal(false));
 
 		return ss;
 	}
@@ -412,12 +429,12 @@ class NameClassification extends NameLinksHandler {
 
 	Names getSupers(boolean direct) {
 
-		return supers.get(direct);
+		return supers.getExternal(direct);
 	}
 
 	Names getSubs(boolean direct) {
 
-		return subs.get(direct);
+		return subs.getExternal(direct);
 	}
 
 	boolean isSubsumer(Name test) {

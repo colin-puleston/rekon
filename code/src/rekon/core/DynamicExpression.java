@@ -31,7 +31,7 @@ import java.util.*;
  */
 class DynamicExpression extends LocalExpression {
 
-	private PatternCreator disjunctsCreator;
+	private MultiPatternCreator disjunctsCreator;
 
 	private NodeMatcher expressionMatcher = null;
 	private NodeX asSingleNode = null;
@@ -55,18 +55,23 @@ class DynamicExpression extends LocalExpression {
 		}
 	}
 
-	DynamicExpression(PatternCreator disjunctsCreator) {
+	DynamicExpression(MultiPatternCreator disjunctsCreator) {
 
 		this.disjunctsCreator = disjunctsCreator;
 
 		initialise(new DynamicClasses());
 	}
 
+	DynamicExpression(SinglePatternCreator patternCreator) {
+
+		this(new SingleToMultiPatternCreator(patternCreator));
+	}
+
 	NodeX createStructures(MatchStructures matchStructures) {
 
 		Collection<Pattern> djs = disjunctsCreator.createAll(matchStructures);
 
-		if (djs == null || checkResolveToSingleNode(djs)) {
+		if (djs == null) {
 
 			return null;
 		}
@@ -82,7 +87,11 @@ class DynamicExpression extends LocalExpression {
 			djNodes.add(exprNode);
 		}
 
-		if (djNodes.size() != 1) {
+		if (djs.size() == 1) {
+
+			asSingleNode = djs.iterator().next().toSingleNode();
+		}
+		else {
 
 			exprNode = matchStructures.addDefinitionClass();
 			expressionMatcher = matchStructures.addDisjunction(exprNode, djNodes, true);
@@ -93,33 +102,11 @@ class DynamicExpression extends LocalExpression {
 
 	NodeMatcher getExpressionMatcher() {
 
-		if (asSingleNode != null) {
-
-			throw new Error("No matcher for single-node expression!");
-		}
-
 		return expressionMatcher;
 	}
 
 	NodeX toSingleNode() {
 
 		return asSingleNode;
-	}
-
-	private boolean checkResolveToSingleNode(Collection<Pattern> djs) {
-
-		if (djs.size() == 1) {
-
-			NodeX n = djs.iterator().next().toSingleNode();
-
-			if (n != null) {
-
-				asSingleNode = n;
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

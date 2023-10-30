@@ -110,7 +110,7 @@ public class InstanceOps {
 		checkRegisterAsGhost(instance);
 	}
 
-	public List<Instance> match(PatternCreator queryCreator) {
+	public List<Instance> match(MultiPatternCreator queryCreator) {
 
 		DynamicExpression q = new DynamicExpression(queryCreator);
 		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
@@ -120,7 +120,9 @@ public class InstanceOps {
 				: matchesToInstances(matches);
 	}
 
-	public boolean matches(PatternCreator queryCreator, SinglePatternCreator profileCreator) {
+	public boolean matches(
+						MultiPatternCreator queryCreator,
+						SinglePatternCreator profileCreator) {
 
 		DynamicExpression q = new DynamicExpression(queryCreator);
 		DynamicExpression p = new DynamicExpression(profileCreator);

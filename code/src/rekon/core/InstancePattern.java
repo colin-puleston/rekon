@@ -89,7 +89,7 @@ class InstancePattern extends LocalExpression {
 		if (p == null) {
 
 			throw new RuntimeException(
-						"Invalid description fot instanceNode: "
+						"Invalid description for instanceNode: "
 						+ instanceNode.getLabel());
 		}
 

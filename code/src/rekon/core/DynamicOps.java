@@ -38,7 +38,7 @@ public class DynamicOps {
 		return new DynamicNodeOpsHandler(nodes);
 	}
 
-	public DynamicOpsHandler createHandler(PatternCreator disjunctsCreator) {
+	public DynamicOpsHandler createHandler(MultiPatternCreator disjunctsCreator) {
 
 		DynamicExpression expr = new DynamicExpression(disjunctsCreator);
 		NodeX node = expr.toSingleNode();

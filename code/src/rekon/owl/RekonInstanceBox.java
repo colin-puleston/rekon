@@ -62,71 +62,75 @@ public class RekonInstanceBox {
 		}
 	}
 
-	private abstract class InstanceBoxExprPatternCreator extends SinglePatternCreator {
+	private class InstanceBoxMatchComponents extends MatchComponents {
+
+		private boolean queryComponents;
+
+		InstanceBoxMatchComponents(MatchStructures matchStructures, boolean queryComponents) {
+
+			super(mappedNames, matchStructures, true);
+
+			this.queryComponents = queryComponents;
+		}
+
+		InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
+
+			IRI iri = source.getIRI();
+			Instance i = instances.get(iri);
+
+			if (i == null) {
+
+				if (queryComponents) {
+
+					throw new RekonInstanceBoxException("Instance does not exist: " + iri);
+				}
+
+				i = new MappedInstance(iri);
+
+				instanceOps.add(i);
+			}
+
+			return i.getNode();
+		}
+	}
+
+	private class InstanceExprPatternCreator implements SinglePatternCreator {
 
 		private OWLClassExpression expr;
 
-		private class InstanceBoxMatchComponents extends MatchComponents {
+		public Pattern create(MatchStructures matchStructures) {
 
-			InstanceBoxMatchComponents(MatchStructures matchStructures) {
-
-				super(mappedNames, matchStructures, true);
-			}
-
-			InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
-
-				IRI iri = source.getIRI();
-				Instance i = instances.get(iri);
-
-				if (i == null) {
-
-					i = checkCreateRefedInstance(iri);
-				}
-
-				return i.getNode();
-			}
+			return createMatchComponents(matchStructures).toPattern(expr);
 		}
 
-		protected Pattern create(MatchStructures matchStructures) {
-
-			return new InstanceBoxMatchComponents(matchStructures).toPattern(expr);
-		}
-
-		InstanceBoxExprPatternCreator(OWLClassExpression expr) {
+		InstanceExprPatternCreator(OWLClassExpression expr) {
 
 			this.expr = expr;
 		}
 
-		abstract Instance checkCreateRefedInstance(IRI iri);
-	}
+		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
 
-	private class InstanceExprPatternCreator extends InstanceBoxExprPatternCreator {
-
-		InstanceExprPatternCreator(OWLClassExpression expr) {
-
-			super(expr);
-		}
-
-		Instance checkCreateRefedInstance(IRI iri) {
-
-			Instance i = new MappedInstance(iri);
-
-			instanceOps.add(i);
-
-			return i;
+			return new InstanceBoxMatchComponents(matchStructures, false);
 		}
 	}
 
-	private class QueryExprPatternCreator extends InstanceBoxExprPatternCreator {
+	private class QueryExprPatternCreator implements MultiPatternCreator {
+
+		private OWLClassExpression expr;
+
+		public Collection<Pattern> createAll(MatchStructures matchStructures) {
+
+			return createMatchComponents(matchStructures).toPatternDisjunction(expr);
+		}
 
 		QueryExprPatternCreator(OWLClassExpression expr) {
 
-			super(expr);
+			this.expr = expr;
 		}
 
-		Instance checkCreateRefedInstance(IRI iri) {
+		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
 
-			throw new RekonInstanceBoxException("Instance does not exist: " + iri);
+			return new InstanceBoxMatchComponents(matchStructures, true);
 		}
 	}
 
@@ -156,7 +160,7 @@ public class RekonInstanceBox {
 
 		return instanceOps.matches(
 					new QueryExprPatternCreator(query),
-					new QueryExprPatternCreator(profile));
+					new InstanceExprPatternCreator(profile));
 	}
 
 	public OWLClassExpression createInstanceRef(IRI iri) {

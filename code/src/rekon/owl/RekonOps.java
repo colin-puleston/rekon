@@ -98,7 +98,7 @@ class RekonOps {
 		}
 	}
 
-	private class DynamicExprPatternCreator implements PatternCreator {
+	private class DynamicExprPatternCreator implements MultiPatternCreator {
 
 		private OWLClassExpression expr;
 

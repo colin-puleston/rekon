@@ -24,10 +24,24 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-public interface SinglePatternCreator {
+class SingleToMultiPatternCreator implements MultiPatternCreator {
 
-	public Pattern create(MatchStructures matchStructures);
+	private SinglePatternCreator sourceCreator;
+
+	public final Collection<Pattern> createAll(MatchStructures matchStructures) {
+
+		Pattern p = sourceCreator.create(matchStructures);
+
+		return p != null ? Collections.singleton(p) : null;
+	}
+
+	SingleToMultiPatternCreator(SinglePatternCreator sourceCreator) {
+
+		this.sourceCreator = sourceCreator;
+	}
 }
