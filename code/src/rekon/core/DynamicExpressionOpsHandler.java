@@ -166,16 +166,6 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return individualsResolver.resolve(subs, direct);
 	}
 
-	public boolean equivalentTo(DynamicOpsHandler other) {
-
-		return false;
-	}
-
-	public boolean subsumes(DynamicOpsHandler other) {
-
-		return false;
-	}
-
 	DynamicExpressionOpsHandler(Ontology ontology, DynamicExpression expression) {
 
 		this.expression = expression;
