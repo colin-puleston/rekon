@@ -39,8 +39,6 @@ class LocalClassifier {
 
 	private abstract class ClassifierOption {
 
-		private boolean newSubsumptions = false;
-
 		NameSet classify(LocalExpression expr) {
 
 			classifyProfiles(expr);
@@ -50,12 +48,12 @@ class LocalClassifier {
 
 		void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+			subsumptionChecker.check(defn, candidate);
 		}
 
 		void checkSubsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
 
-			updateNewSubsumptions(subsumptionChecker.check(defn, candidate));
+			subsumptionChecker.check(defn, candidate);
 		}
 
 		private void classifyProfiles(LocalExpression expr) {
@@ -63,13 +61,6 @@ class LocalClassifier {
 			for (NodeMatcher candidate : expr.getOrderedProfileMatchers()) {
 
 				exhaustivelyClassify(candidate);
-
-				if (!newSubsumptions) {
-
-					break;
-				}
-
-				newSubsumptions = false;
 			}
 		}
 
@@ -101,14 +92,6 @@ class LocalClassifier {
 			NodeClassifier c = candidate.getNode().getNodeClassifier();
 
 			return c.absorbNewLocallyInferredSubsumerExpansions();
-		}
-
-		private void updateNewSubsumptions(boolean newSubsumption) {
-
-			if (newSubsumption && !newSubsumptions) {
-
-				newSubsumptions = true;
-			}
 		}
 	}
 
