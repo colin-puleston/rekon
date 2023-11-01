@@ -142,7 +142,14 @@ class MatchComponents {
 				}
 				else if (op instanceof OWLObjectUnionOf) {
 
-					nodes.absorb(createNodeForUnion((OWLObjectUnionOf)op));
+					NodeX n = checkCreateNodeForUnion((OWLObjectUnionOf)op);
+
+					if (n == null) {
+
+						return null;
+					}
+
+					nodes.absorb(n);
 				}
 				else {
 
@@ -172,9 +179,16 @@ class MatchComponents {
 			return r != null ? new Pattern(rootNode, r) : null;
 		}
 
-		private NodeX createNodeForUnion(OWLObjectUnionOf source) {
+		private NodeX checkCreateNodeForUnion(OWLObjectUnionOf source) {
 
-			return resolveDisjunctsToNode(disjunctions.get(source));
+			Set<NodeX> disjuncts = disjunctions.get(source);
+
+			if (disjuncts == null || disjuncts.isEmpty()) {
+
+				return null;
+			}
+
+			return resolveDisjunctsToNode(disjuncts);
 		}
 	}
 
@@ -246,6 +260,8 @@ class MatchComponents {
 
 		abstract Relation create(NodeProperty prop, NodeValue target);
 
+		abstract NodeValue getNodeValueForEmptyDisjunction();
+
 		Relation createForNoValue(NodeProperty prop) {
 
 			return new AllRelation(prop, mappedNames.getAbsentClassValue());
@@ -255,20 +271,27 @@ class MatchComponents {
 
 			if (filler instanceof OWLObjectUnionOf) {
 
-				return createNodeValue((OWLObjectUnionOf)filler);
+				return checkResolveNodeValue((OWLObjectUnionOf)filler);
 			}
 
 			Set<? extends NodeX> djs = toNodeDisjunction(filler);
 
-			return djs != null ? createNodeValue(djs) : null;
+			return djs != null ? resolveNodeValue(djs) : null;
 		}
 
-		private NodeValue createNodeValue(OWLObjectUnionOf union) {
+		private NodeValue checkResolveNodeValue(OWLObjectUnionOf union) {
 
-			return createNodeValue(disjunctions.get(union));
+			Set<NodeX> disjuncts = disjunctions.get(union);
+
+			return disjuncts != null ? resolveNodeValue(disjuncts) : null;
 		}
 
-		private NodeValue createNodeValue(Collection<? extends NodeX> disjuncts) {
+		private NodeValue resolveNodeValue(Collection<? extends NodeX> disjuncts) {
+
+			if (disjuncts.isEmpty()) {
+
+				return getNodeValueForEmptyDisjunction();
+			}
 
 			return new NodeValue(resolveDisjunctsToNode(disjuncts));
 		}
@@ -284,6 +307,11 @@ class MatchComponents {
 		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new SomeRelation(prop, target);
+		}
+
+		NodeValue getNodeValueForEmptyDisjunction() {
+
+			return null;
 		}
 	}
 
@@ -304,6 +332,11 @@ class MatchComponents {
 		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new AllRelation(prop, target);
+		}
+
+		NodeValue getNodeValueForEmptyDisjunction() {
+
+			return mappedNames.getAbsentClassValue();
 		}
 	}
 
