@@ -36,9 +36,8 @@ class OntologyClassifier {
 
 	private List<PatternMatcher> profilePatterns;
 	private List<PatternMatcher> definitionPatterns;
-
 	private List<DisjunctionMatcher> allDisjunctions;
-	private PotentialDisjunctionSubsumers disjunctionDefnsFilter;
+	private List<DisjunctionMatcher> definitionDisjunctions;
 
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
 
@@ -66,27 +65,29 @@ class OntologyClassifier {
 
 		void processElement(PatternMatcher defn) {
 
-			Pattern p = defn.getPattern();
-
-			for (PatternMatcher c : candidatesFilter.getPotentialsFor(p)) {
+			for (PatternMatcher c : candidatesFilter.getPotentialsFor(defn.getPattern())) {
 
 				subsumptionChecker.check(defn, c);
 			}
 		}
 	}
 
-	private class DisjunctionSubsumersChecker extends MultiThreadListProcessor<DisjunctionMatcher> {
+	private class DisjunctionSubsumedsChecker extends MultiThreadListProcessor<DisjunctionMatcher> {
 
-		DisjunctionSubsumersChecker(List<DisjunctionMatcher> candidates) {
+		private PotentialDisjunctionSubsumeds candidatesFilter;
 
-			invokeListProcesses(candidates);
+		DisjunctionSubsumedsChecker(List<DisjunctionMatcher> candidates) {
+
+			candidatesFilter = new PotentialDisjunctionSubsumeds(candidates);
+
+			invokeListProcesses(definitionDisjunctions);
 		}
 
-		void processElement(DisjunctionMatcher candidate) {
+		void processElement(DisjunctionMatcher defn) {
 
-			for (DisjunctionMatcher defn : disjunctionDefnsFilter.getPotentialsFor(candidate)) {
+			for (DisjunctionMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
-				subsumptionChecker.check(defn, candidate);
+				subsumptionChecker.check(defn, c);
 			}
 		}
 	}
@@ -110,7 +111,7 @@ class OntologyClassifier {
 		void checkSubsumptions() {
 
 			new PatternSubsumedsChecker(patternMatchCandidates);
-			new DisjunctionSubsumersChecker(disjunctionMatchCandidates);
+			new DisjunctionSubsumedsChecker(disjunctionMatchCandidates);
 
 			inferNewCommonDisjunctSubsumers();
 		}
@@ -190,9 +191,8 @@ class OntologyClassifier {
 
 		profilePatterns = nodeMatchers.getProfilePatterns();
 		definitionPatterns = nodeMatchers.getDefinitionPatterns();
-
 		allDisjunctions = nodeMatchers.getAllDisjunctions();
-		disjunctionDefnsFilter = createDisjunctionDefnsFilter(nodeMatchers);
+		definitionDisjunctions = nodeMatchers.getDefinitionDisjunctions();
 
 		classify();
 	}
@@ -265,10 +265,5 @@ class OntologyClassifier {
 		NodeClassifier.absorbAllNewInferredSubsumers(nodes);
 
 		return nextConfig;
-	}
-
-	private PotentialDisjunctionSubsumers createDisjunctionDefnsFilter(NodeMatchers nodeMatchers) {
-
-		return new PotentialDisjunctionSubsumers(nodeMatchers.getDefinitionDisjunctions());
 	}
 }
