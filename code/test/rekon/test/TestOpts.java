@@ -24,9 +24,25 @@
 
 package rekon.test;
 
+import java.io.*;
+import java.util.*;
+
 class TestOpts {
 
+	static private final File GENERAL_TESTS_BASE_DIR = new File("test/ontologies/");
+	static private final String GENERAL_TESTS_DEFAULT_LEAF_DIR = "test";
+
 	private boolean runningGeneralTests = false;
+
+	File getGeneralTestsDir() {
+
+		return new File(GENERAL_TESTS_BASE_DIR, getGeneralTestsLeafDir());
+	}
+
+	String getGeneralTestsLeafDir() {
+
+		return GENERAL_TESTS_DEFAULT_LEAF_DIR;
+	}
 
 	void setRunningGeneralTests() {
 
@@ -38,7 +54,7 @@ class TestOpts {
 		return runningGeneralTests;
 	}
 
-	String[] parseArg(String arg, int minLen, int maxLen) {
+	Iterator<String> parseArg(String arg, int minLen, int maxLen) {
 
 		String[] vals = arg.split(":");
 
@@ -47,7 +63,7 @@ class TestOpts {
 			throw new RuntimeException("ERROR: Bad run-opts string!");
 		}
 
-		return vals;
+		return Arrays.asList(vals).iterator();
 	}
 
 	Integer parseInt(String value) {

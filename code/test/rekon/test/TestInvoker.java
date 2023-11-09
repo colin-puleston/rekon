@@ -28,8 +28,6 @@ import java.io.*;
 
 abstract class TestInvoker<O extends TestOpts> {
 
-	private File GENEERAL_TESTS_DIR = new File("test/ontologies/test");
-
 	TestInvoker(String[] args) {
 
 		TestConfig config = new TestConfig(args);
@@ -53,7 +51,7 @@ abstract class TestInvoker<O extends TestOpts> {
 
 		customOpts.setRunningGeneralTests();
 
-		for (File file : GENEERAL_TESTS_DIR.listFiles()) {
+		for (File file : getGeneralTestsDir(customOpts).listFiles()) {
 
 			if (file.getName().endsWith(".owl")) {
 
@@ -62,5 +60,17 @@ abstract class TestInvoker<O extends TestOpts> {
 				run(customOpts, reasonerOpt, file);
 			}
 		}
+	}
+
+	private File getGeneralTestsDir(O customOpts) {
+
+		File dir = customOpts.getGeneralTestsDir();
+
+		if (!dir.exists()) {
+
+			throw new RuntimeException("Cannot find general tests dir: " + dir);
+		}
+
+		return dir;
 	}
 }

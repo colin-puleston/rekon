@@ -57,14 +57,12 @@ public class Compare {
 
 	private TestManager manager;
 
-	private OWLOntology ontology;
-	private OWLDataFactory factory;
-
 	private OWLReasoner rekon;
 	private OWLReasoner control;
 
 	private CompareOpts compareOpts;
 
+	private OntoQueries ontoQueries;
 	private LinkComparator linkComparator = new LinkComparator();
 
 	private class LinkComparator implements Comparator<OWLClass> {
@@ -75,129 +73,195 @@ public class Compare {
 		}
 	}
 
+	private abstract class ScopedCompareOps {
+
+		private CompareOpts.TestScope scope;
+
+		ScopedCompareOps(CompareOpts.TestScope scope) {
+
+			this.scope = scope;
+		}
+
+		abstract void performOps();
+
+		void performOp(OWLClassExpression c) {
+
+			Set<OWLClass> rl = getLinks(rekon, c);
+			Set<OWLClass> cl = getLinks(control, c);
+
+			if (!rl.equals(cl)) {
+
+				Set<OWLClass> rOnly = new HashSet<OWLClass>(rl);
+				Set<OWLClass> cOnly = new HashSet<OWLClass>(cl);
+				Set<OWLClass> common = new HashSet<OWLClass>(rl);
+
+				rOnly.removeAll(cl);
+				cOnly.removeAll(rl);
+
+				common.removeAll(rOnly);
+
+				System.out.println("\nMISMATCH: " + c);
+				System.out.println("Rekon + Control: " + orderLinks(common));
+				System.out.println("Rekon Only: " + orderLinks(rOnly));
+				System.out.println("Control Only: " + orderLinks(cOnly));
+			}
+		}
+
+		private Set<OWLClass> getLinks(OWLReasoner reasoner, OWLClassExpression e) {
+
+			switch (scope) {
+
+				case EQUIVS:
+					return reasoner.getEquivalentClasses(e).getEntities();
+
+				case SUPS:
+					return reasoner.getSuperClasses(e, true).getFlattened();
+
+				case SUBS:
+					return reasoner.getSubClasses(e, true).getFlattened();
+
+				case ANCS:
+					return reasoner.getSuperClasses(e, false).getFlattened();
+
+				case DECS:
+					return reasoner.getSubClasses(e, false).getFlattened();
+			}
+
+			throw new Error("Unrecognised compare option: " + scope);
+		}
+
+		private SortedSet<OWLClass> orderLinks(Collection<OWLClass> links) {
+
+			SortedSet<OWLClass> ordered = new TreeSet<OWLClass>(linkComparator);
+
+			ordered.addAll(links);
+
+			return ordered;
+		}
+	}
+
+	private class ClassCompareOps extends ScopedCompareOps {
+
+		ClassCompareOps(CompareOpts.TestScope scope) {
+
+			super(scope);
+		}
+
+		void performOps() {
+
+			for (OWLOntology o : manager.getAllOntologies()) {
+
+				for (OWLClass c : o.getClassesInSignature()) {
+
+					performOp(c);
+				}
+			}
+		}
+	}
+
+	private abstract class QueryCompareOps extends ScopedCompareOps {
+
+		QueryCompareOps(CompareOpts.TestScope scope) {
+
+			super(scope);
+		}
+
+		void performOps() {
+
+			QueryProvider queries = createQueryProvider();
+
+			while (true) {
+
+				OWLClassExpression next = queries.next();
+
+				if (next == null) {
+
+					break;
+				}
+
+				performOp(next);
+			}
+		}
+
+		abstract QueryProvider createQueryProvider();
+	}
+
+	private class AutoQueryCompareOps extends QueryCompareOps {
+
+		AutoQueryCompareOps(CompareOpts.TestScope scope) {
+
+			super(scope);
+		}
+
+		QueryProvider createQueryProvider() {
+
+			return new AutoQueryGenerator(manager, compareOpts.maxQueries);
+		}
+	}
+
+	private class OntoQueryCompareOps extends QueryCompareOps {
+
+		OntoQueryCompareOps(CompareOpts.TestScope scope) {
+
+			super(scope);
+		}
+
+		QueryProvider createQueryProvider() {
+
+			return ontoQueries.createQueryProvider();
+		}
+	}
+
 	private Compare(CompareOpts compareOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
 		this.compareOpts = compareOpts;
 
-		manager = new TestManager();
-		ontology = manager.loadOntology(ontologyFile);
-		factory = manager.getFactory();
+		manager = new TestManager(ontologyFile);
+		ontoQueries = new OntoQueries(manager);
 
 		System.out.println("ONTOLOGY: " + ontologyFile);
 
 		rekon = startReasoner(ReasonerOpt.REKON);
 		control = startReasoner(reasonerOpt);
 
-		for (CompareOpts.Output output : compareOpts.output.toAtoms()) {
+		compareAll();
+	}
 
-			compare(output);
+	private void compareAll() {
+
+		for (CompareOpts.TestScope scope : compareOpts.testScope.toAtoms()) {
+
+			compareScoped(scope);
 		}
 	}
 
-	private void compare(CompareOpts.Output output) {
+	private void compareScoped(CompareOpts.TestScope scope) {
 
-		System.out.println("\nSTART COMPARE " + output + "...");
+		System.out.println("\nSTART COMPARE " + scope + "...");
 
-		for (OWLOntology o : manager.manager.getOntologies()) {
+		createScopedCompareOps(scope).performOps();
 
-			if (compareOpts.input == CompareOpts.Input.CLASS) {
-
-				compareClassOp(o, output);
-			}
-			else {
-
-				compareQueryOp(o, output);
-			}
-		}
-
-		System.out.println("DONE COMPARE " + output);
+		System.out.println("DONE COMPARE " + scope);
 	}
 
-	private void compareClassOp(OWLOntology o, CompareOpts.Output output) {
+	private ScopedCompareOps createScopedCompareOps(CompareOpts.TestScope scope) {
 
-		for (OWLClass c : o.getClassesInSignature()) {
+		if (compareOpts.testType == CompareOpts.TestType.CLASS) {
 
-			compare(c, output);
-		}
-	}
-
-	private void compareQueryOp(OWLOntology o, CompareOpts.Output output) {
-
-		QueryGenerator generator = new QueryGenerator(o, factory, compareOpts.maxQueries);
-
-		while (true) {
-
-			OWLObjectIntersectionOf next = generator.next();
-
-			if (next == null) {
-
-				break;
-			}
-
-			compare(next, output);
-		}
-	}
-
-	private void compare(OWLClassExpression c, CompareOpts.Output output) {
-
-		Set<OWLClass> rl = getLinks(rekon, c, output);
-		Set<OWLClass> cl = getLinks(control, c, output);
-
-		if (!rl.equals(cl)) {
-
-			Collection<OWLClass> rlo = orderLinks(rl);
-			Collection<OWLClass> clo = orderLinks(cl);
-
-			System.out.println("\nMISMATCH: " + c);
-			System.out.println("Rekon: " + rlo);
-			System.out.println("Control: " + clo);
-
-			rlo.removeAll(cl);
-			clo.removeAll(rl);
-
-			System.out.println("Rekon Only: " + rlo);
-			System.out.println("Control Only: " + clo);
-		}
-	}
-
-	private Set<OWLClass> getLinks(
-							OWLReasoner reasoner,
-							OWLClassExpression e,
-							CompareOpts.Output output) {
-
-		switch (output) {
-
-			case EQUIVS:
-				return reasoner.getEquivalentClasses(e).getEntities();
-
-			case SUPS:
-				return reasoner.getSuperClasses(e, true).getFlattened();
-
-			case SUBS:
-				return reasoner.getSubClasses(e, true).getFlattened();
-
-			case ANCS:
-				return reasoner.getSuperClasses(e, false).getFlattened();
-
-			case DECS:
-				return reasoner.getSubClasses(e, false).getFlattened();
+			return new ClassCompareOps(scope);
 		}
 
-		throw new Error("Unrecognised compare option: " + compareOpts.output);
-	}
+		if (compareOpts.querySource == CompareOpts.QuerySource.AUTO) {
 
-	private Set<OWLClass> orderLinks(Collection<OWLClass> links) {
+			return new AutoQueryCompareOps(scope);
+		}
 
-		SortedSet<OWLClass> ordered = new TreeSet<OWLClass>(linkComparator);
-
-		ordered.addAll(links);
-
-		return ordered;
+		return new OntoQueryCompareOps(scope);
 	}
 
 	private OWLReasoner startReasoner(ReasonerOpt opt) {
 
-		OWLReasoner reasoner = manager.createReasoner(ontology, opt);
+		OWLReasoner reasoner = manager.createReasoner(opt);
 
 		System.out.println("REASONER: " + reasoner.getClass().getSimpleName());
 

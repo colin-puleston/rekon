@@ -56,9 +56,6 @@ public class Run {
 	}
 
 	private TestManager manager;
-
-	private OWLOntology ontology;
-	private OWLDataFactory factory;
 	private OWLReasoner reasoner;
 
 	private boolean terseOutput = false;
@@ -104,7 +101,7 @@ public class Run {
 
 				long startTime = System.currentTimeMillis();
 
-				for (OWLOntology o : manager.manager.getOntologies()) {
+				for (OWLOntology o : manager.getAllOntologies()) {
 
 					testOp(this, o);
 				}
@@ -246,11 +243,11 @@ public class Run {
 
 		void testOp(OpTester opTester, OWLOntology o) {
 
-			QueryGenerator generator = new QueryGenerator(o, factory, maxQueries);
+			AutoQueryGenerator queries = new AutoQueryGenerator(manager, maxQueries);
 
 			while (true) {
 
-				OWLObjectIntersectionOf next = generator.next();
+				OWLClassExpression next = queries.next();
 
 				if (next == null) {
 
@@ -264,11 +261,8 @@ public class Run {
 
 	private Run(RunOpts runOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
-		manager = new TestManager();
-
-		ontology = manager.loadOntology(ontologyFile);
-		factory = manager.getFactory();
-		reasoner = manager.createReasoner(ontology, reasonerOpt);
+		manager = new TestManager(ontologyFile);
+		reasoner = manager.createReasoner(reasonerOpt);
 
 		terseOutput = runOpts.runningGeneralTests();
 
@@ -278,7 +272,7 @@ public class Run {
 
 		precomputeInferences();
 
-		for (int i = 0 ; i < runOpts.retrieveRuns ; i++) {
+		for (int i = 0 ; i < runOpts.classRuns ; i++) {
 
 			new ClassOpTester();
 		}

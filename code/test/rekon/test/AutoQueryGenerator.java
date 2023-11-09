@@ -29,7 +29,7 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.*;
 
-class QueryGenerator {
+class AutoQueryGenerator extends QueryProvider {
 
 	private OWLDataFactory factory;
 
@@ -41,15 +41,15 @@ class QueryGenerator {
 
 	private OWLObjectIntersectionOf expander = null;
 
-	QueryGenerator(OWLOntology ont, OWLDataFactory factory, int max) {
+	AutoQueryGenerator(TestManager manager, int max) {
 
-		this.factory = factory;
 		this.max = max;
 
-		axioms = getAllEquivalenceAxioms(ont).iterator();
+		factory = manager.getFactory();
+		axioms = getAllEquivalenceAxioms(manager.rootOntology).iterator();
 	}
 
-	OWLObjectIntersectionOf next() {
+	OWLClassExpression next() {
 
 		if (max > 0 && generated >= max) {
 
@@ -125,8 +125,8 @@ class QueryGenerator {
 		return factory.getOWLObjectIntersectionOf(ops);
 	}
 
-	private Set<OWLEquivalentClassesAxiom> getAllEquivalenceAxioms(OWLOntology ont) {
+	private Set<OWLEquivalentClassesAxiom> getAllEquivalenceAxioms(OWLOntology rootOntology) {
 
-		return ont.getAxioms(AxiomType.EQUIVALENT_CLASSES, Imports.INCLUDED);
+		return rootOntology.getAxioms(AxiomType.EQUIVALENT_CLASSES, Imports.INCLUDED);
 	}
 }

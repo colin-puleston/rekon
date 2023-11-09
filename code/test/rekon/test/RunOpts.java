@@ -24,18 +24,20 @@
 
 package rekon.test;
 
+import java.util.*;
+
 class RunOpts extends TestOpts {
 
-	final int retrieveRuns;
+	final int classRuns;
 	final int queryRuns;
 	final int maxQueries;
 
 	RunOpts(String arg) {
 
-		String[] vals = parseArg(arg, 2, 3);
+		Iterator<String> vals = parseArg(arg, 2, 3);
 
-		retrieveRuns = parseInt(vals[0]);
-		queryRuns = parseInt(vals[1]);
-		maxQueries = vals.length == 3 ? parseInt(vals[2]) : -1;
+		classRuns = parseInt(vals.next());
+		queryRuns = parseInt(vals.next());
+		maxQueries = vals.hasNext() ? parseInt(vals.next()) : -1;
 	}
 }

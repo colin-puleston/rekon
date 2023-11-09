@@ -25,6 +25,7 @@
 package rekon.test;
 
 import java.io.*;
+import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
@@ -41,14 +42,15 @@ import rekon.owl.RekonReasonerFactory;
 class TestManager {
 
 	final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+	final OWLOntology rootOntology;
 
-	OWLOntology loadOntology(File ontFile) {
+	TestManager(File ontFile) {
 
 		manager.getIRIMappers().add(createIRIMapper(ontFile));
 
 		try {
 
-			return manager.loadOntologyFromOntologyDocument(ontFile);
+			rootOntology = manager.loadOntologyFromOntologyDocument(ontFile);
 		}
 		catch (OWLOntologyCreationException e) {
 
@@ -56,14 +58,19 @@ class TestManager {
 		}
 	}
 
+	OWLReasoner createReasoner(ReasonerOpt opt) {
+
+		return getReasonerFactory(opt).createReasoner(rootOntology);
+	}
+
+	Collection<OWLOntology> getAllOntologies() {
+
+		return manager.getOntologies();
+	}
+
 	OWLDataFactory getFactory() {
 
 		return manager.getOWLDataFactory();
-	}
-
-	OWLReasoner createReasoner(OWLOntology ontology, ReasonerOpt opt) {
-
-		return getReasonerFactory(opt).createReasoner(ontology);
 	}
 
 	private OWLReasonerFactory getReasonerFactory(ReasonerOpt opt) {
