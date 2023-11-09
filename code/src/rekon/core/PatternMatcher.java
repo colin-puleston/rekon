@@ -58,6 +58,16 @@ class PatternMatcher extends NodeMatcher {
 		return pattern;
 	}
 
+	Names getDirectlyImpliedSubNodes() {
+
+		return Names.NO_NAMES;
+	}
+
+	boolean subsumesNode(NodeX n) {
+
+		return false;
+	}
+
 	boolean subsumes(NodeMatcher test) {
 
 		return test instanceof PatternMatcher && subsumes((PatternMatcher)test);

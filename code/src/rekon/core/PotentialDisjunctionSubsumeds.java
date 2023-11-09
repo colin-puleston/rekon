@@ -24,28 +24,30 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-abstract class NodeMatcher {
+class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 
-	private NodeX node;
+	PotentialDisjunctionSubsumeds(List<DisjunctionMatcher> options) {
 
-	NodeMatcher(NodeX node) {
-
-		this.node = node;
+		super(options);
 	}
 
-	NodeX getNode() {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return node;
+		return MatchNamesExpander.expand(names);
 	}
 
-	abstract Names getDirectlyImpliedSubNodes();
+	Names resolveNamesForRetrieval(Names names, int rank) {
 
-	abstract boolean subsumesNode(NodeX n);
+		return names;
+	}
 
-	abstract boolean subsumes(NodeMatcher test);
+	boolean unionRankOptionsForRetrieval() {
 
-	abstract void acceptVisitor(NodeMatcherVisitor visitor);
+		return false;
+	}
 }

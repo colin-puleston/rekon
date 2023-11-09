@@ -29,30 +29,11 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionMatcher> {
+class PotentialDisjunctionSubsumers extends PotentialDisjunctionSubsumptions {
 
-	private List<DisjunctionMatcher> definitions;
+	PotentialDisjunctionSubsumers(List<DisjunctionMatcher> options) {
 
-	PotentialDisjunctionSubsumers(List<DisjunctionMatcher> definitions) {
-
-		this.definitions = definitions;
-
-		registerSingleOptionRank();
-	}
-
-	Collection<DisjunctionMatcher> getPotentialsFor(DisjunctionMatcher request) {
-
-		return getPotentialsFor(disjunctsToSingletonNamesList(request));
-	}
-
-	List<DisjunctionMatcher> getAllOptions() {
-
-		return definitions;
-	}
-
-	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
-
-		return disjunctsToSingletonNamesList(option);
+		super(options);
 	}
 
 	Names resolveNamesForRegistration(Names names, int rank) {
@@ -68,10 +49,5 @@ class PotentialDisjunctionSubsumers extends PotentialSubsumptions<DisjunctionMat
 	boolean unionRankOptionsForRetrieval() {
 
 		return true;
-	}
-
-	private List<Names> disjunctsToSingletonNamesList(DisjunctionMatcher d) {
-
-		return Collections.singletonList(d.getDisjuncts());
 	}
 }

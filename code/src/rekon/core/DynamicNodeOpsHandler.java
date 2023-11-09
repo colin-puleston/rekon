@@ -127,6 +127,11 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		return super.subsumes(other);
 	}
 
+	NodeX getNode() {
+
+		return node;
+	}
+
 	Collection<NodeMatcher> getAllProfileMatchers() {
 
 		return new ProfileMatcherCollector().getAll();

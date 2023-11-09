@@ -32,7 +32,7 @@ import java.util.*;
 class DynamicSubsumeds {
 
 	private PotentialPatternSubsumeds patternPotentials;
-	private PotentialDisjunctionSubsumers disjunctionPotentials;
+	private PotentialDisjunctionSubsumeds disjunctionPotentials;
 
 	private ClassSubsumptions classSubsumptions;
 	private NodeSubsumptions allNodeSubsumptions;
@@ -68,6 +68,14 @@ class DynamicSubsumeds {
 
 			NameSet matches = new NameSet();
 			NodeMatcher defn = expr.getExpressionMatcher();
+
+			for (Name n : defn.getDirectlyImpliedSubNodes()) {
+
+				if (requiredCandidate(n)) {
+
+					matches.add(n);
+				}
+			}
 
 			for (NodeMatcher cand : new PotentialsSelector(defn).getSelecteds()) {
 
@@ -151,9 +159,9 @@ class DynamicSubsumeds {
 							nodeMatchers.getProfilePatterns()));
 	}
 
-	private PotentialDisjunctionSubsumers createDisjunctionPotentials(NodeMatchers nodeMatchers) {
+	private PotentialDisjunctionSubsumeds createDisjunctionPotentials(NodeMatchers nodeMatchers) {
 
-		return new PotentialDisjunctionSubsumers(
+		return new PotentialDisjunctionSubsumeds(
 						filterMatchersForMappedNodes(
 							nodeMatchers.getDefinitionDisjunctions()));
 	}

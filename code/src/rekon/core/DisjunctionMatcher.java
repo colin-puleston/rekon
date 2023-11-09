@@ -66,6 +66,11 @@ class DisjunctionMatcher extends NodeMatcher {
 		return disjuncts;
 	}
 
+	Names getDirectlyImpliedSubNodes() {
+
+		return disjuncts;
+	}
+
 	boolean definition() {
 
 		return definition;

@@ -24,28 +24,41 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-abstract class NodeMatcher {
+abstract class PotentialDisjunctionSubsumptions
+					extends
+						PotentialSubsumptions<DisjunctionMatcher> {
 
-	private NodeX node;
+	private List<DisjunctionMatcher> options;
 
-	NodeMatcher(NodeX node) {
+	PotentialDisjunctionSubsumptions(List<DisjunctionMatcher> options) {
 
-		this.node = node;
+		this.options = options;
+
+		registerSingleOptionRank();
 	}
 
-	NodeX getNode() {
+	Collection<DisjunctionMatcher> getPotentialsFor(DisjunctionMatcher request) {
 
-		return node;
+		return getPotentialsFor(disjunctsToSingletonNamesList(request));
 	}
 
-	abstract Names getDirectlyImpliedSubNodes();
+	List<DisjunctionMatcher> getAllOptions() {
 
-	abstract boolean subsumesNode(NodeX n);
+		return options;
+	}
 
-	abstract boolean subsumes(NodeMatcher test);
+	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
 
-	abstract void acceptVisitor(NodeMatcherVisitor visitor);
+		return disjunctsToSingletonNamesList(option);
+	}
+
+	private List<Names> disjunctsToSingletonNamesList(DisjunctionMatcher d) {
+
+		return Collections.singletonList(d.getDisjuncts());
+	}
 }

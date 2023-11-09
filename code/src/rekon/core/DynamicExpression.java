@@ -76,13 +76,18 @@ class DynamicExpression extends LocalExpression {
 			return null;
 		}
 
-		ClassNode exprNode = null;
-		List<ClassNode> djNodes = new ArrayList<ClassNode>();
+		NodeX exprNode = null;
+		List<NodeX> djNodes = new ArrayList<NodeX>();
 
 		for (Pattern dj : djs) {
 
-			exprNode = matchStructures.addDefinitionClass();
-			expressionMatcher = matchStructures.addDefinitionPattern(exprNode, dj);
+			exprNode = dj.toSingleNode();
+
+			if (exprNode == null) {
+
+				exprNode = matchStructures.addDefinitionClass();
+				expressionMatcher = matchStructures.addDefinitionPattern(exprNode, dj);
+			}
 
 			djNodes.add(exprNode);
 		}
@@ -93,8 +98,10 @@ class DynamicExpression extends LocalExpression {
 		}
 		else {
 
-			exprNode = matchStructures.addDefinitionClass();
-			expressionMatcher = matchStructures.addDisjunction(exprNode, djNodes, true);
+			ClassNode defnCls = matchStructures.addDefinitionClass();
+
+			exprNode = defnCls;
+			expressionMatcher = matchStructures.addDisjunction(defnCls, djNodes, true);
 		}
 
 		return exprNode;
