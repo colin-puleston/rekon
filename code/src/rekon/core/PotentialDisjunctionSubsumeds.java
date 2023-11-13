@@ -38,7 +38,7 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 
 	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return MatchNamesExpander.expand(names);
+		return MatchNamesResolver.expand(names);
 	}
 
 	Names resolveNamesForRetrieval(Names names, int rank) {
@@ -47,6 +47,29 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 	}
 
 	boolean unionRankOptionsForRetrieval() {
+
+		return false;
+	}
+
+	Names resolveRequestDisjuncts(Names disjuncts) {
+
+		if (containsLocalNode(disjuncts)) {
+
+			return MatchNamesResolver.ROOT_COLLECTED_NAME_SET;
+		}
+
+		return disjuncts;
+	}
+
+	private boolean containsLocalNode(Names nodes) {
+
+		for (Name n : nodes) {
+
+			if (((NodeX)n).local()) {
+
+				return true;
+			}
+		}
 
 		return false;
 	}

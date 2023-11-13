@@ -41,7 +41,7 @@ class PotentialLocalPatternSubsumeds extends PotentialPatternSubsumeds {
 
 	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return MatchNamesExpander.expand(names);
+		return MatchNamesResolver.expand(names);
 	}
 
 	List<Names> getRankedDefinitionNames(Pattern defn) {

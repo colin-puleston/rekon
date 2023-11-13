@@ -435,6 +435,6 @@ abstract class PotentialSubsumptions<O> {
 
 	private boolean rootCollected(Names rankNames) {
 
-		return FilteringNameCollector.rootCollected(rankNames);
+		return rankNames == MatchNamesResolver.ROOT_COLLECTED_NAME_SET;
 	}
 }

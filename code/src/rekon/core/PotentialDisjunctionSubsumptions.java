@@ -44,7 +44,7 @@ abstract class PotentialDisjunctionSubsumptions
 
 	Collection<DisjunctionMatcher> getPotentialsFor(DisjunctionMatcher request) {
 
-		return getPotentialsFor(disjunctsToSingletonNamesList(request));
+		return getPotentialsFor(requestToSingletonNamesList(request));
 	}
 
 	List<DisjunctionMatcher> getAllOptions() {
@@ -54,11 +54,13 @@ abstract class PotentialDisjunctionSubsumptions
 
 	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
 
-		return disjunctsToSingletonNamesList(option);
+		return Collections.singletonList(option.getDisjuncts());
 	}
 
-	private List<Names> disjunctsToSingletonNamesList(DisjunctionMatcher d) {
+	abstract Names resolveRequestDisjuncts(Names disjuncts);
 
-		return Collections.singletonList(d.getDisjuncts());
+	private List<Names> requestToSingletonNamesList(DisjunctionMatcher d) {
+
+		return Collections.singletonList(resolveRequestDisjuncts(d.getDisjuncts()));
 	}
 }

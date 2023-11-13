@@ -79,17 +79,17 @@ class NameClassifier extends NameLinksHandler {
 
 	Names getEquivalents() {
 
-		throw new Error("Method should never be invoked!");
+		return handleGetLinked();
 	}
 
 	Names getSupers(boolean direct) {
 
-		throw new Error("Method should never be invoked!");
+		return handleGetLinked();
 	}
 
 	Names getSubs(boolean direct) {
 
-		throw new Error("Method should never be invoked!");
+		return handleGetLinked();
 	}
 
 	boolean isSubsumer(Name test) {
@@ -121,5 +121,15 @@ class NameClassifier extends NameLinksHandler {
 	private boolean checkAddSubsumer(Name subsumer) {
 
 		return subsumer != name && subsumers.add(subsumer);
+	}
+
+	private Names handleGetLinked() {
+
+		if (name.local()) {
+
+			return Names.NO_NAMES;
+		}
+
+		throw new Error("Method should never be invoked!");
 	}
 }
