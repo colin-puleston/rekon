@@ -97,6 +97,14 @@
     
 
 
+    <!-- urn:test#EE -->
+
+    <owl:Class rdf:about="urn:test#EE">
+        <rdfs:subClassOf rdf:resource="urn:test#E"/>
+    </owl:Class>
+    
+
+
     <!-- urn:test#Query1 -->
 
     <owl:Class rdf:about="urn:test#Query1">
@@ -117,7 +125,7 @@
         <owl:equivalentClass>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#B"/>
+                <owl:someValuesFrom rdf:resource="urn:test#EE"/>
             </owl:Restriction>
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="urn:test#_Query"/>
