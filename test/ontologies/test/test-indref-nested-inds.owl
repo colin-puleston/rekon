@@ -94,7 +94,9 @@
 
     <!-- urn:test#Ind-1 -->
 
-    <owl:NamedIndividual rdf:about="urn:test#Ind-1"/>
+    <owl:NamedIndividual rdf:about="urn:test#Ind-1">
+        <p rdf:resource="urn:test#Ind-2"/>
+    </owl:NamedIndividual>
     
 
 
