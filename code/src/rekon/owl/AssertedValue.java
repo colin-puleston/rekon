@@ -34,6 +34,18 @@ abstract class AssertedValue<P extends OWLProperty, V extends OWLObject> {
 	private P property;
 	private V value;
 
+	public boolean equals(Object other) {
+
+		AssertedValue<?, ?> o = (AssertedValue<?, ?>)other;
+
+		return property.equals(o.property) && value.equals(o.value);
+	}
+
+	public int hashCode() {
+
+		return property.hashCode() + value.hashCode();
+	}
+
 	AssertedValue(P property, V value) {
 
 		this.property = property;
