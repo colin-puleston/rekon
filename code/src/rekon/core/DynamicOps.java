@@ -41,14 +41,15 @@ public class DynamicOps {
 	public DynamicOpsHandler createHandler(MultiPatternCreator disjunctsCreator) {
 
 		DynamicExpression expr = new DynamicExpression(disjunctsCreator);
-		NodeX node = expr.toSingleNode();
-
-		if (node != null) {
-
-			return new DynamicNodeOpsHandler(node);
-		}
 
 		if (expr.expressionCreated()) {
+
+			NodeX node = expr.toSingleNode();
+
+			if (node != null) {
+
+				return new DynamicNodeOpsHandler(node);
+			}
 
 			return new DynamicExpressionOpsHandler(ontology, expr);
 		}

@@ -73,7 +73,17 @@ public class RekonInstanceBox {
 			this.queryComponents = queryComponents;
 		}
 
-		InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
+		NodeX toNode(OWLClassExpression source) {
+
+			if (source instanceof RekonOWLInstanceRef) {
+
+				return toInstanceNode((RekonOWLInstanceRef)source);
+			}
+
+			return super.toNode(source);
+		}
+
+		private InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
 
 			IRI iri = source.getIRI();
 			Instance i = instances.get(iri);

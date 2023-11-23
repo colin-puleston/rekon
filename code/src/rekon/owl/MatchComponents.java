@@ -43,12 +43,12 @@ class MatchComponents {
 	private Patterns patterns = new Patterns();
 	private Disjunctions disjunctions = new Disjunctions();
 
-	private SomeRelations someRelations = new SomeRelations();
-	private AllRelations allRelations = new AllRelations();
-	private DataRelations dataRelations = new DataRelations();
+	private ClassSomeRelations classSomeRelations = new ClassSomeRelations();
+	private ClassAllRelations classAllRelations = new ClassAllRelations();
+	private ClassDataRelations classDataRelations = new ClassDataRelations();
 
-	private NodeValueRelations nodeValueRelations = new NodeValueRelations();
-	private DataValueRelations dataValueRelations = new DataValueRelations();
+	private IndividualNodeRelations individualNodeRelations = new IndividualNodeRelations();
+	private IndividualDataRelations individualDataRelations = new IndividualDataRelations();
 
 	private DataTypes dataTypes;
 
@@ -214,9 +214,14 @@ class MatchComponents {
 		}
 	}
 
-	private abstract class ObjectRelations
-								<S extends OWLQuantifiedObjectRestriction>
+	private abstract class Relations
+								<S extends OWLRestriction>
 								extends TypeEntities<S, Relation> {
+	}
+
+	private abstract class ClassNodeRelations
+								<S extends OWLQuantifiedObjectRestriction>
+								extends Relations<S> {
 
 		private boolean complement = false;
 
@@ -229,19 +234,18 @@ class MatchComponents {
 
 		Relation checkCreate(S source) {
 
-			OWLObjectPropertyExpression propExpr = source.getProperty();
+			NodeProperty p = extracNodeProperty(source);
 
-			if (propExpr instanceof OWLObjectProperty) {
+			if (p != null) {
 
-				NodeProperty prop = mappedNames.get((OWLObjectProperty)propExpr);
 				OWLClassExpression filler = source.getFiller();
 
 				if (complement) {
 
-					return checkCreateForComplement(prop, filler);
+					return checkCreateForComplement(p, filler);
 				}
 
-				return checkCreate(prop, filler);
+				return checkCreate(p, filler);
 			}
 
 			return null;
@@ -297,7 +301,7 @@ class MatchComponents {
 		}
 	}
 
-	private class SomeRelations extends ObjectRelations<OWLObjectSomeValuesFrom> {
+	private class ClassSomeRelations extends ClassNodeRelations<OWLObjectSomeValuesFrom> {
 
 		Relation checkCreateForComplement(NodeProperty prop, OWLClassExpression filler) {
 
@@ -315,7 +319,7 @@ class MatchComponents {
 		}
 	}
 
-	private class AllRelations extends ObjectRelations<OWLObjectAllValuesFrom> {
+	private class ClassAllRelations extends ClassNodeRelations<OWLObjectAllValuesFrom> {
 
 		Relation checkCreate(NodeProperty prop, OWLClassExpression filler) {
 
@@ -340,32 +344,34 @@ class MatchComponents {
 		}
 	}
 
-	private class DataRelations extends TypeEntities<OWLDataRestriction, Relation> {
+	private class ClassDataRelations extends Relations<OWLDataRestriction> {
 
 		Relation checkCreate(OWLDataRestriction source) {
 
-			OWLDataPropertyExpression propExpr = source.getProperty();
+			DataProperty p = extractDataProperty(source);
 
-			if (propExpr instanceof OWLDataProperty) {
+			if (p != null) {
 
-				DataValue v = toDataValue(source);
+				DataValue v = extractDataValue(source);
 
 				if (v != null) {
 
-					return create((OWLDataProperty)propExpr, v);
+					return new DataRelation(p, v);
 				}
 			}
 
 			return null;
 		}
-
-		private Relation create(OWLDataProperty prop, DataValue value) {
-
-			return new DataRelation(mappedNames.get(prop), value);
-		}
 	}
 
-	private class NodeValueRelations extends TypeEntities<AssertedObjectValue, Relation> {
+	private class IndividualNodeRelations extends TypeEntities<AssertedObjectValue, Relation> {
+
+		Relation get(OWLObjectHasValue source) {
+
+			AssertedObjectValue source2 = toAssertedObjectValue(source);
+
+			return source2 != null ? get(source2) : null;
+		}
 
 		Relation checkCreate(AssertedObjectValue source) {
 
@@ -374,6 +380,18 @@ class MatchComponents {
 			if (v instanceof OWLNamedIndividual) {
 
 				return create(source.getProperty(), (OWLNamedIndividual)v);
+			}
+
+			return null;
+		}
+
+		private AssertedObjectValue toAssertedObjectValue(OWLObjectHasValue source) {
+
+			OWLObjectPropertyExpression p = source.getProperty();
+
+			if (p instanceof OWLObjectProperty) {
+
+				return new AssertedObjectValue((OWLObjectProperty)p, source.getFiller());
 			}
 
 			return null;
@@ -390,7 +408,7 @@ class MatchComponents {
 		}
 	}
 
-	private class DataValueRelations extends TypeEntities<AssertedDataValue, Relation> {
+	private class IndividualDataRelations extends TypeEntities<AssertedDataValue, Relation> {
 
 		Relation checkCreate(AssertedDataValue source) {
 
@@ -516,17 +534,17 @@ class MatchComponents {
 
 	Relation toNodeValueRelation(AssertedObjectValue source) {
 
-		return nodeValueRelations.checkCreate(source);
+		return individualNodeRelations.checkCreate(source);
 	}
 
 	Relation toDataValueRelation(AssertedDataValue source) {
 
-		return dataValueRelations.checkCreate(source);
+		return individualDataRelations.checkCreate(source);
 	}
 
-	InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
+	NodeX toNode(OWLClassExpression source) {
 
-		throw new Error("Method should never be invoked!");
+		return toClassNode(source);
 	}
 
 	private Relation toRelation(OWLClassExpression source, boolean complement) {
@@ -538,17 +556,22 @@ class MatchComponents {
 
 		if (source instanceof OWLObjectSomeValuesFrom) {
 
-			return someRelations.get((OWLObjectSomeValuesFrom)source, complement);
+			return classSomeRelations.get((OWLObjectSomeValuesFrom)source, complement);
 		}
 
 		if (source instanceof OWLObjectAllValuesFrom) {
 
-			return allRelations.get((OWLObjectAllValuesFrom)source, complement);
+			return classAllRelations.get((OWLObjectAllValuesFrom)source, complement);
 		}
 
 		if (source instanceof OWLDataSomeValuesFrom || source instanceof OWLDataHasValue) {
 
-			return dataRelations.get((OWLDataRestriction)source);
+			return classDataRelations.get((OWLDataRestriction)source);
+		}
+
+		if (source instanceof OWLObjectHasValue) {
+
+			return individualNodeRelations.get((OWLObjectHasValue)source);
 		}
 
 		return null;
@@ -559,29 +582,53 @@ class MatchComponents {
 		return toRelation(source.getOperand(), !wasComplement);
 	}
 
-	private DataValue toDataValue(OWLDataRestriction source) {
+	private NodeProperty extracNodeProperty(OWLObjectRestriction source) {
+
+		OWLObjectPropertyExpression p = source.getProperty();
+
+		if (p instanceof OWLObjectProperty) {
+
+			return mappedNames.get((OWLObjectProperty)p);
+		}
+
+		return null;
+	}
+
+	private DataProperty extractDataProperty(OWLDataRestriction source) {
+
+		OWLDataPropertyExpression p = source.getProperty();
+
+		if (p instanceof OWLDataProperty) {
+
+			return mappedNames.get((OWLDataProperty)p);
+		}
+
+		return null;
+	}
+
+	private DataValue extractDataValue(OWLDataRestriction source) {
 
 		if (source instanceof OWLQuantifiedDataRestriction) {
 
-			return toDataType((OWLQuantifiedDataRestriction)source);
+			return extractDataType((OWLQuantifiedDataRestriction)source);
 		}
 
 		if (source instanceof OWLDataHasValue) {
 
-			return toDataValue((OWLDataHasValue)source);
+			return extractDataValue((OWLDataHasValue)source);
 		}
 
 		throw new Error("Unexpected OWLDataRestriction type");
 	}
 
-	private DataValue toDataType(OWLQuantifiedDataRestriction source) {
-
-		return dataTypes.get(source.getFiller());
-	}
-
-	private DataValue toDataValue(OWLDataHasValue source) {
+	private DataValue extractDataValue(OWLDataHasValue source) {
 
 		return DataTypes.toDataValueExpression(source.getFiller());
+	}
+
+	private DataValue extractDataType(OWLQuantifiedDataRestriction source) {
+
+		return dataTypes.get(source.getFiller());
 	}
 
 	private Set<? extends NodeX> toNodeDisjunction(OWLClassExpression source) {
@@ -594,16 +641,6 @@ class MatchComponents {
 		NodeX n = toNode(source);
 
 		return n != null ? Collections.singleton(n) : null;
-	}
-
-	private NodeX toNode(OWLClassExpression source) {
-
-		if (source instanceof RekonOWLInstanceRef) {
-
-			return toInstanceNode((RekonOWLInstanceRef)source);
-		}
-
-		return toClassNode(source);
 	}
 
 	private ClassNode toClassNode(OWLClassExpression source) {
