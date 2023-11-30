@@ -51,6 +51,23 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 		return false;
 	}
 
+	Names resolveRegistrationDisjuncts(Names disjuncts) {
+
+		NameSet expDisjuncts = new NameSet();
+
+		for (Name d : disjuncts) {
+
+			expDisjuncts.add(d);
+
+			for (DisjunctionMatcher m : ((NodeX)d).getAllDisjunctionMatchers()) {
+
+				expDisjuncts.addAll(resolveRegistrationDisjuncts(m.getDisjuncts()));
+			}
+		}
+
+		return expDisjuncts;
+	}
+
 	Names resolveRequestDisjuncts(Names disjuncts) {
 
 		if (containsLocalNode(disjuncts)) {

@@ -51,6 +51,11 @@ class PotentialDisjunctionSubsumers extends PotentialDisjunctionSubsumptions {
 		return true;
 	}
 
+	Names resolveRegistrationDisjuncts(Names disjuncts) {
+
+		return disjuncts;
+	}
+
 	Names resolveRequestDisjuncts(Names disjuncts) {
 
 		return disjuncts;

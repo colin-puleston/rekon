@@ -98,7 +98,9 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		for (Name d : test.disjuncts) {
 
-			if (!subsumesNode((NodeX)d)) {
+			NodeX dn = (NodeX)d;
+
+			if (!subsumesNode(dn) && !subsumesDisjunctionMatcher(dn)) {
 
 				return false;
 			}
@@ -152,6 +154,19 @@ class DisjunctionMatcher extends NodeMatcher {
 		ss.remove(getNode());
 
 		return ss;
+	}
+
+	private boolean subsumesDisjunctionMatcher(NodeX node) {
+
+		for (DisjunctionMatcher m : node.getAllDisjunctionMatchers()) {
+
+			if (subsumes(m)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private String getDisjunctLabelsList() {

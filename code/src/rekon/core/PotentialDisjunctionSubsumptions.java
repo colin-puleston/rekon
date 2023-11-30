@@ -54,8 +54,10 @@ abstract class PotentialDisjunctionSubsumptions
 
 	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
 
-		return Collections.singletonList(option.getDisjuncts());
+		return Collections.singletonList(resolveRegistrationDisjuncts(option.getDisjuncts()));
 	}
+
+	abstract Names resolveRegistrationDisjuncts(Names disjuncts);
 
 	abstract Names resolveRequestDisjuncts(Names disjuncts);
 
