@@ -30,13 +30,13 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 
-public class Run {
+public class Run extends Tester {
 
 	static private class RunInvoker extends TestInvoker<RunOpts> {
 
-		RunInvoker(String[] args) {
+		RunInvoker(TestConfig config) {
 
-			super(args);
+			super(config);
 		}
 
 		RunOpts createCustomOpts(String customConfig) {
@@ -52,13 +52,36 @@ public class Run {
 
 	static public void main(String[] args) {
 
-		new RunInvoker(args);
+		new RunInvoker(new TestConfig(args, true));
 	}
 
-	private TestManager manager;
 	private OWLReasoner reasoner;
 
-	private boolean terseOutput = false;
+	private class RunTimer {
+
+		private long start = System.currentTimeMillis();
+		private long timeInSecs = 0;
+
+		void stop() {
+
+			timeInSecs = (System.currentTimeMillis() - start) / 1000;
+		}
+
+		void showTime(String title) {
+
+			if (timeInSecs == 0) {
+
+				stop();
+			}
+
+			showOptionalInfo(title, timeInSecs);
+		}
+
+		void showInfo(String info) {
+
+			showOptionalInfo(info);
+		}
+	}
 
 	private abstract class Tester {
 
@@ -69,7 +92,7 @@ public class Run {
 			private String op;
 
 			private int count = 0;
-			private long timeInSecs = 0;
+			private RunTimer timer = new RunTimer();
 
 			OpTester(String op) {
 
@@ -77,36 +100,29 @@ public class Run {
 
 				opTesters.add(this);
 
-				run();
+				for (OWLOntology o : manager.allOntologies) {
+
+					testOp(this, o);
+				}
+
+				timer.stop();
 			}
 
 			abstract Set<OWLClass> doOp(OWLClassExpression c);
 
 			void printCount() {
 
-				showGeneralInfo("  " + op + ": " + count);
+				showGeneralInfo("  " + op, count);
 			}
 
 			void printTime() {
 
-				showTimingInfo("  " + op + ": " + timeInSecs);
+				timer.showTime("  " + op);
 			}
 
 			void test(OWLClassExpression c) {
 
 				count += doOp(c).size();
-			}
-
-			private void run() {
-
-				long startTime = System.currentTimeMillis();
-
-				for (OWLOntology o : manager.getAllOntologies()) {
-
-					testOp(this, o);
-				}
-
-				timeInSecs = (System.currentTimeMillis() - startTime) / 1000;
 			}
 		}
 
@@ -177,7 +193,7 @@ public class Run {
 
 		void run(String opGroup) {
 
-			long startTime = System.currentTimeMillis();
+			RunTimer timer = new RunTimer();
 
 			showGeneralInfo("TESTING-" + opGroup + "...");
 
@@ -187,7 +203,7 @@ public class Run {
 			new AllSupersTester();
 			new DirectSupersTester();
 
-			long timeInSecs = (System.currentTimeMillis() - startTime) / 1000;
+			timer.stop();
 
 			showGeneralInfo("");
 			showGeneralInfo("COUNTS:");
@@ -197,16 +213,16 @@ public class Run {
 				opTester.printCount();
 			}
 
-			showTimingInfo("");
-			showTimingInfo("TIME:");
+			timer.showInfo("");
+			timer.showInfo("TIME:");
 
 			for (OpTester opTester : opTesters) {
 
 				opTester.printTime();
 			}
 
-			showTimingInfo("");
-			showTimingInfo("TOTAL-TIME: " + timeInSecs);
+			timer.showInfo("");
+			timer.showTime("TOTAL-TIME");
 
 			showGeneralInfo("\n");
 		}
@@ -261,16 +277,9 @@ public class Run {
 
 	private Run(RunOpts runOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
-		manager = new TestManager(ontologyFile);
-		reasoner = manager.createReasoner(reasonerOpt);
+		super(ontologyFile, runOpts.runningGeneralTests());
 
-		terseOutput = runOpts.runningGeneralTests();
-
-		showGeneralInfo("\nONTOLOGY: " + ontologyFile);
-		showGeneralInfo("REASONER: " + reasoner.getClass().getSimpleName());
-		showGeneralInfo("");
-
-		precomputeInferences();
+		reasoner = startRunReasoner(reasonerOpt);
 
 		for (int i = 0 ; i < runOpts.classRuns ; i++) {
 
@@ -283,28 +292,14 @@ public class Run {
 		}
 	}
 
-	private void precomputeInferences() {
+	private OWLReasoner startRunReasoner(ReasonerOpt opt) {
 
-		long startTime = System.currentTimeMillis();
+		RunTimer timer = new RunTimer();
+		OWLReasoner r = startReasoner(opt);
 
-		reasoner.precomputeInferences();
+		timer.showTime("PRECOMPUTE-TIME");
+		timer.showInfo("");
 
-		long timeInSecs = (System.currentTimeMillis() - startTime) / 1000;
-
-		showTimingInfo("PRECOMPUTE-TIME: " + timeInSecs);
-		showTimingInfo("");
-	}
-
-	private void showGeneralInfo(String info) {
-
-		System.out.println(info);
-	}
-
-	private void showTimingInfo(String info) {
-
-		if (!terseOutput) {
-
-			System.out.println(info);
-		}
+		return r;
 	}
 }

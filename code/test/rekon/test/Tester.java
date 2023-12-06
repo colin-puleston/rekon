@@ -24,69 +24,62 @@
 
 package rekon.test;
 
-import java.util.*;
+import java.io.*;
 
-class CompareOpts extends TestOpts {
+import org.semanticweb.owlapi.reasoner.*;
 
-	static private final String GENERAL_TESTS_ONTO_QUERIES_LEAF_DIR = "test-query";
+abstract class Tester {
 
-	final TestType testType;
-	final TestScope testScope;
-	final QuerySource querySource;
-	final int maxQueries;
+	final TestManager manager;
 
-	enum TestType {
+	private boolean terseOutput;
 
-		CLASS, QUERY;
+	Tester(File ontologyFile, boolean terseOutput) {
+
+		this.terseOutput = terseOutput;
+
+		manager = new TestManager(ontologyFile);
+
+		showGeneralInfo("");
+		showGeneralInfo("ONTOLOGY: " + ontologyFile);
 	}
 
-	enum TestScope {
+	TestManager getManager() {
 
-		EQUIVS, SUPS, SUBS, ANCS, DECS, ALL;
-
-		TestScope[] toAtoms() {
-
-			if (this == ALL) {
-
-				return Arrays.copyOf(values(), values().length - 1);
-			}
-
-			return new TestScope[]{this};
-		}
+		return manager;
 	}
 
-	enum QuerySource {
+	OWLReasoner startReasoner(ReasonerOpt opt) {
 
-		AUTO, ONTO, NONE;
+		OWLReasoner reasoner = manager.createReasoner(opt);
+
+		showGeneralInfo("REASONER", reasoner.getClass().getSimpleName());
+
+		reasoner.precomputeInferences();
+
+		return reasoner;
 	}
 
-	CompareOpts(String arg) {
+	void showGeneralInfo(String title, Object info) {
 
-		Iterator<String> vals = parseArg(arg, 2, 4);
-
-		testType = TestType.valueOf(vals.next());
-
-		if (testType == TestType.QUERY) {
-
-			testScope = TestScope.valueOf(vals.next());
-			querySource = QuerySource.valueOf(vals.next());
-			maxQueries = vals.hasNext() ? parseInt(vals.next()) : -1;
-		}
-		else {
-
-			testScope = TestScope.valueOf(vals.next());
-			querySource = QuerySource.NONE;
-			maxQueries = -1;
-		}
+		showGeneralInfo(title + ": " + info);
 	}
 
-	String getGeneralTestsLeafDir() {
+	void showGeneralInfo(String info) {
 
-		if (querySource == QuerySource.ONTO) {
+		System.out.println(info);
+	}
 
-			return GENERAL_TESTS_ONTO_QUERIES_LEAF_DIR;
+	void showOptionalInfo(String title, Object info) {
+
+		showOptionalInfo(title + ": " + info);
+	}
+
+	void showOptionalInfo(String info) {
+
+		if (!terseOutput) {
+
+			System.out.println(info);
 		}
-
-		return super.getGeneralTestsLeafDir();
 	}
 }

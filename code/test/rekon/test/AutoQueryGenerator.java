@@ -45,7 +45,7 @@ class AutoQueryGenerator extends QueryProvider {
 
 		this.max = max;
 
-		factory = manager.getFactory();
+		factory = manager.factory;
 		axioms = getAllEquivalenceAxioms(manager.rootOntology).iterator();
 	}
 

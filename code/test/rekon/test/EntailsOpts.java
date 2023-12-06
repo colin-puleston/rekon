@@ -26,67 +26,12 @@ package rekon.test;
 
 import java.util.*;
 
-class CompareOpts extends TestOpts {
+class EntailsOpts extends TestOpts {
 
-	static private final String GENERAL_TESTS_ONTO_QUERIES_LEAF_DIR = "test-query";
-
-	final TestType testType;
-	final TestScope testScope;
-	final QuerySource querySource;
-	final int maxQueries;
-
-	enum TestType {
-
-		CLASS, QUERY;
-	}
-
-	enum TestScope {
-
-		EQUIVS, SUPS, SUBS, ANCS, DECS, ALL;
-
-		TestScope[] toAtoms() {
-
-			if (this == ALL) {
-
-				return Arrays.copyOf(values(), values().length - 1);
-			}
-
-			return new TestScope[]{this};
-		}
-	}
-
-	enum QuerySource {
-
-		AUTO, ONTO, NONE;
-	}
-
-	CompareOpts(String arg) {
-
-		Iterator<String> vals = parseArg(arg, 2, 4);
-
-		testType = TestType.valueOf(vals.next());
-
-		if (testType == TestType.QUERY) {
-
-			testScope = TestScope.valueOf(vals.next());
-			querySource = QuerySource.valueOf(vals.next());
-			maxQueries = vals.hasNext() ? parseInt(vals.next()) : -1;
-		}
-		else {
-
-			testScope = TestScope.valueOf(vals.next());
-			querySource = QuerySource.NONE;
-			maxQueries = -1;
-		}
-	}
+	static private final String GENERAL_ENTAILS_TESTS_LEAF_DIR = "test-entails";
 
 	String getGeneralTestsLeafDir() {
 
-		if (querySource == QuerySource.ONTO) {
-
-			return GENERAL_TESTS_ONTO_QUERIES_LEAF_DIR;
-		}
-
-		return super.getGeneralTestsLeafDir();
+		return GENERAL_ENTAILS_TESTS_LEAF_DIR;
 	}
 }

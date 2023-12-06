@@ -28,9 +28,8 @@ import java.io.*;
 
 abstract class TestInvoker<O extends TestOpts> {
 
-	TestInvoker(String[] args) {
+	TestInvoker(TestConfig config) {
 
-		TestConfig config = new TestConfig(args);
 		O customOpts = createCustomOpts(config.customConfig);
 
 		if (config.ontologyFile == null) {

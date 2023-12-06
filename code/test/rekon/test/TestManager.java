@@ -42,7 +42,11 @@ import rekon.owl.RekonReasonerFactory;
 class TestManager {
 
 	final OWLOntologyManager manager = OWLManager.createOWLOntologyManager();
+
 	final OWLOntology rootOntology;
+	final Collection<OWLOntology> allOntologies;
+
+	final OWLDataFactory factory;
 
 	TestManager(File ontFile) {
 
@@ -51,6 +55,9 @@ class TestManager {
 		try {
 
 			rootOntology = manager.loadOntologyFromOntologyDocument(ontFile);
+
+			allOntologies = manager.getOntologies();
+			factory = manager.getOWLDataFactory();
 		}
 		catch (OWLOntologyCreationException e) {
 
@@ -61,16 +68,6 @@ class TestManager {
 	OWLReasoner createReasoner(ReasonerOpt opt) {
 
 		return getReasonerFactory(opt).createReasoner(rootOntology);
-	}
-
-	Collection<OWLOntology> getAllOntologies() {
-
-		return manager.getOntologies();
-	}
-
-	OWLDataFactory getFactory() {
-
-		return manager.getOWLDataFactory();
 	}
 
 	private OWLReasonerFactory getReasonerFactory(ReasonerOpt opt) {

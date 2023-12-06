@@ -30,13 +30,13 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 
-public class Compare {
+public class Compare extends Tester {
 
 	static private class CompareInvoker extends TestInvoker<CompareOpts> {
 
-		CompareInvoker(String[] args) {
+		CompareInvoker(TestConfig config) {
 
-			super(args);
+			super(config);
 		}
 
 		CompareOpts createCustomOpts(String customConfig) {
@@ -52,10 +52,8 @@ public class Compare {
 
 	static public void main(String[] args) {
 
-		new CompareInvoker(args);
+		new CompareInvoker(new TestConfig(args, true));
 	}
-
-	private TestManager manager;
 
 	private OWLReasoner rekon;
 	private OWLReasoner control;
@@ -100,10 +98,11 @@ public class Compare {
 
 				common.removeAll(rOnly);
 
-				System.out.println("\nMISMATCH: " + c);
-				System.out.println("Rekon + Control: " + orderLinks(common));
-				System.out.println("Rekon Only: " + orderLinks(rOnly));
-				System.out.println("Control Only: " + orderLinks(cOnly));
+				showGeneralInfo("");
+				showGeneralInfo("MISMATCH", c);
+				showGeneralInfo("Rekon + Control", orderLinks(common));
+				showGeneralInfo("Rekon Only", orderLinks(rOnly));
+				showGeneralInfo("Control Only", orderLinks(cOnly));
 			}
 		}
 
@@ -149,7 +148,7 @@ public class Compare {
 
 		void performOps() {
 
-			for (OWLOntology o : manager.getAllOntologies()) {
+			for (OWLOntology o : manager.allOntologies) {
 
 				for (OWLClass c : o.getClassesInSignature()) {
 
@@ -214,12 +213,11 @@ public class Compare {
 
 	private Compare(CompareOpts compareOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
+		super(ontologyFile, false);
+
 		this.compareOpts = compareOpts;
 
-		manager = new TestManager(ontologyFile);
 		ontoQueries = new OntoQueries(manager);
-
-		System.out.println("ONTOLOGY: " + ontologyFile);
 
 		rekon = startReasoner(ReasonerOpt.REKON);
 		control = startReasoner(reasonerOpt);
@@ -237,11 +235,12 @@ public class Compare {
 
 	private void compareScoped(CompareOpts.TestScope scope) {
 
-		System.out.println("\nSTART COMPARE " + scope + "...");
+		showGeneralInfo("");
+		showGeneralInfo("START COMPARE " + scope + "...");
 
 		createScopedCompareOps(scope).performOps();
 
-		System.out.println("DONE COMPARE " + scope);
+		showGeneralInfo("DONE COMPARE " + scope);
 	}
 
 	private ScopedCompareOps createScopedCompareOps(CompareOpts.TestScope scope) {
@@ -257,16 +256,5 @@ public class Compare {
 		}
 
 		return new OntoQueryCompareOps(scope);
-	}
-
-	private OWLReasoner startReasoner(ReasonerOpt opt) {
-
-		OWLReasoner reasoner = manager.createReasoner(opt);
-
-		System.out.println("REASONER: " + reasoner.getClass().getSimpleName());
-
-		reasoner.precomputeInferences();
-
-		return reasoner;
 	}
 }

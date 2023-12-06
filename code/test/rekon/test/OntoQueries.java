@@ -27,97 +27,28 @@ package rekon.test;
 import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.model.parameters.*;
-import org.semanticweb.owlapi.search.*;
 
 class OntoQueries {
 
-	static private final IRI QUERIES_BASE_CLASS_IRI = IRI.create("urn:test#_Query");
+	static private final String QUERIES_BASE_CLASS_NAME = "_Query";
 
-	private TestManager manager;
 	private List<OWLClassExpression> queryList = new ArrayList<OWLClassExpression>();
 
-	private class QueryExtractor {
-
-		private TestManager manager;
+	private class QueryExtractor extends OntoSpecifiedTestExtractor {
 
 		QueryExtractor(TestManager manager) {
 
-			this.manager = manager;
-
-			extractQueries();
+			super(manager);
 		}
 
-		private void extractQueries() {
+		String getTestBaseClassName() {
 
-			OWLClass baseCls = getBaseQueryClass();
-
-			for (OWLClassExpression clsExp : getSubClasses(baseCls)) {
-
-				OWLClass cls = (OWLClass)clsExp;
-				OWLClassExpression q = lookForQuery(cls);
-
-				if (q != null) {
-
-					queryList.add(q);
-				}
-
-				removeAllClassAxioms(cls);
-			}
-
-			removeAllClassAxioms(baseCls);
+			return QUERIES_BASE_CLASS_NAME;
 		}
 
-		private OWLClassExpression lookForQuery(OWLClass cls) {
+		void processTestClass(TestClass testClass) {
 
-			for (OWLAxiom ax : getAllClassAxioms(cls, Imports.INCLUDED)) {
-
-				if (ax instanceof OWLEquivalentClassesAxiom) {
-
-					return extractQuery((OWLEquivalentClassesAxiom)ax);
-				}
-			}
-
-			return null;
-		}
-
-		private OWLClassExpression extractQuery(OWLEquivalentClassesAxiom ax) {
-
-			for (OWLClassExpression e : ax.getClassExpressions()) {
-
-				if (!(e instanceof OWLClass)) {
-
-					return e;
-				}
-			}
-
-			return null;
-		}
-
-		private OWLClass getBaseQueryClass() {
-
-			return manager.getFactory().getOWLClass(QUERIES_BASE_CLASS_IRI);
-		}
-
-		private Collection<OWLClassExpression> getSubClasses(OWLClass cls) {
-
-			return EntitySearcher.getSubClasses(cls, manager.getAllOntologies());
-		}
-
-		private void removeAllClassAxioms(OWLClass cls) {
-
-			for (OWLOntology o : manager.getAllOntologies()) {
-
-				for (OWLAxiom ax : getAllClassAxioms(cls, Imports.EXCLUDED)) {
-
-					manager.manager.removeAxiom(o, ax);
-				}
-			}
-		}
-
-		private Set<OWLClassAxiom> getAllClassAxioms(OWLClass cls, Imports importsStatus) {
-
-			return manager.rootOntology.getAxioms(cls, importsStatus);
+			queryList.add(testClass.extractQuery());
 		}
 	}
 
@@ -132,8 +63,6 @@ class OntoQueries {
 	}
 
 	OntoQueries(TestManager manager) {
-
-		this.manager = manager;
 
 		new QueryExtractor(manager);
 	}

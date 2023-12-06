@@ -31,24 +31,48 @@ class TestConfig {
 	static private final String TEST_ONTOLOGIES_DIR = "test/ontologies/";
 	static private final String OWL_EXTN = ".owl";
 
-	final String customConfig;
+	static class ArgReader {
+
+		private String[] args;
+		private int current = 0;
+
+		ArgReader(String[] args, int min) {
+
+			this.args = args;
+
+			if (args.length < min) {
+
+				throw new RuntimeException("ERROR: Not enough args!");
+			}
+		}
+
+		boolean more() {
+
+			return current < args.length;
+		}
+
+		String next() {
+
+			return args[current++];
+		}
+	}
+
 	final ReasonerOpt reasonerOpt;
 	final File ontologyFile;
 
-	TestConfig(String[] args) {
+	final String customConfig;
 
-		if (args.length < 2) {
+	TestConfig(String[] args, boolean expectCustomConfig) {
 
-			throw new RuntimeException("ERROR: Not enough args!");
-		}
+		ArgReader ar = new ArgReader(args, expectCustomConfig ? 2 : 1);
 
-		customConfig = args[0];
-		reasonerOpt = ReasonerOpt.valueOf(args[1]);
+		customConfig = expectCustomConfig ? ar.next() : "";
+		reasonerOpt = ReasonerOpt.valueOf(ar.next());
 
-		if (args.length > 2) {
+		if (ar.more()) {
 
-			String testDir = args[2];
-			String testFile = args.length == 4 ? args[3] : args[2];
+			String testDir = ar.next();
+			String testFile = ar.more() ? ar.next() : testDir;
 
 			ontologyFile = new File(TEST_ONTOLOGIES_DIR + testDir, testFile + OWL_EXTN);
 		}
