@@ -41,6 +41,7 @@ abstract class Tester {
 		manager = new TestManager(ontologyFile);
 
 		showGeneralInfo("");
+		showGeneralInfo("--------------------------------------------------------");
 		showGeneralInfo("ONTOLOGY: " + ontologyFile);
 	}
 

@@ -112,6 +112,8 @@ public class Entails extends Tester {
 
 		reasoner = startReasoner(reasonerOpt);
 
+		showGeneralInfo("");
+
 		for (Entailment e : entailments) {
 
 			e.test();

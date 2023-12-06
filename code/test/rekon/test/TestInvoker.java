@@ -54,8 +54,6 @@ abstract class TestInvoker<O extends TestOpts> {
 
 			if (file.getName().endsWith(".owl")) {
 
-				System.out.println("-------------------------------");
-
 				run(customOpts, reasonerOpt, file);
 			}
 		}

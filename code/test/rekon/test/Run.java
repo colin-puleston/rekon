@@ -195,6 +195,7 @@ public class Run extends Tester {
 
 			RunTimer timer = new RunTimer();
 
+			showGeneralInfo("");
 			showGeneralInfo("TESTING-" + opGroup + "...");
 
 			new EquivsTester();
@@ -223,8 +224,6 @@ public class Run extends Tester {
 
 			timer.showInfo("");
 			timer.showTime("TOTAL-TIME");
-
-			showGeneralInfo("\n");
 		}
 
 		abstract void testOp(OpTester opTester, OWLOntology o);
@@ -297,8 +296,8 @@ public class Run extends Tester {
 		RunTimer timer = new RunTimer();
 		OWLReasoner r = startReasoner(opt);
 
-		timer.showTime("PRECOMPUTE-TIME");
 		timer.showInfo("");
+		timer.showTime("PRECOMPUTE-TIME");
 
 		return r;
 	}
