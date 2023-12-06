@@ -178,9 +178,10 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 		if (other instanceof DynamicNodeOpsHandler) {
 
-			NodeX n = ((DynamicNodeOpsHandler)other).getNode();
+			if (subsumesNode((DynamicNodeOpsHandler)other)) {
 
-			return getExpressionMatcher().subsumesNode(n);
+				return true;
+			}
 		}
 
 		return super.subsumes(other);
@@ -213,6 +214,11 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 	void inferExpressionSubsumers() {
 
 		inferSubsumers();
+	}
+
+	private boolean subsumesNode(DynamicNodeOpsHandler other) {
+
+		return getExpressionMatcher().subsumesNode(other.getNode());
 	}
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {
