@@ -126,6 +126,12 @@ public class Pattern extends Expression {
 		}
 	}
 
+	void checkExpandProfile() {
+
+		setProfileExpansionCheckRequired();
+		updateForProfileExpansion();
+	}
+
 	void setProfileExpansionCheckRequired() {
 
 		getProfileRelations().setExpansionCheckRequired();

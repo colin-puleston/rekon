@@ -147,6 +147,6 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		return new NameList(node);
 	}
 
-	void inferExpressionSubsumers() {
+	void configureProfileExpression() {
 	}
 }

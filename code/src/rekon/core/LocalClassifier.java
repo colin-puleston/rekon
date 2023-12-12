@@ -68,24 +68,14 @@ class LocalClassifier {
 
 			do {
 
-				checkExpandProfile(candidate);
+				candidate.checkExpandProfile();
+
 				classify(candidate);
 			}
 			while (absorbNewSubsumerExpansions(candidate));
 		}
 
 		abstract void classify(NodeMatcher candidate);
-
-		private void checkExpandProfile(NodeMatcher candidate) {
-
-			if (candidate instanceof PatternMatcher) {
-
-				Pattern p = ((PatternMatcher)candidate).getPattern();
-
-				p.setProfileExpansionCheckRequired();
-				p.updateForProfileExpansion();
-			}
-		}
 
 		private boolean absorbNewSubsumerExpansions(NodeMatcher candidate) {
 

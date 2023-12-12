@@ -36,6 +36,8 @@ abstract class NodeMatcher {
 		this.node = node;
 	}
 
+	abstract void checkExpandProfile();
+
 	NodeX getNode() {
 
 		return node;

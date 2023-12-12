@@ -156,7 +156,6 @@ class ProfileRelations {
 
 				e.collectFromRelationExpansions(getDirectRelations());
 			}
-
 			return e.anyAdditions();
 		}
 

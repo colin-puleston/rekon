@@ -211,9 +211,11 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return Names.NO_NAMES;
 	}
 
-	void inferExpressionSubsumers() {
+	void configureProfileExpression() {
 
 		inferSubsumers();
+
+		expression.getExpressionMatcher().checkExpandProfile();
 	}
 
 	private boolean subsumesNode(DynamicNodeOpsHandler other) {

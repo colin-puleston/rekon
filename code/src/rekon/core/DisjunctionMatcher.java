@@ -61,6 +61,9 @@ class DisjunctionMatcher extends NodeMatcher {
 		getClassifier().checkAddInferredSubsumers(findCommonDisjunctSubsumers());
 	}
 
+	void checkExpandProfile() {
+	}
+
 	Names getDisjuncts() {
 
 		return disjuncts;
