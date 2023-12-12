@@ -27,11 +27,11 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class Expression {
+public abstract class PatternComponent {
 
 	public String toString() {
 
-		PatternRenderer r = new PatternRenderer();
+		PatternRenderer r = new PatternRenderer(getComponentTypeName());
 
 		render(r);
 
@@ -39,4 +39,9 @@ public abstract class Expression {
 	}
 
 	abstract void render(PatternRenderer r);
+
+	private String getComponentTypeName() {
+
+		return getClass().getSimpleName();
+	}
 }

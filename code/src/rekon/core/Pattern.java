@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class Pattern extends Expression {
+public class Pattern extends PatternComponent {
 
 	private NameList nodes = new NameList();
 	private Set<Relation> directRelations = new HashSet<Relation>();

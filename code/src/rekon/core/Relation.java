@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class Relation extends Expression {
+public abstract class Relation extends PatternComponent {
 
 	private PropertyX property;
 	private Value target;

@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class Value extends Expression {
+abstract class Value extends PatternComponent {
 
 	NodeValue asNodeValue() {
 

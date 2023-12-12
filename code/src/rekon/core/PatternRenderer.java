@@ -34,11 +34,11 @@ class PatternRenderer {
 	private StringBuilder rendering;
 	private String tabs;
 
-	PatternRenderer() {
+	PatternRenderer(String rootComponentTypeName) {
 
 		this(new StringBuilder(), "");
 
-		addLine("Pattern:");
+		addLine(rootComponentTypeName + ":");
 
 		tabs += TAB;
 	}
