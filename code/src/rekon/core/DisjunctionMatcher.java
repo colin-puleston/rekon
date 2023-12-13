@@ -64,6 +64,14 @@ class DisjunctionMatcher extends NodeMatcher {
 	void checkExpandProfile() {
 	}
 
+	void setProfileExpansionCheckRequired() {
+	}
+
+	boolean updateForProfileExpansion() {
+
+		return false;
+	}
+
 	Names getDisjuncts() {
 
 		return disjuncts;

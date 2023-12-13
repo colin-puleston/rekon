@@ -53,22 +53,7 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 	boolean equivalentTo(ValidInputDynamicOpsHandler other) {
 
-		Collection<NodeMatcher> defns = getAllDefinitionMatchers();
-
-		if (!defns.isEmpty()) {
-
-			Collection<NodeMatcher> oDefns = other.getAllDefinitionMatchers();
-
-			if (!oDefns.isEmpty()) {
-
-				configureProfileExpression();
-				other.configureProfileExpression();
-
-				return anySubsumptions(defns, oDefns, true);
-			}
-		}
-
-		return false;
+		return subsumes(other) && other.subsumes(this);
 	}
 
 	boolean subsumes(ValidInputDynamicOpsHandler other) {
@@ -83,7 +68,7 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 				other.configureProfileExpression();
 
-				return anySubsumptions(defns, oProfs, false);
+				return anySubsumptions(defns, oProfs);
 			}
 		}
 
@@ -100,14 +85,13 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 	private boolean anySubsumptions(
 						Collection<NodeMatcher> ms1,
-						Collection<NodeMatcher> ms2,
-						boolean mutual) {
+						Collection<NodeMatcher> ms2) {
 
 		for (NodeMatcher m1 : ms1) {
 
 			for (NodeMatcher m2 : ms2) {
 
-				if (m1.subsumes(m2) && (!mutual || m2.subsumes(m1))) {
+				if (m1.subsumes(m2)) {
 
 					return true;
 				}

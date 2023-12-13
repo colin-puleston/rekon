@@ -36,12 +36,16 @@ abstract class NodeMatcher {
 		this.node = node;
 	}
 
-	abstract void checkExpandProfile();
-
 	NodeX getNode() {
 
 		return node;
 	}
+
+	abstract void checkExpandProfile();
+
+	abstract void setProfileExpansionCheckRequired();
+
+	abstract boolean updateForProfileExpansion();
 
 	abstract Names getDirectlyImpliedSubNodes();
 

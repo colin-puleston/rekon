@@ -213,9 +213,11 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 	void configureProfileExpression() {
 
-		inferSubsumers();
+		NodeMatcher m = getExpressionMatcher();
 
-		expression.getExpressionMatcher().checkExpandProfile();
+		m.setProfileExpansionCheckRequired();
+		inferSubsumers();
+		m.updateForProfileExpansion();
 	}
 
 	private boolean subsumesNode(DynamicNodeOpsHandler other) {
