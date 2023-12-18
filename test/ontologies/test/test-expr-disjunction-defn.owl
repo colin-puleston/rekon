@@ -27,12 +27,6 @@
     
 
 
-    <!-- urn:test#q -->
-
-    <owl:ObjectProperty rdf:about="urn:test#q"/>
-    
-
-
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -53,7 +47,7 @@
                     <rdf:Description rdf:about="urn:test#Y"/>
                     <rdf:Description rdf:about="urn:test#Z"/>
                     <owl:Restriction>
-                        <owl:onProperty rdf:resource="urn:test#q"/>
+                        <owl:onProperty rdf:resource="urn:test#p"/>
                         <owl:someValuesFrom rdf:resource="urn:test#X"/>
                     </owl:Restriction>
                 </owl:unionOf>
@@ -71,11 +65,24 @@
                 <owl:unionOf rdf:parseType="Collection">
                     <rdf:Description rdf:about="urn:test#Y"/>
                     <owl:Restriction>
-                        <owl:onProperty rdf:resource="urn:test#q"/>
+                        <owl:onProperty rdf:resource="urn:test#p"/>
                         <owl:someValuesFrom rdf:resource="urn:test#X1"/>
                     </owl:Restriction>
                 </owl:unionOf>
             </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#C -->
+
+    <owl:Class rdf:about="urn:test#C">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#p"/>
+                <owl:someValuesFrom rdf:resource="urn:test#X"/>
+            </owl:Restriction>
         </owl:equivalentClass>
     </owl:Class>
     
