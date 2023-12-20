@@ -187,14 +187,20 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return super.subsumes(other);
 	}
 
-	Collection<NodeMatcher> getAllProfileMatchers() {
+	Collection<NodeMatcher> getAllDefinitionMatchers() {
 
 		return Collections.singleton(getExpressionMatcher());
 	}
 
-	Collection<NodeMatcher> getAllDefinitionMatchers() {
+	Collection<NodeMatcher> getAllProfileMatchers(Collection<NodeMatcher> defns) {
 
-		return getAllProfileMatchers();
+		NodeMatcher m = getExpressionMatcher();
+
+		m.setProfileExpansionCheckRequired();
+		inferSubsumers();
+		m.updateForProfileExpansion();
+
+		return Collections.singleton(m);
 	}
 
 	Names getPotentialSubNodes() {
@@ -203,21 +209,10 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 		if (m instanceof PatternMatcher) {
 
-			PatternMatcher pm = (PatternMatcher)m;
-
-			return pm.getPattern().getNodes();
+			return ((PatternMatcher)m).getPattern().getNodes();
 		}
 
 		return Names.NO_NAMES;
-	}
-
-	void configureProfileExpression() {
-
-		NodeMatcher m = getExpressionMatcher();
-
-		m.setProfileExpansionCheckRequired();
-		inferSubsumers();
-		m.updateForProfileExpansion();
 	}
 
 	private boolean subsumesNode(DynamicNodeOpsHandler other) {

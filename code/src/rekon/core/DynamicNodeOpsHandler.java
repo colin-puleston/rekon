@@ -132,21 +132,18 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		return node;
 	}
 
-	Collection<NodeMatcher> getAllProfileMatchers() {
-
-		return new ProfileMatcherCollector().getAll();
-	}
-
 	Collection<NodeMatcher> getAllDefinitionMatchers() {
 
 		return new DefinitionMatcherCollector().getAll();
 	}
 
+	Collection<NodeMatcher> getAllProfileMatchers(Collection<NodeMatcher> defns) {
+
+		return new ProfileMatcherCollector().getAll();
+	}
+
 	Names getPotentialSubNodes() {
 
 		return new NameList(node);
-	}
-
-	void configureProfileExpression() {
 	}
 }

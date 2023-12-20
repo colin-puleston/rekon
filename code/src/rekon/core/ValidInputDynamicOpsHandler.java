@@ -62,11 +62,9 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 		if (!defns.isEmpty()) {
 
-			Collection<NodeMatcher> oProfs = other.getAllProfileMatchers();
+			Collection<NodeMatcher> oProfs = other.getAllProfileMatchers(defns);
 
 			if (!oProfs.isEmpty()) {
-
-				other.configureProfileExpression();
 
 				return anySubsumptions(defns, oProfs);
 			}
@@ -75,23 +73,21 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		return false;
 	}
 
-	abstract Collection<NodeMatcher> getAllProfileMatchers();
-
 	abstract Collection<NodeMatcher> getAllDefinitionMatchers();
+
+	abstract Collection<NodeMatcher> getAllProfileMatchers(Collection<NodeMatcher> defns);
 
 	abstract Names getPotentialSubNodes();
 
-	abstract void configureProfileExpression();
-
 	private boolean anySubsumptions(
-						Collection<NodeMatcher> ms1,
-						Collection<NodeMatcher> ms2) {
+						Collection<NodeMatcher> defns,
+						Collection<NodeMatcher> candidates) {
 
-		for (NodeMatcher m1 : ms1) {
+		for (NodeMatcher d : defns) {
 
-			for (NodeMatcher m2 : ms2) {
+			for (NodeMatcher c : candidates) {
 
-				if (m1.subsumes(m2)) {
+				if (d.subsumes(c)) {
 
 					return true;
 				}

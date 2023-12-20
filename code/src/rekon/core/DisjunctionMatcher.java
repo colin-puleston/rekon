@@ -34,6 +34,26 @@ class DisjunctionMatcher extends NodeMatcher {
 	private Names disjuncts;
 	private boolean definition = false;
 
+	private class MatcherSubsumptionTester extends NodeMatcherVisitor {
+
+		boolean subsumption = false;
+
+		MatcherSubsumptionTester(NodeMatcher test) {
+
+			test.acceptVisitor(this);
+		}
+
+		void visit(PatternMatcher test) {
+
+			subsumption = subsumesPatternMatcher(test);
+		}
+
+		void visit(DisjunctionMatcher test) {
+
+			subsumption = subsumes(test);
+		}
+	}
+
 	public String toString() {
 
 		return getClass().getSimpleName() + "(" + getDisjunctLabelsList() + ")";
@@ -102,7 +122,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumes(NodeMatcher test) {
 
-		return test instanceof DisjunctionMatcher && subsumes((DisjunctionMatcher)test);
+		return new MatcherSubsumptionTester(test).subsumption;
 	}
 
 	boolean subsumes(DisjunctionMatcher test) {
@@ -165,6 +185,26 @@ class DisjunctionMatcher extends NodeMatcher {
 		ss.remove(getNode());
 
 		return ss;
+	}
+
+	private boolean subsumesPatternMatcher(PatternMatcher test) {
+
+		for (Name d : disjuncts) {
+
+			if (d.subsumes(test.getNode())) {
+
+				return true;
+			}
+
+			PatternMatcher dm = ((NodeX)d).getProfilePatternMatcher();
+
+			if (dm != null && dm.subsumes(test)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean subsumesDisjunctionMatcher(NodeX node) {
