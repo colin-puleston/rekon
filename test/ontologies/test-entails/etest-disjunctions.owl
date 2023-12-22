@@ -85,6 +85,33 @@
     
 
 
+    <!-- urn:test#_MultiDisjunctExprEquiv -->
+
+    <owl:Class rdf:about="urn:test#_MultiDisjunctExprEquiv">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="urn:test#A"/>
+                    <rdf:Description rdf:about="urn:test#C"/>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="urn:test#A"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="urn:test#p"/>
+                        <owl:someValuesFrom rdf:resource="urn:test#P"/>
+                    </owl:Restriction>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#_Entailment"/>
+    </owl:Class>
+    
+
+
     <!-- urn:test#_MultiDisjunctExprSub -->
 
     <owl:Class rdf:about="urn:test#_MultiDisjunctExprSub">
