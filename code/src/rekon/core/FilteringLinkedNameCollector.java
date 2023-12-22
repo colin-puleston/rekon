@@ -78,6 +78,15 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 		private void collectForProfileNode(NodeX n) {
 
 			collectName(n);
+			checkCollectForProfileMatchers(n);
+
+			for (Name s : n.getSubsumers()) {
+
+				checkCollectForProfileMatchers((NodeX)s);
+			}
+		}
+
+		private void checkCollectForProfileMatchers(NodeX n) {
 
 			if (!linkNames.contains(n)) {
 

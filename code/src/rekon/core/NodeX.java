@@ -155,7 +155,14 @@ public abstract class NodeX extends Name {
 
 		if (name instanceof NodeX) {
 
-			return local() ? subsumesViaMatcher((NodeX)name) : super.subsumes(name);
+			if (local()) {
+
+				NodeX n = (NodeX)name;
+
+				return subsumesViaMatcher(n) || subsumesSubsumerViaMatcher(n);
+			}
+
+			return super.subsumes(name);
 		}
 
 		return false;
@@ -227,6 +234,19 @@ public abstract class NodeX extends Name {
 		}
 
 		return selecteds;
+	}
+
+	private boolean subsumesSubsumerViaMatcher(NodeX node) {
+
+		for (Name s : node.getSubsumers()) {
+
+			if (subsumesViaMatcher((NodeX)s)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private boolean subsumesViaMatcher(NodeX node) {
