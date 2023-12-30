@@ -73,7 +73,7 @@ class DynamicSubsumers {
 				}
 			}
 
-			potentials.addAll(n.getAllDisjunctionMatchers());
+			potentials.addAll(n.getDefinitionDisjunctionMatchers());
 		}
 
 		private Names getDefinitionMatchNames(PatternMatcher defn) {

@@ -163,7 +163,7 @@ class DynamicSubsumeds {
 
 		return new PotentialDisjunctionSubsumeds(
 						filterMatchersForMappedNodes(
-							nodeMatchers.getDefinitionDisjunctions()));
+							nodeMatchers.getAllDisjunctions()));
 	}
 
 	private <M extends NodeMatcher>List<M> filterMatchersForMappedNodes(List<M> all) {
