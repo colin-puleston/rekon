@@ -41,7 +41,7 @@ class SetIntersector<E> extends Intersector<Collection<E>, Set<E>> {
 		return collection.size();
 	}
 
-	boolean emptySet(Set<E> set) {
+	boolean emptyCollection(Collection<E> set) {
 
 		return set.isEmpty();
 	}

@@ -43,16 +43,33 @@ abstract class Intersector<C, S extends C> {
 
 	C intersectSets(Collection<C> sets) {
 
+		S intersection = creteEmptySet();
+
+		if (sets.size() == 0) {
+
+			return intersection;
+		}
+
 		if (sets.size() == 1) {
 
 			return sets.iterator().next();
 		}
 
-		S intersection = creteEmptySet();
+		Collection<C> smallestFirst = sortSmallestFirst(sets);
 
-		for (C set : sort(sets)) {
+		if (emptyCollection(smallestFirst.iterator().next())) {
 
-			if (emptySet(intersection)) {
+			return intersection;
+		}
+
+		for (C set : smallestFirst) {
+
+			if (emptyCollection(set)) {
+
+				return creteEmptySet();
+			}
+
+			if (emptyCollection(intersection)) {
 
 				addAll(intersection, set);
 			}
@@ -60,7 +77,7 @@ abstract class Intersector<C, S extends C> {
 
 				retainAll(intersection, set);
 
-				if (emptySet(intersection)) {
+				if (emptyCollection(intersection)) {
 
 					break;
 				}
@@ -74,13 +91,13 @@ abstract class Intersector<C, S extends C> {
 
 	abstract int collectionSize(C collection);
 
-	abstract boolean emptySet(S set);
+	abstract boolean emptyCollection(C set);
 
 	abstract void addAll(S set, C adding);
 
 	abstract void retainAll(S set, C retaining);
 
-	private Collection<C> sort(Collection<? extends C> in) {
+	private Collection<C> sortSmallestFirst(Collection<? extends C> in) {
 
 		Collection<C> out = new TreeSet<C>(new SmallestFirstComparator());
 

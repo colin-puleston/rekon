@@ -47,7 +47,7 @@ class IntegerIntersection extends IntegerCollector {
 			return collection.size();
 		}
 
-		boolean emptySet(IntHashSet set) {
+		boolean emptyCollection(IntHashSet set) {
 
 			return set.isEmpty();
 		}
