@@ -95,6 +95,19 @@ public abstract class Names implements Iterable<Name> {
 		return getNames().iterator().next();
 	}
 
+	boolean anySubsumes(Name test) {
+
+		for (Name n : getNames()) {
+
+			if (n.subsumes(test)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	private boolean equalsNames(Names other) {
 
 		return getNames().equals(other.getNames());

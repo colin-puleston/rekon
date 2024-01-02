@@ -127,17 +127,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumes(DisjunctionMatcher test) {
 
-		for (Name d : test.disjuncts) {
-
-			NodeX dn = (NodeX)d;
-
-			if (!subsumesNode(dn) && !subsumesDisjunctionMatcher(dn)) {
-
-				return false;
-			}
-		}
-
-		return true;
+		return test.allDisjunctsSubsumedByAny(expandDisjuncts(), new NameSet());
 	}
 
 	boolean classifiable(boolean initialPass) {
@@ -207,13 +197,106 @@ class DisjunctionMatcher extends NodeMatcher {
 		return false;
 	}
 
-	private boolean subsumesDisjunctionMatcher(NodeX node) {
+	private Names expandDisjuncts() {
 
-		for (DisjunctionMatcher m : node.getAllDisjunctionMatchers()) {
+		Names expansions = new NameSet();
 
-			if (subsumes(m)) {
+		collectDisjunctExpansions(expansions);
+
+		return expansions;
+	}
+
+	private void collectDisjunctExpansions(Names expansions) {
+
+		expansions.addAll(disjuncts);
+
+		for (Name d : disjuncts) {
+
+			for (DisjunctionMatcher m : ((NodeX)d).getAllDisjunctionMatchers()) {
+
+				m.collectDisjunctExpansions(expansions);
+			}
+		}
+	}
+
+	private boolean allDisjunctsSubsumedByAny(Names subsumers, NameSet visited) {
+
+		for (Name d : disjuncts) {
+
+			if (!disjunctSubsumedByAny(subsumers, (NodeX)d, visited)) {
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean disjunctSubsumedByAny(Names subsumers, NodeX d, NameSet visited) {
+
+		if (subsumers.anySubsumes(d)) {
+
+			return true;
+		}
+
+		if (anyNestedDisjunctSubsumptions(subsumers, d, visited)) {
+
+			return true;
+		}
+
+		for (Name s : d.getSubsumers()) {
+
+			if (visited.add(getNode())) {
+
+				if (anyNestedDisjunctSubsumptions(subsumers, (NodeX)s, visited)) {
+
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	private boolean anyNestedDisjunctSubsumptions(
+						Names subsumers,
+						NodeX d,
+						NameSet visited) {
+
+		for (DisjunctionMatcher dm : d.getAllDisjunctionMatchers()) {
+
+			if (dm.allDisjunctsSubsumedByAny(subsumers, visited)) {
 
 				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean anySubsumptions(Names subsumers, NodeX test) {
+
+		for (Name s : subsumers) {
+
+			if (s.subsumes(test)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean patternMatcherSubsumedByAny(Names subsumers, PatternMatcher pm) {
+
+		for (Name s : subsumers) {
+
+			for (NodeMatcher dm : ((NodeX)s).getAllDefinitionMatchers()) {
+
+				if (dm.subsumes(pm)) {
+
+					return true;
+				}
 			}
 		}
 
