@@ -76,6 +76,25 @@
     
 
 
+    <!-- urn:test#_MultiDisjunctExprSub -->
+
+    <owl:Class rdf:about="urn:test#_MultiDisjunctExprSub">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="urn:test#B"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="urn:test#p"/>
+                        <owl:someValuesFrom rdf:resource="urn:test#Q"/>
+                    </owl:Restriction>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#_Query"/>
+    </owl:Class>
+    
+
+
     <!-- urn:test#_Query -->
 
     <owl:Class rdf:about="urn:test#_Query"/>
