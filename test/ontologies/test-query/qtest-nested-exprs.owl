@@ -78,15 +78,9 @@
     
 
 
-    <!-- urn:test#_Query -->
+    <!-- urn:test#_Q1 -->
 
-    <owl:Class rdf:about="urn:test#_Query"/>
-    
-
-
-    <!-- urn:test#_XXX -->
-
-    <owl:Class rdf:about="urn:test#_XXX">
+    <owl:Class rdf:about="urn:test#_Q1">
         <owl:equivalentClass>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
@@ -100,6 +94,12 @@
         </owl:equivalentClass>
         <rdfs:subClassOf rdf:resource="urn:test#_Query"/>
     </owl:Class>
+    
+
+
+    <!-- urn:test#_Query -->
+
+    <owl:Class rdf:about="urn:test#_Query"/>
 </rdf:RDF>
 
 
