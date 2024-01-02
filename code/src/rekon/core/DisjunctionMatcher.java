@@ -34,11 +34,11 @@ class DisjunctionMatcher extends NodeMatcher {
 	private Names disjuncts;
 	private boolean definition = false;
 
-	private class MatcherSubsumptionTester extends NodeMatcherVisitor {
+	private class GeneralSubsumedTester extends NodeMatcherVisitor {
 
 		boolean subsumption = false;
 
-		MatcherSubsumptionTester(NodeMatcher test) {
+		GeneralSubsumedTester(NodeMatcher test) {
 
 			test.acceptVisitor(this);
 		}
@@ -51,6 +51,71 @@ class DisjunctionMatcher extends NodeMatcher {
 		void visit(DisjunctionMatcher test) {
 
 			subsumption = subsumes(test);
+		}
+	}
+
+	private class SubsumedDisjunctionTester {
+
+		final boolean subsumption;
+
+		private Names testSubsumers = expandDisjuncts();
+		private NameSet visited = new NameSet();
+
+		SubsumedDisjunctionTester(DisjunctionMatcher test) {
+
+			subsumption = allDisjunctsSubsumed(test);
+		}
+
+		private boolean allDisjunctsSubsumed(DisjunctionMatcher test) {
+
+			for (Name d : test.disjuncts) {
+
+				if (!disjunctSubsumed((NodeX)d)) {
+
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		private boolean disjunctSubsumed(NodeX d) {
+
+			if (testSubsumers.anySubsumes(d)) {
+
+				return true;
+			}
+
+			if (anyNestedDisjunctSubsumptions(d)) {
+
+				return true;
+			}
+
+			for (Name s : d.getSubsumers()) {
+
+				if (visited.add(getNode())) {
+
+					if (anyNestedDisjunctSubsumptions((NodeX)s)) {
+
+						return true;
+					}
+				}
+			}
+
+			return false;
+		}
+
+		private boolean anyNestedDisjunctSubsumptions(NodeX d) {
+
+			for (DisjunctionMatcher dm : d.getAllDisjunctionMatchers()) {
+
+				if (allDisjunctsSubsumed(dm)) {
+
+					return true;
+				}
+			}
+
+			return false;
 		}
 	}
 
@@ -122,12 +187,12 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumes(NodeMatcher test) {
 
-		return new MatcherSubsumptionTester(test).subsumption;
+		return new GeneralSubsumedTester(test).subsumption;
 	}
 
 	boolean subsumes(DisjunctionMatcher test) {
 
-		return test.allDisjunctsSubsumedByAny(expandDisjuncts(), new NameSet());
+		return new SubsumedDisjunctionTester(test).subsumption;
 	}
 
 	boolean classifiable(boolean initialPass) {
@@ -217,90 +282,6 @@ class DisjunctionMatcher extends NodeMatcher {
 				m.collectDisjunctExpansions(expansions);
 			}
 		}
-	}
-
-	private boolean allDisjunctsSubsumedByAny(Names subsumers, NameSet visited) {
-
-		for (Name d : disjuncts) {
-
-			if (!disjunctSubsumedByAny(subsumers, (NodeX)d, visited)) {
-
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private boolean disjunctSubsumedByAny(Names subsumers, NodeX d, NameSet visited) {
-
-		if (subsumers.anySubsumes(d)) {
-
-			return true;
-		}
-
-		if (anyNestedDisjunctSubsumptions(subsumers, d, visited)) {
-
-			return true;
-		}
-
-		for (Name s : d.getSubsumers()) {
-
-			if (visited.add(getNode())) {
-
-				if (anyNestedDisjunctSubsumptions(subsumers, (NodeX)s, visited)) {
-
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	private boolean anyNestedDisjunctSubsumptions(
-						Names subsumers,
-						NodeX d,
-						NameSet visited) {
-
-		for (DisjunctionMatcher dm : d.getAllDisjunctionMatchers()) {
-
-			if (dm.allDisjunctsSubsumedByAny(subsumers, visited)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean anySubsumptions(Names subsumers, NodeX test) {
-
-		for (Name s : subsumers) {
-
-			if (s.subsumes(test)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean patternMatcherSubsumedByAny(Names subsumers, PatternMatcher pm) {
-
-		for (Name s : subsumers) {
-
-			for (NodeMatcher dm : ((NodeX)s).getAllDefinitionMatchers()) {
-
-				if (dm.subsumes(pm)) {
-
-					return true;
-				}
-			}
-		}
-
-		return false;
 	}
 
 	private String getDisjunctLabelsList() {
