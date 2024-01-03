@@ -130,29 +130,71 @@ class LocalClassifier {
 
 		private Collection<NodeMatcher> preFilteredDefns;
 
-		private class TypeClassifier extends NodeMatcherVisitor {
+		private abstract class TypeClassifier
+								<C extends NodeMatcher>
+								extends NodeMatcherVisitor {
 
-			private NodeMatcher candidate;
+			final C candidate;
 
-			TypeClassifier(NodeMatcher candidate) {
+			TypeClassifier(C candidate) {
 
 				this.candidate = candidate;
+			}
+		}
+
+		private class PatternClassifier extends TypeClassifier<PatternMatcher> {
+
+			PatternClassifier(PatternMatcher candidate) {
+
+				super(candidate);
 			}
 
 			void visit(PatternMatcher defn) {
 
-				if (candidate instanceof PatternMatcher) {
+				checkSubsumption(defn, candidate);
+			}
 
-					checkSubsumption(defn, (PatternMatcher)candidate);
-				}
+			void visit(DisjunctionMatcher defn) {
+			}
+		}
+
+		private class DisjunctionClassifier extends TypeClassifier<DisjunctionMatcher> {
+
+			DisjunctionClassifier(DisjunctionMatcher candidate) {
+
+				super(candidate);
+
+				candidate.inferNewCommonDisjunctSubsumers();
+			}
+
+			void visit(PatternMatcher defn) {
 			}
 
 			void visit(DisjunctionMatcher defn) {
 
-				if (candidate instanceof DisjunctionMatcher) {
+				checkSubsumption(defn, candidate);
+			}
+		}
 
-					checkSubsumption(defn, (DisjunctionMatcher)candidate);
-				}
+		private class TypeClassifierCreator extends NodeMatcherVisitor {
+
+			private TypeClassifier<?> created;
+
+			TypeClassifier<?> create(NodeMatcher candidate) {
+
+				candidate.acceptVisitor(this);
+
+				return created;
+			}
+
+			void visit(PatternMatcher defn) {
+
+				created = new PatternClassifier(defn);
+			}
+
+			void visit(DisjunctionMatcher defn) {
+
+				created = new DisjunctionClassifier(defn);
 			}
 		}
 
@@ -163,7 +205,7 @@ class LocalClassifier {
 
 		void classify(NodeMatcher candidate) {
 
-			TypeClassifier tc = new TypeClassifier(candidate);
+			TypeClassifier<?> tc = new TypeClassifierCreator().create(candidate);
 
 			for (NodeMatcher defn : preFilteredDefns) {
 

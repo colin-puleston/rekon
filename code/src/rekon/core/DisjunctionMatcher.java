@@ -45,7 +45,10 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		void visit(PatternMatcher test) {
 
-			subsumption = subsumesPatternMatcher(test);
+			if (getNode().local()) {
+
+				subsumption = subsumesPatternMatcher(test);
+			}
 		}
 
 		void visit(DisjunctionMatcher test) {
