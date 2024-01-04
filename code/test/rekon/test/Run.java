@@ -60,7 +60,7 @@ public class Run extends Tester {
 	private class RunTimer {
 
 		private long start = System.currentTimeMillis();
-		private long timeInSecs = 0;
+		private Long timeInSecs = null;
 
 		void stop() {
 
@@ -69,7 +69,7 @@ public class Run extends Tester {
 
 		void showTime(String title) {
 
-			if (timeInSecs == 0) {
+			if (timeInSecs == null) {
 
 				stop();
 			}
