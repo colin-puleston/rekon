@@ -34,9 +34,11 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 	private int startRank;
 	private int stopRank;
 
-	private Deque<Name> linkNames = new ArrayDeque<Name>();
+	private Deque<NodeX> profileLinkingNodes = new ArrayDeque<NodeX>();
 
 	private class LinkedRankCollector extends RankCollector {
+
+		private NameSet profileValueNodesCollected = new NameSet();
 
 		void collectForValueNode(NodeX n) {
 
@@ -77,23 +79,30 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private void collectForProfileNode(NodeX n) {
 
-			if (!linkNames.contains(n)) {
+			if (collectProfileValueNode(n) && !profileLinkingNodes.contains(n)) {
 
-				linkNames.push(n);
+				profileLinkingNodes.push(n);
 
-				collectName(n);
-				checkCollectForProfileMatchers(n);
+				collectForProfileMatchers(n);
 
-				for (Name s : n.getSubsumers()) {
-
-					checkCollectForProfileMatchers((NodeX)s);
-				}
-
-				linkNames.pop();
+				profileLinkingNodes.pop();
 			}
 		}
 
-		private void checkCollectForProfileMatchers(NodeX n) {
+		private void collectForProfileMatchers(NodeX n) {
+
+			PatternMatcher p = n.getProfilePatternMatcher();
+
+			collectForProfilePatternMatchers(n, new NameSet());
+			collectForProfileDisjunctionMatchers(n);
+
+			for (Name s : n.getSubsumers()) {
+
+				collectForProfileDisjunctionMatchers(n);
+			}
+		}
+
+		private void collectForProfilePatternMatchers(NodeX n, NameSet visited) {
 
 			PatternMatcher p = n.getProfilePatternMatcher();
 
@@ -101,6 +110,19 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 				p.getPattern().collectNames(this);
 			}
+			else {
+
+				for (Name s : n.getSupers(true)) {
+
+					if (visited.add(s)) {
+
+						collectForProfilePatternMatchers((NodeX)s, visited);
+					}
+				}
+			}
+		}
+
+		private void collectForProfileDisjunctionMatchers(NodeX n) {
 
 			for (DisjunctionMatcher d : n.getAllDisjunctionMatchers()) {
 
@@ -109,6 +131,18 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 					collectForProfileNode((NodeX)dj);
 				}
 			}
+		}
+
+		private boolean collectProfileValueNode(NodeX n) {
+
+			if (profileValueNodesCollected.add(n)) {
+
+				collectName(n);
+
+				return true;
+			}
+
+			return false;
 		}
 	}
 
