@@ -81,17 +81,11 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (collectProfileValueNode(n) && !profileLinkingNodes.contains(n)) {
 
-				profileLinkingNodes.push(n);
-
 				collectForProfileMatchers(n);
-
-				profileLinkingNodes.pop();
 			}
 		}
 
 		private void collectForProfileMatchers(NodeX n) {
-
-			PatternMatcher p = n.getProfilePatternMatcher();
 
 			collectForProfilePatternMatchers(n, new NameSet());
 			collectForProfileDisjunctionMatchers(n);
@@ -104,17 +98,19 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private void collectForProfilePatternMatchers(NodeX n, NameSet visited) {
 
-			PatternMatcher p = n.getProfilePatternMatcher();
+			if (visited.add(n)) {
 
-			if (p != null) {
+				PatternMatcher p = n.getProfilePatternMatcher();
 
-				p.getPattern().collectNames(this);
-			}
-			else {
+				if (p != null) {
 
-				for (Name s : n.getSupers(true)) {
+					profileLinkingNodes.push(n);
+					p.getPattern().collectNames(this);
+					profileLinkingNodes.pop();
+				}
+				else {
 
-					if (visited.add(s)) {
+					for (Name s : n.getSupers(true)) {
 
 						collectForProfilePatternMatchers((NodeX)s, visited);
 					}
