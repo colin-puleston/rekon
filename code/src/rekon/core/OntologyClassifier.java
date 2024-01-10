@@ -96,17 +96,18 @@ class OntologyClassifier {
 
 		private List<PatternMatcher> patternMatchCandidates = new ArrayList<PatternMatcher>();
 		private List<DisjunctionMatcher> disjunctionMatchCandidates = new ArrayList<DisjunctionMatcher>();
+		private List<DisjunctionMatcher> disjunctionClassifyCandidates = new ArrayList<DisjunctionMatcher>();
 
 		PassConfig() {
 
 			findPatternMatchCandidates();
-			findDisjunctionMatchCandidates();
+			findDisjunctionClassifyCandidates();
 		}
 
 		boolean potentialInferences() {
 
 			return !patternMatchCandidates.isEmpty()
-					|| !disjunctionMatchCandidates.isEmpty();
+					|| !disjunctionClassifyCandidates.isEmpty();
 		}
 
 		void checkSubsumptions() {
@@ -123,32 +124,40 @@ class OntologyClassifier {
 
 		private void findPatternMatchCandidates() {
 
+			boolean initPass = initialPhasePass();
+
 			for (PatternMatcher pp : profilePatterns) {
 
 				Pattern p = pp.getPattern();
 
-				if (potentialPatternMatchCandidate(p)
-					&& p.classifiable(initialPhasePass())) {
+				if (potentialPatternMatchCandidate(p) && p.classifiable(initPass)) {
 
 					patternMatchCandidates.add(pp);
 				}
 			}
 		}
 
-		private void findDisjunctionMatchCandidates() {
+		private void findDisjunctionClassifyCandidates() {
+
+			boolean initPass = initialPhasePass();
 
 			for (DisjunctionMatcher d : allDisjunctions) {
 
-				if (d.classifiable(initialPhasePass())) {
+				if (d.classifiable(initPass)) {
 
-					disjunctionMatchCandidates.add(d);
+					disjunctionClassifyCandidates.add(d);
+
+					if (d.matchable(initPass)) {
+
+						disjunctionMatchCandidates.add(d);
+					}
 				}
 			}
 		}
 
 		private void inferNewCommonDisjunctSubsumers() {
 
-			for (DisjunctionMatcher d : disjunctionMatchCandidates) {
+			for (DisjunctionMatcher d : disjunctionClassifyCandidates) {
 
 				d.inferNewCommonDisjunctSubsumers();
 			}

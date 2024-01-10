@@ -198,17 +198,14 @@ class DisjunctionMatcher extends NodeMatcher {
 		return new SubsumedDisjunctionTester(test).subsumption;
 	}
 
+	boolean matchable(boolean initialPass) {
+
+		return classifiable(initialPass, NodeSelector.MATCHABLE_DISJUNCT);
+	}
+
 	boolean classifiable(boolean initialPass) {
 
-		for (Name d : disjuncts) {
-
-			if (((NodeX)d).classifiable(initialPass)) {
-
-				return true;
-			}
-		}
-
-		return false;
+		return classifiable(initialPass, NodeSelector.ANY);
 	}
 
 	void acceptVisitor(NodeMatcherVisitor visitor) {
@@ -285,6 +282,19 @@ class DisjunctionMatcher extends NodeMatcher {
 				m.collectDisjunctExpansions(expansions);
 			}
 		}
+	}
+
+	private boolean classifiable(boolean initialPass, NodeSelector selector) {
+
+		for (Name d : disjuncts) {
+
+			if (((NodeX)d).classifiable(initialPass, selector)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private String getDisjunctLabelsList() {

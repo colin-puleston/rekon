@@ -33,8 +33,9 @@ abstract class NodeSelector {
 
 	static final NodeSelector ANY = new AnyNode();
 	static final NodeSelector STRUCTURED = new StructuredNode();
-	static final NodeSelector CLASSIABLE_PATTERN_ROOT = new ClassifiablePatternRoot();
-	static final NodeSelector CLASSIABLE_PATTERN_VALUE = new ClassifiablePatternValue();
+	static final NodeSelector MATCHABLE_PATTERN_ROOT = new MatchablePatternRoot();
+	static final NodeSelector MATCHABLE_PATTERN_VALUE = new MatchablePatternValue();
+	static final NodeSelector MATCHABLE_DISJUNCT = new MatchableDisjunct();
 
 	static private class AnyNode extends NodeSelector {
 
@@ -80,7 +81,12 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private abstract class ClassifiablePatternNode extends StructuredNode {
+	static private abstract class MatchablePatternNode extends StructuredNode {
+
+		boolean matchableSelector() {
+
+			return true;
+		}
 
 		boolean select(NodeX node) {
 
@@ -110,7 +116,7 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifiablePatternRoot extends ClassifiablePatternNode {
+	static private class MatchablePatternRoot extends MatchablePatternNode {
 
 		MatchRole getMatchRole() {
 
@@ -118,12 +124,30 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private class ClassifiablePatternValue extends ClassifiablePatternNode {
+	static private class MatchablePatternValue extends MatchablePatternNode {
 
 		MatchRole getMatchRole() {
 
 			return MatchRole.PATTERN_VALUE;
 		}
+	}
+
+	static private class MatchableDisjunct extends SelectiveSelector {
+
+		boolean matchableSelector() {
+
+			return true;
+		}
+
+		boolean select(NodeX node) {
+
+			return node.definitionRefed(MatchRole.DISJUNCT);
+		}
+	}
+
+	boolean matchableSelector() {
+
+		return false;
 	}
 
 	abstract boolean select(NodeX node);
