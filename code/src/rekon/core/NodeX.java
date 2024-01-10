@@ -168,6 +168,11 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
+	boolean classifiable(boolean initialPass) {
+
+		return classifiable(initialPass, NodeSelector.ANY);
+	}
+
 	boolean classifiablePatternRoot(boolean initialPass) {
 
 		return classifiablePatternNode(
@@ -180,11 +185,6 @@ public abstract class NodeX extends Name {
 		return classifiablePatternNode(
 					initialPass,
 					NodeSelector.CLASSIABLE_PATTERN_VALUE);
-	}
-
-	boolean classifiableDisjunct(boolean initialPass) {
-
-		return classifiable(initialPass, NodeSelector.CLASSIABLE_DISJUNCT);
 	}
 
 	NodeClassifier getNodeClassifier() {

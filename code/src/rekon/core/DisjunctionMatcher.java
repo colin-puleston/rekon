@@ -202,7 +202,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		for (Name d : disjuncts) {
 
-			if (((NodeX)d).classifiableDisjunct(initialPass)) {
+			if (((NodeX)d).classifiable(initialPass)) {
 
 				return true;
 			}

@@ -105,7 +105,8 @@ class OntologyClassifier {
 
 		boolean potentialInferences() {
 
-			return !patternMatchCandidates.isEmpty() || !disjunctionMatchCandidates.isEmpty();
+			return !patternMatchCandidates.isEmpty()
+					|| !disjunctionMatchCandidates.isEmpty();
 		}
 
 		void checkSubsumptions() {
@@ -147,7 +148,7 @@ class OntologyClassifier {
 
 		private void inferNewCommonDisjunctSubsumers() {
 
-			for (DisjunctionMatcher d : allDisjunctions) {
+			for (DisjunctionMatcher d : disjunctionMatchCandidates) {
 
 				d.inferNewCommonDisjunctSubsumers();
 			}

@@ -35,7 +35,6 @@ abstract class NodeSelector {
 	static final NodeSelector STRUCTURED = new StructuredNode();
 	static final NodeSelector CLASSIABLE_PATTERN_ROOT = new ClassifiablePatternRoot();
 	static final NodeSelector CLASSIABLE_PATTERN_VALUE = new ClassifiablePatternValue();
-	static final NodeSelector CLASSIABLE_DISJUNCT = new ClassifiableDisjunct();
 
 	static private class AnyNode extends NodeSelector {
 
@@ -124,14 +123,6 @@ abstract class NodeSelector {
 		MatchRole getMatchRole() {
 
 			return MatchRole.PATTERN_VALUE;
-		}
-	}
-
-	static private class ClassifiableDisjunct extends SelectiveSelector {
-
-		boolean select(NodeX node) {
-
-			return node.definitionRefed(MatchRole.DISJUNCT);
 		}
 	}
 
