@@ -36,6 +36,11 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 		super(options);
 	}
 
+	Collection<DisjunctionMatcher> getPotentialsFor(PatternMatcher request) {
+
+		return getPotentialsFor(asDisjunctionMatcher(request.getNode()));
+	}
+
 	Names resolveNamesForRegistration(Names names, int rank) {
 
 		return MatchNamesResolver.expand(names);
@@ -66,6 +71,11 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 		}
 
 		return disjuncts;
+	}
+
+	private DisjunctionMatcher asDisjunctionMatcher(NodeX node) {
+
+		return new DisjunctionMatcher(node, Collections.singleton(node));
 	}
 
 	private boolean containsLocalNode(Names nodes) {

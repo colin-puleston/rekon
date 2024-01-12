@@ -31,7 +31,7 @@ import java.util.*;
  */
 class DynamicSubsumeds {
 
-	private PotentialPatternSubsumeds patternPotentials;
+	private PotentialLocalPatternSubsumeds patternPotentials;
 	private PotentialDisjunctionSubsumeds disjunctionPotentials;
 
 	private ClassSubsumptions classSubsumptions;
@@ -39,7 +39,7 @@ class DynamicSubsumeds {
 
 	private class PotentialsSelector extends NodeMatcherVisitor {
 
-		private Collection<? extends NodeMatcher> potentials = null;
+		List<NodeMatcher> selecteds = new ArrayList<NodeMatcher>();
 
 		PotentialsSelector(NodeMatcher defn) {
 
@@ -48,17 +48,14 @@ class DynamicSubsumeds {
 
 		void visit(PatternMatcher defn) {
 
-			potentials = patternPotentials.getPotentialsFor(defn);
+			selecteds.addAll(patternPotentials.getPotentialsFor(defn));
+			selecteds.addAll(disjunctionPotentials.getPotentialsFor(defn));
 		}
 
 		void visit(DisjunctionMatcher defn) {
 
-			potentials = disjunctionPotentials.getPotentialsFor(defn);
-		}
-
-		Collection<? extends NodeMatcher> getSelecteds() {
-
-			return potentials;
+			selecteds.addAll(patternPotentials.getPotentialsFor(defn));
+			selecteds.addAll(disjunctionPotentials.getPotentialsFor(defn));
 		}
 	}
 
@@ -77,7 +74,7 @@ class DynamicSubsumeds {
 				}
 			}
 
-			for (NodeMatcher cand : new PotentialsSelector(defn).getSelecteds()) {
+			for (NodeMatcher cand : new PotentialsSelector(defn).selecteds) {
 
 				Name n = cand.getNode();
 
@@ -152,7 +149,7 @@ class DynamicSubsumeds {
 		return allNodeSubsumptions.find(expr);
 	}
 
-	private PotentialPatternSubsumeds createPatternPotentials(NodeMatchers nodeMatchers) {
+	private PotentialLocalPatternSubsumeds createPatternPotentials(NodeMatchers nodeMatchers) {
 
 		return new PotentialLocalPatternSubsumeds(
 						filterMatchersForMappedNodes(
