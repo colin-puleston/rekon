@@ -88,14 +88,14 @@
                 </owl:unionOf>
             </owl:Class>
         </owl:equivalentClass>
-        <rdfs:subClassOf rdf:resource="urn:test#_QUERY"/>
+        <rdfs:subClassOf rdf:resource="urn:test#_Query"/>
     </owl:Class>
     
 
 
-    <!-- urn:test#_QUERY -->
+    <!-- urn:test#_Query -->
 
-    <owl:Class rdf:about="urn:test#_QUERY"/>
+    <owl:Class rdf:about="urn:test#_Query"/>
     
 
 
