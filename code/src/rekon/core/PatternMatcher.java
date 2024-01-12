@@ -110,7 +110,12 @@ class PatternMatcher extends NodeMatcher {
 		return pattern.subsumes(test.pattern);
 	}
 
-	boolean disjunctSubsumes(NodeX n) {
+	boolean disjunctSubsumes(NodeX test) {
+
+		return false;
+	}
+
+	boolean hasExpandedDisjunct(NodeX test) {
 
 		return false;
 	}
@@ -122,7 +127,7 @@ class PatternMatcher extends NodeMatcher {
 
 	private boolean subsumesDisjunctionMatcher(DisjunctionMatcher test) {
 
-		for (Name d : test.getDisjuncts()) {
+		for (Name d : test.getExpandedDisjuncts()) {
 
 			if (!getNode().subsumes(d)) {
 

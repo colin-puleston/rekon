@@ -155,11 +155,9 @@ public abstract class NodeX extends Name {
 
 		if (name instanceof NodeX) {
 
-			if (local()) {
+			if (local() ) {
 
-				NodeX n = (NodeX)name;
-
-				return subsumesViaMatcher(n) || subsumesSubsumerViaMatcher(n);
+				return subsumesNodeOrSubsumerViaMatcher((NodeX)name);
 			}
 
 			return super.subsumes(name);
@@ -247,11 +245,16 @@ public abstract class NodeX extends Name {
 		return selecteds;
 	}
 
-	private boolean subsumesSubsumerViaMatcher(NodeX node) {
+	private boolean subsumesNodeOrSubsumerViaMatcher(NodeX baseTarget) {
 
-		for (Name s : node.getSubsumers()) {
+		if (subsumesViaMatcher(baseTarget, baseTarget)) {
 
-			if (subsumesViaMatcher((NodeX)s)) {
+			return true;
+		}
+
+		for (Name s : baseTarget.getSubsumers()) {
+
+			if (subsumesViaMatcher(baseTarget, (NodeX)s)) {
 
 				return true;
 			}
@@ -260,43 +263,23 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
-	private boolean subsumesViaMatcher(NodeX node) {
+	private boolean subsumesViaMatcher(NodeX baseTarget, NodeX currentTarget) {
 
-		return subsumesViaPattern(node) || subsumesViaDisjunction(node);
-	}
+		for (NodeMatcher d : getAllDefinitionMatchers()) {
 
-	private boolean subsumesViaPattern(NodeX node) {
-
-		PatternMatcher p = node.getProfilePatternMatcher();
-
-		if (p != null) {
-
-			for (PatternMatcher d : getDefinitionPatternMatchers()) {
-
-				if (d.subsumes(p)) {
-
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	private boolean subsumesViaDisjunction(NodeX node) {
-
-		for (DisjunctionMatcher d : getAllDisjunctionMatchers()) {
-
-			if (d.disjunctSubsumes(node)) {
+			if (d.disjunctSubsumes(currentTarget)) {
 
 				return true;
 			}
 
-			for (DisjunctionMatcher od : node.getAllDisjunctionMatchers()) {
+			for (NodeMatcher op : currentTarget.getAllProfileMatchers()) {
 
-				if (d.subsumes(od)) {
+				if (currentTarget == baseTarget || !op.hasExpandedDisjunct(baseTarget)) {
 
-					return true;
+					if (d.subsumes(op)) {
+
+						return true;
+					}
 				}
 			}
 		}
@@ -313,7 +296,7 @@ public abstract class NodeX extends Name {
 
 		for (DisjunctionMatcher dm : getAllDisjunctionMatchers()) {
 
-			for (Name d : dm.getDisjuncts()) {
+			for (Name d : dm.getExpandedDisjuncts()) {
 
 				if (((NodeX)d).anyNewSubsumers(NodeSelector.ANY)) {
 

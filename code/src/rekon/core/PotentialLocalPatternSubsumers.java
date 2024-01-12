@@ -180,7 +180,7 @@ class PotentialLocalPatternSubsumers {
 
 		List<Collection<PatternMatcher>> djPotentials = new ArrayList<Collection<PatternMatcher>>();
 
-		for (Name dj : request.getDisjuncts()) {
+		for (Name dj : request.getDirectDisjuncts()) {
 
 			djPotentials.add(getPotentialsForDisjunct((NodeX)dj));
 		}
