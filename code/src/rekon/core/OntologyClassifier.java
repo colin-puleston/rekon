@@ -46,7 +46,7 @@ class OntologyClassifier {
 
 	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
-		boolean subsumption(Pattern defn, Pattern candidate) {
+		boolean patternSubsumption(Pattern defn, Pattern candidate) {
 
 			return defn.subsumesRelations(candidate);
 		}
@@ -65,7 +65,7 @@ class OntologyClassifier {
 
 		void processElement(PatternMatcher defn) {
 
-			for (PatternMatcher c : candidatesFilter.getPotentialsFor(defn.getPattern())) {
+			for (PatternMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
 				subsumptionChecker.check(defn, c);
 			}

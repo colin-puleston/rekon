@@ -287,7 +287,7 @@ public abstract class NodeX extends Name {
 
 		for (DisjunctionMatcher d : getAllDisjunctionMatchers()) {
 
-			if (d.subsumesNode(node)) {
+			if (d.disjunctSubsumes(node)) {
 
 				return true;
 			}

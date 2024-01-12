@@ -29,27 +29,27 @@ package rekon.core;
  */
 class SubsumptionChecker {
 
-	private PatternChecker patternChecker = new PatternChecker();
-	private DisjunctionChecker disjunctionChecker = new DisjunctionChecker();
+	private GeneralChecker generalChecker = new GeneralChecker();
+	private AllPatternChecker allPatternChecker = new AllPatternChecker();
 
-	private abstract class NodeMatcherChecker<C> {
+	private abstract class NodeMatcherChecker<D extends NodeMatcher, C extends NodeMatcher> {
 
-		boolean check(NodeX dn, C defn, NodeX cn, C candidate) {
+		boolean check(D defn, C candidate) {
 
-			if (defn != candidate) {
+			NodeX dn = defn.getNode();
+			NodeX cn = candidate.getNode();
 
-				if (!dn.subsumes(cn) && subsumption(defn, candidate)) {
+			if (dn != cn && !dn.subsumes(cn) && subsumption(defn, candidate)) {
 
-					addSubsumption(dn, cn);
+				addSubsumption(dn, cn);
 
-					return true;
-				}
+				return true;
 			}
 
 			return false;
 		}
 
-		abstract boolean subsumption(C defn, C candidate);
+		abstract boolean subsumption(D defn, C candidate);
 
 		private void addSubsumption(NodeX subsumer, NodeX subsumed) {
 
@@ -57,43 +57,37 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class PatternChecker extends NodeMatcherChecker<Pattern> {
+	private class GeneralChecker
+					extends
+						NodeMatcherChecker<NodeMatcher, NodeMatcher> {
 
-		boolean check(NodeX dn, Pattern defn, PatternMatcher candidate) {
-
-			return check(dn, defn, candidate.getNode(), candidate.getPattern());
-		}
-
-		boolean subsumption(Pattern defn, Pattern candidate) {
-
-			return SubsumptionChecker.this.subsumption(defn, candidate);
-		}
-	}
-
-	private class DisjunctionChecker extends NodeMatcherChecker<DisjunctionMatcher> {
-
-		boolean check(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
-
-			return check(defn.getNode(), defn, candidate.getNode(), candidate);
-		}
-
-		boolean subsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
+		boolean subsumption(NodeMatcher defn, NodeMatcher candidate) {
 
 			return defn.subsumes(candidate);
 		}
 	}
 
+	private class AllPatternChecker
+					extends
+						NodeMatcherChecker<PatternMatcher, PatternMatcher> {
+
+		boolean subsumption(PatternMatcher defn, PatternMatcher candidate) {
+
+			return patternSubsumption(defn.getPattern(), candidate.getPattern());
+		}
+	}
+
+	boolean check(NodeMatcher defn, NodeMatcher candidate) {
+
+		return generalChecker.check(defn, candidate);
+	}
+
 	boolean check(PatternMatcher defn, PatternMatcher candidate) {
 
-		return patternChecker.check(defn.getNode(), defn.getPattern(), candidate);
+		return allPatternChecker.check(defn, candidate);
 	}
 
-	boolean check(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
-
-		return disjunctionChecker.check(defn, candidate);
-	}
-
-	boolean subsumption(Pattern defn, Pattern candidate) {
+	boolean patternSubsumption(Pattern defn, Pattern candidate) {
 
 		return defn.subsumes(candidate);
 	}

@@ -175,7 +175,17 @@ class DisjunctionMatcher extends NodeMatcher {
 		return definition;
 	}
 
-	boolean subsumesNode(NodeX n) {
+	boolean subsumes(NodeMatcher test) {
+
+		return new GeneralSubsumedTester(test).subsumption;
+	}
+
+	boolean subsumes(DisjunctionMatcher test) {
+
+		return new SubsumedDisjunctionTester(test).subsumption;
+	}
+
+	boolean disjunctSubsumes(NodeX n) {
 
 		for (Name d : disjuncts) {
 
@@ -186,16 +196,6 @@ class DisjunctionMatcher extends NodeMatcher {
 		}
 
 		return false;
-	}
-
-	boolean subsumes(NodeMatcher test) {
-
-		return new GeneralSubsumedTester(test).subsumption;
-	}
-
-	boolean subsumes(DisjunctionMatcher test) {
-
-		return new SubsumedDisjunctionTester(test).subsumption;
 	}
 
 	boolean matchable(boolean initialPass) {

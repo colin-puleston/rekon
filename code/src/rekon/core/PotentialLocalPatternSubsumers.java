@@ -161,17 +161,42 @@ class PotentialLocalPatternSubsumers {
 		this.allDefinitionPatterns = allDefinitionPatterns;
 	}
 
-	Collection<PatternMatcher> getPotentialsFor(Pattern request) {
+	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
 
 		List<PatternMatcher> all = new ArrayList<PatternMatcher>();
+		Pattern pattern = request.getPattern();
 
-		simplePotentials.collectPotentialsFor(request, all);
+		simplePotentials.collectPotentialsFor(pattern, all);
 
-		if (request.nestedPattern(true)) {
+		if (pattern.nestedPattern(true)) {
 
-			nestedPotentials.collectPotentialsFor(request, all);
+			nestedPotentials.collectPotentialsFor(pattern, all);
 		}
 
 		return all;
+	}
+
+	Collection<PatternMatcher> getPotentialsFor(DisjunctionMatcher request) {
+
+		List<Collection<PatternMatcher>> djPotentials = new ArrayList<Collection<PatternMatcher>>();
+
+		for (Name dj : request.getDisjuncts()) {
+
+			djPotentials.add(getPotentialsForDisjunct((NodeX)dj));
+		}
+
+		return new SetIntersector<PatternMatcher>().intersectSets(djPotentials);
+	}
+
+	private Collection<PatternMatcher> getPotentialsForDisjunct(NodeX disjunct) {
+
+		Set<PatternMatcher> potentials = new HashSet<PatternMatcher>();
+
+		for (PatternMatcher pm : disjunct.getProfilePatternMatcherAsList()) {
+
+			potentials.addAll(getPotentialsFor(pm));
+		}
+
+		return potentials;
 	}
 }

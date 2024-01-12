@@ -46,12 +46,12 @@ class LocalClassifier {
 			return expr.getExpressionNode().getClassifier().getSubsumers();
 		}
 
-		void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
+		void checkSubsumption(NodeMatcher defn, NodeMatcher candidate) {
 
 			subsumptionChecker.check(defn, candidate);
 		}
 
-		void checkSubsumption(DisjunctionMatcher defn, DisjunctionMatcher candidate) {
+		void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
 			subsumptionChecker.check(defn, candidate);
 		}
@@ -109,15 +109,18 @@ class LocalClassifier {
 
 		private void checkSubsumptions(PatternMatcher candidate) {
 
-			Pattern profile = candidate.getPattern();
-
-			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(profile)) {
+			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
 
 				checkSubsumption(defn, candidate);
 			}
 		}
 
 		private void checkSubsumptions(DisjunctionMatcher candidate) {
+
+			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
+
+				checkSubsumption(defn, candidate);
+			}
 
 			for (DisjunctionMatcher defn : defnDisjunctionsFilter.getPotentialsFor(candidate)) {
 
@@ -155,6 +158,8 @@ class LocalClassifier {
 			}
 
 			void visit(DisjunctionMatcher defn) {
+
+				checkSubsumption(defn, candidate);
 			}
 		}
 

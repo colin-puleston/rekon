@@ -59,9 +59,9 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 		}
 	}
 
-	Collection<PatternMatcher> getPotentialsFor(Pattern request) {
+	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
 
-		return getPotentialsFor(getRankedDefinitionNames(request));
+		return getPotentialsFor(getRankedDefinitionNames(request.getPattern()));
 	}
 
 	List<PatternMatcher> getAllOptions() {

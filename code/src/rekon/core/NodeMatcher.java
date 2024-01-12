@@ -49,9 +49,9 @@ abstract class NodeMatcher {
 
 	abstract Names getDirectlyImpliedSubNodes();
 
-	abstract boolean subsumesNode(NodeX n);
-
 	abstract boolean subsumes(NodeMatcher test);
+
+	abstract boolean disjunctSubsumes(NodeX n);
 
 	abstract void acceptVisitor(NodeMatcherVisitor visitor);
 }

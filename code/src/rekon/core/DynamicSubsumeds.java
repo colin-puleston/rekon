@@ -48,7 +48,7 @@ class DynamicSubsumeds {
 
 		void visit(PatternMatcher defn) {
 
-			potentials = patternPotentials.getPotentialsFor(defn.getPattern());
+			potentials = patternPotentials.getPotentialsFor(defn);
 		}
 
 		void visit(DisjunctionMatcher defn) {

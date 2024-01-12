@@ -24,12 +24,34 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
 class PatternMatcher extends NodeMatcher {
 
 	private Pattern pattern;
+
+	private class SubsumedTester extends NodeMatcherVisitor {
+
+		boolean subsumption = false;
+
+		SubsumedTester(NodeMatcher test) {
+
+			test.acceptVisitor(this);
+		}
+
+		void visit(PatternMatcher test) {
+
+			subsumption = subsumes(test);
+		}
+
+		void visit(DisjunctionMatcher test) {
+
+			subsumption = subsumesDisjunctionMatcher(test);
+		}
+	}
 
 	public String toString() {
 
@@ -78,14 +100,9 @@ class PatternMatcher extends NodeMatcher {
 		return Names.NO_NAMES;
 	}
 
-	boolean subsumesNode(NodeX n) {
-
-		return false;
-	}
-
 	boolean subsumes(NodeMatcher test) {
 
-		return test instanceof PatternMatcher && subsumes((PatternMatcher)test);
+		return new SubsumedTester(test).subsumption;
 	}
 
 	boolean subsumes(PatternMatcher test) {
@@ -93,8 +110,26 @@ class PatternMatcher extends NodeMatcher {
 		return pattern.subsumes(test.pattern);
 	}
 
+	boolean disjunctSubsumes(NodeX n) {
+
+		return false;
+	}
+
 	void acceptVisitor(NodeMatcherVisitor visitor) {
 
 		visitor.visit(this);
+	}
+
+	private boolean subsumesDisjunctionMatcher(DisjunctionMatcher test) {
+
+		for (Name d : test.getDisjuncts()) {
+
+			if (!getNode().subsumes(d)) {
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
