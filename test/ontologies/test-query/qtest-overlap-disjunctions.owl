@@ -119,9 +119,9 @@
     
 
 
-    <!-- urn:test#_OverlappingDisjunctsEquiv -->
+    <!-- urn:test#_Q1 -->
 
-    <owl:Class rdf:about="urn:test#_OverlappingDisjunctsEquiv">
+    <owl:Class rdf:about="urn:test#_Q1">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:unionOf rdf:parseType="Collection">
@@ -135,9 +135,9 @@
     
 
 
-    <!-- urn:test#_OverlappingDisjunctsExprEquiv -->
+    <!-- urn:test#_Q2 -->
 
-    <owl:Class rdf:about="urn:test#_OverlappingDisjunctsExprEquiv">
+    <owl:Class rdf:about="urn:test#_Q2">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:unionOf rdf:parseType="Collection">
