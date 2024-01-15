@@ -203,6 +203,19 @@ class DisjunctionMatcher extends NodeMatcher {
 		return false;
 	}
 
+	boolean subsumedBy(PatternMatcher test) {
+
+		for (Name d : expandDisjuncts()) {
+
+			if (!((NodeX)d).subsumedByMatcher(test)) {
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	boolean hasExpandedDisjunct(NodeX test) {
 
 		return expandDisjuncts().contains(test);
@@ -218,6 +231,19 @@ class DisjunctionMatcher extends NodeMatcher {
 		return classifiable(initialPass, NodeSelector.ANY);
 	}
 
+	boolean classifiable(boolean initialPass, NodeSelector selector) {
+
+		for (Name d : expandDisjuncts()) {
+
+			if (((NodeX)d).classifiable(initialPass, selector)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void acceptVisitor(NodeMatcherVisitor visitor) {
 
 		visitor.visit(this);
@@ -225,7 +251,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	private void configureAsDefinition(NodeX node) {
 
-		for (Name d : directDisjuncts) {
+		for (Name d : expandDisjuncts()) {
 
 			if (!node.local()) {
 
@@ -254,7 +280,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	private boolean subsumesPatternMatcher(PatternMatcher test) {
 
-		for (Name d : directDisjuncts) {
+		for (Name d : expandDisjuncts()) {
 
 			if (((NodeX)d).subsumesMatcher(test)) {
 
@@ -285,19 +311,6 @@ class DisjunctionMatcher extends NodeMatcher {
 				m.collectDisjunctExpansions(expansions);
 			}
 		}
-	}
-
-	private boolean classifiable(boolean initialPass, NodeSelector selector) {
-
-		for (Name d : expandDisjuncts()) {
-
-			if (((NodeX)d).classifiable(initialPass, selector)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private String getDisjunctLabelsList() {

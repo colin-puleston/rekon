@@ -179,21 +179,39 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
+	boolean subsumedByMatcher(NodeMatcher test) {
+
+		for (NodeMatcher d : getAllProfileMatchers()) {
+
+			if (test.subsumes(d)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	boolean classifiable(boolean initialPass, NodeSelector selector) {
 
 		if (initialPass) {
 
-			return anyMatches(selector);
+			if (anyMatches(selector)) {
+
+				return true;
+			}
 		}
+		else {
 
-		if (anyNewSubsumers(selector)) {
+			if (anyNewSubsumers(selector)) {
 
-			return true;
+				return true;
+			}
 		}
 
 		if (selector.matchableSelector()) {
 
-			return anyNewDisjunctSubsumers();
+			return classifiableDisjunct(initialPass, selector);
 		}
 
 		return false;
@@ -305,16 +323,13 @@ public abstract class NodeX extends Name {
 		return selector.select(this) || selector.anyMatches(getSubsumers());
 	}
 
-	private boolean anyNewDisjunctSubsumers() {
+	private boolean classifiableDisjunct(boolean initialPass, NodeSelector selector) {
 
-		for (DisjunctionMatcher dm : getAllDisjunctionMatchers()) {
+		for (DisjunctionMatcher d : getAllDisjunctionMatchers()) {
 
-			for (Name d : dm.getExpandedDisjuncts()) {
+			if (d.classifiable(initialPass, selector)) {
 
-				if (((NodeX)d).anyNewSubsumers(NodeSelector.ANY)) {
-
-					return true;
-				}
+				return true;
 			}
 		}
 

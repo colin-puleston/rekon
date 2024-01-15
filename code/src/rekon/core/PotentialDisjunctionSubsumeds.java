@@ -63,14 +63,7 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 
 	Names getRequestDisjuncts(DisjunctionMatcher request) {
 
-		Names disjuncts = request.getDirectDisjuncts();
-
-		if (containsLocalNode(disjuncts)) {
-
-			return MatchNamesResolver.ROOT_COLLECTED_NAME_SET;
-		}
-
-		return disjuncts;
+		return removeLocalNodes(request.getExpandedDisjuncts());
 	}
 
 	private DisjunctionMatcher asDisjunctionMatcher(NodeX node) {
@@ -78,16 +71,18 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 		return new DisjunctionMatcher(node, Collections.singleton(node));
 	}
 
-	private boolean containsLocalNode(Names nodes) {
+	private Names removeLocalNodes(Names nodes) {
+
+		Names newNodes = new NameList();
 
 		for (Name n : nodes) {
 
-			if (((NodeX)n).local()) {
+			if (!((NodeX)n).local()) {
 
-				return true;
+				newNodes.add(n);
 			}
 		}
 
-		return false;
+		return newNodes;
 	}
 }

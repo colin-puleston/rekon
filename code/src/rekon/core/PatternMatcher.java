@@ -49,7 +49,7 @@ class PatternMatcher extends NodeMatcher {
 
 		void visit(DisjunctionMatcher test) {
 
-			subsumption = subsumesDisjunctionMatcher(test);
+			subsumption = test.subsumedBy(PatternMatcher.this);
 		}
 	}
 
@@ -123,18 +123,5 @@ class PatternMatcher extends NodeMatcher {
 	void acceptVisitor(NodeMatcherVisitor visitor) {
 
 		visitor.visit(this);
-	}
-
-	private boolean subsumesDisjunctionMatcher(DisjunctionMatcher test) {
-
-		for (Name d : test.getExpandedDisjuncts()) {
-
-			if (!getNode().subsumes(d)) {
-
-				return false;
-			}
-		}
-
-		return true;
 	}
 }

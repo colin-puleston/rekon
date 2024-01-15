@@ -53,11 +53,11 @@ class PotentialDisjunctionSubsumers extends PotentialDisjunctionSubsumptions {
 
 	Names getRegistrationDisjuncts(DisjunctionMatcher option) {
 
-		return option.getDirectDisjuncts();
+		return option.getExpandedDisjuncts();
 	}
 
 	Names getRequestDisjuncts(DisjunctionMatcher request) {
 
-		return request.getDirectDisjuncts();
+		return request.getExpandedDisjuncts();
 	}
 }
