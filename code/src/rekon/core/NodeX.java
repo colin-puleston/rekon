@@ -166,6 +166,19 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
+	boolean subsumesMatcher(NodeMatcher test) {
+
+		for (NodeMatcher d : getAllDefinitionMatchers()) {
+
+			if (d.subsumes(test)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	boolean classifiable(boolean initialPass, NodeSelector selector) {
 
 		if (initialPass) {

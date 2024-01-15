@@ -256,14 +256,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		for (Name d : directDisjuncts) {
 
-			if (d.subsumes(test.getNode())) {
-
-				return true;
-			}
-
-			PatternMatcher dm = ((NodeX)d).getProfilePatternMatcher();
-
-			if (dm != null && dm.subsumes(test)) {
+			if (((NodeX)d).subsumesMatcher(test)) {
 
 				return true;
 			}
