@@ -34,57 +34,78 @@ class DynamicSubsumeds {
 	private PotentialLocalPatternSubsumeds patternPotentials;
 	private PotentialDisjunctionSubsumeds disjunctionPotentials;
 
-	private ClassSubsumptions classSubsumptions;
-	private NodeSubsumptions allNodeSubsumptions;
+	private abstract class NodeSubsumptions {
 
-	private class PotentialsSelector extends NodeMatcherVisitor {
+		final NameSet subsumeds = new NameSet();
 
-		List<NodeMatcher> selecteds = new ArrayList<NodeMatcher>();
+		private NodeMatcher defn;
 
-		PotentialsSelector(NodeMatcher defn) {
+		private class MatchFinder extends NodeMatcherVisitor {
 
-			defn.acceptVisitor(this);
+			MatchFinder(NodeMatcher defn) {
+
+				defn.acceptVisitor(this);
+			}
+
+			void visit(PatternMatcher defn) {
+
+				findViaMatchers(patternPotentials.getPotentialsFor(defn));
+				findViaMatchers(disjunctionPotentials.getPotentialsFor(defn));
+			}
+
+			void visit(DisjunctionMatcher defn) {
+
+				findViaMatchers(patternPotentials.getPotentialsFor(defn));
+				findViaMatchers(disjunctionPotentials.getPotentialsFor(defn));
+			}
 		}
 
-		void visit(PatternMatcher defn) {
+		NodeSubsumptions(LocalExpression expr) {
 
-			selecteds.addAll(patternPotentials.getPotentialsFor(defn));
-			selecteds.addAll(disjunctionPotentials.getPotentialsFor(defn));
+			defn = expr.getExpressionMatcher();
 		}
 
-		void visit(DisjunctionMatcher defn) {
+		void findAll() {
 
-			selecteds.addAll(patternPotentials.getPotentialsFor(defn));
-			selecteds.addAll(disjunctionPotentials.getPotentialsFor(defn));
+			findDirectlyImplieds();
+
+			new MatchFinder(defn);
 		}
-	}
 
-	private class NodeSubsumptions {
+		abstract boolean requiredCandidate(Name n);
 
-		NameSet find(LocalExpression expr) {
-
-			NameSet matches = new NameSet();
-			NodeMatcher defn = expr.getExpressionMatcher();
+		private void findDirectlyImplieds() {
 
 			for (Name n : defn.getDirectlyImpliedSubNodes()) {
 
 				if (requiredCandidate(n)) {
 
-					matches.add(n);
+					subsumeds.add(n);
 				}
 			}
+		}
 
-			for (NodeMatcher cand : new PotentialsSelector(defn).selecteds) {
+		private void findViaMatchers(Collection<? extends NodeMatcher> potentials) {
+
+			for (NodeMatcher cand : potentials) {
 
 				Name n = cand.getNode();
 
 				if (requiredCandidate(n) && defn.subsumes(cand)) {
 
-					matches.add(n);
+					subsumeds.add(n);
 				}
 			}
+		}
+	}
 
-			return matches;
+	private class AllNodeSubsumptions extends NodeSubsumptions {
+
+		AllNodeSubsumptions(LocalExpression expr) {
+
+			super(expr);
+
+			findAll();
 		}
 
 		boolean requiredCandidate(Name n) {
@@ -95,13 +116,20 @@ class DynamicSubsumeds {
 
 	private class ClassSubsumptions extends NodeSubsumptions {
 
-		private NameSet filterNames = null;
+		private NameSet filterNames;
 
-		NameSet find(LocalExpression expr, NameSet filterNames) {
+		ClassSubsumptions(LocalExpression expr) {
+
+			this(expr, null);
+		}
+
+		ClassSubsumptions(LocalExpression expr, NameSet filterNames) {
+
+			super(expr);
 
 			this.filterNames = filterNames;
 
-			return find(expr);
+			findAll();
 		}
 
 		boolean requiredCandidate(Name n) {
@@ -119,9 +147,6 @@ class DynamicSubsumeds {
 
 		patternPotentials = createPatternPotentials(nodeMatchers);
 		disjunctionPotentials = createDisjunctionPotentials(nodeMatchers);
-
-		classSubsumptions = new ClassSubsumptions();
-		allNodeSubsumptions = new NodeSubsumptions();
 	}
 
 	void checkAddInstanceOption(InstanceNode node) {
@@ -136,17 +161,17 @@ class DynamicSubsumeds {
 
 	NameSet inferSubsumedClasses(LocalExpression expr) {
 
-		return classSubsumptions.find(expr, null);
+		return new ClassSubsumptions(expr).subsumeds;
 	}
 
 	NameSet inferSubsumedClasses(LocalExpression expr, NameSet filterNames) {
 
-		return classSubsumptions.find(expr, filterNames);
+		return new ClassSubsumptions(expr, filterNames).subsumeds;
 	}
 
 	NameSet inferAllSubsumedNodes(LocalExpression expr) {
 
-		return allNodeSubsumptions.find(expr);
+		return new AllNodeSubsumptions(expr).subsumeds;
 	}
 
 	private PotentialLocalPatternSubsumeds createPatternPotentials(NodeMatchers nodeMatchers) {
