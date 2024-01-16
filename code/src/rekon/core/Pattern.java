@@ -175,11 +175,11 @@ public class Pattern extends PatternComponent {
 		return true;
 	}
 
-	boolean classifiable(boolean initialPass) {
+	boolean matchable(boolean initialPass) {
 
 		for (Name n : nodes) {
 
-			if (((NodeX)n).classifiablePatternRoot(initialPass)) {
+			if (((NodeX)n).matchablePatternRoot(initialPass)) {
 
 				return true;
 			}
@@ -187,11 +187,11 @@ public class Pattern extends PatternComponent {
 
 		for (Relation r : getProfileRelations().getAll()) {
 
-			if (r.getProperty().classifiablePatternProperty()) {
+			if (r.getProperty().matchablePatternProperty()) {
 
 				for (Name tn : r.getTargetNodes()) {
 
-					if (((NodeX)tn).classifiablePatternValue(initialPass)) {
+					if (((NodeX)tn).matchablePatternValue(initialPass)) {
 
 						return true;
 					}

@@ -83,11 +83,6 @@ abstract class NodeSelector {
 
 	static private abstract class MatchablePatternNode extends StructuredNode {
 
-		boolean matchableSelector() {
-
-			return true;
-		}
-
 		boolean select(NodeX node) {
 
 			return node.definitionRefed(getMatchRole()) || super.select(node);
@@ -134,20 +129,10 @@ abstract class NodeSelector {
 
 	static private class MatchableDisjunct extends SelectiveSelector {
 
-		boolean matchableSelector() {
-
-			return true;
-		}
-
 		boolean select(NodeX node) {
 
 			return node.definitionRefed(MatchRole.DISJUNCT);
 		}
-	}
-
-	boolean matchableSelector() {
-
-		return false;
 	}
 
 	abstract boolean select(NodeX node);

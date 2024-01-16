@@ -192,39 +192,19 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
-	boolean classifiable(boolean initialPass, NodeSelector selector) {
-
-		if (initialPass) {
-
-			if (anyMatches(selector)) {
-
-				return true;
-			}
-		}
-		else {
-
-			if (anyNewSubsumers(selector)) {
-
-				return true;
-			}
-		}
-
-		if (selector.matchableSelector()) {
-
-			return classifiableDisjunct(initialPass, selector);
-		}
-
-		return false;
-	}
-
-	boolean classifiablePatternRoot(boolean initialPass) {
+	boolean matchablePatternRoot(boolean initialPass) {
 
 		return classifiable(initialPass, NodeSelector.MATCHABLE_PATTERN_ROOT);
 	}
 
-	boolean classifiablePatternValue(boolean initialPass) {
+	boolean matchablePatternValue(boolean initialPass) {
 
 		return classifiable(initialPass, NodeSelector.MATCHABLE_PATTERN_VALUE);
+	}
+
+	boolean classifiable(boolean initialPass, NodeSelector selector) {
+
+		return initialPass ? anyMatches(selector) : anyNewSubsumers(selector);
 	}
 
 	NodeClassifier getNodeClassifier() {
@@ -321,18 +301,5 @@ public abstract class NodeX extends Name {
 	private boolean anyMatches(NodeSelector selector) {
 
 		return selector.select(this) || selector.anyMatches(getSubsumers());
-	}
-
-	private boolean classifiableDisjunct(boolean initialPass, NodeSelector selector) {
-
-		for (DisjunctionMatcher d : getAllDisjunctionMatchers()) {
-
-			if (d.classifiable(initialPass, selector)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 }

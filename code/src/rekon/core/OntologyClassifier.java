@@ -130,7 +130,7 @@ class OntologyClassifier {
 
 				Pattern p = pp.getPattern();
 
-				if (potentialPatternMatchCandidate(p) && p.classifiable(initPass)) {
+				if (potentialPatternMatchCandidate(p) && p.matchable(initPass)) {
 
 					patternMatchCandidates.add(pp);
 				}
