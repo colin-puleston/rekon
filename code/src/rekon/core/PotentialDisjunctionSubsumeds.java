@@ -75,9 +75,9 @@ class PotentialDisjunctionSubsumeds extends PotentialDisjunctionSubsumptions {
 
 		Names newNodes = new NameList();
 
-		for (Name n : nodes) {
+		for (NodeX n : nodes.asNodes()) {
 
-			if (!((NodeX)n).local()) {
+			if (!n.local()) {
 
 				newNodes.add(n);
 			}

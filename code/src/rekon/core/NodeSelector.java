@@ -54,9 +54,9 @@ abstract class NodeSelector {
 
 		boolean anyMatches(Names nodes) {
 
-			for (Name n : nodes) {
+			for (NodeX n : nodes.asNodes()) {
 
-				if (select((NodeX)n)) {
+				if (select(n)) {
 
 					return true;
 				}

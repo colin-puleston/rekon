@@ -62,9 +62,9 @@ class ProfileRelationCollector {
 
 	void collectFromSubsumers(Names nodes) {
 
-		for (Name n : nodes) {
+		for (NodeX n : nodes.asNodes()) {
 
-			collectFromSubsumers((NodeX)n);
+			collectFromSubsumers(n);
 		}
 	}
 
@@ -96,9 +96,9 @@ class ProfileRelationCollector {
 
 	private void collectFromSubsumers(NodeX node) {
 
-		for (Name s : node.getSubsumers()) {
+		for (NodeX s : node.getSubsumers().asNodes()) {
 
-			collectFromRelations((NodeX)s);
+			collectFromRelations(s);
 		}
 	}
 

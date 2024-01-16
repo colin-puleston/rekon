@@ -110,9 +110,9 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 				}
 				else {
 
-					for (Name s : n.getSupers(true)) {
+					for (NodeX s : n.getSupers(true).asNodes()) {
 
-						collectForProfilePatternMatchers((NodeX)s, visited);
+						collectForProfilePatternMatchers(s, visited);
 					}
 				}
 			}
@@ -122,9 +122,9 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			for (DisjunctionMatcher d : n.getAllDisjunctionMatchers()) {
 
-				for (Name dj : d.getDirectDisjuncts()) {
+				for (NodeX dj : d.getDirectDisjuncts().asNodes()) {
 
-					collectForProfileNode((NodeX)dj);
+					collectForProfileNode(dj);
 				}
 			}
 		}

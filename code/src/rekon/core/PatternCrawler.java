@@ -70,9 +70,9 @@ abstract class PatternCrawler {
 
 	private void crawlFromNodes(Names nodes) {
 
-		for (Name n : nodes) {
+		for (NodeX n : nodes.asNodes()) {
 
-			crawlFromNode((NodeX)n);
+			crawlFromNode(n);
 		}
 	}
 

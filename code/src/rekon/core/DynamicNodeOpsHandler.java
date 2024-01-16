@@ -41,9 +41,9 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 
 			addMatchers(matchers, node);
 
-			for (Name en : node.getEquivalents()) {
+			for (NodeX en : node.getEquivalents().asNodes()) {
 
-				addMatchers(matchers, (NodeX)en);
+				addMatchers(matchers, en);
 			}
 
 			return matchers;
@@ -116,9 +116,9 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 
 	boolean subsumes(ValidInputDynamicOpsHandler other) {
 
-		for (Name ps : other.getPotentialSubNodes().getNames()) {
+		for (NodeX ps : other.getPotentialSubNodes().asNodes()) {
 
-			if (node.subsumes((NodeX)ps)) {
+			if (node.subsumes(ps)) {
 
 				return true;
 			}

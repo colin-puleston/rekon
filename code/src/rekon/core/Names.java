@@ -33,6 +33,29 @@ public abstract class Names implements Iterable<Name> {
 
 	static public final Names NO_NAMES = new NameList();
 
+	private class AsNodes implements Iterable<NodeX> {
+
+		private class NodesIterator implements Iterator<NodeX> {
+
+			private Iterator<Name> nameIterator = Names.this.iterator();
+
+			public boolean hasNext() {
+
+				return nameIterator.hasNext();
+			}
+
+			public NodeX next() {
+
+				return (NodeX)nameIterator.next();
+			}
+		}
+
+		public Iterator<NodeX> iterator() {
+
+			return new NodesIterator();
+		}
+	}
+
 	public boolean add(Name name) {
 
 		return getNames().add(name);
@@ -83,6 +106,11 @@ public abstract class Names implements Iterable<Name> {
 	public Collection<Name> copyNames() {
 
 		return new ArrayList<Name>(getNames());
+	}
+
+	public Iterable<NodeX> asNodes() {
+
+		return new AsNodes();
 	}
 
 	Names filterForType(Class<? extends Name> type) {

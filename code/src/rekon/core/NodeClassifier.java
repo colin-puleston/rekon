@@ -140,7 +140,7 @@ class NodeClassifier extends NameClassifier {
 			}
 		}
 
-		Names getMatchableSubsumerLatestInferreds(Name s) {
+		Names getMatchableSubsumerLatestInferreds(NodeX s) {
 
 			return getInferredSubsumers(s).getMatchableLatestInferreds();
 		}
@@ -191,7 +191,7 @@ class NodeClassifier extends NameClassifier {
 
 		private void expandDirectLatestInferences() {
 
-			for (Name s : latestInferreds) {
+			for (NodeX s : latestInferreds.asNodes()) {
 
 				addSubsumerExpansions(s.getSubsumers());
 				addSubsumerExpansions(getInferredSubsumers(s).allNewInferreds);
@@ -200,9 +200,9 @@ class NodeClassifier extends NameClassifier {
 
 		private void expandCurrentSubsumerLatestInferences() {
 
-			for (Name s : getSubsumers()) {
+			for (NodeX s : getSubsumers().asNodes()) {
 
-				if (matchableNode(s)) {
+				if (s.matchable()) {
 
 					addSubsumerExpansions(getMatchableSubsumerLatestInferreds(s));
 				}
@@ -211,7 +211,7 @@ class NodeClassifier extends NameClassifier {
 
 		private void addSubsumerExpansions(Names subsumerSet) {
 
-			for (Name s : subsumerSet) {
+			for (NodeX s : subsumerSet.asNodes()) {
 
 				if (newSubsumer(s) && !allNewInferreds.contains(s)) {
 
@@ -233,9 +233,9 @@ class NodeClassifier extends NameClassifier {
 
 		void expandLatestInferencesForNonMatchable() {
 
-			for (Name s : getSubsumers()) {
+			for (NodeX s : getSubsumers().asNodes()) {
 
-				if (matchableNode(s)) {
+				if (s.matchable()) {
 
 					expandForNewMatchableSubsumers(s);
 				}
@@ -252,9 +252,9 @@ class NodeClassifier extends NameClassifier {
 			throw new UnexpectedMethodInvocationError();
 		}
 
-		private void expandForNewMatchableSubsumers(Name s) {
+		private void expandForNewMatchableSubsumers(NodeX s) {
 
-			for (Name ss : getMatchableSubsumerLatestInferreds(s)) {
+			for (NodeX ss : getMatchableSubsumerLatestInferreds(s).asNodes()) {
 
 				if (newSubsumer(ss)) {
 
@@ -290,7 +290,7 @@ class NodeClassifier extends NameClassifier {
 
 	void checkAddInferredSubsumers(Names subsumers) {
 
-		for (Name s : subsumers) {
+		for (NodeX s : subsumers.asNodes()) {
 
 			if (newSubsumer(s)) {
 
@@ -321,13 +321,8 @@ class NodeClassifier extends NameClassifier {
 		return (NodeX)getName();
 	}
 
-	private boolean newSubsumer(Name s) {
+	private boolean newSubsumer(NodeX s) {
 
 		return s != getName() && !isSubsumer(s);
-	}
-
-	private boolean matchableNode(Name node) {
-
-		return ((NodeX)node).matchable();
 	}
 }

@@ -177,9 +177,9 @@ public class Pattern extends PatternComponent {
 
 	boolean matchable(boolean initialPass) {
 
-		for (Name n : nodes) {
+		for (NodeX n : nodes.asNodes()) {
 
-			if (((NodeX)n).matchablePatternRoot(initialPass)) {
+			if (n.matchablePatternRoot(initialPass)) {
 
 				return true;
 			}
@@ -189,9 +189,9 @@ public class Pattern extends PatternComponent {
 
 			if (r.getProperty().matchablePatternProperty()) {
 
-				for (Name tn : r.getTargetNodes()) {
+				for (NodeX tn : r.getTargetNodes().asNodes()) {
 
-					if (((NodeX)tn).matchablePatternValue(initialPass)) {
+					if (tn.matchablePatternValue(initialPass)) {
 
 						return true;
 					}
@@ -241,7 +241,7 @@ public class Pattern extends PatternComponent {
 
 	private void registerAsDefinitionRefed(Names regNames, MatchRole role) {
 
-		for (Name n : regNames) {
+		for (NodeX n : regNames.asNodes()) {
 
 			n.registerAsDefinitionRefed(role);
 		}
@@ -249,7 +249,7 @@ public class Pattern extends PatternComponent {
 
 	private boolean subsumesAllNames(Pattern p) {
 
-		for (Name n : nodes) {
+		for (NodeX n : nodes.asNodes()) {
 
 			if (!subsumesAnyName(n, p)) {
 

@@ -164,11 +164,9 @@ class ProfileRelations {
 
 	private boolean anyLastPhaseInferredSubsumers() {
 
-		for (Name n : getNodes()) {
+		for (NodeX n : getNodes().asNodes()) {
 
-			NodeX nd = (NodeX)n;
-
-			if (!nd.classified() && nd.getNodeClassifier().anyLastPhaseInferredSubsumers()) {
+			if (!n.classified() && n.getNodeClassifier().anyLastPhaseInferredSubsumers()) {
 
 				return true;
 			}

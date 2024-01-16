@@ -43,9 +43,9 @@ class PotentialLocalPatternSubsumeds extends PotentialPatternSubsumeds {
 
 		Set<PatternMatcher> potentials = new HashSet<PatternMatcher>();
 
-		for (Name dj : request.getExpandedDisjuncts()) {
+		for (NodeX dj : request.getExpandedDisjuncts().asNodes()) {
 
-			for (PatternMatcher pm : ((NodeX)dj).getProfilePatternMatcherAsList()) {
+			for (PatternMatcher pm : dj.getProfilePatternMatcherAsList()) {
 
 				potentials.addAll(getPotentialsFor(pm));
 			}

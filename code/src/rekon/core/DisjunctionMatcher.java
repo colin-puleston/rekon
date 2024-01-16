@@ -71,9 +71,9 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		private boolean allDisjunctsSubsumed(DisjunctionMatcher test) {
 
-			for (Name d : test.directDisjuncts) {
+			for (NodeX d : test.directDisjuncts.asNodes()) {
 
-				if (!disjunctSubsumed((NodeX)d)) {
+				if (!disjunctSubsumed(d)) {
 
 					return false;
 				}
@@ -84,21 +84,21 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		private boolean disjunctSubsumed(NodeX d) {
 
-			if (testSubsumers.anySubsumes(d)) {
+			if (visited.add(d)) {
 
-				return true;
-			}
+				if (testSubsumers.anySubsumes(d)) {
 
-			if (anyNestedDisjunctSubsumptions(d)) {
+					return true;
+				}
 
-				return true;
-			}
+				if (anyNestedDisjunctSubsumptions(d)) {
 
-			for (Name s : d.getSubsumers()) {
+					return true;
+				}
 
-				if (visited.add(getNode())) {
+				for (NodeX s : d.getSubsumers().asNodes()) {
 
-					if (anyNestedDisjunctSubsumptions((NodeX)s)) {
+					if (anyNestedDisjunctSubsumptions(s)) {
 
 						return true;
 					}
@@ -205,9 +205,9 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumedBy(PatternMatcher test) {
 
-		for (Name d : expandDisjuncts()) {
+		for (NodeX d : expandDisjuncts().asNodes()) {
 
-			if (!((NodeX)d).subsumedByMatcher(test)) {
+			if (!d.subsumedByMatcher(test)) {
 
 				return false;
 			}
@@ -233,9 +233,9 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean classifiable(boolean initialPass, NodeSelector selector) {
 
-		for (Name d : expandDisjuncts()) {
+		for (NodeX d : expandDisjuncts().asNodes()) {
 
-			if (((NodeX)d).classifiable(initialPass, selector)) {
+			if (d.classifiable(initialPass, selector)) {
 
 				return true;
 			}
@@ -280,9 +280,9 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	private boolean subsumesPatternMatcher(PatternMatcher test) {
 
-		for (Name d : expandDisjuncts()) {
+		for (NodeX d : expandDisjuncts().asNodes()) {
 
-			if (((NodeX)d).subsumesMatcher(test)) {
+			if (d.subsumesMatcher(test)) {
 
 				return true;
 			}
@@ -304,9 +304,9 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		expansions.addAll(directDisjuncts);
 
-		for (Name d : directDisjuncts) {
+		for (NodeX d : directDisjuncts.asNodes()) {
 
-			for (DisjunctionMatcher m : ((NodeX)d).getAllDisjunctionMatchers()) {
+			for (DisjunctionMatcher m : d.getAllDisjunctionMatchers()) {
 
 				m.collectDisjunctExpansions(expansions);
 			}

@@ -263,9 +263,9 @@ public abstract class NodeX extends Name {
 			return true;
 		}
 
-		for (Name s : baseTarget.getSubsumers()) {
+		for (NodeX s : baseTarget.getSubsumers().asNodes()) {
 
-			if (subsumesViaMatcher(baseTarget, (NodeX)s)) {
+			if (subsumesViaMatcher(baseTarget, s)) {
 
 				return true;
 			}

@@ -180,9 +180,9 @@ class PotentialLocalPatternSubsumers {
 
 		List<Collection<PatternMatcher>> djPotentials = new ArrayList<Collection<PatternMatcher>>();
 
-		for (Name dj : request.getExpandedDisjuncts()) {
+		for (NodeX dj : request.getExpandedDisjuncts().asNodes()) {
 
-			djPotentials.add(getPotentialsForDisjunct((NodeX)dj));
+			djPotentials.add(getPotentialsForDisjunct(dj));
 		}
 
 		return new SetIntersector<PatternMatcher>().intersectSets(djPotentials);

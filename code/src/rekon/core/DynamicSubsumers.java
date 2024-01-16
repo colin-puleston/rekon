@@ -39,9 +39,9 @@ class DynamicSubsumers {
 
 			Set<NodeMatcher> potentials = new HashSet<NodeMatcher>();
 
-			for (Name s : subsumeds) {
+			for (NodeX s : subsumeds.asNodes()) {
 
-				findAllFrom((NodeX)s, potentials);
+				findAllFrom(s, potentials);
 			}
 
 			return potentials;
@@ -51,9 +51,9 @@ class DynamicSubsumers {
 
 			findFrom(n, potentials);
 
-			for (Name ss : n.getSubs(ClassNode.class, false)) {
+			for (NodeX ss : n.getSubs(ClassNode.class, false).asNodes()) {
 
-				findFrom((NodeX)ss, potentials);
+				findFrom(ss, potentials);
 			}
 		}
 
