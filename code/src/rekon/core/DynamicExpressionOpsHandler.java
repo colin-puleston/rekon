@@ -174,20 +174,18 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
-	NodeX getDefinitionMatchNode() {
-
-		return getExpressionMatcher().getNode();
-	}
-
-	NodeX getProfileMatchNode() {
+	void configureAsPotentialSubsumed() {
 
 		NodeMatcher m = getExpressionMatcher();
 
 		m.setProfileExpansionCheckRequired();
 		inferSubsumers();
 		m.updateForProfileExpansion();
+	}
 
-		return m.getNode();
+	NodeX getNode() {
+
+		return getExpressionMatcher().getNode();
 	}
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {

@@ -60,17 +60,10 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		this.node = node;
 	}
 
+	void configureAsPotentialSubsumed() {
+	}
+
 	NodeX getNode() {
-
-		return node;
-	}
-
-	NodeX getDefinitionMatchNode() {
-
-		return node;
-	}
-
-	NodeX getProfileMatchNode() {
 
 		return node;
 	}

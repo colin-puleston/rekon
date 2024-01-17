@@ -58,10 +58,12 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 	private boolean subsumes(ValidInputDynamicOpsHandler other) {
 
-		return getDefinitionMatchNode().subsumes(other.getProfileMatchNode());
+		other.configureAsPotentialSubsumed();
+
+		return getNode().subsumes(other.getNode());
 	}
 
-	abstract NodeX getDefinitionMatchNode();
+	abstract void configureAsPotentialSubsumed();
 
-	abstract NodeX getProfileMatchNode();
+	abstract NodeX getNode();
 }
