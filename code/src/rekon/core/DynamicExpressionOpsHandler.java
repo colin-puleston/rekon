@@ -83,19 +83,9 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 	static private class IndividualsResolver extends ResultsResolver {
 
-		Names resolve(NameSet inferreds, boolean direct) {
-
-			return filter(super.resolve(inferreds, direct));
-		}
-
 		Names getAllLinked(Name n) {
 
-			return n.getSubs(NodeX.class, false);
-		}
-
-		private Names filter(Names inferreds) {
-
-			return inferreds.filterForType(IndividualNode.class);
+			return n.getSubs(IndividualNode.class, false);
 		}
 	}
 
