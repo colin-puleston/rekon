@@ -51,7 +51,7 @@ abstract class NodeMatcher {
 
 	abstract boolean subsumes(NodeMatcher test);
 
-	abstract boolean disjunctSubsumes(NodeX test);
+	abstract boolean subsumesNodeDirectly(NodeX test);
 
 	abstract boolean hasExpandedDisjunct(NodeX test);
 

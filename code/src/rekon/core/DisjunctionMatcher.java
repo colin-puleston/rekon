@@ -190,11 +190,11 @@ class DisjunctionMatcher extends NodeMatcher {
 		return new SubsumedDisjunctionTester(test).subsumption;
 	}
 
-	boolean disjunctSubsumes(NodeX test) {
+	boolean subsumesNodeDirectly(NodeX test) {
 
-		for (Name d : expandDisjuncts()) {
+		for (NodeX d : expandDisjuncts().asNodes()) {
 
-			if (d.subsumes(test)) {
+			if (d.subsumesDirectly(test)) {
 
 				return true;
 			}

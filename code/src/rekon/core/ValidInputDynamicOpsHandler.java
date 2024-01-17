@@ -51,49 +51,17 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		return false;
 	}
 
-	boolean equivalentTo(ValidInputDynamicOpsHandler other) {
+	private boolean equivalentTo(ValidInputDynamicOpsHandler other) {
 
 		return subsumes(other) && other.subsumes(this);
 	}
 
-	boolean subsumes(ValidInputDynamicOpsHandler other) {
+	private boolean subsumes(ValidInputDynamicOpsHandler other) {
 
-		Collection<NodeMatcher> defns = getAllDefinitionMatchers();
-
-		if (!defns.isEmpty()) {
-
-			Collection<NodeMatcher> oProfs = other.getAllProfileMatchers(defns);
-
-			if (!oProfs.isEmpty()) {
-
-				return anySubsumptions(defns, oProfs);
-			}
-		}
-
-		return false;
+		return getDefinitionMatchNode().subsumes(other.getProfileMatchNode());
 	}
 
-	abstract Collection<NodeMatcher> getAllDefinitionMatchers();
+	abstract NodeX getDefinitionMatchNode();
 
-	abstract Collection<NodeMatcher> getAllProfileMatchers(Collection<NodeMatcher> defns);
-
-	abstract Names getPotentialSubNodes();
-
-	private boolean anySubsumptions(
-						Collection<NodeMatcher> defns,
-						Collection<NodeMatcher> candidates) {
-
-		for (NodeMatcher d : defns) {
-
-			for (NodeMatcher c : candidates) {
-
-				if (d.subsumes(c)) {
-
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
+	abstract NodeX getProfileMatchNode();
 }

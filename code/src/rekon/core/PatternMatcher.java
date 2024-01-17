@@ -110,7 +110,7 @@ class PatternMatcher extends NodeMatcher {
 		return pattern.subsumes(test.pattern);
 	}
 
-	boolean disjunctSubsumes(NodeX test) {
+	boolean subsumesNodeDirectly(NodeX test) {
 
 		return false;
 	}

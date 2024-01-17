@@ -174,25 +174,12 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
-	boolean subsumes(ValidInputDynamicOpsHandler other) {
+	NodeX getDefinitionMatchNode() {
 
-		if (other instanceof DynamicNodeOpsHandler) {
-
-			if (disjunctSubsumes((DynamicNodeOpsHandler)other)) {
-
-				return true;
-			}
-		}
-
-		return super.subsumes(other);
+		return getExpressionMatcher().getNode();
 	}
 
-	Collection<NodeMatcher> getAllDefinitionMatchers() {
-
-		return Collections.singleton(getExpressionMatcher());
-	}
-
-	Collection<NodeMatcher> getAllProfileMatchers(Collection<NodeMatcher> defns) {
+	NodeX getProfileMatchNode() {
 
 		NodeMatcher m = getExpressionMatcher();
 
@@ -200,24 +187,7 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		inferSubsumers();
 		m.updateForProfileExpansion();
 
-		return Collections.singleton(m);
-	}
-
-	Names getPotentialSubNodes() {
-
-		NodeMatcher m = getExpressionMatcher();
-
-		if (m instanceof PatternMatcher) {
-
-			return ((PatternMatcher)m).getPattern().getNodes();
-		}
-
-		return Names.NO_NAMES;
-	}
-
-	private boolean disjunctSubsumes(DynamicNodeOpsHandler other) {
-
-		return getExpressionMatcher().disjunctSubsumes(other.getNode());
+		return m.getNode();
 	}
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {

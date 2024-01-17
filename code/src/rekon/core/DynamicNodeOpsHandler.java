@@ -24,54 +24,12 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
 class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 
 	private NodeX node;
-
-	private abstract class MatcherCollector {
-
-		Collection<NodeMatcher> getAll() {
-
-			List<NodeMatcher> matchers = new ArrayList<NodeMatcher>();
-
-			addMatchers(matchers, node);
-
-			for (NodeX en : node.getEquivalents().asNodes()) {
-
-				addMatchers(matchers, en);
-			}
-
-			return matchers;
-		}
-
-		abstract Collection<NodeMatcher> getCandidateMatchers(NodeX n);
-
-		private void addMatchers(Collection<NodeMatcher> matchers, NodeX n) {
-
-			matchers.addAll(getCandidateMatchers(n));
-		}
-	}
-
-	private class ProfileMatcherCollector extends MatcherCollector {
-
-		Collection<NodeMatcher> getCandidateMatchers(NodeX n) {
-
-			return n.getAllProfileMatchers();
-		}
-	}
-
-	private class DefinitionMatcherCollector extends MatcherCollector {
-
-		Collection<NodeMatcher> getCandidateMatchers(NodeX n) {
-
-			return n.getAllDefinitionMatchers();
-		}
-	}
 
 	public Names getEquivalents() {
 
@@ -102,48 +60,18 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		this.node = node;
 	}
 
-	boolean equivalentTo(ValidInputDynamicOpsHandler other) {
-
-		if (other instanceof DynamicNodeOpsHandler) {
-
-			DynamicNodeOpsHandler o = (DynamicNodeOpsHandler)other;
-
-			return node.getEquivalents().getNames().contains(o.node);
-		}
-
-		return super.equivalentTo(other);
-	}
-
-	boolean subsumes(ValidInputDynamicOpsHandler other) {
-
-		for (NodeX ps : other.getPotentialSubNodes().asNodes()) {
-
-			if (node.subsumes(ps)) {
-
-				return true;
-			}
-		}
-
-		return super.subsumes(other);
-	}
-
 	NodeX getNode() {
 
 		return node;
 	}
 
-	Collection<NodeMatcher> getAllDefinitionMatchers() {
+	NodeX getDefinitionMatchNode() {
 
-		return new DefinitionMatcherCollector().getAll();
+		return node;
 	}
 
-	Collection<NodeMatcher> getAllProfileMatchers(Collection<NodeMatcher> defns) {
+	NodeX getProfileMatchNode() {
 
-		return new ProfileMatcherCollector().getAll();
-	}
-
-	Names getPotentialSubNodes() {
-
-		return new NameList(node);
+		return node;
 	}
 }

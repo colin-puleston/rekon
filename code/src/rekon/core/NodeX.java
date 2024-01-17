@@ -166,6 +166,11 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
+	boolean subsumesDirectly(NodeX node) {
+
+		return super.subsumes(node);
+	}
+
 	boolean subsumesMatcher(NodeMatcher test) {
 
 		for (NodeMatcher d : getAllDefinitionMatchers()) {
@@ -278,7 +283,7 @@ public abstract class NodeX extends Name {
 
 		for (NodeMatcher d : getAllDefinitionMatchers()) {
 
-			if (d.disjunctSubsumes(currentTarget)) {
+			if (d.subsumesNodeDirectly(currentTarget)) {
 
 				return true;
 			}
