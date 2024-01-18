@@ -35,22 +35,12 @@ import rekon.core.*;
  */
 class MappedNames extends OntologyNames {
 
-	static <E extends OWLEntity>E toMappedEntity(Name name, Class<E> entityType) {
-
-		return entityType.cast(((MappedName)name).toMappedEntity());
-	}
-
-	private ClassNodes classes;
-	private IndividualNodes individuals;
-	private NodeProperties nodeProperties;
-	private DataProperties dataProperties;
-
-	private interface MappedName {
+	static private interface MappedName {
 
 		public OWLEntity toMappedEntity();
 	}
 
-	private class MappedClassNode extends ClassNode implements MappedName {
+	static private class MappedClassNode extends ClassNode implements MappedName {
 
 		private OWLClass entity;
 
@@ -70,7 +60,7 @@ class MappedNames extends OntologyNames {
 		}
 	}
 
-	private class MappedIndividualNode extends IndividualNode implements MappedName {
+	static private class MappedIndividualNode extends IndividualNode implements MappedName {
 
 		private OWLNamedIndividual entity;
 
@@ -90,7 +80,7 @@ class MappedNames extends OntologyNames {
 		}
 	}
 
-	private class MappedNodeProperty extends NodeProperty implements MappedName {
+	static private class MappedNodeProperty extends NodeProperty implements MappedName {
 
 		private OWLObjectProperty entity;
 
@@ -110,7 +100,7 @@ class MappedNames extends OntologyNames {
 		}
 	}
 
-	private class MappedDataProperty extends DataProperty implements MappedName {
+	static private class MappedDataProperty extends DataProperty implements MappedName {
 
 		private OWLDataProperty entity;
 
@@ -129,6 +119,16 @@ class MappedNames extends OntologyNames {
 			this.entity = entity;
 		}
 	}
+
+	static <E extends OWLEntity>E toMappedEntity(Name name, Class<E> entityType) {
+
+		return entityType.cast(((MappedName)name).toMappedEntity());
+	}
+
+	private ClassNodes classes;
+	private IndividualNodes individuals;
+	private NodeProperties nodeProperties;
+	private DataProperties dataProperties;
 
 	private abstract class TypeNames
 								<E extends OWLEntity,
