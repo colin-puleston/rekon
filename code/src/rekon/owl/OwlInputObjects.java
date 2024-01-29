@@ -580,17 +580,22 @@ class OwlInputObjects {
 					return InputRelationType.SOME_NODES;
 				}
 
-				if (owlRest instanceof OWLObjectAllValuesFrom) {
-
-					return InputRelationType.All_NODES;
-				}
-
 				if (owlRest instanceof OWLObjectHasValue) {
 
 					return InputRelationType.SOME_NODES;
 				}
 
-				if (owlRest instanceof OWLDataRestriction) {
+				if (owlRest instanceof OWLObjectAllValuesFrom) {
+
+					return InputRelationType.All_NODES;
+				}
+
+				if (owlRest instanceof OWLDataSomeValuesFrom) {
+
+					return InputRelationType.DATA_VALUE;
+				}
+
+				if (owlRest instanceof OWLDataHasValue) {
 
 					return InputRelationType.DATA_VALUE;
 				}
@@ -618,7 +623,7 @@ class OwlInputObjects {
 
 			OWLRestriction owlRest = getOwlObject();
 
-			if (owlRest instanceof OWLQuantifiedDataRestriction) {
+			if (owlRest instanceof OWLDataSomeValuesFrom) {
 
 				return extractDataType();
 			}
