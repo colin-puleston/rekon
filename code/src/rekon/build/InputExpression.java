@@ -22,37 +22,28 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
 
 import java.util.*;
 
-import org.semanticweb.owlapi.model.*;
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class AssertedEntity<E extends OWLEntity> {
+public interface InputExpression extends InputObject {
 
-	private E entity;
-	private Set<E> equivs = new HashSet<E>();
+	InputExpressionType getExpressionType();
 
-	AssertedEntity(E entity) {
+	ClassNode asClassNode();
 
-		this.entity = entity;
-	}
+	IndividualNode asIndividualNode();
 
-	void addEquiv(E equiv) {
+	Collection<InputExpression> asConjuncts();
 
-		equivs.add(equiv);
-	}
+	Collection<InputExpression> asDisjuncts();
 
-	E getEntity() {
+	InputExpression asComplemented();
 
-		return entity;
-	}
-
-	Collection<E> getEquivs() {
-
-		return equivs;
-	}
+	InputRelation asRelation();
 }

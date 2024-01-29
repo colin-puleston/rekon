@@ -22,26 +22,24 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build;
 
 import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-class SingleToMultiPatternCreator implements MultiPatternCreator {
+public interface InputAssertions {
 
-	private SinglePatternCreator sourceCreator;
+	public Collection<InputClass> getClasses();
 
-	public final Collection<Pattern> createAll(MatchStructures matchStructures) {
+	public Collection<InputIndividual> getIndividuals();
 
-		Pattern p = sourceCreator.create(matchStructures);
+	public Collection<InputObjectProperty> getObjectProperties();
 
-		return p != null ? Collections.singleton(p) : null;
-	}
+	public Collection<InputDataProperty> getDataProperties();
 
-	SingleToMultiPatternCreator(SinglePatternCreator sourceCreator) {
+	public Collection<InputEquivalence> getEquivalenceGCIs();
 
-		this.sourceCreator = sourceCreator;
-	}
+	public Collection<InputSubSuper> getSubSuperGCIs();
 }

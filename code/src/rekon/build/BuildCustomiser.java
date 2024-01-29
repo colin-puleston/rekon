@@ -22,12 +22,14 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface SinglePatternCreator {
+public interface BuildCustomiser {
 
-	public Pattern create(MatchStructures matchStructures);
+	public NodeX checkToCustomAtomicNode(InputExpression source);
 }

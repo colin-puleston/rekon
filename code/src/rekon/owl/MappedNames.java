@@ -29,6 +29,7 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
@@ -130,33 +131,19 @@ class MappedNames extends OntologyNames {
 	private NodeProperties nodeProperties;
 	private DataProperties dataProperties;
 
-	private abstract class TypeNames
-								<E extends OWLEntity,
-								AE extends AssertedEntity<E>,
-								N extends Name> {
+	private abstract class TypeNames<E extends OWLEntity, N extends Name> {
 
 		private Map<E, N> names = new HashMap<E, N>();
 
-		void initialise(Collection<AE> entities) {
+		void initialise(OWLOntologyManager manager) {
 
-			for (AE ae : entities) {
+			for (OWLOntology o : manager.getOntologies()) {
 
-				addName(ae.getEntity());
+				for (E e : getEntitiesInSignature(o)) {
+
+					addName(e);
+				}
 			}
-
-			for (AE ae : entities) {
-
-				configureName(ae);
-			}
-		}
-
-		N addName(E entity) {
-
-			N n = createName(entity);
-
-			names.put(entity, n);
-
-			return n;
 		}
 
 		N resolveName(E entity) {
@@ -166,57 +153,38 @@ class MappedNames extends OntologyNames {
 			return n != null ? n : addName(entity);
 		}
 
-		N configureName(AE entity) {
-
-			N n = names.get(entity.getEntity());
-
-			addAssertedEquivalents(entity, n);
-			addAssertedSupers(entity, n);
-
-			return n;
-		}
-
 		abstract N createName(E entity);
 
-		abstract void addAssertedSupers(AE entity, N name);
+		abstract Collection<E> getEntitiesInSignature(OWLOntology o);
 
 		Collection<N> getAllNames() {
 
 			return names.values();
 		}
 
-		private void addAssertedEquivalents(AE entity, N name) {
+		private N addName(E entity) {
 
-			for (E e : entity.getEquivs()) {
+			N n = createName(entity);
 
-				name.addEquivalent(resolveName(e));
-			}
+			names.put(entity, n);
+
+			return n;
 		}
 	}
 
 	private abstract class HierarchyNames
-								<E extends OWLEntity,
-								AE extends AssertedHierarchyEntity<E>,
-								N extends Name>
-								extends TypeNames<E, AE, N> {
+								<E extends OWLEntity, N extends Name>
+								extends TypeNames<E, N> {
 
 		final N rootName = createRootName();
 
 		private E rootEntity;
 
-		HierarchyNames(E rootEntity, Collection<AE> entities) {
+		HierarchyNames(OWLOntologyManager manager) {
 
-			this.rootEntity = rootEntity;
+			rootEntity = getRootEntity(manager.getOWLDataFactory());
 
-			initialise(entities);
-		}
-
-		void addAssertedSupers(AE entity, N name) {
-
-			for (E s : entity.getSupers()) {
-
-				name.addSubsumer(resolveName(s));
-			}
+			initialise(manager);
 		}
 
 		N resolveName(E entity) {
@@ -225,13 +193,15 @@ class MappedNames extends OntologyNames {
 		}
 
 		abstract N createRootName();
+
+		abstract E getRootEntity(OWLDataFactory factory);
 	}
 
-	private class ClassNodes extends HierarchyNames<OWLClass, AssertedClass, ClassNode> {
+	private class ClassNodes extends HierarchyNames<OWLClass, ClassNode> {
 
-		ClassNodes(Assertions assertions) {
+		ClassNodes(OWLOntologyManager manager) {
 
-			super(assertions.owlThing, assertions.getClasses());
+			super(manager);
 		}
 
 		ClassNode createName(OWLClass entity) {
@@ -243,15 +213,23 @@ class MappedNames extends OntologyNames {
 
 			return createRootClassNode(getAllNames());
 		}
+
+		Collection<OWLClass> getEntitiesInSignature(OWLOntology o) {
+
+			return o.getClassesInSignature();
+		}
+
+		OWLClass getRootEntity(OWLDataFactory factory) {
+
+			return factory.getOWLThing();
+		}
 	}
 
-	private class IndividualNodes
-					extends
-						TypeNames<OWLNamedIndividual, AssertedIndividual, IndividualNode> {
+	private class IndividualNodes extends TypeNames<OWLNamedIndividual, IndividualNode> {
 
-		IndividualNodes(Assertions assertions) {
+		IndividualNodes(OWLOntologyManager manager) {
 
-			initialise(assertions.getIndividuals());
+			initialise(manager);
 		}
 
 		IndividualNode createName(OWLNamedIndividual entity) {
@@ -259,40 +237,17 @@ class MappedNames extends OntologyNames {
 			return new MappedIndividualNode(entity);
 		}
 
-		void addAssertedSupers(AssertedIndividual entity, IndividualNode node) {
+		Collection<OWLNamedIndividual> getEntitiesInSignature(OWLOntology o) {
 
-			for (OWLClass c : entity.getTypes()) {
-
-				node.addSubsumer(classes.resolveName(c));
-			}
+			return o.getIndividualsInSignature();
 		}
 	}
 
-	private class NodeProperties
-						extends
-							HierarchyNames
-								<OWLObjectProperty,
-								AssertedObjectProperty,
-								NodeProperty> {
+	private class NodeProperties extends HierarchyNames<OWLObjectProperty, NodeProperty> {
 
-		NodeProperties(Assertions assertions) {
+		NodeProperties(OWLOntologyManager manager) {
 
-			super(assertions.owlTopObjectProperty, assertions.getObjectProperties());
-		}
-
-		NodeProperty configureName(AssertedObjectProperty entity) {
-
-			NodeProperty n = super.configureName(entity);
-
-			addInverses(entity, n);
-			addChains(entity, n);
-
-			if (entity.symmetric()) {
-
-				n.setSymmetric();
-			}
-
-			return n;
+			super(manager);
 		}
 
 		NodeProperty createName(OWLObjectProperty entity) {
@@ -305,47 +260,22 @@ class MappedNames extends OntologyNames {
 			return createRootNodeProperty(getAllNames());
 		}
 
-		private void addInverses(AssertedObjectProperty entity, NodeProperty prop) {
+		Collection<OWLObjectProperty> getEntitiesInSignature(OWLOntology o) {
 
-			prop.addInverses(toNodeProperties(entity.getInverses()));
+			return o.getObjectPropertiesInSignature();
 		}
 
-		private void addChains(AssertedObjectProperty entity, NodeProperty prop) {
+		OWLObjectProperty getRootEntity(OWLDataFactory factory) {
 
-			if (entity.transitive()) {
-
-				new PropertyChain(prop);
-			}
-
-			for (List<OWLObjectProperty> chain : entity.getChains()) {
-
-				new PropertyChain(prop, toNodeProperties(chain));
-			}
-		}
-
-		private List<NodeProperty> toNodeProperties(Collection<OWLObjectProperty> objectProps) {
-
-			List<NodeProperty> props = new ArrayList<NodeProperty>();
-
-			for (OWLObjectProperty p : objectProps) {
-
-				props.add(resolveName(p));
-			}
-
-			return props;
+			return factory.getOWLTopObjectProperty();
 		}
 	}
 
-	private class DataProperties
-						extends
-							HierarchyNames
-								<OWLDataProperty,
-								AssertedDataProperty,
-								DataProperty> {
+	private class DataProperties extends HierarchyNames<OWLDataProperty, DataProperty> {
 
-		DataProperties(Assertions assertions) {
+		DataProperties(OWLOntologyManager manager) {
 
-			super(assertions.owlTopDataProperty, assertions.getDataProperties());
+			super(manager);
 		}
 
 		DataProperty createName(OWLDataProperty entity) {
@@ -357,34 +287,49 @@ class MappedNames extends OntologyNames {
 
 			return createRootDataProperty(getAllNames());
 		}
+
+		Collection<OWLDataProperty> getEntitiesInSignature(OWLOntology o) {
+
+			return o.getDataPropertiesInSignature();
+		}
+
+		OWLDataProperty getRootEntity(OWLDataFactory factory) {
+
+			return factory.getOWLTopDataProperty();
+		}
 	}
 
-	protected Collection<ClassNode> getClassNodes() {
+	public ClassNode getRootClassNode() {
+
+		return classes.rootName;
+	}
+
+	public Collection<ClassNode> getClassNodes() {
 
 		return classes.getAllNames();
 	}
 
-	protected Collection<IndividualNode> getIndividualNodes() {
+	public Collection<IndividualNode> getIndividualNodes() {
 
 		return individuals.getAllNames();
 	}
 
-	protected Collection<NodeProperty> getNodeProperties() {
+	public Collection<NodeProperty> getNodeProperties() {
 
 		return nodeProperties.getAllNames();
 	}
 
-	protected Collection<DataProperty> getDataProperties() {
+	public Collection<DataProperty> getDataProperties() {
 
 		return dataProperties.getAllNames();
 	}
 
-	MappedNames(Assertions assertions) {
+	MappedNames(OWLOntologyManager manager) {
 
-		classes = new ClassNodes(assertions);
-		individuals = new IndividualNodes(assertions);
-		nodeProperties = new NodeProperties(assertions);
-		dataProperties = new DataProperties(assertions);
+		classes = new ClassNodes(manager);
+		individuals = new IndividualNodes(manager);
+		nodeProperties = new NodeProperties(manager);
+		dataProperties = new DataProperties(manager);
 	}
 
 	ClassNode get(OWLClass entity) {
@@ -405,10 +350,5 @@ class MappedNames extends OntologyNames {
 	DataProperty get(OWLDataProperty entity) {
 
 		return dataProperties.resolveName(entity);
-	}
-
-	ClassNode getRootClassNode() {
-
-		return classes.rootName;
 	}
 }

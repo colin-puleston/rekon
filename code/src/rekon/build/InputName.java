@@ -22,43 +22,18 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
 
-import org.semanticweb.owlapi.model.*;
+import java.util.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class AssertedValue<P extends OWLProperty, V extends OWLObject> {
+public interface InputName<N extends Name> extends InputObject {
 
-	private P property;
-	private V value;
+	N getName();
 
-	public boolean equals(Object other) {
-
-		AssertedValue<?, ?> o = (AssertedValue<?, ?>)other;
-
-		return property.equals(o.property) && value.equals(o.value);
-	}
-
-	public int hashCode() {
-
-		return property.hashCode() + value.hashCode();
-	}
-
-	AssertedValue(P property, V value) {
-
-		this.property = property;
-		this.value = value;
-	}
-
-	P getProperty() {
-
-		return property;
-	}
-
-	V getValue() {
-
-		return value;
-	}
+	Collection<N> getEquivs();
 }

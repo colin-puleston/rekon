@@ -22,67 +22,16 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
 
 import java.util.*;
 
-import org.semanticweb.owlapi.model.*;
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class AssertedIndividual extends AssertedEntity<OWLNamedIndividual> {
+public interface InputHierarchyName<N extends Name> extends InputName<N> {
 
-	private Set<OWLClass> types = new HashSet<OWLClass>();
-	private Set<OWLClassExpression> typeExprs = new HashSet<OWLClassExpression>();
-
-	private Set<AssertedObjectValue> objectValues = new HashSet<AssertedObjectValue>();
-	private Set<AssertedDataValue> dataValues = new HashSet<AssertedDataValue>();
-
-	AssertedIndividual(OWLNamedIndividual entity) {
-
-		super(entity);
-	}
-
-	void addTypeExpr(OWLClassExpression type) {
-
-		if (type instanceof OWLClass) {
-
-			types.add((OWLClass)type);
-		}
-		else {
-
-			typeExprs.add(type);
-		}
-	}
-
-	void addObjectValue(AssertedObjectValue value) {
-
-		objectValues.add(value);
-	}
-
-	void addDataValue(AssertedDataValue value) {
-
-		dataValues.add(value);
-	}
-
-	Collection<OWLClass> getTypes() {
-
-		return types;
-	}
-
-	Collection<OWLClassExpression> getTypeExprs() {
-
-		return typeExprs;
-	}
-
-	Collection<AssertedObjectValue> getObjectValues() {
-
-		return objectValues;
-	}
-
-	Collection<AssertedDataValue> getDataValues() {
-
-		return dataValues;
-	}
+	Collection<N> getSupers();
 }

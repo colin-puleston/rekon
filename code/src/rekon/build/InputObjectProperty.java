@@ -22,43 +22,22 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build;
 
 import java.util.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public class DynamicOps {
+public interface InputObjectProperty extends InputHierarchyName<NodeProperty> {
 
-	private Ontology ontology;
+	Collection<NodeProperty> getInverses();
 
-	public DynamicOpsHandler createHandler(NodeX nodes) {
+	Collection<List<NodeProperty>> getChains();
 
-		return new DynamicNodeOpsHandler(nodes);
-	}
+	boolean transitive();
 
-	public DynamicOpsHandler createHandler(MultiPatternBuilder disjunctsBuilder) {
-
-		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
-
-		if (expr.expressionCreated()) {
-
-			NodeX node = expr.toSingleNode();
-
-			if (node != null) {
-
-				return new DynamicNodeOpsHandler(node);
-			}
-
-			return new DynamicExpressionOpsHandler(ontology, expr);
-		}
-
-		return InvalidInputDynamicOpsHandler.SINGLETON;
-	}
-
-	DynamicOps(Ontology ontology) {
-
-		this.ontology = ontology;
-	}
+	boolean symmetric();
 }

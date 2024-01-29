@@ -22,33 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
 
-import org.semanticweb.owlapi.model.*;
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class AssertedDataProperty extends AssertedHierarchyEntity<OWLDataProperty> {
-
-	AssertedDataProperty(OWLDataProperty entity) {
-
-		super(entity);
-	}
-
-	void checkAddEquiv(OWLDataPropertyExpression equiv) {
-
-		if (equiv instanceof OWLDataProperty) {
-
-			addEquiv((OWLDataProperty)equiv);
-		}
-	}
-
-	void checkAddSuper(OWLDataPropertyExpression sup) {
-
-		if (sup instanceof OWLDataProperty) {
-
-			addSuper((OWLDataProperty)sup);
-		}
-	}
+public interface InputDataProperty extends InputHierarchyName<DataProperty> {
 }

@@ -29,36 +29,19 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class DynamicOps {
+class SingleToMultiPatternBuilder implements MultiPatternBuilder {
 
-	private Ontology ontology;
+	private SinglePatternBuilder sourceBuilder;
 
-	public DynamicOpsHandler createHandler(NodeX nodes) {
+	public final Collection<Pattern> createAll(MatchStructures matchStructures) {
 
-		return new DynamicNodeOpsHandler(nodes);
+		Pattern p = sourceBuilder.create(matchStructures);
+
+		return p != null ? Collections.singleton(p) : null;
 	}
 
-	public DynamicOpsHandler createHandler(MultiPatternBuilder disjunctsBuilder) {
+	SingleToMultiPatternBuilder(SinglePatternBuilder sourceBuilder) {
 
-		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
-
-		if (expr.expressionCreated()) {
-
-			NodeX node = expr.toSingleNode();
-
-			if (node != null) {
-
-				return new DynamicNodeOpsHandler(node);
-			}
-
-			return new DynamicExpressionOpsHandler(ontology, expr);
-		}
-
-		return InvalidInputDynamicOpsHandler.SINGLETON;
-	}
-
-	DynamicOps(Ontology ontology) {
-
-		this.ontology = ontology;
+		this.sourceBuilder = sourceBuilder;
 	}
 }

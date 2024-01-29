@@ -34,7 +34,7 @@ public abstract class Instance {
 	private InstanceNode node = new InstanceNode(this);
 	private Set<Instance> referencers = new HashSet<Instance>();
 
-	private SinglePatternCreator profileRecreator = null;
+	private SinglePatternBuilder profileRebuilder = null;
 
 	public String toString() {
 
@@ -66,9 +66,9 @@ public abstract class Instance {
 		}
 	}
 
-	void setProfileRecreator(SinglePatternCreator profileRecreator) {
+	void setProfileRebuilder(SinglePatternBuilder profileRebuilder) {
 
-		this.profileRecreator = profileRecreator;
+		this.profileRebuilder = profileRebuilder;
 	}
 
 	boolean addReferencers() {
@@ -96,14 +96,14 @@ public abstract class Instance {
 		}
 	}
 
-	SinglePatternCreator getProfileRecreator() {
+	SinglePatternBuilder getProfileRebuilder() {
 
-		if (profileRecreator == null) {
+		if (profileRebuilder == null) {
 
-			throw new Error("Profile-recreator has not been set!");
+			throw new Error("Profile-rebuilder has not been set!");
 		}
 
-		return profileRecreator;
+		return profileRebuilder;
 	}
 
 	boolean anyReferencers() {

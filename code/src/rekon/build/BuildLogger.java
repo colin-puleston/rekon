@@ -22,31 +22,22 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import java.util.*;
-
-import org.semanticweb.owlapi.model.*;
+package rekon.build;
 
 /**
  * @author Colin Puleston
  */
-abstract class AssertedHierarchyEntity<E extends OWLEntity> extends AssertedEntity<E> {
+public interface BuildLogger {
 
-	private Set<E> supers = new HashSet<E>();
+	void logOutOfScopeEquivalent(InputClass cls, InputExpression equiv);
 
-	AssertedHierarchyEntity(E entity) {
+	void logOutOfScopeSuper(InputClass cls, InputExpression sup);
 
-		super(entity);
-	}
+	void logOutOfScopeType(InputIndividual ind, InputExpression type);
 
-	void addSuper(E sup) {
+	void logOutOfScopeValue(InputIndividual ind, InputRelation value);
 
-		supers.add(sup);
-	}
+	void logOutOfScopeEquivalence(InputEquivalence equivs);
 
-	Collection<E> getSupers() {
-
-		return supers;
-	}
+	void logOutOfScopeSubSuper(InputSubSuper subSuper);
 }

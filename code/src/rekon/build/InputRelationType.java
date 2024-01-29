@@ -22,17 +22,15 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import org.semanticweb.owlapi.model.*;
+package rekon.build;
 
 /**
  * @author Colin Puleston
  */
-class AssertedDataValue extends AssertedValue<OWLDataProperty, OWLLiteral> {
+public enum InputRelationType {
 
-	AssertedDataValue(OWLDataProperty property, OWLLiteral value) {
-
-		super(property, value);
-	}
+	SOME_NODES,
+	All_NODES,
+	DATA_VALUE,
+	OUT_OF_SCOPE
 }

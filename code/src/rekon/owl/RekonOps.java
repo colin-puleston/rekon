@@ -31,6 +31,7 @@ import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.reasoner.impl.*;
 
 import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
@@ -39,6 +40,8 @@ class RekonOps {
 
 	static private NodeSet<OWLClass> EMPTY_EQUIV_CLASS_GROUPS = new OWLClassNodeSet();
 
+	private OWLDataFactory factory;
+
 	private OWLClass owlThing;
 	private OWLClass owlNothing;
 
@@ -46,6 +49,8 @@ class RekonOps {
 	private Node<OWLClass> owlNothingAsEquivGroup;
 
 	private MappedNames mappedNames;
+	private OwlInputObjects inputObjects;
+	private CoreBuilder coreBuilder;
 
 	private DynamicOps dynamicOps;
 	private InstanceOps instanceOps;
@@ -98,29 +103,9 @@ class RekonOps {
 		}
 	}
 
-	private class DynamicExprPatternCreator implements MultiPatternCreator {
-
-		private OWLClassExpression expr;
-
-		public Collection<Pattern> createAll(MatchStructures matchStructures) {
-
-			return createMatchComponents(matchStructures).toPatternDisjunction(expr);
-		}
-
-		DynamicExprPatternCreator(OWLClassExpression expr) {
-
-			this.expr = expr;
-		}
-
-		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
-
-			return new MatchComponents(mappedNames, matchStructures, true);
-		}
-	}
-
 	RekonOps(OWLOntologyManager manager) {
 
-		OWLDataFactory factory = manager.getOWLDataFactory();
+		factory = manager.getOWLDataFactory();
 
 		owlThing = factory.getOWLThing();
 		owlNothing = factory.getOWLNothing();
@@ -128,11 +113,11 @@ class RekonOps {
 		owlThingAsEquivGroup = new OWLClassNode(owlThing);
 		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
 
-		Assertions assertions = new Assertions(manager);
+		mappedNames = new MappedNames(manager);
+		inputObjects = new OwlInputObjects(factory, mappedNames);
+		coreBuilder = new CoreBuilder(mappedNames);
 
-		mappedNames = new MappedNames(assertions);
-
-		Ontology ontology = createOntology(assertions);
+		Ontology ontology = buildOntology(manager);
 
 		dynamicOps = ontology.createDynamicOps();
 		instanceOps = ontology.createInstanceOps();
@@ -142,7 +127,7 @@ class RekonOps {
 
 	RekonInstanceBox createInstanceBox() {
 
-		return new RekonInstanceBox(instanceOps, mappedNames);
+		return new RekonInstanceBox(instanceOps, mappedNames, inputObjects);
 	}
 
 	Node<OWLClass> getEquivalentClasses(OWLClassExpression expr) {
@@ -229,14 +214,21 @@ class RekonOps {
 		return false;
 	}
 
-	private Ontology createOntology(Assertions assertions) {
+	private Ontology buildOntology(OWLOntologyManager manager) {
 
-		return new Ontology(mappedNames, createStructureBuilder(assertions));
+		return new Ontology(mappedNames, createStructureBuilder(manager));
 	}
 
-	private StructureBuilder createStructureBuilder(Assertions assertions) {
+	public StructureBuilder createStructureBuilder(OWLOntologyManager manager) {
 
-		return new RekonStructureBuilder(assertions, mappedNames);
+		OwlInputAssertions asserts = createInputAssertions(manager);
+
+		return coreBuilder.createStructureBuilder(asserts, new OwlBuildLogger());
+	}
+
+	private OwlInputAssertions createInputAssertions(OWLOntologyManager manager) {
+
+		return new OwlInputAssertions(manager, mappedNames, inputObjects);
 	}
 
 	private Names getSuperNames(OWLClassExpression expr, boolean direct) {
@@ -328,7 +320,7 @@ class RekonOps {
 			return toDynamicHandler((OWLClass)expr);
 		}
 
-		return dynamicOps.createHandler(new DynamicExprPatternCreator(expr));
+		return dynamicOps.createHandler(toDynamicPatternBuilder(expr));
 	}
 
 	private DynamicOpsHandler toDynamicHandler(OWLClass cls) {
@@ -339,5 +331,10 @@ class RekonOps {
 	private DynamicOpsHandler toDynamicHandler(OWLNamedIndividual ind) {
 
 		return dynamicOps.createHandler(mappedNames.get(ind));
+	}
+
+	private MultiPatternBuilder toDynamicPatternBuilder(OWLClassExpression expr) {
+
+		return coreBuilder.createMultiPatternBuilder(inputObjects.createExpression(expr));
 	}
 }

@@ -22,34 +22,30 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
 
 import java.util.*;
-
-import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class ComplexStuctureCreator {
+class ComplexStuctureBuilder {
 
-	static private final String EQUIV_AXIOM_DESCRIPTION = "EQUIVALENT-CLASSES";
-	static private final String SUBCLASS_AXIOM_DESCRIPTION = "SUB-CLASS-OF";
-
-	private MappedNames mappedNames;
 	private MatchComponents matchComponents;
 	private MatchStructures matchStructures;
 
-	private abstract class EquivsBasedCreator {
+	private BuildLogger logger;
+
+	private abstract class EquivsBasedBuilder {
 
 		private Set<Pattern> patternDefns = new HashSet<Pattern>();
 		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
 
-		boolean create(Collection<OWLClassExpression> equivs) {
+		boolean create(Collection<InputExpression> equivs) {
 
-			for (OWLClassExpression e : equivs) {
+			for (InputExpression e : equivs) {
 
 				if (!absorbEquiv(e)) {
 
@@ -75,11 +71,11 @@ class ComplexStuctureCreator {
 			return true;
 		}
 
-		abstract boolean handleOutOfScopeEquiv(OWLClassExpression equiv);
+		abstract boolean handleOutOfScopeEquiv(InputExpression equiv);
 
 		abstract ClassNode resolveDefinedClass();
 
-		private boolean absorbEquiv(OWLClassExpression equiv) {
+		private boolean absorbEquiv(InputExpression equiv) {
 
 			List<Pattern> djs = matchComponents.toPatternDisjunction(equiv);
 
@@ -106,41 +102,41 @@ class ComplexStuctureCreator {
 		}
 	}
 
-	private class ClassEquivsBasedCreator extends EquivsBasedCreator {
+	private class ClassEquivalentsBasedBuilder extends EquivsBasedBuilder {
 
-		private AssertedClass assertCls;
+		private InputClass input;
 
-		ClassEquivsBasedCreator(AssertedClass assertCls) {
+		ClassEquivalentsBasedBuilder(InputClass input) {
 
-			this.assertCls = assertCls;
+			this.input = input;
 
-			create(assertCls.getEquivExprs());
+			create(input.getEquivExprs());
 		}
 
-		boolean handleOutOfScopeEquiv(OWLClassExpression equiv) {
+		boolean handleOutOfScopeEquiv(InputExpression equiv) {
 
-			logOutOfScopeAxiom(EQUIV_AXIOM_DESCRIPTION, assertCls.equivExprToAxiom(equiv));
+			logger.logOutOfScopeEquivalent(input, equiv);
 
 			return true;
 		}
 
 		ClassNode resolveDefinedClass() {
 
-			return mappedNames.get(assertCls.getEntity());
+			return input.getName();
 		}
 	}
 
-	private class GCIEquivsBasedCreator extends EquivsBasedCreator {
+	private class GCIEquivalentsBasedBuilder extends EquivsBasedBuilder {
 
-		GCIEquivsBasedCreator(OWLEquivalentClassesAxiom ax) {
+		GCIEquivalentsBasedBuilder(InputEquivalence equivs) {
 
-			if (!create(ax.getClassExpressions())) {
+			if (!create(equivs.getEquivs())) {
 
-				logOutOfScopeAxiom(EQUIV_AXIOM_DESCRIPTION, ax);
+				logger.logOutOfScopeEquivalence(equivs);
 			}
 		}
 
-		boolean handleOutOfScopeEquiv(OWLClassExpression equiv) {
+		boolean handleOutOfScopeEquiv(InputExpression equiv) {
 
 			return false;
 		}
@@ -151,24 +147,24 @@ class ComplexStuctureCreator {
 		}
 	}
 
-	private class ClassUnionSupersBasedCreator {
+	private class ClassDisjunctionSupersBasedBuilder {
 
-		private AssertedClass assertCls;
+		private InputClass input;
 		private ClassNode subCls;
 
-		ClassUnionSupersBasedCreator(AssertedClass assertCls) {
+		ClassDisjunctionSupersBasedBuilder(InputClass input) {
 
-			subCls = mappedNames.get(assertCls.getEntity());
+			subCls = input.getName();
 
-			for (OWLObjectUnionOf sup : assertCls.getSuperUnionExprs()) {
+			for (InputExpression inputDj : input.getSuperDisjunctionExprs()) {
 
-				checkCreate(sup);
+				checkCreate(inputDj);
 			}
 		}
 
-		private void checkCreate(OWLObjectUnionOf sup) {
+		private void checkCreate(InputExpression inputDisjunction) {
 
-			List<Pattern> djs = matchComponents.toPatternDisjunction(sup);
+			List<Pattern> djs = matchComponents.toPatternDisjunction(inputDisjunction);
 
 			if (djs != null) {
 
@@ -176,59 +172,39 @@ class ComplexStuctureCreator {
 			}
 			else {
 
-				handleOutOfScopeSuper(sup);
+				logger.logOutOfScopeSuper(input, inputDisjunction);
 			}
-		}
-
-		private void handleOutOfScopeSuper(OWLClassExpression sup) {
-
-			logOutOfScopeAxiom(SUBCLASS_AXIOM_DESCRIPTION, assertCls.superExprToAxiom(sup));
 		}
 	}
 
-	private class GCISuperBasedCreator {
+	private class GCISubSuperBasedBuilder {
 
-		private OWLClassExpression sup;
-		private OWLClassExpression sub;
+		GCISubSuperBasedBuilder(InputSubSuper subSuper) {
 
-		GCISuperBasedCreator(OWLSubClassOfAxiom ax) {
-
-			sup = ax.getSuperClass();
-			sub = ax.getSubClass();
-
-			if (!create()) {
-
-				logOutOfScopeAxiom(SUBCLASS_AXIOM_DESCRIPTION, ax);
-			}
-		}
-
-		private boolean create() {
-
+			InputExpression sub = subSuper.getSub();
 			List<Pattern> subDjs = matchComponents.toPatternDisjunction(sub);
 
-			if (subDjs != null) {
+			if (subDjs == null) {
 
-				ClassNode supCls = resolveSuperClass();
-
-				if (supCls != null) {
-
-					for (NodeX subCls : resolveDisjunctionToNodes(subDjs)) {
-
-						subCls.addSubsumer(supCls);
-					}
-
-					return true;
-				}
+				logger.logOutOfScopeSubSuper(subSuper);
 			}
 
-			return false;
+			ClassNode supCls = resolveSuperClass(subSuper.getSuper());
+
+			if (supCls != null) {
+
+				for (NodeX subCls : resolveDisjunctionToNodes(subDjs)) {
+
+					subCls.addSubsumer(supCls);
+				}
+			}
 		}
 
-		private ClassNode resolveSuperClass() {
+		private ClassNode resolveSuperClass(InputExpression sup) {
 
-			if (sup instanceof OWLClass) {
+			if (sup.getExpressionType() == InputExpressionType.CLASS) {
 
-				return mappedNames.get((OWLClass)sup);
+				return sup.asClassNode();
 			}
 
 			Pattern p = matchComponents.toPattern(sup);
@@ -237,30 +213,30 @@ class ComplexStuctureCreator {
 		}
 	}
 
-	ComplexStuctureCreator(
-		Assertions assertions,
-		MappedNames mappedNames,
+	ComplexStuctureBuilder(
+		InputAssertions assertions,
 		MatchComponents matchComponents,
-		MatchStructures matchStructures) {
+		MatchStructures matchStructures,
+		BuildLogger logger) {
 
-		this.mappedNames = mappedNames;
 		this.matchComponents = matchComponents;
 		this.matchStructures = matchStructures;
+		this.logger = logger;
 
-		for (AssertedClass c : assertions.getClasses()) {
+		for (InputClass c : assertions.getClasses()) {
 
-			new ClassEquivsBasedCreator(c);
-			new ClassUnionSupersBasedCreator(c);
+			new ClassEquivalentsBasedBuilder(c);
+			new ClassDisjunctionSupersBasedBuilder(c);
 		}
 
-		for (OWLEquivalentClassesAxiom ax : assertions.getEquivGCIs()) {
+		for (InputEquivalence equivs : assertions.getEquivalenceGCIs()) {
 
-			new GCIEquivsBasedCreator(ax);
+			new GCIEquivalentsBasedBuilder(equivs);
 		}
 
-		for (OWLSubClassOfAxiom ax :  assertions.getSuperGCIs()) {
+		for (InputSubSuper subSuper :  assertions.getSubSuperGCIs()) {
 
-			new GCISuperBasedCreator(ax);
+			new GCISubSuperBasedBuilder(subSuper);
 		}
 	}
 
@@ -300,14 +276,5 @@ class ComplexStuctureCreator {
 		matchStructures.addDefinitionPattern(c, defn);
 
 		return c;
-	}
-
-	private void logOutOfScopeAxiom(String axiomDesc, OWLAxiom axiom) {
-
-		Logger logger = Logger.SINGLETON;
-
-		logger.logOutOfScopeWarningLine(axiomDesc);
-		logger.logLine("AXIOM: " + axiom);
-		logger.logSeparatorLine();
 	}
 }

@@ -22,43 +22,14 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build;
 
 import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-public class DynamicOps {
+public interface InputEquivalence extends InputObject {
 
-	private Ontology ontology;
-
-	public DynamicOpsHandler createHandler(NodeX nodes) {
-
-		return new DynamicNodeOpsHandler(nodes);
-	}
-
-	public DynamicOpsHandler createHandler(MultiPatternBuilder disjunctsBuilder) {
-
-		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
-
-		if (expr.expressionCreated()) {
-
-			NodeX node = expr.toSingleNode();
-
-			if (node != null) {
-
-				return new DynamicNodeOpsHandler(node);
-			}
-
-			return new DynamicExpressionOpsHandler(ontology, expr);
-		}
-
-		return InvalidInputDynamicOpsHandler.SINGLETON;
-	}
-
-	DynamicOps(Ontology ontology) {
-
-		this.ontology = ontology;
-	}
+	Collection<InputExpression> getEquivs();
 }

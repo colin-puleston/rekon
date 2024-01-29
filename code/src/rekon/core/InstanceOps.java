@@ -40,10 +40,10 @@ public class InstanceOps {
 
 		private Set<Instance> added = new HashSet<Instance>();
 
-		void add(Instance instance, SinglePatternCreator profileCreator) {
+		void add(Instance instance, SinglePatternBuilder profileBuilder) {
 
 			InstanceNode node = instance.getNode();
-			InstancePattern ip = new InstancePattern(node, profileCreator);
+			InstancePattern ip = new InstancePattern(node, profileBuilder);
 
 			dynamicSubsumers.inferSubsumers(ip);
 			node.completeClassification();
@@ -52,7 +52,7 @@ public class InstanceOps {
 
 			if (instance.addReferencers()) {
 
-				instance.setProfileRecreator(profileCreator);
+				instance.setProfileRebuilder(profileBuilder);
 			}
 
 			added.add(instance);
@@ -79,7 +79,7 @@ public class InstanceOps {
 
 					remove(r);
 					r.reset();
-					add(r, r.getProfileRecreator());
+					add(r, r.getProfileRebuilder());
 				}
 			}
 		}
@@ -96,11 +96,11 @@ public class InstanceOps {
 		registerAsGhost(instance);
 	}
 
-	public void add(Instance instance, SinglePatternCreator profileCreator) {
+	public void add(Instance instance, SinglePatternBuilder profileBuilder) {
 
 		checkReplaceGhost(instance);
 
-		new Updater().add(instance, profileCreator);
+		new Updater().add(instance, profileBuilder);
 	}
 
 	public void remove(Instance instance) {
@@ -110,9 +110,9 @@ public class InstanceOps {
 		checkRegisterAsGhost(instance);
 	}
 
-	public List<Instance> match(MultiPatternCreator queryCreator) {
+	public List<Instance> match(MultiPatternBuilder queryBuilder) {
 
-		DynamicExpression q = new DynamicExpression(queryCreator);
+		DynamicExpression q = new DynamicExpression(queryBuilder);
 		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
 
 		return matches.isEmpty()
@@ -121,11 +121,11 @@ public class InstanceOps {
 	}
 
 	public boolean matches(
-						MultiPatternCreator queryCreator,
-						SinglePatternCreator profileCreator) {
+						MultiPatternBuilder queryBuilder,
+						SinglePatternBuilder profileBuilder) {
 
-		DynamicExpression q = new DynamicExpression(queryCreator);
-		DynamicExpression p = new DynamicExpression(profileCreator);
+		DynamicExpression q = new DynamicExpression(queryBuilder);
+		DynamicExpression p = new DynamicExpression(profileBuilder);
 
 		return q.getExpressionMatcher().subsumes(p.getExpressionMatcher());
 	}

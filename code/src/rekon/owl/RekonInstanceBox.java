@@ -29,6 +29,7 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
@@ -37,6 +38,10 @@ public class RekonInstanceBox {
 
 	private InstanceOps instanceOps;
 	private MappedNames mappedNames;
+	private OwlInputObjects inputObjects;
+
+	private CoreBuilder instancesCoreBuilder;
+	private CoreBuilder queriesCoreBuilder;
 
 	private Map<IRI, MappedInstance> instances = new HashMap<IRI, MappedInstance>();
 
@@ -62,25 +67,25 @@ public class RekonInstanceBox {
 		}
 	}
 
-	private class InstanceBoxMatchComponents extends MatchComponents {
+	private class InstanceBoxBuildCustomiser implements BuildCustomiser {
 
-		private boolean queryComponents;
+		private boolean queries;
 
-		InstanceBoxMatchComponents(MatchStructures matchStructures, boolean queryComponents) {
+		public NodeX checkToCustomAtomicNode(InputExpression source) {
 
-			super(mappedNames, matchStructures, true);
+			Object owlSource = source.getSourceObject();
 
-			this.queryComponents = queryComponents;
-		}
+			if (owlSource instanceof RekonOWLInstanceRef) {
 
-		NodeX toNode(OWLClassExpression source) {
-
-			if (source instanceof RekonOWLInstanceRef) {
-
-				return toInstanceNode((RekonOWLInstanceRef)source);
+				return toInstanceNode((RekonOWLInstanceRef)owlSource);
 			}
 
-			return super.toNode(source);
+			return null;
+		}
+
+		InstanceBoxBuildCustomiser(boolean queries) {
+
+			this.queries = queries;
 		}
 
 		private InstanceNode toInstanceNode(RekonOWLInstanceRef source) {
@@ -90,7 +95,7 @@ public class RekonInstanceBox {
 
 			if (i == null) {
 
-				if (queryComponents) {
+				if (queries) {
 
 					throw new RekonInstanceBoxException("Instance does not exist: " + iri);
 				}
@@ -104,49 +109,9 @@ public class RekonInstanceBox {
 		}
 	}
 
-	private class InstanceExprPatternCreator implements SinglePatternCreator {
-
-		private OWLClassExpression expr;
-
-		public Pattern create(MatchStructures matchStructures) {
-
-			return createMatchComponents(matchStructures).toPattern(expr);
-		}
-
-		InstanceExprPatternCreator(OWLClassExpression expr) {
-
-			this.expr = expr;
-		}
-
-		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
-
-			return new InstanceBoxMatchComponents(matchStructures, false);
-		}
-	}
-
-	private class QueryExprPatternCreator implements MultiPatternCreator {
-
-		private OWLClassExpression expr;
-
-		public Collection<Pattern> createAll(MatchStructures matchStructures) {
-
-			return createMatchComponents(matchStructures).toPatternDisjunction(expr);
-		}
-
-		QueryExprPatternCreator(OWLClassExpression expr) {
-
-			this.expr = expr;
-		}
-
-		private MatchComponents createMatchComponents(MatchStructures matchStructures) {
-
-			return new InstanceBoxMatchComponents(matchStructures, true);
-		}
-	}
-
 	public synchronized void add(IRI iri, OWLClassExpression profile) {
 
-		instanceOps.add(new MappedInstance(iri), new InstanceExprPatternCreator(profile));
+		instanceOps.add(new MappedInstance(iri), createInstanceExprBuilder(profile));
 	}
 
 	public synchronized void remove(IRI iri) {
@@ -163,14 +128,14 @@ public class RekonInstanceBox {
 
 	public synchronized List<IRI> match(OWLClassExpression query) {
 
-		return extractIRIs(instanceOps.match(new QueryExprPatternCreator(query)));
+		return extractIRIs(instanceOps.match(createQueryExprBuilder(query)));
 	}
 
 	public synchronized boolean matches(OWLClassExpression query, OWLClassExpression profile) {
 
 		return instanceOps.matches(
-					new QueryExprPatternCreator(query),
-					new InstanceExprPatternCreator(profile));
+					createQueryExprBuilder(query),
+					createInstanceExprBuilder(profile));
 	}
 
 	public OWLClassExpression createInstanceRef(IRI iri) {
@@ -178,10 +143,37 @@ public class RekonInstanceBox {
 		return new RekonOWLInstanceRef(iri);
 	}
 
-	RekonInstanceBox(InstanceOps instanceOps, MappedNames mappedNames) {
+	RekonInstanceBox(
+		InstanceOps instanceOps,
+		MappedNames mappedNames,
+		OwlInputObjects inputObjects) {
 
 		this.instanceOps = instanceOps;
 		this.mappedNames = mappedNames;
+		this.inputObjects = inputObjects;
+
+		instancesCoreBuilder = createCoreBuilder(false);
+		queriesCoreBuilder = createCoreBuilder(true);
+	}
+
+	private CoreBuilder createCoreBuilder(boolean queries) {
+
+		return new CoreBuilder(mappedNames, new InstanceBoxBuildCustomiser(queries));
+	}
+
+	private SinglePatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
+
+		return instancesCoreBuilder.createSinglePatternBuilder(toInputExpression(expr));
+	}
+
+	private MultiPatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
+
+		return queriesCoreBuilder.createMultiPatternBuilder(toInputExpression(expr));
+	}
+
+	private InputExpression toInputExpression(OWLClassExpression expr) {
+
+		return inputObjects.createExpression(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

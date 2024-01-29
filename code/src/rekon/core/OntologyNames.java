@@ -34,7 +34,29 @@ public abstract class OntologyNames {
 	static private final String ROOT_NAMES_LABEL = "ROOT";
 	static private final String ABSENT_CLASS_NAME_LABEL = "NOTHING";
 
-	private AbsentClassValue absentClassValue = new AbsentClassValue();
+	static public final ClassNode ABSENT_CLASS_NODE = new AbsentClassNode();
+	static public final NodeValue ABSENT_CLASS_VALUE = new AbsentClassValue();
+
+	static private class AbsentClassNode extends ClassNode {
+
+		public String getLabel() {
+
+			return ABSENT_CLASS_NAME_LABEL;
+		}
+	}
+
+	static private class AbsentClassValue extends NodeValue {
+
+		boolean subsumesOther(Value v) {
+
+			return v == this;
+		}
+
+		private AbsentClassValue() {
+
+			super(ABSENT_CLASS_NODE);
+		}
+	}
 
 	private class RootClassNode extends ClassNode {
 
@@ -90,31 +112,15 @@ public abstract class OntologyNames {
 		}
 	}
 
-	private class AbsentClassNode extends ClassNode {
+	public abstract ClassNode getRootClassNode();
 
-		public String getLabel() {
+	public abstract Collection<ClassNode> getClassNodes();
 
-			return ABSENT_CLASS_NAME_LABEL;
-		}
-	}
+	public abstract Collection<IndividualNode> getIndividualNodes();
 
-	private class AbsentClassValue extends NodeValue {
+	public abstract Collection<NodeProperty> getNodeProperties();
 
-		boolean subsumesOther(Value v) {
-
-			return v == this;
-		}
-
-		private AbsentClassValue() {
-
-			super(new AbsentClassNode());
-		}
-	}
-
-	public AbsentClassValue getAbsentClassValue() {
-
-		return absentClassValue;
-	}
+	public abstract Collection<DataProperty> getDataProperties();
 
 	protected ClassNode createRootClassNode(Collection<ClassNode> allSubs) {
 
@@ -130,12 +136,4 @@ public abstract class OntologyNames {
 
 		return new RootDataProperty(allSubs);
 	}
-
-	protected abstract Collection<ClassNode> getClassNodes();
-
-	protected abstract Collection<IndividualNode> getIndividualNodes();
-
-	protected abstract Collection<NodeProperty> getNodeProperties();
-
-	protected abstract Collection<DataProperty> getDataProperties();
 }

@@ -22,14 +22,24 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build;
 
 import java.util.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface MultiPatternCreator {
+public interface InputRelation extends InputObject {
 
-	public Collection<Pattern> createAll(MatchStructures matchStructures);
+	InputRelationType getRelationType();
+
+	NodeProperty getNodeProperty();
+
+	DataProperty getDataProperty();
+
+	InputExpression getExpressionValue();
+
+	DataValue getDataValue();
 }

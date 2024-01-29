@@ -31,7 +31,7 @@ import java.util.*;
  */
 class DynamicExpression extends LocalExpression {
 
-	private MultiPatternCreator disjunctsCreator;
+	private MultiPatternBuilder disjunctsBuilder;
 
 	private NodeMatcher expressionMatcher = null;
 	private NodeX asSingleNode = null;
@@ -55,21 +55,21 @@ class DynamicExpression extends LocalExpression {
 		}
 	}
 
-	DynamicExpression(MultiPatternCreator disjunctsCreator) {
+	DynamicExpression(MultiPatternBuilder disjunctsBuilder) {
 
-		this.disjunctsCreator = disjunctsCreator;
+		this.disjunctsBuilder = disjunctsBuilder;
 
 		initialise(new DynamicClasses());
 	}
 
-	DynamicExpression(SinglePatternCreator patternCreator) {
+	DynamicExpression(SinglePatternBuilder patternBuilder) {
 
-		this(new SingleToMultiPatternCreator(patternCreator));
+		this(new SingleToMultiPatternBuilder(patternBuilder));
 	}
 
 	NodeX createStructures(MatchStructures matchStructures) {
 
-		Collection<Pattern> djs = disjunctsCreator.createAll(matchStructures);
+		Collection<Pattern> djs = disjunctsBuilder.createAll(matchStructures);
 
 		if (djs == null) {
 

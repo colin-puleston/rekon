@@ -22,17 +22,22 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
 
-import org.semanticweb.owlapi.model.*;
+import java.util.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class AssertedObjectValue extends AssertedValue<OWLObjectProperty, OWLIndividual> {
+public interface InputIndividual extends InputName<IndividualNode> {
 
-	AssertedObjectValue(OWLObjectProperty property, OWLIndividual value) {
+	IndividualNode getIndividualNode();
 
-		super(property, value);
-	}
+	Collection<ClassNode> getTypes();
+
+	Collection<InputExpression> getTypeExprs();
+
+	Collection<InputRelation> getRelations();
 }

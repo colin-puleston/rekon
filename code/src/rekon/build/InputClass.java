@@ -22,29 +22,22 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.build;
+
+import java.util.*;
 
 import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class RekonStructureBuilder implements StructureBuilder {
+public interface InputClass extends InputHierarchyName<ClassNode> {
 
-	private Assertions assertions;
-	private MappedNames mappedNames;
+	ClassNode getClassNode();
 
-	public void build(MatchStructures structures) {
+	Collection<InputExpression> getEquivExprs();
 
-		MatchComponents comps = new MatchComponents(mappedNames, structures, false);
+	Collection<InputExpression> getSuperAtomicExprs();
 
-		new NodeProfilesCreator(assertions, mappedNames, comps, structures);
-		new ComplexStuctureCreator(assertions, mappedNames, comps, structures);
-	}
-
-	RekonStructureBuilder(Assertions assertions, MappedNames mappedNames) {
-
-		this.assertions = assertions;
-		this.mappedNames = mappedNames;
-	}
+	Collection<InputExpression> getSuperDisjunctionExprs();
 }
