@@ -650,7 +650,7 @@ class OwlInputObjects {
 
 		private DataValue extractDataType() {
 
-			return dataTypes.get(owlFillerAs(OWLDatatypeRestriction.class));
+			return dataTypes.get(owlFillerAs(OWLDataRange.class));
 		}
 
 		private DataValue extractDataValue() {
