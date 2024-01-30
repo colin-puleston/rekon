@@ -68,7 +68,7 @@ public class InstanceOps {
 
 			updateReferencers(instance);
 
-			return instance.anyReferencers();
+			return !instance.anyReferencers();
 		}
 
 		private void updateReferencers(Instance instance) {
