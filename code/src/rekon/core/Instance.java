@@ -50,25 +50,14 @@ public abstract class Instance {
 
 	public abstract String getLabel();
 
-	protected Instance(boolean setAsClassified) {
+	protected Instance(boolean undefinedRef) {
 
-		node = new InstanceNode(this, setAsClassified);
+		node = new InstanceNode(this, undefinedRef);
 	}
 
 	void reset() {
 
-		node = new InstanceNode(this, false);
-	}
-
-	void replaceGhost(Instance ghost) {
-
-		referencers.addAll(ghost.referencers);
-
-		for (Instance r : getReferenceds()) {
-
-			r.referencers.remove(ghost);
-			r.referencers.add(this);
-		}
+		node.unsetClassification();
 	}
 
 	void setProfileRebuilder(SinglePatternBuilder profileRebuilder) {
@@ -76,7 +65,7 @@ public abstract class Instance {
 		this.profileRebuilder = profileRebuilder;
 	}
 
-	boolean addReferencers() {
+	boolean addAsReferencer() {
 
 		Collection<Instance> refed = getReferenceds();
 
@@ -93,7 +82,7 @@ public abstract class Instance {
 		return false;
 	}
 
-	void removeFromReferenceds() {
+	void removeAsReferencer() {
 
 		for (Instance r : getReferenceds()) {
 

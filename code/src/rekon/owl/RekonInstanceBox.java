@@ -59,9 +59,9 @@ public class RekonInstanceBox {
 			return iri.toURI().getFragment();
 		}
 
-		MappedInstance(IRI iri, boolean setAsClassified) {
+		MappedInstance(IRI iri, boolean undefinedRef) {
 
-			super(setAsClassified);
+			super(undefinedRef);
 
 			this.iri = iri;
 
@@ -103,8 +103,6 @@ public class RekonInstanceBox {
 				}
 
 				i = new MappedInstance(iri, true);
-
-				instanceOps.add(i);
 			}
 
 			return i.getNode();
@@ -118,14 +116,17 @@ public class RekonInstanceBox {
 
 	public synchronized void remove(IRI iri) {
 
-		MappedInstance instance = instances.remove(iri);
+		MappedInstance instance = instances.get(iri);
 
 		if (instance == null) {
 
 			throw new RekonInstanceBoxException("Instance does not exist: " + iri);
 		}
 
-		instanceOps.remove(instance);
+		if (instanceOps.remove(instance)) {
+
+			instances.remove(iri);
+		}
 	}
 
 	public synchronized List<IRI> match(OWLClassExpression query) {

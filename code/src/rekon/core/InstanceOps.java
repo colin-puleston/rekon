@@ -34,8 +34,6 @@ public class InstanceOps {
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
-	private Map<Object, Instance> ghosts = new HashMap<Object, Instance>();
-
 	private class Updater {
 
 		private Set<Instance> added = new HashSet<Instance>();
@@ -50,7 +48,7 @@ public class InstanceOps {
 
 			dynamicSubsumeds.checkAddInstanceOption(node);
 
-			if (instance.addReferencers()) {
+			if (instance.addAsReferencer()) {
 
 				instance.setProfileRebuilder(profileBuilder);
 			}
@@ -59,16 +57,18 @@ public class InstanceOps {
 			updateReferencers(instance);
 		}
 
-		void remove(Instance instance) {
+		boolean remove(Instance instance) {
 
 			InstanceNode node = instance.getNode();
 
 			node.removeFromClassification();
 			dynamicSubsumeds.checkRemoveInstanceOption(node);
 
-			instance.removeFromReferenceds();
+			instance.removeAsReferencer();
 
 			updateReferencers(instance);
+
+			return instance.anyReferencers();
 		}
 
 		private void updateReferencers(Instance instance) {
@@ -91,23 +91,14 @@ public class InstanceOps {
 		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
-	public void add(Instance instance) {
-
-		registerAsGhost(instance);
-	}
-
 	public void add(Instance instance, SinglePatternBuilder profileBuilder) {
-
-		checkReplaceGhost(instance);
 
 		new Updater().add(instance, profileBuilder);
 	}
 
-	public void remove(Instance instance) {
+	public boolean remove(Instance instance) {
 
-		new Updater().remove(instance);
-
-		checkRegisterAsGhost(instance);
+		return new Updater().remove(instance);
 	}
 
 	public List<Instance> match(MultiPatternBuilder queryBuilder) {
@@ -128,29 +119,6 @@ public class InstanceOps {
 		DynamicExpression p = new DynamicExpression(profileBuilder);
 
 		return q.getExpressionMatcher().subsumes(p.getExpressionMatcher());
-	}
-
-	private void checkReplaceGhost(Instance addition) {
-
-		Instance ghost = ghosts.remove(addition.getInstanceId());
-
-		if (ghost != null) {
-
-			addition.replaceGhost(ghost);
-		}
-	}
-
-	private void checkRegisterAsGhost(Instance removal) {
-
-		if (removal.anyReferencers()) {
-
-			registerAsGhost(removal);
-		}
-	}
-
-	private void registerAsGhost(Instance instance) {
-
-		ghosts.put(instance.getInstanceId(), instance);
 	}
 
 	private List<Instance> matchesToInstances(NameSet matches) {

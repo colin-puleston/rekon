@@ -81,9 +81,9 @@ public abstract class Name {
 		return getSubs(direct).filterForType(type);
 	}
 
-	void registerAsDefinitionRefed(MatchRole role) {
+	Name() {
 
-		definitionRoles.add(role);
+		linksHandler = createInitialLinksHandler();
 	}
 
 	void setClassification() {
@@ -91,7 +91,7 @@ public abstract class Name {
 		linksHandler = getClassifier().createClassification();
 	}
 
-	Name() {
+	void unsetClassification() {
 
 		linksHandler = createInitialLinksHandler();
 	}
@@ -99,6 +99,11 @@ public abstract class Name {
 	void configureAsRootName(Collection<? extends Name> allSubs) {
 
 		getRootLinksHandler().configure(allSubs);
+	}
+
+	void registerAsDefinitionRefed(MatchRole role) {
+
+		definitionRoles.add(role);
 	}
 
 	boolean classified() {

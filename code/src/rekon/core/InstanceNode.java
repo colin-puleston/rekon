@@ -140,11 +140,11 @@ public class InstanceNode extends NodeX {
 		return instance.getLabel();
 	}
 
-	InstanceNode(Instance instance, boolean setAsClassified) {
+	InstanceNode(Instance instance, boolean undefinedRef) {
 
 		this.instance = instance;
 
-		if (setAsClassified) {
+		if (undefinedRef) {
 
 			completeClassification();
 		}
