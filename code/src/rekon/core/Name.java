@@ -91,7 +91,7 @@ public abstract class Name {
 		linksHandler = getClassifier().createClassification();
 	}
 
-	void unsetClassification() {
+	void resetClassifier() {
 
 		linksHandler = createInitialLinksHandler();
 	}

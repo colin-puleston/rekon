@@ -22,24 +22,17 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import rekon.core.*;
+package rekon.core;
 
 /**
  * @author Colin Puleston
  */
-public class RekonInstanceBoxException extends RuntimeException {
+public class RekonInstanceOpsException extends RuntimeException {
 
 	static private final long serialVersionUID = -1;
 
-	RekonInstanceBoxException(String message) {
+	RekonInstanceOpsException(String message) {
 
 		super(message);
-	}
-
-	RekonInstanceBoxException(RekonInstanceOpsException e) {
-
-		super(e);
 	}
 }

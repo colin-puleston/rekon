@@ -73,6 +73,11 @@ public abstract class NodeX extends Name {
 		return false;
 	}
 
+	void clearMatchers() {
+
+		matchers = NO_MATCHERS;
+	}
+
 	boolean matchable() {
 
 		return !matchers.isEmpty();

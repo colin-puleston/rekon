@@ -150,6 +150,14 @@ public class InstanceNode extends NodeX {
 		}
 	}
 
+	void checkClassifiable() {
+
+		if (classified()) {
+
+			resetClassifier();
+		}
+	}
+
 	void completeClassification() {
 
 		Names directs = findDirectTypes();
@@ -161,9 +169,11 @@ public class InstanceNode extends NodeX {
 		getClassification().optimiseEmptyLinks();
 	}
 
-	void removeFromClassification() {
+	void clearLinks() {
 
 		new TypeLinksRemover();
+
+		clearMatchers();
 	}
 
 	Instance getInstance() {

@@ -111,7 +111,21 @@ public class RekonInstanceBox {
 
 	public synchronized void add(IRI iri, OWLClassExpression profile) {
 
-		instanceOps.add(new MappedInstance(iri, false), createInstanceExprBuilder(profile));
+		MappedInstance instance = instances.get(iri);
+
+		if (instance != null) {
+
+			if (!instance.undefinedRef()) {
+
+				throw new RekonInstanceBoxException("Instance already exists: " + iri);
+			}
+		}
+		else {
+
+			instance = new MappedInstance(iri, false);
+		}
+
+		instanceOps.add(instance, createInstanceExprBuilder(profile));
 	}
 
 	public synchronized void remove(IRI iri) {
@@ -131,14 +145,28 @@ public class RekonInstanceBox {
 
 	public synchronized List<IRI> match(OWLClassExpression query) {
 
-		return extractIRIs(instanceOps.match(createQueryExprBuilder(query)));
+		try {
+
+			return extractIRIs(instanceOps.match(createQueryExprBuilder(query)));
+		}
+		catch (RekonInstanceOpsException e) {
+
+			throw new RekonInstanceBoxException(e);
+		}
 	}
 
 	public synchronized boolean matches(OWLClassExpression query, OWLClassExpression profile) {
 
-		return instanceOps.matches(
-					createQueryExprBuilder(query),
-					createInstanceExprBuilder(profile));
+		try {
+
+			return instanceOps.matches(
+						createQueryExprBuilder(query),
+						createInstanceExprBuilder(profile));
+		}
+		catch (RekonInstanceOpsException e) {
+
+			throw new RekonInstanceBoxException(e);
+		}
 	}
 
 	public OWLClassExpression createInstanceRef(IRI iri) {

@@ -50,22 +50,17 @@ public abstract class Instance {
 
 	public abstract String getLabel();
 
+	public boolean undefinedRef() {
+
+		return profileRebuilder == null;
+	}
+
 	protected Instance(boolean undefinedRef) {
 
 		node = new InstanceNode(this, undefinedRef);
 	}
 
-	void reset() {
-
-		node.unsetClassification();
-	}
-
-	void setProfileRebuilder(SinglePatternBuilder profileRebuilder) {
-
-		this.profileRebuilder = profileRebuilder;
-	}
-
-	boolean addAsReferencer() {
+	void checkAddAsReferencer(SinglePatternBuilder profileBuilder) {
 
 		Collection<Instance> refed = getReferenceds();
 
@@ -76,10 +71,8 @@ public abstract class Instance {
 				r.referencers.add(this);
 			}
 
-			return true;
+			profileRebuilder = profileBuilder;
 		}
-
-		return false;
 	}
 
 	void removeAsReferencer() {
@@ -90,11 +83,16 @@ public abstract class Instance {
 		}
 	}
 
+	void setAsUndefinedRef() {
+
+		profileRebuilder = null;
+	}
+
 	SinglePatternBuilder getProfileRebuilder() {
 
 		if (profileRebuilder == null) {
 
-			throw new Error("Profile-rebuilder has not been set!");
+			throw new Error("Profile-rebuilder has not been set for: " + node);
 		}
 
 		return profileRebuilder;

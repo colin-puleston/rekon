@@ -45,30 +45,23 @@ public class InstanceOps {
 
 			dynamicSubsumers.inferSubsumers(ip);
 			node.completeClassification();
-
 			dynamicSubsumeds.checkAddInstanceOption(node);
 
-			if (instance.addAsReferencer()) {
-
-				instance.setProfileRebuilder(profileBuilder);
-			}
-
+			instance.checkAddAsReferencer(profileBuilder);
 			added.add(instance);
 			updateReferencers(instance);
 		}
 
-		boolean remove(Instance instance) {
+		void remove(Instance instance) {
 
 			InstanceNode node = instance.getNode();
 
-			node.removeFromClassification();
 			dynamicSubsumeds.checkRemoveInstanceOption(node);
 
+			updateReferencers(instance);
 			instance.removeAsReferencer();
 
-			updateReferencers(instance);
-
-			return !instance.anyReferencers();
+			node.clearLinks();
 		}
 
 		private void updateReferencers(Instance instance) {
@@ -78,7 +71,7 @@ public class InstanceOps {
 				if (!added.contains(r)) {
 
 					remove(r);
-					r.reset();
+					r.getNode().resetClassifier();
 					add(r, r.getProfileRebuilder());
 				}
 			}
@@ -93,17 +86,28 @@ public class InstanceOps {
 
 	public void add(Instance instance, SinglePatternBuilder profileBuilder) {
 
+		instance.getNode().checkClassifiable();
+
 		new Updater().add(instance, profileBuilder);
 	}
 
 	public boolean remove(Instance instance) {
 
-		return new Updater().remove(instance);
+		new Updater().remove(instance);
+
+		if (instance.anyReferencers()) {
+
+			instance.setAsUndefinedRef();
+
+			return false;
+		}
+
+		return true;
 	}
 
 	public List<Instance> match(MultiPatternBuilder queryBuilder) {
 
-		DynamicExpression q = new DynamicExpression(queryBuilder);
+		DynamicExpression q = createQueryExpression(queryBuilder);
 		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
 
 		return matches.isEmpty()
@@ -115,8 +119,8 @@ public class InstanceOps {
 						MultiPatternBuilder queryBuilder,
 						SinglePatternBuilder profileBuilder) {
 
-		DynamicExpression q = new DynamicExpression(queryBuilder);
-		DynamicExpression p = new DynamicExpression(profileBuilder);
+		DynamicExpression q = createQueryExpression(queryBuilder);
+		DynamicExpression p = createInstanceExpression(profileBuilder);
 
 		return q.getExpressionMatcher().subsumes(p.getExpressionMatcher());
 	}
@@ -144,5 +148,25 @@ public class InstanceOps {
 
 			instances.add(((InstanceNode)n).getInstance());
 		}
+	}
+
+	private DynamicExpression createQueryExpression(MultiPatternBuilder builder) {
+
+		return checkExpressionCreated(new DynamicExpression(builder), "query");
+	}
+
+	private DynamicExpression createInstanceExpression(SinglePatternBuilder builder) {
+
+		return checkExpressionCreated(new DynamicExpression(builder), "instance");
+	}
+
+	private DynamicExpression checkExpressionCreated(DynamicExpression expr, String exprDesc) {
+
+		if (expr.expressionCreated()) {
+
+			return expr;
+		}
+
+		throw new RekonInstanceOpsException("Invalid " + exprDesc + "-expression!");
 	}
 }
