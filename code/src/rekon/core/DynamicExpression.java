@@ -55,6 +55,76 @@ class DynamicExpression extends LocalExpression {
 		}
 	}
 
+	private class ExpressionCreator {
+
+		private MatchStructures matchStructures;
+
+		ExpressionCreator(MatchStructures matchStructures) {
+
+			this.matchStructures = matchStructures;
+		}
+
+		NodeX create() {
+
+			Collection<Pattern> djs = disjunctsBuilder.createAll(matchStructures);
+
+			if (djs == null) {
+
+				return null;
+			}
+
+			if (djs.size() == 1) {
+
+				return createSinglePattern(djs.iterator().next());
+			}
+
+			return createDisjunction(djs);
+		}
+
+		private NodeX createSinglePattern(Pattern pattern) {
+
+			asSingleNode = pattern.toSingleNode();
+
+			if (asSingleNode != null) {
+
+				expressionMatcher = new PatternMatcher(asSingleNode);
+
+				return asSingleNode;
+			}
+
+			ClassNode defnCls = matchStructures.addDefinitionClass();
+
+			expressionMatcher = matchStructures.addDefinitionPattern(defnCls, pattern);
+
+			return defnCls;
+		}
+
+		private NodeX createDisjunction(Collection<Pattern> djs) {
+
+			List<NodeX> djNodes = new ArrayList<NodeX>();
+
+			for (Pattern dj : djs) {
+
+				NodeX djNode = dj.toSingleNode();
+
+				if (djNode == null) {
+
+					djNode = matchStructures.addDefinitionClass();
+
+					matchStructures.addDefinitionPattern(djNode, dj);
+				}
+
+				djNodes.add(djNode);
+			}
+
+			ClassNode defnCls = matchStructures.addDefinitionClass();
+
+			expressionMatcher = matchStructures.addDisjunction(defnCls, djNodes, true);
+
+			return defnCls;
+		}
+	}
+
 	DynamicExpression(MultiPatternBuilder disjunctsBuilder) {
 
 		this.disjunctsBuilder = disjunctsBuilder;
@@ -69,19 +139,7 @@ class DynamicExpression extends LocalExpression {
 
 	NodeX createExpression(MatchStructures matchStructures) {
 
-		Collection<Pattern> djs = disjunctsBuilder.createAll(matchStructures);
-
-		if (djs == null) {
-
-			return null;
-		}
-
-		if (djs.size() == 1) {
-
-			return createSinglePattern(matchStructures, djs.iterator().next());
-		}
-
-		return createDisjunction(matchStructures, djs);
+		return new ExpressionCreator(matchStructures).create();
 	}
 
 	NodeMatcher getExpressionMatcher() {
@@ -92,48 +150,5 @@ class DynamicExpression extends LocalExpression {
 	NodeX toSingleNode() {
 
 		return asSingleNode;
-	}
-
-	private NodeX createSinglePattern(MatchStructures matchStructures, Pattern pattern) {
-
-		asSingleNode = pattern.toSingleNode();
-
-		if (asSingleNode != null) {
-
-			expressionMatcher = new PatternMatcher(asSingleNode);
-
-			return asSingleNode;
-		}
-
-		ClassNode defnCls = matchStructures.addDefinitionClass();
-
-		expressionMatcher = matchStructures.addDefinitionPattern(defnCls, pattern);
-
-		return defnCls;
-	}
-
-	private NodeX createDisjunction(MatchStructures matchStructures, Collection<Pattern> djs) {
-
-		List<NodeX> djNodes = new ArrayList<NodeX>();
-
-		for (Pattern dj : djs) {
-
-			NodeX djNode = dj.toSingleNode();
-
-			if (djNode == null) {
-
-				djNode = matchStructures.addDefinitionClass();
-
-				matchStructures.addDefinitionPattern(djNode, dj);
-			}
-
-			djNodes.add(djNode);
-		}
-
-		ClassNode defnCls = matchStructures.addDefinitionClass();
-
-		expressionMatcher = matchStructures.addDisjunction(defnCls, djNodes, true);
-
-		return defnCls;
 	}
 }
