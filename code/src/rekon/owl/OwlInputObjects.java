@@ -169,7 +169,7 @@ class OwlInputObjects {
 
 	private class OwlInputClass
 						extends OwlInputHierarchyName<ClassNode, OWLClass>
-						implements InputClass  {
+						implements InputClass {
 
 		private Set<OWLClassExpression> owlEquivExprs = new HashSet<OWLClassExpression>();
 		private Set<OWLClassExpression> superAtomicExprs = new HashSet<OWLClassExpression>();
@@ -273,7 +273,7 @@ class OwlInputObjects {
 
 	private class OwlInputObjectProperty
 						extends OwlInputHierarchyName<NodeProperty, OWLObjectProperty>
-						implements InputObjectProperty  {
+						implements InputObjectProperty {
 
 		private Set<OWLObjectProperty> owlInverses = new HashSet<OWLObjectProperty>();
 		private Set<List<OWLObjectProperty>> owlChains = new HashSet<List<OWLObjectProperty>>();
@@ -343,7 +343,7 @@ class OwlInputObjects {
 
 	private class OwlInputDataProperty
 						extends OwlInputHierarchyName<DataProperty, OWLDataProperty>
-						implements InputDataProperty  {
+						implements InputDataProperty {
 
 		OwlInputDataProperty(OWLDataProperty owlEntity) {
 
@@ -358,7 +358,7 @@ class OwlInputObjects {
 
 	private class OwlInputIndividual
 						extends OwlInputName<IndividualNode, OWLNamedIndividual>
-						implements InputIndividual  {
+						implements InputIndividual {
 
 		private Set<OWLClass> owlTypes = new HashSet<OWLClass>();
 		private Set<OWLClassExpression> owlTypeExprs = new HashSet<OWLClassExpression>();
@@ -422,7 +422,7 @@ class OwlInputObjects {
 
 	private class OwlInputExpression
 						extends OwlInputObject<OWLClassExpression>
-						implements InputExpression  {
+						implements InputExpression {
 
 		public InputExpressionType getExpressionType() {
 
@@ -566,7 +566,7 @@ class OwlInputObjects {
 
 	private class OwlInputRelation
 						extends OwlInputObject<OWLRestriction>
-						implements InputRelation  {
+						implements InputRelation {
 
 		public InputRelationType getRelationType() {
 
@@ -587,7 +587,7 @@ class OwlInputObjects {
 
 				if (owlRest instanceof OWLObjectAllValuesFrom) {
 
-					return InputRelationType.All_NODES;
+					return InputRelationType.ALL_NODES;
 				}
 
 				if (owlRest instanceof OWLDataSomeValuesFrom) {

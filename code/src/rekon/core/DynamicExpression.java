@@ -67,7 +67,7 @@ class DynamicExpression extends LocalExpression {
 		this(new SingleToMultiPatternBuilder(patternBuilder));
 	}
 
-	NodeX createStructures(MatchStructures matchStructures) {
+	NodeX createExpression(MatchStructures matchStructures) {
 
 		Collection<Pattern> djs = disjunctsBuilder.createAll(matchStructures);
 
@@ -76,35 +76,12 @@ class DynamicExpression extends LocalExpression {
 			return null;
 		}
 
-		NodeX exprNode = null;
-		List<NodeX> djNodes = new ArrayList<NodeX>();
-
-		for (Pattern dj : djs) {
-
-			exprNode = dj.toSingleNode();
-
-			if (exprNode == null) {
-
-				exprNode = matchStructures.addDefinitionClass();
-				expressionMatcher = matchStructures.addDefinitionPattern(exprNode, dj);
-			}
-
-			djNodes.add(exprNode);
-		}
-
 		if (djs.size() == 1) {
 
-			asSingleNode = djs.iterator().next().toSingleNode();
-		}
-		else {
-
-			ClassNode defnCls = matchStructures.addDefinitionClass();
-
-			exprNode = defnCls;
-			expressionMatcher = matchStructures.addDisjunction(defnCls, djNodes, true);
+			return createSinglePattern(matchStructures, djs.iterator().next());
 		}
 
-		return exprNode;
+		return createDisjunction(matchStructures, djs);
 	}
 
 	NodeMatcher getExpressionMatcher() {
@@ -115,5 +92,48 @@ class DynamicExpression extends LocalExpression {
 	NodeX toSingleNode() {
 
 		return asSingleNode;
+	}
+
+	private NodeX createSinglePattern(MatchStructures matchStructures, Pattern pattern) {
+
+		asSingleNode = pattern.toSingleNode();
+
+		if (asSingleNode != null) {
+
+			expressionMatcher = new PatternMatcher(asSingleNode);
+
+			return asSingleNode;
+		}
+
+		ClassNode defnCls = matchStructures.addDefinitionClass();
+
+		expressionMatcher = matchStructures.addDefinitionPattern(defnCls, pattern);
+
+		return defnCls;
+	}
+
+	private NodeX createDisjunction(MatchStructures matchStructures, Collection<Pattern> djs) {
+
+		List<NodeX> djNodes = new ArrayList<NodeX>();
+
+		for (Pattern dj : djs) {
+
+			NodeX djNode = dj.toSingleNode();
+
+			if (djNode == null) {
+
+				djNode = matchStructures.addDefinitionClass();
+
+				matchStructures.addDefinitionPattern(djNode, dj);
+			}
+
+			djNodes.add(djNode);
+		}
+
+		ClassNode defnCls = matchStructures.addDefinitionClass();
+
+		expressionMatcher = matchStructures.addDisjunction(defnCls, djNodes, true);
+
+		return defnCls;
 	}
 }

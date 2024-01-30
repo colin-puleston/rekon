@@ -43,6 +43,11 @@ public abstract class OntologyNames {
 
 			return ABSENT_CLASS_NAME_LABEL;
 		}
+
+		AbsentClassNode() {
+
+			setClassification();
+		}
 	}
 
 	static private class AbsentClassValue extends NodeValue {

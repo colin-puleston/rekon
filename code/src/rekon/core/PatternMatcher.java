@@ -58,6 +58,11 @@ class PatternMatcher extends NodeMatcher {
 		return getClass().getSimpleName() + "(" + getNode().getLabel() + ")";
 	}
 
+	PatternMatcher(NodeX node) {
+
+		this(node, new Pattern(node));
+	}
+
 	PatternMatcher(NodeX node, Pattern pattern) {
 
 		super(node);

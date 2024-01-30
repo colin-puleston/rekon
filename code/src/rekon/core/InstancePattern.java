@@ -68,7 +68,7 @@ class InstancePattern extends LocalExpression {
 		initialise(new InstanceClasses());
 	}
 
-	NodeX createStructures(MatchStructures matchStructures) {
+	NodeX createExpression(MatchStructures matchStructures) {
 
 		Pattern p = createPattern(matchStructures);
 

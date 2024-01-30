@@ -29,8 +29,20 @@ package rekon.build;
  */
 public enum InputRelationType {
 
-	SOME_NODES,
-	All_NODES,
-	DATA_VALUE,
-	OUT_OF_SCOPE
+	SOME_NODES(true),
+	ALL_NODES(true),
+	DATA_VALUE(false),
+	OUT_OF_SCOPE(false);
+
+	private boolean nodeValued;
+
+	public boolean nodeValued() {
+
+		return nodeValued;
+	}
+
+	private InputRelationType(boolean nodeValued) {
+
+		this.nodeValued = nodeValued;
+	}
 }

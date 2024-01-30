@@ -59,7 +59,9 @@ public class RekonInstanceBox {
 			return iri.toURI().getFragment();
 		}
 
-		MappedInstance(IRI iri) {
+		MappedInstance(IRI iri, boolean setAsClassified) {
+
+			super(setAsClassified);
 
 			this.iri = iri;
 
@@ -100,7 +102,7 @@ public class RekonInstanceBox {
 					throw new RekonInstanceBoxException("Instance does not exist: " + iri);
 				}
 
-				i = new MappedInstance(iri);
+				i = new MappedInstance(iri, true);
 
 				instanceOps.add(i);
 			}
@@ -111,7 +113,7 @@ public class RekonInstanceBox {
 
 	public synchronized void add(IRI iri, OWLClassExpression profile) {
 
-		instanceOps.add(new MappedInstance(iri), createInstanceExprBuilder(profile));
+		instanceOps.add(new MappedInstance(iri, false), createInstanceExprBuilder(profile));
 	}
 
 	public synchronized void remove(IRI iri) {

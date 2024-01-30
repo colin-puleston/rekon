@@ -364,7 +364,7 @@ class MatchComponents {
 
 		InputRelationType handledInputType() {
 
-			return InputRelationType.All_NODES;
+			return InputRelationType.ALL_NODES;
 		}
 
 		Relation checkCreateForComplement(NodeProperty prop, InputExpression filler) {
@@ -534,7 +534,7 @@ class MatchComponents {
 
 				return someRelations.get(source, complement);
 
-			case All_NODES:
+			case ALL_NODES:
 
 				return allRelations.get(source, complement);
 

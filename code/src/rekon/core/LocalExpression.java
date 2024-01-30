@@ -82,7 +82,7 @@ abstract class LocalExpression {
 
 	void initialise(LocalClasses localClasses) {
 
-		expressionNode = createStructures(new LocalMatchStructures(localClasses));
+		expressionNode = createExpression(new LocalMatchStructures(localClasses));
 
 		if (expressionNode != null) {
 
@@ -90,7 +90,7 @@ abstract class LocalExpression {
 		}
 	}
 
-	abstract NodeX createStructures(MatchStructures matchStructures);
+	abstract NodeX createExpression(MatchStructures matchStructures);
 
 	boolean expressionCreated() {
 

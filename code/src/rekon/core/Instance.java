@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class Instance {
 
-	private InstanceNode node = new InstanceNode(this);
+	private InstanceNode node;
 	private Set<Instance> referencers = new HashSet<Instance>();
 
 	private SinglePatternBuilder profileRebuilder = null;
@@ -50,9 +50,14 @@ public abstract class Instance {
 
 	public abstract String getLabel();
 
+	protected Instance(boolean setAsClassified) {
+
+		node = new InstanceNode(this, setAsClassified);
+	}
+
 	void reset() {
 
-		node = new InstanceNode(this);
+		node = new InstanceNode(this, false);
 	}
 
 	void replaceGhost(Instance ghost) {
