@@ -22,66 +22,22 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build.input;
 
-import java.util.*;
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public abstract class NodeProperty extends PropertyX {
+public interface InputRelation extends InputComponent {
 
-	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	InputRelationType getRelationType();
 
-	public void setSymmetric() {
+	NodeProperty getNodeProperty();
 
-		inverses.add(this);
-	}
+	DataProperty getDataProperty();
 
-	public void addInverse(NodeProperty inverse) {
+	InputNode getExpressionValue();
 
-		inverses.add(inverse);
-		inverse.inverses.add(this);
-	}
-
-	public void addChain(PropertyChain chain) {
-
-		chains.add(chain);
-	}
-
-	Collection<NodeProperty> getInverses() {
-
-		return inverses;
-	}
-
-	boolean anyChains() {
-
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (!((NodeProperty)s).chains.isEmpty()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	Collection<PropertyChain> getAllChains() {
-
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
-
-		for (Name s : getSubsumers()) {
-
-			allChains.addAll(((NodeProperty)s).chains);
-		}
-
-		return allChains;
-	}
+	DataValue getDataValue();
 }

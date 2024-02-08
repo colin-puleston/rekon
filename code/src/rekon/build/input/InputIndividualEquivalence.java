@@ -22,14 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
 
-import java.util.*;
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputEquivalence extends InputObject {
-
-	Collection<InputExpression> getEquivs();
+public interface InputIndividualEquivalence extends InputNameEquivalence<IndividualNode> {
 }

@@ -27,129 +27,128 @@ package rekon.build;
 import java.util.*;
 
 import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
 class BasicStructureBuilder {
 
-	private abstract class TypeNameHandler<N extends Name, IN extends InputName<N>> {
+	private InputAxioms axioms;
 
-		TypeNameHandler(Collection<IN> inputNames) {
+	private abstract class TypeNameConverter<N extends Name> {
 
-			for (IN ae : inputNames) {
+		TypeNameConverter() {
 
-				configureName(ae);
+			for (InputNameEquivalence<N> ax : getEquivalences()) {
+
+				ax.getFirst().addEquivalent(ax.getSecond());
 			}
 		}
 
-		void configureName(IN inputName) {
+		abstract Collection<? extends InputNameEquivalence<N>> getEquivalences();
+	}
 
-			N n = inputName.getName();
+	private abstract class HierarchyNameConverter
+								<N extends Name>
+								extends TypeNameConverter<N> {
 
-			addInputEquivalents(inputName, n);
-			addInputSupers(inputName, n);
+		HierarchyNameConverter() {
+
+			for (InputNameSubSuper<N> ax : getSubSupers()) {
+
+				ax.getSub().addSubsumer(ax.getSuper());
+			}
 		}
 
-		abstract void addInputSupers(IN inputName, N name);
+		abstract Collection<? extends InputNameSubSuper<N>> getSubSupers();
+	}
 
-		private void addInputEquivalents(IN inputName, N name) {
+	private class ClassNodeConverter extends HierarchyNameConverter<ClassNode> {
 
-			for (N e : inputName.getEquivs()) {
+		Collection<InputClassEquivalence> getEquivalences() {
 
-				name.addEquivalent(e);
-			}
+			return axioms.getClassEquivalences();
+		}
+
+		Collection<InputClassSubSuper> getSubSupers() {
+
+			return axioms.getClassSubSupers();
 		}
 	}
 
-	private abstract class HierarchyNameHandler
-								<N extends Name,
-								IN extends InputHierarchyName<N>>
-								extends TypeNameHandler<N, IN> {
+	private class IndividualNodeConverter extends TypeNameConverter<IndividualNode> {
 
-		HierarchyNameHandler(Collection<IN> inputNames) {
+		IndividualNodeConverter() {
 
-			super(inputNames);
+			for (InputIndividualClassType ax : axioms.getIndividualClassTypes()) {
+
+				ax.getIndividual().addSubsumer(ax.getClassType());
+			}
 		}
 
-		void addInputSupers(IN inputName, N name) {
+		Collection<InputIndividualEquivalence> getEquivalences() {
 
-			for (N s : inputName.getSupers()) {
-
-				name.addSubsumer(s);
-			}
+			return axioms.getIndividualEquivalences();
 		}
 	}
 
-	private class ClassNodeHandler extends HierarchyNameHandler<ClassNode, InputClass> {
+	private class NodePropertyConverter extends HierarchyNameConverter<NodeProperty> {
 
-		ClassNodeHandler(InputAssertions assertions) {
+		NodePropertyConverter() {
 
-			super(assertions.getClasses());
+			for (InputNodePropertyInverse ax : axioms.getNodePropertyInverses()) {
+
+				ax.getProperty().addInverse(ax.getInverse());
+			}
+
+			for (InputNodePropertyChain ax : axioms.getNodePropertyChains()) {
+
+				new PropertyChain(ax.getProperty(), ax.getChain());
+			}
+
+			for (InputNodePropertyTransitive ax : axioms.getNodePropertyTransitives()) {
+
+				new PropertyChain(ax.getProperty());
+			}
+
+			for (InputNodePropertySymmetric ax : axioms.getNodePropertySymmetrics()) {
+
+				ax.getProperty().setSymmetric();
+			}
+		}
+
+		Collection<InputNodePropertyEquivalence> getEquivalences() {
+
+			return axioms.getNodePropertyEquivalences();
+		}
+
+		Collection<InputNodePropertySubSuper> getSubSupers() {
+
+			return axioms.getNodePropertySubSupers();
 		}
 	}
 
-	private class IndividualNodeHandler extends TypeNameHandler<IndividualNode, InputIndividual> {
+	private class DataPropertyConverter extends HierarchyNameConverter<DataProperty> {
 
-		IndividualNodeHandler(InputAssertions assertions) {
+		Collection<InputDataPropertyEquivalence> getEquivalences() {
 
-			super(assertions.getIndividuals());
+			return axioms.getDataPropertyEquivalences();
 		}
 
-		void addInputSupers(InputIndividual inputName, IndividualNode node) {
+		Collection<InputDataPropertySubSuper> getSubSupers() {
 
-			for (ClassNode t : inputName.getTypes()) {
-
-				node.addSubsumer(t);
-			}
+			return axioms.getDataPropertySubSupers();
 		}
 	}
 
-	private class NodePropertyHandler extends HierarchyNameHandler<NodeProperty, InputObjectProperty> {
+	BasicStructureBuilder(InputAxioms axioms) {
 
-		NodePropertyHandler(InputAssertions assertions) {
+		this.axioms = axioms;
 
-			super(assertions.getObjectProperties());
-		}
-
-		void configureName(InputObjectProperty inputName) {
-
-			super.configureName(inputName);
-
-			NodeProperty p = inputName.getName();
-
-			p.addInverses(inputName.getInverses());
-
-			if (inputName.transitive()) {
-
-				new PropertyChain(p);
-			}
-
-			for (List<NodeProperty> chain : inputName.getChains()) {
-
-				new PropertyChain(p, chain);
-			}
-
-			if (inputName.symmetric()) {
-
-				p.setSymmetric();
-			}
-		}
-	}
-
-	private class DataPropertyHandler extends HierarchyNameHandler<DataProperty, InputDataProperty> {
-
-		DataPropertyHandler(InputAssertions assertions) {
-
-			super(assertions.getDataProperties());
-		}
-	}
-
-	BasicStructureBuilder(InputAssertions assertions) {
-
-		new ClassNodeHandler(assertions);
-		new IndividualNodeHandler(assertions);
-		new NodePropertyHandler(assertions);
-		new DataPropertyHandler(assertions);
+		new ClassNodeConverter();
+		new IndividualNodeConverter();
+		new NodePropertyConverter();
+		new DataPropertyConverter();
 	}
 }

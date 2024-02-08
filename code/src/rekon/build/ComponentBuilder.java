@@ -27,11 +27,12 @@ package rekon.build;
 import java.util.*;
 
 import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-class MatchComponents {
+class ComponentBuilder {
 
 	private ClassNode rootClassNode;
 
@@ -45,7 +46,7 @@ class MatchComponents {
 	private AllRelations allRelations = new AllRelations();
 	private DataRelations dataRelations = new DataRelations();
 
-	private Map<InputExpression, ClassNode> patternClasses = new HashMap<InputExpression, ClassNode>();
+	private Map<InputComplex, ClassNode> patternClasses = new HashMap<InputComplex, ClassNode>();
 
 	private boolean dynamic;
 
@@ -67,32 +68,107 @@ class MatchComponents {
 
 		private E getViaCache(S source) {
 
-			E expr = bySource.get(source);
+			E entity = bySource.get(source);
 
-			if (expr == null) {
+			if (entity == null) {
 
-				expr = checkCreate(source);
+				entity = checkCreate(source);
 
-				if (expr != null) {
+				if (entity != null) {
 
-					bySource.put(source, expr);
+					bySource.put(source, entity);
 				}
 			}
 
-			return expr;
+			return entity;
 		}
 	}
 
 	private class Patterns extends TypeEntities<PatternSpec, Pattern> {
 
-		Pattern get(InputExpression source) {
+		private class ConjunctsConverter {
 
-			return get(new PatternSpec(source));
+			private NameSet nodes = new NameSet();
+			private Set<Relation> rels = new HashSet<Relation>();
+
+			Pattern checkCreate(Collection<InputNode> conjuncts) {
+
+				for (InputNode c : conjuncts) {
+
+					if (!processConjunct(c)) {
+
+						return null;
+					}
+				}
+
+				if (nodes.isEmpty()) {
+
+					nodes.add(rootClassNode);
+				}
+
+				return new Pattern(nodes, rels);
+			}
+
+			private boolean processConjunct(InputNode conjunct) {
+
+				switch (conjunct.getNodeType()) {
+
+					case CLASS:
+
+						nodes.absorb(conjunct.asClassNode());
+
+						return true;
+
+					case COMPLEX:
+
+						return processComplexConjunct(conjunct.asComplex());
+				}
+
+				return false;
+			}
+
+			private boolean processComplexConjunct(InputComplex conjunct) {
+
+				switch (conjunct.getComplexType()) {
+
+					case DISJUNCTION:
+
+						NodeX n = checkCreateNodeForDisjunction(conjunct.asDisjuncts());
+
+						if (n != null) {
+
+							nodes.absorb(n);
+
+							return true;
+						}
+						break;
+
+					case RELATION:
+					case COMPLEMENT:
+
+						Relation r = toRelation(conjunct, false);
+
+						if (r != null) {
+
+							rels.add(r);
+
+							return true;
+						}
+						break;
+				}
+
+				return false;
+			}
+		}
+
+		Pattern get(InputComplex source) {
+
+			return get(new PatternSpec(source.toNode()));
 		}
 
 		Pattern checkCreate(PatternSpec source) {
 
-			List<InputExpression> conjuncts = source.getConjuncts();
+			List<InputNode> conjuncts = source.getConjuncts();
 
 			if (conjuncts.size() == 1) {
 
@@ -102,9 +178,9 @@ class MatchComponents {
 			return checkCreateForConjuncts(conjuncts);
 		}
 
-		private Pattern checkCreate(InputExpression source) {
+		private Pattern checkCreate(InputNode source) {
 
-			switch (source.getExpressionType()) {
+			switch (source.getNodeType()) {
 
 				case CLASS:
 
@@ -113,6 +189,18 @@ class MatchComponents {
 				case INDIVIDUAL:
 
 					return new Pattern(source.asIndividualNode());
+
+				case COMPLEX:
+
+					return checkCreateForComplex(source.asComplex());
+			}
+
+			return null;
+		}
+
+		private Pattern checkCreateForComplex(InputComplex source) {
+
+			switch (source.getComplexType()) {
 
 				case CONJUNCTION:
 
@@ -126,53 +214,9 @@ class MatchComponents {
 			return null;
 		}
 
-		private Pattern checkCreateForConjuncts(Collection<InputExpression> conjuncts) {
+		private Pattern checkCreateForConjuncts(Collection<InputNode> source) {
 
-			NameSet nodes = new NameSet();
-			Set<Relation> rels = new HashSet<Relation>();
-
-			for (InputExpression op : conjuncts) {
-
-				switch (op.getExpressionType()) {
-
-					case CLASS:
-
-						nodes.absorb(op.asClassNode());
-						break;
-
-					case DISJUNCTION:
-
-						NodeX n = checkCreateNodeForDisjunction(op.asDisjuncts());
-
-						if (n == null) {
-
-							return null;
-						}
-
-						nodes.absorb(n);
-						break;
-
-					case RELATION:
-					case COMPLEMENT:
-
-						Relation r = toRelation(op);
-
-						if (r == null) {
-
-							return null;
-						}
-
-						rels.add(r);
-						break;
-				}
-			}
-
-			if (nodes.isEmpty()) {
-
-				nodes.add(rootClassNode);
-			}
-
-			return new Pattern(nodes, rels);
+			return new ConjunctsConverter().checkCreate(source);
 		}
 
 		private Pattern checkCreateForRelation(InputRelation source) {
@@ -182,7 +226,7 @@ class MatchComponents {
 			return r != null ? new Pattern(rootClassNode, r) : null;
 		}
 
-		private NodeX checkCreateNodeForDisjunction(Collection<InputExpression> source) {
+		private NodeX checkCreateNodeForDisjunction(Collection<InputNode> source) {
 
 			Set<NodeX> disjuncts = disjunctions.get(source);
 
@@ -195,15 +239,15 @@ class MatchComponents {
 		}
 	}
 
-	private class Disjunctions extends TypeEntities<Collection<InputExpression>, Set<NodeX>> {
+	private class Disjunctions extends TypeEntities<Collection<InputNode>, Set<NodeX>> {
 
-		Set<NodeX> checkCreate(Collection<InputExpression> source) {
+		Set<NodeX> checkCreate(Collection<InputNode> source) {
 
 			Set<NodeX> disjuncts = new HashSet<NodeX>();
 
-			for (InputExpression op : source) {
+			for (InputNode n : source) {
 
-				Set<? extends NodeX> djs = toDisjuncts(op);
+				Set<? extends NodeX> djs = toDisjuncts(n);
 
 				if (djs == null) {
 
@@ -216,11 +260,11 @@ class MatchComponents {
 			return disjuncts;
 		}
 
-		private Set<? extends NodeX> toDisjuncts(InputExpression source) {
+		private Set<? extends NodeX> toDisjuncts(InputNode source) {
 
-			if (source.getExpressionType() == InputExpressionType.DISJUNCTION) {
+			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
 
-				return toIndividualDisjuncts(source.asDisjuncts());
+				return toIndividualDisjuncts(source.asComplex().asDisjuncts());
 			}
 
 			NodeX n = toAtomicNode(source);
@@ -228,18 +272,18 @@ class MatchComponents {
 			return n != null ? Collections.singleton(n) : null;
 		}
 
-		private Set<IndividualNode> toIndividualDisjuncts(Collection<InputExpression> source) {
+		private Set<IndividualNode> toIndividualDisjuncts(Collection<InputNode> source) {
 
 			Set<IndividualNode> disjuncts = new HashSet<IndividualNode>();
 
-			for (InputExpression op : source) {
+			for (InputNode d : source) {
 
-				if (op.getExpressionType() != InputExpressionType.INDIVIDUAL) {
+				if (!d.hasNodeType(InputNodeType.INDIVIDUAL)) {
 
 					return null;
 				}
 
-				disjuncts.add(op.asIndividualNode());
+				disjuncts.add(d.asIndividualNode());
 			}
 
 			return disjuncts;
@@ -262,10 +306,10 @@ class MatchComponents {
 
 		Relation checkCreate(InputRelation source) {
 
-			if (source.getRelationType() == handledInputType()) {
+			if (source.getRelationType() == convertdInputType()) {
 
 				NodeProperty p = source.getNodeProperty();
-				InputExpression f = source.getExpressionValue();
+				InputNode f = source.getExpressionValue();
 
 				if (complement) {
 
@@ -278,18 +322,18 @@ class MatchComponents {
 			return null;
 		}
 
-		Relation checkCreate(NodeProperty prop, InputExpression filler) {
+		Relation checkCreate(NodeProperty prop, InputNode filler) {
 
 			NodeValue target = toNodeValue(filler);
 
 			return target != null ? create(prop, target) : null;
 		}
 
-		abstract InputRelationType handledInputType();
+		abstract InputRelationType convertdInputType();
 
 		abstract Relation checkCreateForComplement(
 								NodeProperty prop,
-								InputExpression filler);
+								InputNode filler);
 
 		abstract Relation create(NodeProperty prop, NodeValue target);
 
@@ -300,11 +344,11 @@ class MatchComponents {
 			return new AllRelation(prop, OntologyNames.ABSENT_CLASS_VALUE);
 		}
 
-		private NodeValue toNodeValue(InputExpression source) {
+		private NodeValue toNodeValue(InputNode source) {
 
-			if (source.getExpressionType() == InputExpressionType.DISJUNCTION) {
+			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
 
-				return toNodeValue(source.asDisjuncts());
+				return toNodeValue(source.asComplex().asDisjuncts());
 			}
 
 			NodeX n = toAtomicNode(source);
@@ -312,7 +356,7 @@ class MatchComponents {
 			return n != null ? new NodeValue(n) : null;
 		}
 
-		private NodeValue toNodeValue(Collection<InputExpression> source) {
+		private NodeValue toNodeValue(Collection<InputNode> source) {
 
 			Set<NodeX> disjuncts = disjunctions.get(source);
 
@@ -332,12 +376,12 @@ class MatchComponents {
 
 	private class SomeRelations extends NodeRelations {
 
-		InputRelationType handledInputType() {
+		InputRelationType convertdInputType() {
 
 			return InputRelationType.SOME_NODES;
 		}
 
-		Relation checkCreateForComplement(NodeProperty prop, InputExpression filler) {
+		Relation checkCreateForComplement(NodeProperty prop, InputNode filler) {
 
 			return isClassNode(filler, rootClassNode) ? createForNoValue(prop) : null;
 		}
@@ -355,19 +399,19 @@ class MatchComponents {
 
 	private class AllRelations extends NodeRelations {
 
-		Relation checkCreate(NodeProperty prop, InputExpression filler) {
+		Relation checkCreate(NodeProperty prop, InputNode filler) {
 
 			return isClassNode(filler, OntologyNames.ABSENT_CLASS_NODE)
 						? createForNoValue(prop)
 						: super.checkCreate(prop, filler);
 		}
 
-		InputRelationType handledInputType() {
+		InputRelationType convertdInputType() {
 
 			return InputRelationType.ALL_NODES;
 		}
 
-		Relation checkCreateForComplement(NodeProperty prop, InputExpression filler) {
+		Relation checkCreateForComplement(NodeProperty prop, InputNode filler) {
 
 			return null;
 		}
@@ -398,7 +442,7 @@ class MatchComponents {
 
 	private class PatternSpec {
 
-		private List<InputExpression> conjuncts = new ArrayList<InputExpression>();
+		private List<InputNode> conjuncts = new ArrayList<InputNode>();
 
 		public boolean equals(Object other) {
 
@@ -410,11 +454,11 @@ class MatchComponents {
 			return conjuncts.hashCode();
 		}
 
-		PatternSpec(InputExpression source) {
+		PatternSpec(InputNode source) {
 
-			if (source.getExpressionType() == InputExpressionType.CONJUNCTION) {
+			if (source.hasComplexType(InputComplexType.CONJUNCTION)) {
 
-				conjuncts.addAll(source.asConjuncts());
+				conjuncts.addAll(source.asComplex().asConjuncts());
 			}
 			else {
 
@@ -422,7 +466,7 @@ class MatchComponents {
 			}
 		}
 
-		List<InputExpression> getConjuncts() {
+		List<InputNode> getConjuncts() {
 
 			return conjuncts;
 		}
@@ -432,15 +476,15 @@ class MatchComponents {
 
 		private Set<PatternSpec> disjuncts = new HashSet<PatternSpec>();
 
-		PatternDisjunctionSpec(InputExpression source) {
+		PatternDisjunctionSpec(InputComplex source) {
 
-			if (source.getExpressionType() == InputExpressionType.DISJUNCTION) {
+			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
 
 				addDisjunctsFor(source.asDisjuncts());
 			}
 			else {
 
-				addDisjunctFor(source);
+				addDisjunctFor(source.toNode());
 			}
 		}
 
@@ -463,21 +507,21 @@ class MatchComponents {
 			return patternDisjunction;
 		}
 
-		private void addDisjunctsFor(Collection<InputExpression> source) {
+		private void addDisjunctsFor(Collection<InputNode> source) {
 
-			for (InputExpression op : source) {
+			for (InputNode n : source) {
 
-				addDisjunctFor(op);
+				addDisjunctFor(n);
 			}
 		}
 
-		private void addDisjunctFor(InputExpression source) {
+		private void addDisjunctFor(InputNode source) {
 
 			disjuncts.add(new PatternSpec(source));
 		}
 	}
 
-	MatchComponents(
+	ComponentBuilder(
 		OntologyNames names,
 		MatchStructures structures,
 		BuildCustomiser customiser,
@@ -490,17 +534,17 @@ class MatchComponents {
 		rootClassNode = names.getRootClassNode();
 	}
 
-	Pattern toPattern(InputExpression source) {
+	Pattern toPattern(InputComplex source) {
 
 		return patterns.get(source);
 	}
 
-	List<Pattern> toPatternDisjunction(InputExpression source) {
+	List<Pattern> toPatternDisjunction(InputComplex source) {
 
 		return new PatternDisjunctionSpec(source).checkCreate();
 	}
 
-	Relation toRelation(InputExpression source) {
+	Relation toRelation(InputComplex source) {
 
 		return toRelation(source, false);
 	}
@@ -510,9 +554,9 @@ class MatchComponents {
 		return toRelation(source, false);
 	}
 
-	private Relation toRelation(InputExpression source, boolean complement) {
+	private Relation toRelation(InputComplex source, boolean complement) {
 
-		switch (source.getExpressionType()) {
+		switch (source.getComplexType()) {
 
 			case COMPLEMENT:
 
@@ -546,7 +590,7 @@ class MatchComponents {
 		return null;
 	}
 
-	private NodeX toAtomicNode(InputExpression source) {
+	private NodeX toAtomicNode(InputNode source) {
 
 		NodeX customNode = customiser.checkToCustomAtomicNode(source);
 
@@ -555,7 +599,7 @@ class MatchComponents {
 			return customNode;
 		}
 
-		switch (source.getExpressionType()) {
+		switch (source.getNodeType()) {
 
 			case CLASS:
 
@@ -564,12 +608,16 @@ class MatchComponents {
 			case INDIVIDUAL:
 
 				return source.asIndividualNode();
+
+			case COMPLEX:
+
+				return toPatternClassNode(source.asComplex());
 		}
 
-		return toPatternClassNode(source);
+		return null;
 	}
 
-	private ClassNode toPatternClassNode(InputExpression source) {
+	private ClassNode toPatternClassNode(InputComplex source) {
 
 		ClassNode pCls = patternClasses.get(source);
 
@@ -604,11 +652,11 @@ class MatchComponents {
 		return c;
 	}
 
-	private boolean isClassNode(InputExpression expr, ClassNode test) {
+	private boolean isClassNode(InputNode node, ClassNode test) {
 
-		if (expr.getExpressionType() == InputExpressionType.CLASS) {
+		if (node.hasNodeType(InputNodeType.CLASS)) {
 
-			return expr.asClassNode() == test;
+			return node.asClassNode() == test;
 		}
 
 		return false;

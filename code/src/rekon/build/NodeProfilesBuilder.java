@@ -27,138 +27,117 @@ package rekon.build;
 import java.util.*;
 
 import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
 class NodeProfilesBuilder {
 
-	private MatchComponents matchComponents;
+	private ComponentBuilder components;
 	private MatchStructures matchStructures;
 
-	private BuildLogger logger;
+	private class ProfilesBuilder {
 
-	private ClassSupersBasedRelator classSupersBasedRelator = new ClassSupersBasedRelator();
-	private IndividualTypesBasedRelator individualTypesBasedRelator = new IndividualTypesBasedRelator();
-	private IndividualValuesBasedRelator individualValuesBasedRelator = new IndividualValuesBasedRelator();
+		private Map<NodeX, List<Relation>> relationsByNode
+							= new HashMap<NodeX, List<Relation>>();
 
-	private abstract class RelationBuilder<IN extends InputName<?>, RS> {
+		void checkAddRelation(InputAxiom axiom, NodeX node, InputComplex relSource) {
 
-		Set<Relation> getRelations(IN inputName) {
+			checkAddRelation(axiom, node, components.toRelation(relSource));
+		}
 
-			Set<Relation> rels = new HashSet<Relation>();
+		void checkAddRelation(InputAxiom axiom, NodeX node, InputRelation relSource) {
 
-			for (RS rs : getRelationSources(inputName)) {
+			checkAddRelation(axiom, node, components.toRelation(relSource));
+		}
 
-				Relation r = toRelation(rs);
+		void createAllProfiles(Collection<? extends NodeX> nodes) {
 
-				if (r != null) {
+			for (NodeX n : nodes) {
 
-					rels.add(r);
-				}
-				else {
+				matchStructures.checkAddProfilePattern(n, getRelations(n));
+			}
+		}
 
-					logOutOfScope(inputName, rs);
-				}
+		private void checkAddRelation(InputAxiom axiom, NodeX node, Relation rel) {
+
+			if (rel != null) {
+
+				resolveRelations(node).add(rel);
+			}
+			else {
+
+				axiom.notifyAxiomOutOfScope();
+			}
+		}
+
+		private List<Relation> resolveRelations(NodeX node) {
+
+			List<Relation> rels = relationsByNode.get(node);
+
+			if (rels == null) {
+
+				rels = new ArrayList<Relation>();
+
+				relationsByNode.put(node, rels);
 			}
 
 			return rels;
 		}
 
-		abstract Collection<RS> getRelationSources(IN inputName);
+		private List<Relation> getRelations(NodeX node) {
 
-		abstract Relation toRelation(RS source);
+			List<Relation> rels = relationsByNode.get(node);
 
-		abstract void logOutOfScope(IN inputName, RS relSource);
-	}
-
-	private abstract class NodeValueRelationBuilder
-								<IN extends InputName<?>>
-								extends RelationBuilder<IN, InputExpression> {
-
-		Relation toRelation(InputExpression relSource) {
-
-			return matchComponents.toRelation(relSource);
-		}
-	}
-
-	private class ClassSupersBasedRelator extends NodeValueRelationBuilder<InputClass> {
-
-		Collection<InputExpression> getRelationSources(InputClass inputName) {
-
-			return inputName.getSuperAtomicExprs();
-		}
-
-		void logOutOfScope(InputClass inputName, InputExpression relSource) {
-
-			logger.logOutOfScopeSuper(inputName, relSource);
-		}
-	}
-
-	private class IndividualTypesBasedRelator extends NodeValueRelationBuilder<InputIndividual> {
-
-		Collection<InputExpression> getRelationSources(InputIndividual inputName) {
-
-			return inputName.getTypeExprs();
-		}
-
-		void logOutOfScope(InputIndividual inputName, InputExpression relSource) {
-
-			logger.logOutOfScopeType(inputName, relSource);
-		}
-	}
-
-	private class IndividualValuesBasedRelator extends RelationBuilder<InputIndividual, InputRelation> {
-
-		Collection<InputRelation> getRelationSources(InputIndividual inputName) {
-
-			return inputName.getRelations();
-		}
-
-		Relation toRelation(InputRelation relSource) {
-
-			return matchComponents.toRelation(relSource);
-		}
-
-		void logOutOfScope(InputIndividual inputName, InputRelation relSource) {
-
-			logger.logOutOfScopeValue(inputName, relSource);
+			return rels != null ? rels : Collections.emptyList();
 		}
 	}
 
 	NodeProfilesBuilder(
-		InputAssertions assertions,
-		MatchComponents matchComponents,
-		MatchStructures matchStructures,
-		BuildLogger logger) {
+		OntologyNames names,
+		InputAxioms axioms,
+		ComponentBuilder components,
+		MatchStructures matchStructures) {
 
-		this.matchComponents = matchComponents;
+		this.components = components;
 		this.matchStructures = matchStructures;
-		this.logger = logger;
 
-		for (InputClass c : assertions.getClasses()) {
-
-			createForNode(c.getClassNode(), classSupersBasedRelator.getRelations(c));
-		}
-
-		for (InputIndividual i : assertions.getIndividuals()) {
-
-			createForNode(i.getIndividualNode(), getInputIndividualRelations(i));
-		}
+		createClassProfiles(names, axioms);
+		createIndividualProfiles(names, axioms);
 	}
 
-	private void createForNode(NodeX n, Collection<Relation> relations) {
+	private void createClassProfiles(OntologyNames names, InputAxioms axioms) {
 
-		matchStructures.checkAddProfilePattern(n, relations);
+		ProfilesBuilder builders = new ProfilesBuilder();
+
+		for (InputClassSubComplexSuper ax : axioms.getClassSubComplexSupers()) {
+
+			InputComplex sup = ax.getSuper();
+
+			if (!sup.hasComplexType(InputComplexType.DISJUNCTION)) {
+
+				builders.checkAddRelation(ax, ax.getSub(), sup);
+			}
+		}
+
+		builders.createAllProfiles(names.getClassNodes());
 	}
 
-	private Set<Relation> getInputIndividualRelations(InputIndividual i) {
+	private void createIndividualProfiles(OntologyNames names, InputAxioms axioms) {
 
-		Set<Relation> rels = new HashSet<Relation>();
+		ProfilesBuilder builders = new ProfilesBuilder();
 
-		rels.addAll(individualTypesBasedRelator.getRelations(i));
-		rels.addAll(individualValuesBasedRelator.getRelations(i));
+		for (InputIndividualComplexType ax : axioms.getIndividualComplexTypes()) {
 
-		return rels;
+			builders.checkAddRelation(ax, ax.getIndividual(), ax.getComplexType());
+		}
+
+		for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
+
+			builders.checkAddRelation(ax, ax.getIndividual(), ax.getRelation());
+		}
+
+		builders.createAllProfiles(names.getIndividualNodes());
 	}
 }

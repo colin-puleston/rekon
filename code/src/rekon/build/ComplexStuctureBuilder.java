@@ -27,25 +27,24 @@ package rekon.build;
 import java.util.*;
 
 import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
 class ComplexStuctureBuilder {
 
-	private MatchComponents matchComponents;
+	private ComponentBuilder components;
 	private MatchStructures matchStructures;
 
-	private BuildLogger logger;
-
-	private abstract class EquivsBasedBuilder {
+	private abstract class EquivalenceBasedBuilder {
 
 		private Set<Pattern> patternDefns = new HashSet<Pattern>();
 		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
 
-		boolean create(Collection<InputExpression> equivs) {
+		boolean create(InputComplex... equivs) {
 
-			for (InputExpression e : equivs) {
+			for (InputComplex e : equivs) {
 
 				if (!absorbEquiv(e)) {
 
@@ -71,17 +70,17 @@ class ComplexStuctureBuilder {
 			return true;
 		}
 
-		abstract boolean handleOutOfScopeEquiv(InputExpression equiv);
+		abstract boolean convertOutOfScopeEquiv(InputComplex equiv);
 
 		abstract ClassNode resolveDefinedClass();
 
-		private boolean absorbEquiv(InputExpression equiv) {
+		private boolean absorbEquiv(InputComplex equiv) {
 
-			List<Pattern> djs = matchComponents.toPatternDisjunction(equiv);
+			List<Pattern> djs = components.toPatternDisjunction(equiv);
 
 			if (djs == null) {
 
-				if (!handleOutOfScopeEquiv(equiv)) {
+				if (!convertOutOfScopeEquiv(equiv)) {
 
 					return false;
 				}
@@ -102,41 +101,41 @@ class ComplexStuctureBuilder {
 		}
 	}
 
-	private class ClassEquivalentsBasedBuilder extends EquivsBasedBuilder {
+	private class ClassComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
 
-		private InputClass input;
+		private InputClassComplexEquivalence equivs;
 
-		ClassEquivalentsBasedBuilder(InputClass input) {
+		ClassComplexEquivalenceBasedBuilder(InputClassComplexEquivalence equivs) {
 
-			this.input = input;
+			this.equivs = equivs;
 
-			create(input.getEquivExprs());
+			create(equivs.getSecond());
 		}
 
-		boolean handleOutOfScopeEquiv(InputExpression equiv) {
+		boolean convertOutOfScopeEquiv(InputComplex equiv) {
 
-			logger.logOutOfScopeEquivalent(input, equiv);
+			equivs.notifyAxiomOutOfScope();
 
 			return true;
 		}
 
 		ClassNode resolveDefinedClass() {
 
-			return input.getName();
+			return equivs.getFirst();
 		}
 	}
 
-	private class GCIEquivalentsBasedBuilder extends EquivsBasedBuilder {
+	private class ComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
 
-		GCIEquivalentsBasedBuilder(InputEquivalence equivs) {
+		ComplexEquivalenceBasedBuilder(InputComplexEquivalence equivs) {
 
-			if (!create(equivs.getEquivs())) {
+			if (!create(equivs.getFirst(), equivs.getSecond())) {
 
-				logger.logOutOfScopeEquivalence(equivs);
+				equivs.notifyAxiomOutOfScope();
 			}
 		}
 
-		boolean handleOutOfScopeEquiv(InputExpression equiv) {
+		boolean convertOutOfScopeEquiv(InputComplex equiv) {
 
 			return false;
 		}
@@ -147,46 +146,47 @@ class ComplexStuctureBuilder {
 		}
 	}
 
-	private class ClassDisjunctionSupersBasedBuilder {
+	private class ClassSubComplexSuperBasedBuilder {
 
-		private InputClass input;
-		private ClassNode subCls;
+		private InputClassSubComplexSuper subSuper;
 
-		ClassDisjunctionSupersBasedBuilder(InputClass input) {
+		ClassSubComplexSuperBasedBuilder(InputClassSubComplexSuper subSuper) {
 
-			subCls = input.getName();
+			this.subSuper = subSuper;
 
-			for (InputExpression inputDj : input.getSuperDisjunctionExprs()) {
+			InputComplex sup = subSuper.getSuper();
 
-				checkCreate(inputDj);
+			if (sup.hasComplexType(InputComplexType.DISJUNCTION)) {
+
+				checkCreate(sup);
 			}
 		}
 
-		private void checkCreate(InputExpression inputDisjunction) {
+		private void checkCreate(InputComplex supDisjunction) {
 
-			List<Pattern> djs = matchComponents.toPatternDisjunction(inputDisjunction);
+			List<Pattern> djs = components.toPatternDisjunction(supDisjunction);
 
 			if (djs != null) {
 
-				addDisjunction(subCls, djs, false);
+				addDisjunction(subSuper.getSub(), djs, false);
 			}
 			else {
 
-				logger.logOutOfScopeSuper(input, inputDisjunction);
+				subSuper.notifyAxiomOutOfScope();
 			}
 		}
 	}
 
-	private class GCISubSuperBasedBuilder {
+	private abstract class ComplexSubBasedBuilder<SP> {
 
-		GCISubSuperBasedBuilder(InputSubSuper subSuper) {
+		ComplexSubBasedBuilder(InputSubSuper<InputComplex, SP> subSuper) {
 
-			InputExpression sub = subSuper.getSub();
-			List<Pattern> subDjs = matchComponents.toPatternDisjunction(sub);
+			InputComplex sub = subSuper.getSub();
+			List<Pattern> subDjs = components.toPatternDisjunction(sub);
 
 			if (subDjs == null) {
 
-				logger.logOutOfScopeSubSuper(subSuper);
+				subSuper.notifyAxiomOutOfScope();
 			}
 
 			ClassNode supCls = resolveSuperClass(subSuper.getSuper());
@@ -200,43 +200,68 @@ class ComplexStuctureBuilder {
 			}
 		}
 
-		private ClassNode resolveSuperClass(InputExpression sup) {
+		abstract ClassNode resolveSuperClass(SP sup);
+	}
 
-			if (sup.getExpressionType() == InputExpressionType.CLASS) {
+	private class ComplexSubClassSuperBasedBuilder extends ComplexSubBasedBuilder<ClassNode> {
 
-				return sup.asClassNode();
-			}
+		ComplexSubClassSuperBasedBuilder(InputComplexSubClassSuper subSuper) {
 
-			Pattern p = matchComponents.toPattern(sup);
+			super(subSuper);
+		}
+
+		ClassNode resolveSuperClass(ClassNode sup) {
+
+			return sup;
+		}
+	}
+
+	private class ComplexSubSuperBasedBuilder extends ComplexSubBasedBuilder<InputComplex> {
+
+		ComplexSubSuperBasedBuilder(InputComplexSubSuper subSuper) {
+
+			super(subSuper);
+		}
+
+		ClassNode resolveSuperClass(InputComplex sup) {
+
+			Pattern p = components.toPattern(sup);
 
 			return p != null ? addDefinitionClass(p) : null;
 		}
 	}
 
 	ComplexStuctureBuilder(
-		InputAssertions assertions,
-		MatchComponents matchComponents,
-		MatchStructures matchStructures,
-		BuildLogger logger) {
+		InputAxioms axioms,
+		ComponentBuilder components,
+		MatchStructures matchStructures) {
 
-		this.matchComponents = matchComponents;
+		this.components = components;
 		this.matchStructures = matchStructures;
-		this.logger = logger;
 
-		for (InputClass c : assertions.getClasses()) {
+		for (InputClassComplexEquivalence ax : axioms.getClassComplexEquivalences()) {
 
-			new ClassEquivalentsBasedBuilder(c);
-			new ClassDisjunctionSupersBasedBuilder(c);
+			new ClassComplexEquivalenceBasedBuilder(ax);
 		}
 
-		for (InputEquivalence equivs : assertions.getEquivalenceGCIs()) {
+		for (InputComplexEquivalence ax : axioms.getComplexEquivalences()) {
 
-			new GCIEquivalentsBasedBuilder(equivs);
+			new ComplexEquivalenceBasedBuilder(ax);
 		}
 
-		for (InputSubSuper subSuper :  assertions.getSubSuperGCIs()) {
+		for (InputClassSubComplexSuper ax : axioms.getClassSubComplexSupers()) {
 
-			new GCISubSuperBasedBuilder(subSuper);
+			new ClassSubComplexSuperBasedBuilder(ax);
+		}
+
+		for (InputComplexSubClassSuper ax :  axioms.getComplexSubClassSupers()) {
+
+			new ComplexSubClassSuperBasedBuilder(ax);
+		}
+
+		for (InputComplexSubSuper ax :  axioms.getComplexSubSupers()) {
+
+			new ComplexSubSuperBasedBuilder(ax);
 		}
 	}
 

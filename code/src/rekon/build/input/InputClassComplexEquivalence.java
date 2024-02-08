@@ -22,18 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public enum InputExpressionType {
-
-	CLASS,
-	INDIVIDUAL,
-	CONJUNCTION,
-	DISJUNCTION,
-	COMPLEMENT,
-	RELATION,
-	OUT_OF_SCOPE;
+public interface InputClassComplexEquivalence extends InputEquivalence<ClassNode, InputComplex> {
 }

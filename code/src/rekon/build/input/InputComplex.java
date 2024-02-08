@@ -22,28 +22,26 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
 
 import java.util.*;
-
-import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputExpression extends InputObject {
+public interface InputComplex extends InputComponent {
 
-	InputExpressionType getExpressionType();
+	InputComplexType getComplexType();
 
-	ClassNode asClassNode();
+	boolean hasComplexType(InputComplexType type);
 
-	IndividualNode asIndividualNode();
+	InputNode toNode();
 
-	Collection<InputExpression> asConjuncts();
+	Collection<InputNode> asConjuncts();
 
-	Collection<InputExpression> asDisjuncts();
+	Collection<InputNode> asDisjuncts();
 
-	InputExpression asComplemented();
+	InputComplex asComplemented();
 
 	InputRelation asRelation();
 }

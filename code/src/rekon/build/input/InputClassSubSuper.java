@@ -22,22 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
-
-import java.util.*;
+package rekon.build.input;
 
 import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputIndividual extends InputName<IndividualNode> {
-
-	IndividualNode getIndividualNode();
-
-	Collection<ClassNode> getTypes();
-
-	Collection<InputExpression> getTypeExprs();
-
-	Collection<InputRelation> getRelations();
+public interface InputClassSubSuper extends InputNameSubSuper<ClassNode> {
 }

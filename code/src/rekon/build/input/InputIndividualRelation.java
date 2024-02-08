@@ -22,22 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
-
-import java.util.*;
-
-import rekon.core.*;
+package rekon.build.input;
 
 /**
  * @author Colin Puleston
  */
-public interface InputObjectProperty extends InputHierarchyName<NodeProperty> {
+public interface InputIndividualRelation extends InputIndividualAttribute {
 
-	Collection<NodeProperty> getInverses();
-
-	Collection<List<NodeProperty>> getChains();
-
-	boolean transitive();
-
-	boolean symmetric();
+	InputRelation getRelation();
 }

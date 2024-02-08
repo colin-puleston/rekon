@@ -22,27 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
 
 /**
  * @author Colin Puleston
  */
-public enum InputRelationType {
+public interface InputComponent {
 
-	SOME_NODES(true),
-	ALL_NODES(true),
-	DATA_VALUE(false),
-	OUT_OF_SCOPE(false);
-
-	private boolean nodeValued;
-
-	public boolean nodeValued() {
-
-		return nodeValued;
-	}
-
-	private InputRelationType(boolean nodeValued) {
-
-		this.nodeValued = nodeValued;
-	}
+	Object getSourceObject();
 }

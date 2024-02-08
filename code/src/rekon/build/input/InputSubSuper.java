@@ -22,24 +22,14 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
-
-import java.util.*;
-
-import rekon.core.*;
+package rekon.build.input;
 
 /**
  * @author Colin Puleston
  */
-public interface InputRelation extends InputObject {
+public interface InputSubSuper<SB, SP> extends InputAxiom {
 
-	InputRelationType getRelationType();
+	SB getSub();
 
-	NodeProperty getNodeProperty();
-
-	DataProperty getDataProperty();
-
-	InputExpression getExpressionValue();
-
-	DataValue getDataValue();
+	SP getSuper();
 }

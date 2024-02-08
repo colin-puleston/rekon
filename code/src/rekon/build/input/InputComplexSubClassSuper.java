@@ -22,24 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
 
-import java.util.*;
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputAssertions {
-
-	public Collection<InputClass> getClasses();
-
-	public Collection<InputIndividual> getIndividuals();
-
-	public Collection<InputObjectProperty> getObjectProperties();
-
-	public Collection<InputDataProperty> getDataProperties();
-
-	public Collection<InputEquivalence> getEquivalenceGCIs();
-
-	public Collection<InputSubSuper> getSubSuperGCIs();
+public interface InputComplexSubClassSuper extends InputSubSuper<InputComplex, ClassNode> {
 }

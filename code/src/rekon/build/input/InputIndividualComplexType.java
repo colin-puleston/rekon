@@ -22,22 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
 
 /**
  * @author Colin Puleston
  */
-public interface BuildLogger {
+public interface InputIndividualComplexType extends InputIndividualAttribute {
 
-	void logOutOfScopeEquivalent(InputClass cls, InputExpression equiv);
-
-	void logOutOfScopeSuper(InputClass cls, InputExpression sup);
-
-	void logOutOfScopeType(InputIndividual ind, InputExpression type);
-
-	void logOutOfScopeValue(InputIndividual ind, InputRelation value);
-
-	void logOutOfScopeEquivalence(InputEquivalence equivs);
-
-	void logOutOfScopeSubSuper(InputSubSuper subSuper);
+	InputComplex getComplexType();
 }

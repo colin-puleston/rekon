@@ -22,22 +22,10 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
-
-import java.util.*;
-
-import rekon.core.*;
+package rekon.build.input;
 
 /**
  * @author Colin Puleston
  */
-public interface InputClass extends InputHierarchyName<ClassNode> {
-
-	ClassNode getClassNode();
-
-	Collection<InputExpression> getEquivExprs();
-
-	Collection<InputExpression> getSuperAtomicExprs();
-
-	Collection<InputExpression> getSuperDisjunctionExprs();
+public interface InputNodePropertyTransitive extends InputNodePropertyAttribute {
 }

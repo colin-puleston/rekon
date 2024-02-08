@@ -22,16 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
-
-import java.util.*;
+package rekon.build.input;
 
 import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputHierarchyName<N extends Name> extends InputName<N> {
-
-	Collection<N> getSupers();
+public interface InputNodePropertyEquivalence extends InputNameEquivalence<NodeProperty> {
 }

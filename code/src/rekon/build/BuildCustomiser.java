@@ -25,11 +25,12 @@
 package rekon.build;
 
 import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
 public interface BuildCustomiser {
 
-	public NodeX checkToCustomAtomicNode(InputExpression source);
+	public NodeX checkToCustomAtomicNode(InputNode source);
 }

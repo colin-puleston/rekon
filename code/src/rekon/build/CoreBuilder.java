@@ -27,6 +27,7 @@ package rekon.build;
 import java.util.*;
 
 import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
@@ -35,7 +36,7 @@ public class CoreBuilder {
 
 	static private class NonCustomisingCustomiser implements BuildCustomiser {
 
-		public NodeX checkToCustomAtomicNode(InputExpression source) {
+		public NodeX checkToCustomAtomicNode(InputNode source) {
 
 			return null;
 		}
@@ -46,42 +47,40 @@ public class CoreBuilder {
 
 	private class StructureBuilderImpl implements StructureBuilder {
 
-		private InputAssertions assertions;
-		private BuildLogger logger;
+		private InputAxioms axioms;
 
 		public void build(MatchStructures matchStructures) {
 
-			MatchComponents comps = createMatchComponents(matchStructures, false);
+			ComponentBuilder components = createComponentBuilder(matchStructures, false);
 
-			new BasicStructureBuilder(assertions);
-			new NodeProfilesBuilder(assertions, comps, matchStructures, logger);
-			new ComplexStuctureBuilder(assertions, comps, matchStructures, logger);
+			new BasicStructureBuilder(axioms);
+			new NodeProfilesBuilder(names, axioms, components, matchStructures);
+			new ComplexStuctureBuilder(axioms, components, matchStructures);
 		}
 
-		StructureBuilderImpl(InputAssertions assertions, BuildLogger logger) {
+		StructureBuilderImpl(InputAxioms axioms) {
 
-			this.assertions = assertions;
-			this.logger = logger;
+			this.axioms = axioms;
 		}
 	}
 
 	private class GeneralPatternBuilder implements SinglePatternBuilder, MultiPatternBuilder {
 
-		private InputExpression expr;
+		private InputComplex source;
 
 		public Pattern create(MatchStructures matchStructures) {
 
-			return createMatchComponents(matchStructures, true).toPattern(expr);
+			return createComponentBuilder(matchStructures, true).toPattern(source);
 		}
 
 		public Collection<Pattern> createAll(MatchStructures matchStructures) {
 
-			return createMatchComponents(matchStructures, true).toPatternDisjunction(expr);
+			return createComponentBuilder(matchStructures, true).toPatternDisjunction(source);
 		}
 
-		GeneralPatternBuilder(InputExpression expr) {
+		GeneralPatternBuilder(InputComplex source) {
 
-			this.expr = expr;
+			this.source = source;
 		}
 	}
 
@@ -96,25 +95,23 @@ public class CoreBuilder {
 		this.customiser = customiser;
 	}
 
-	public StructureBuilder createStructureBuilder(
-								InputAssertions assertions,
-								BuildLogger logger) {
+	public StructureBuilder createStructureBuilder(InputAxioms axioms) {
 
-		return new StructureBuilderImpl(assertions, logger);
+		return new StructureBuilderImpl(axioms);
 	}
 
-	public MultiPatternBuilder createMultiPatternBuilder(InputExpression expr) {
+	public MultiPatternBuilder createMultiPatternBuilder(InputComplex source) {
 
-		return new GeneralPatternBuilder(expr);
+		return new GeneralPatternBuilder(source);
 	}
 
-	public SinglePatternBuilder createSinglePatternBuilder(InputExpression expr) {
+	public SinglePatternBuilder createSinglePatternBuilder(InputComplex source) {
 
-		return new GeneralPatternBuilder(expr);
+		return new GeneralPatternBuilder(source);
 	}
 
-	private MatchComponents createMatchComponents(MatchStructures structs, boolean dynamic) {
+	private ComponentBuilder createComponentBuilder(MatchStructures structs, boolean dynamic) {
 
-		return new MatchComponents(names, structs, customiser, dynamic);
+		return new ComponentBuilder(names, structs, customiser, dynamic);
 	}
 }

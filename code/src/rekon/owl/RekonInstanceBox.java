@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
 import rekon.build.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
@@ -37,8 +38,8 @@ import rekon.build.*;
 public class RekonInstanceBox {
 
 	private InstanceOps instanceOps;
-	private MappedNames mappedNames;
-	private OwlInputObjects inputObjects;
+	private MappedNames names;
+	private ExpressionConverter expressionConverter;
 
 	private CoreBuilder instancesCoreBuilder;
 	private CoreBuilder queriesCoreBuilder;
@@ -73,7 +74,7 @@ public class RekonInstanceBox {
 
 		private boolean queries;
 
-		public NodeX checkToCustomAtomicNode(InputExpression source) {
+		public NodeX checkToCustomAtomicNode(InputNode source) {
 
 			Object owlSource = source.getSourceObject();
 
@@ -176,12 +177,12 @@ public class RekonInstanceBox {
 
 	RekonInstanceBox(
 		InstanceOps instanceOps,
-		MappedNames mappedNames,
-		OwlInputObjects inputObjects) {
+		MappedNames names,
+		ExpressionConverter expressionConverter) {
 
 		this.instanceOps = instanceOps;
-		this.mappedNames = mappedNames;
-		this.inputObjects = inputObjects;
+		this.names = names;
+		this.expressionConverter = expressionConverter;
 
 		instancesCoreBuilder = createCoreBuilder(false);
 		queriesCoreBuilder = createCoreBuilder(true);
@@ -189,22 +190,22 @@ public class RekonInstanceBox {
 
 	private CoreBuilder createCoreBuilder(boolean queries) {
 
-		return new CoreBuilder(mappedNames, new InstanceBoxBuildCustomiser(queries));
+		return new CoreBuilder(names, new InstanceBoxBuildCustomiser(queries));
 	}
 
 	private SinglePatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
 
-		return instancesCoreBuilder.createSinglePatternBuilder(toInputExpression(expr));
+		return instancesCoreBuilder.createSinglePatternBuilder(toInputComplex(expr));
 	}
 
 	private MultiPatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
 
-		return queriesCoreBuilder.createMultiPatternBuilder(toInputExpression(expr));
+		return queriesCoreBuilder.createMultiPatternBuilder(toInputComplex(expr));
 	}
 
-	private InputExpression toInputExpression(OWLClassExpression expr) {
+	private InputComplex toInputComplex(OWLClassExpression expr) {
 
-		return inputObjects.createExpression(expr);
+		return expressionConverter.toComplex(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

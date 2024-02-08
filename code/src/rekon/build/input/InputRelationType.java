@@ -22,66 +22,27 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
-
-import java.util.*;
+package rekon.build.input;
 
 /**
  * @author Colin Puleston
  */
-public abstract class NodeProperty extends PropertyX {
+public enum InputRelationType {
 
-	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	SOME_NODES(true),
+	ALL_NODES(true),
+	DATA_VALUE(false),
+	OUT_OF_SCOPE(false);
 
-	public void setSymmetric() {
+	private boolean nodeValued;
 
-		inverses.add(this);
+	public boolean nodeValued() {
+
+		return nodeValued;
 	}
 
-	public void addInverse(NodeProperty inverse) {
+	private InputRelationType(boolean nodeValued) {
 
-		inverses.add(inverse);
-		inverse.inverses.add(this);
-	}
-
-	public void addChain(PropertyChain chain) {
-
-		chains.add(chain);
-	}
-
-	Collection<NodeProperty> getInverses() {
-
-		return inverses;
-	}
-
-	boolean anyChains() {
-
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (!((NodeProperty)s).chains.isEmpty()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	Collection<PropertyChain> getAllChains() {
-
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
-
-		for (Name s : getSubsumers()) {
-
-			allChains.addAll(((NodeProperty)s).chains);
-		}
-
-		return allChains;
+		this.nodeValued = nodeValued;
 	}
 }

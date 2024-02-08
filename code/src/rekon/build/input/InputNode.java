@@ -22,12 +22,26 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
+
+import java.util.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputObject {
+public interface InputNode extends InputComponent {
 
-	Object getSourceObject();
+	InputNodeType getNodeType();
+
+	boolean hasNodeType(InputNodeType type);
+
+	boolean hasComplexType(InputComplexType type);
+
+	ClassNode asClassNode();
+
+	IndividualNode asIndividualNode();
+
+	InputComplex asComplex();
 }

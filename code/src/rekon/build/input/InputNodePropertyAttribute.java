@@ -22,12 +22,14 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
 
 import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputDataProperty extends InputHierarchyName<DataProperty> {
+public interface InputNodePropertyAttribute extends InputAxiom {
+
+	NodeProperty getProperty();
 }

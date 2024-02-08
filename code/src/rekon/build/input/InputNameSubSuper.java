@@ -22,14 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.build.input;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputSubSuper extends InputObject {
-
-	InputExpression getSuper();
-
-	InputExpression getSub();
+public interface InputNameSubSuper<N extends Name> extends InputSubSuper<N, N> {
 }

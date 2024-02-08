@@ -32,6 +32,7 @@ import org.semanticweb.owlapi.reasoner.impl.*;
 
 import rekon.core.*;
 import rekon.build.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
@@ -48,9 +49,9 @@ class RekonOps {
 	private Node<OWLClass> owlThingAsEquivGroup;
 	private Node<OWLClass> owlNothingAsEquivGroup;
 
-	private MappedNames mappedNames;
-	private OwlInputObjects inputObjects;
+	private MappedNames names;
 	private CoreBuilder coreBuilder;
+	private ExpressionConverter expressionConverter;
 
 	private DynamicOps dynamicOps;
 	private InstanceOps instanceOps;
@@ -113,11 +114,11 @@ class RekonOps {
 		owlThingAsEquivGroup = new OWLClassNode(owlThing);
 		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
 
-		mappedNames = new MappedNames(manager);
-		inputObjects = new OwlInputObjects(factory, mappedNames);
-		coreBuilder = new CoreBuilder(mappedNames);
+		names = new MappedNames(manager);
+		coreBuilder = new CoreBuilder(names);
+		expressionConverter = new ExpressionConverter(factory, names);
 
-		Ontology ontology = buildOntology(manager);
+		Ontology ontology = new Ontology(names, createStructureBuilder(manager));
 
 		dynamicOps = ontology.createDynamicOps();
 		instanceOps = ontology.createInstanceOps();
@@ -127,7 +128,7 @@ class RekonOps {
 
 	RekonInstanceBox createInstanceBox() {
 
-		return new RekonInstanceBox(instanceOps, mappedNames, inputObjects);
+		return new RekonInstanceBox(instanceOps, names, expressionConverter);
 	}
 
 	Node<OWLClass> getEquivalentClasses(OWLClassExpression expr) {
@@ -214,21 +215,14 @@ class RekonOps {
 		return false;
 	}
 
-	private Ontology buildOntology(OWLOntologyManager manager) {
-
-		return new Ontology(mappedNames, createStructureBuilder(manager));
-	}
-
 	public StructureBuilder createStructureBuilder(OWLOntologyManager manager) {
 
-		OwlInputAssertions asserts = createInputAssertions(manager);
-
-		return coreBuilder.createStructureBuilder(asserts, new OwlBuildLogger());
+		return coreBuilder.createStructureBuilder(createAxiomConverter(manager));
 	}
 
-	private OwlInputAssertions createInputAssertions(OWLOntologyManager manager) {
+	private AxiomConverter createAxiomConverter(OWLOntologyManager manager) {
 
-		return new OwlInputAssertions(manager, mappedNames, inputObjects);
+		return new AxiomConverter(manager, names, expressionConverter);
 	}
 
 	private Names getSuperNames(OWLClassExpression expr, boolean direct) {
@@ -240,7 +234,7 @@ class RekonOps {
 				return getLeafClassNodes();
 			}
 
-			return new NameList(mappedNames.getClassNodes());
+			return new NameList(names.getClassNodes());
 		}
 
 		return toDynamicHandler(expr).getSupers(direct);
@@ -283,7 +277,7 @@ class RekonOps {
 
 		NameSet leafs = new NameSet();
 
-		for (Name n : mappedNames.getClassNodes()) {
+		for (Name n : names.getClassNodes()) {
 
 			if (n.getSubs(ClassNode.class, true).isEmpty()) {
 
@@ -325,16 +319,18 @@ class RekonOps {
 
 	private DynamicOpsHandler toDynamicHandler(OWLClass cls) {
 
-		return dynamicOps.createHandler(mappedNames.get(cls));
+		return dynamicOps.createHandler(names.get(cls));
 	}
 
 	private DynamicOpsHandler toDynamicHandler(OWLNamedIndividual ind) {
 
-		return dynamicOps.createHandler(mappedNames.get(ind));
+		return dynamicOps.createHandler(names.get(ind));
 	}
 
 	private MultiPatternBuilder toDynamicPatternBuilder(OWLClassExpression expr) {
 
-		return coreBuilder.createMultiPatternBuilder(inputObjects.createExpression(expr));
+		InputComplex c = expressionConverter.toComplex(expr);
+
+		return coreBuilder.createMultiPatternBuilder(c);
 	}
 }
