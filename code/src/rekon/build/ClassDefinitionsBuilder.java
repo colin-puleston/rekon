@@ -32,10 +32,9 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class ComplexStuctureBuilder {
+class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private ComponentBuilder components;
-	private MatchStructures matchStructures;
 
 	private abstract class EquivalenceBasedBuilder {
 
@@ -58,12 +57,12 @@ class ComplexStuctureBuilder {
 
 				for (Pattern defn : patternDefns) {
 
-					matchStructures.addDefinitionPattern(c, defn);
+					addDefinitionPattern(c, defn);
 				}
 
 				for (List<Pattern> disjuncts : disjunctionDefns) {
 
-					addDisjunction(c, disjuncts, true);
+					addDefinitionDisjunction(c, disjuncts);
 				}
 			}
 
@@ -142,38 +141,7 @@ class ComplexStuctureBuilder {
 
 		ClassNode resolveDefinedClass() {
 
-			return matchStructures.addDefinitionClass();
-		}
-	}
-
-	private class ClassSubComplexSuperBasedBuilder {
-
-		private InputClassSubComplexSuper subSuper;
-
-		ClassSubComplexSuperBasedBuilder(InputClassSubComplexSuper subSuper) {
-
-			this.subSuper = subSuper;
-
-			InputComplex sup = subSuper.getSuper();
-
-			if (sup.hasComplexType(InputComplexType.DISJUNCTION)) {
-
-				checkCreate(sup);
-			}
-		}
-
-		private void checkCreate(InputComplex supDisjunction) {
-
-			List<Pattern> djs = components.toPatternDisjunction(supDisjunction);
-
-			if (djs != null) {
-
-				addDisjunction(subSuper.getSub(), djs, false);
-			}
-			else {
-
-				subSuper.notifyAxiomOutOfScope();
-			}
+			return addDefinitionClass();
 		}
 	}
 
@@ -216,28 +184,29 @@ class ComplexStuctureBuilder {
 		}
 	}
 
-	private class ComplexSubSuperBasedBuilder extends ComplexSubBasedBuilder<InputComplex> {
+	private class ComplexSubSuperBasedBuilder extends ComplexSubBasedBuilder<InputComplexSuper> {
 
 		ComplexSubSuperBasedBuilder(InputComplexSubSuper subSuper) {
 
 			super(subSuper);
 		}
 
-		ClassNode resolveSuperClass(InputComplex sup) {
+		ClassNode resolveSuperClass(InputComplexSuper sup) {
 
-			Pattern p = components.toPattern(sup);
+			Pattern p = components.toPattern(ComplexSuperConverter.toComplex(sup));
 
 			return p != null ? addDefinitionClass(p) : null;
 		}
 	}
 
-	ComplexStuctureBuilder(
+	ClassDefinitionsBuilder(
+		MatchStructures matchStructures,
 		InputAxioms axioms,
-		ComponentBuilder components,
-		MatchStructures matchStructures) {
+		ComponentBuilder components) {
+
+		super(matchStructures);
 
 		this.components = components;
-		this.matchStructures = matchStructures;
 
 		for (InputClassComplexEquivalence ax : axioms.getClassComplexEquivalences()) {
 
@@ -249,11 +218,6 @@ class ComplexStuctureBuilder {
 			new ComplexEquivalenceBasedBuilder(ax);
 		}
 
-		for (InputClassSubComplexSuper ax : axioms.getClassSubComplexSupers()) {
-
-			new ClassSubComplexSuperBasedBuilder(ax);
-		}
-
 		for (InputComplexSubClassSuper ax :  axioms.getComplexSubClassSupers()) {
 
 			new ComplexSubClassSuperBasedBuilder(ax);
@@ -263,43 +227,5 @@ class ComplexStuctureBuilder {
 
 			new ComplexSubSuperBasedBuilder(ax);
 		}
-	}
-
-	private void addDisjunction(
-					ClassNode node,
-					List<Pattern> disjuncts,
-					boolean definition) {
-
-		List<NodeX> nodeDjs = resolveDisjunctionToNodes(disjuncts);
-
-		matchStructures.addDisjunction(node, nodeDjs, definition);
-	}
-
-	private List<NodeX> resolveDisjunctionToNodes(List<Pattern> disjuncts) {
-
-		List<NodeX> nodeDjs = new ArrayList<NodeX>();
-
-		for (Pattern d : disjuncts) {
-
-			nodeDjs.add(resolveDisjunctToNode(d));
-		}
-
-		return nodeDjs;
-	}
-
-	private NodeX resolveDisjunctToNode(Pattern disjunct) {
-
-		NodeX n = disjunct.toSingleNode();
-
-		return n != null ? n : addDefinitionClass(disjunct);
-	}
-
-	private ClassNode addDefinitionClass(Pattern defn) {
-
-		ClassNode c = matchStructures.addDefinitionClass();
-
-		matchStructures.addDefinitionPattern(c, defn);
-
-		return c;
 	}
 }

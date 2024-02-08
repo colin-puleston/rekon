@@ -258,6 +258,40 @@ class ExpressionConverter {
 		}
 	}
 
+	private class ConvertedComplexSuper
+						extends ConvertedExpression
+						implements InputComplexSuper {
+
+		private ConvertedComplex complex;
+
+		public InputComplexSuperType getComplexSuperType() {
+
+			InputComplexType complexType = complex.getComplexType();
+
+			for (InputComplexSuperType supType : InputComplexSuperType.values()) {
+
+				if (supType.toComplexType() == complexType) {
+
+					return supType;
+				}
+			}
+
+			throw new RuntimeException("Cannot handle expression: " + getOwlObject());
+		}
+
+		public InputComplex toComplex() {
+
+			return complex;
+		}
+
+		ConvertedComplexSuper(OWLClassExpression owlExpression) {
+
+			super(owlExpression);
+
+			complex = new ConvertedComplex(owlExpression);
+		}
+	}
+
 	private class ConvertedNode extends ConvertedExpression implements InputNode {
 
 		public InputNodeType getNodeType() {
@@ -459,6 +493,11 @@ class ExpressionConverter {
 	InputComplex toComplex(OWLClassExpression owlExpression) {
 
 		return new ConvertedComplex(owlExpression);
+	}
+
+	InputComplexSuper toComplexSuper(OWLClassExpression owlExpression) {
+
+		return new ConvertedComplexSuper(owlExpression);
 	}
 
 	InputNode toNode(OWLClassExpression owlExpression) {

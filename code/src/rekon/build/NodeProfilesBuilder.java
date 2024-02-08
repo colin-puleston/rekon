@@ -32,12 +32,11 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class NodeProfilesBuilder {
+class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 	private ComponentBuilder components;
-	private MatchStructures matchStructures;
 
-	private class ProfilesBuilder {
+	private class ProfilePatternsBuilder {
 
 		private Map<NodeX, List<Relation>> relationsByNode
 							= new HashMap<NodeX, List<Relation>>();
@@ -56,7 +55,7 @@ class NodeProfilesBuilder {
 
 			for (NodeX n : nodes) {
 
-				matchStructures.checkAddProfilePattern(n, getRelations(n));
+				checkAddProfilePattern(n, getRelations(n));
 			}
 		}
 
@@ -95,13 +94,14 @@ class NodeProfilesBuilder {
 	}
 
 	NodeProfilesBuilder(
+		MatchStructures matchStructures,
 		OntologyNames names,
 		InputAxioms axioms,
-		ComponentBuilder components,
-		MatchStructures matchStructures) {
+		ComponentBuilder components) {
+
+		super(matchStructures);
 
 		this.components = components;
-		this.matchStructures = matchStructures;
 
 		createClassProfiles(names, axioms);
 		createIndividualProfiles(names, axioms);
@@ -109,35 +109,56 @@ class NodeProfilesBuilder {
 
 	private void createClassProfiles(OntologyNames names, InputAxioms axioms) {
 
-		ProfilesBuilder builders = new ProfilesBuilder();
+		ProfilePatternsBuilder ppBuilders = new ProfilePatternsBuilder();
 
 		for (InputClassSubComplexSuper ax : axioms.getClassSubComplexSupers()) {
 
-			InputComplex sup = ax.getSuper();
+			InputComplex sup = ComplexSuperConverter.toComplex(ax.getSuper());
 
-			if (!sup.hasComplexType(InputComplexType.DISJUNCTION)) {
+			if (sup.hasComplexType(InputComplexType.DISJUNCTION)) {
 
-				builders.checkAddRelation(ax, ax.getSub(), sup);
+				checkCreateDisjunctionProfile(ax, ax.getSub(), sup);
+			}
+			else {
+
+				ppBuilders.checkAddRelation(ax, ax.getSub(), sup);
 			}
 		}
 
-		builders.createAllProfiles(names.getClassNodes());
+		ppBuilders.createAllProfiles(names.getClassNodes());
 	}
 
 	private void createIndividualProfiles(OntologyNames names, InputAxioms axioms) {
 
-		ProfilesBuilder builders = new ProfilesBuilder();
+		ProfilePatternsBuilder ppBuilders = new ProfilePatternsBuilder();
 
 		for (InputIndividualComplexType ax : axioms.getIndividualComplexTypes()) {
 
-			builders.checkAddRelation(ax, ax.getIndividual(), ax.getComplexType());
+			ppBuilders.checkAddRelation(ax, ax.getIndividual(), ax.getComplexType());
 		}
 
 		for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
 
-			builders.checkAddRelation(ax, ax.getIndividual(), ax.getRelation());
+			ppBuilders.checkAddRelation(ax, ax.getIndividual(), ax.getRelation());
 		}
 
-		builders.createAllProfiles(names.getIndividualNodes());
+		ppBuilders.createAllProfiles(names.getIndividualNodes());
+	}
+
+	private void checkCreateDisjunctionProfile(
+						InputClassSubComplexSuper ax,
+						ClassNode sub,
+						InputComplex supDisjunction) {
+
+		List<Pattern> djs = components.toPatternDisjunction(supDisjunction);
+
+		if (djs != null) {
+
+			addProfileDisjunction(sub, djs);
+		}
+		else {
+
+			ax.notifyAxiomOutOfScope();
+		}
 	}
 }

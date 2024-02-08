@@ -27,7 +27,22 @@ package rekon.build.input;
 /**
  * @author Colin Puleston
  */
-public interface InputComplexSubSuper
-					extends
-						InputSubSuper<InputComplex, InputComplexSuper> {
+public enum InputComplexSuperType {
+
+	DISJUNCTION(InputComplexType.DISJUNCTION),
+	COMPLEMENT(InputComplexType.COMPLEMENT),
+	RELATION(InputComplexType.RELATION),
+	OUT_OF_SCOPE(InputComplexType.OUT_OF_SCOPE);
+
+	private InputComplexType complexType;
+
+	public InputComplexType toComplexType() {
+
+		return complexType;
+	}
+
+	InputComplexSuperType(InputComplexType complexType) {
+
+		this.complexType = complexType;
+	}
 }

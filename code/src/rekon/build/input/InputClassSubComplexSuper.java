@@ -29,5 +29,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputClassSubComplexSuper extends InputSubSuper<ClassNode, InputComplex> {
+public interface InputClassSubComplexSuper
+					extends
+						InputSubSuper<ClassNode, InputComplexSuper> {
 }

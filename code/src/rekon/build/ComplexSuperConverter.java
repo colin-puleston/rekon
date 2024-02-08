@@ -22,12 +22,24 @@
  * THE SOFTWARE.
  */
 
-package rekon.build.input;
+package rekon.build;
+
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputComplexSubSuper
-					extends
-						InputSubSuper<InputComplex, InputComplexSuper> {
+class ComplexSuperConverter {
+
+	static InputComplex toComplex(InputComplexSuper sup) {
+
+		InputComplex c = sup.toComplex();
+
+		if (c.getComplexType() == sup.getComplexSuperType().toComplexType()) {
+
+			return c;
+		}
+
+		throw new RuntimeException("Invalid conversion to InputComplex for: " + sup);
+	}
 }
