@@ -33,11 +33,11 @@ public interface DynamicOpsHandler {
 
 	public Names getEquivalents();
 
-	public Names getSupers(boolean direct);
+	public Collection<Names> getSuperEquivGroups(boolean direct);
 
-	public Names getSubs(boolean direct);
+	public Collection<Names> getSubEquivGroups(boolean direct);
 
-	public Names getIndividuals(boolean direct);
+	public Collection<Names> getIndividualEquivGroups(boolean direct);
 
 	public boolean equivalentTo(DynamicOpsHandler other);
 

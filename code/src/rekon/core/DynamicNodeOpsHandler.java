@@ -40,21 +40,6 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		return equivs;
 	}
 
-	public Names getSupers(boolean direct) {
-
-		return node.getSupers(direct);
-	}
-
-	public Names getSubs(boolean direct) {
-
-		return node.getSubs(ClassNode.class, direct);
-	}
-
-	public Names getIndividuals(boolean direct) {
-
-		return node.getSubs(IndividualNode.class, direct);
-	}
-
 	DynamicNodeOpsHandler(NodeX node) {
 
 		this.node = node;
@@ -66,5 +51,20 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 	NodeX getNode() {
 
 		return node;
+	}
+
+	Names getSupers(boolean direct) {
+
+		return node.getSupers(direct);
+	}
+
+	Names getSubs(boolean direct) {
+
+		return node.getSubs(ClassNode.class, direct);
+	}
+
+	Names getIndividuals(boolean direct) {
+
+		return node.getSubs(IndividualNode.class, direct);
 	}
 }

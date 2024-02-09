@@ -106,56 +106,6 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return inferEquivsForSubsumeds(subsumeds);
 	}
 
-	public Names getSupers(boolean direct) {
-
-		NameSet subsumers = inferSubsumers();
-
-		if (subsumers.isEmpty()) {
-
-			return subsumers;
-		}
-
-		NameSet equivs = inferSubsumedClasses(subsumers);
-
-		if (!equivs.isEmpty()) {
-
-			return equivs.getFirstName().getSupers(direct);
-		}
-
-		return superClassesResolver.resolve(subsumers, direct);
-	}
-
-	public Names getSubs(boolean direct) {
-
-		NameSet subsumeds = inferSubsumedClasses();
-
-		if (subsumeds.isEmpty()) {
-
-			return NameSet.NO_NAMES;
-		}
-
-		NameSet equivs = inferEquivsForSubsumeds(subsumeds);
-
-		if (!equivs.isEmpty()) {
-
-			return equivs.getFirstName().getSubs(ClassNode.class, direct);
-		}
-
-		return subClassesResolver.resolve(subsumeds, direct);
-	}
-
-	public Names getIndividuals(boolean direct) {
-
-		NameSet subs = inferAllSubsumedNodes();
-
-		if (subs.isEmpty()) {
-
-			return NameSet.NO_NAMES;
-		}
-
-		return individualsResolver.resolve(subs, direct);
-	}
-
 	DynamicExpressionOpsHandler(Ontology ontology, DynamicExpression expression) {
 
 		this.expression = expression;
@@ -176,6 +126,56 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 	NodeX getNode() {
 
 		return getExpressionMatcher().getNode();
+	}
+
+	Names getSupers(boolean direct) {
+
+		NameSet subsumers = inferSubsumers();
+
+		if (subsumers.isEmpty()) {
+
+			return subsumers;
+		}
+
+		NameSet equivs = inferSubsumedClasses(subsumers);
+
+		if (!equivs.isEmpty()) {
+
+			return equivs.getFirstName().getSupers(direct);
+		}
+
+		return superClassesResolver.resolve(subsumers, direct);
+	}
+
+	Names getSubs(boolean direct) {
+
+		NameSet subsumeds = inferSubsumedClasses();
+
+		if (subsumeds.isEmpty()) {
+
+			return NameSet.NO_NAMES;
+		}
+
+		NameSet equivs = inferEquivsForSubsumeds(subsumeds);
+
+		if (!equivs.isEmpty()) {
+
+			return equivs.getFirstName().getSubs(ClassNode.class, direct);
+		}
+
+		return subClassesResolver.resolve(subsumeds, direct);
+	}
+
+	Names getIndividuals(boolean direct) {
+
+		NameSet subs = inferAllSubsumedNodes();
+
+		if (subs.isEmpty()) {
+
+			return NameSet.NO_NAMES;
+		}
+
+		return individualsResolver.resolve(subs, direct);
 	}
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {

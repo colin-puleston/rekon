@@ -29,41 +29,42 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class DynamicOps {
+class EquivalentsGrouper {
 
-	private Ontology ontology;
+	static Collection<Names> group(Names names) {
 
-	public DynamicOpsHandler createHandler(NodeX nodes) {
+		Set<Names> groups = new HashSet<Names>();
+		NameSet initialGroupNames = new NameSet();
 
-		return new DynamicNodeOpsHandler(nodes);
-	}
+		for (Name n : names) {
 
-	public DynamicOpsHandler createHandler(MultiPatternBuilder disjunctsBuilder) {
+			Names equivs = n.getEquivalents();
 
-		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
+			if (equivs.isEmpty()) {
 
-		if (expr.expressionCreated()) {
-
-			NodeX node = expr.toSingleNode();
-
-			if (node != null) {
-
-				return new DynamicNodeOpsHandler(node);
+				groups.add(new NameSet(n));
 			}
+			else {
 
-			return new DynamicExpressionOpsHandler(ontology, expr);
+				if (!initialGroupNames.containsAny(equivs)) {
+
+					groups.add(createEquivGroup(n, equivs));
+
+					initialGroupNames.add(n);
+				}
+			}
 		}
 
-		return InvalidInputDynamicOpsHandler.SINGLETON;
+		return groups;
 	}
 
-	public Collection<Names> namesToEquivGroups(Names names) {
+	static private Names createEquivGroup(Name name, Names equivs) {
 
-		return EquivalentsGrouper.group(names);
-	}
+		Names group = new NameSet();
 
-	DynamicOps(Ontology ontology) {
+		group.add(name);
+		group.addAll(equivs);
 
-		this.ontology = ontology;
+		return group;
 	}
 }

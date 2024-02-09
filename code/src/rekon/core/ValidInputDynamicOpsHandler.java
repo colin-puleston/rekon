@@ -31,6 +31,21 @@ import java.util.*;
  */
 abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
+	public Collection<Names> getSuperEquivGroups(boolean direct) {
+
+		return EquivalentsGrouper.group(getSupers(direct));
+	}
+
+	public Collection<Names> getSubEquivGroups(boolean direct) {
+
+		return EquivalentsGrouper.group(getSubs(direct));
+	}
+
+	public Collection<Names> getIndividualEquivGroups(boolean direct) {
+
+		return EquivalentsGrouper.group(getIndividuals(direct));
+	}
+
 	public boolean equivalentTo(DynamicOpsHandler other) {
 
 		if (other instanceof ValidInputDynamicOpsHandler) {
@@ -51,6 +66,16 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		return false;
 	}
 
+	abstract void configureAsPotentialSubsumed();
+
+	abstract NodeX getNode();
+
+	abstract Names getSupers(boolean direct);
+
+	abstract Names getSubs(boolean direct);
+
+	abstract Names getIndividuals(boolean direct);
+
 	private boolean equivalentTo(ValidInputDynamicOpsHandler other) {
 
 		return subsumes(other) && other.subsumes(this);
@@ -62,8 +87,4 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 		return getNode().subsumes(other.getNode());
 	}
-
-	abstract void configureAsPotentialSubsumed();
-
-	abstract NodeX getNode();
 }

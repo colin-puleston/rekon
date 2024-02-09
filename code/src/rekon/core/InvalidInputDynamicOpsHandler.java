@@ -39,19 +39,19 @@ class InvalidInputDynamicOpsHandler implements DynamicOpsHandler {
 		return Names.NO_NAMES;
 	}
 
-	public Names getSupers(boolean direct) {
+	public Collection<Names> getSuperEquivGroups(boolean direct) {
 
-		return Names.NO_NAMES;
+		return Collections.emptySet();
 	}
 
-	public Names getSubs(boolean direct) {
+	public Collection<Names> getSubEquivGroups(boolean direct) {
 
-		return Names.NO_NAMES;
+		return Collections.emptySet();
 	}
 
-	public Names getIndividuals(boolean direct) {
+	public Collection<Names> getIndividualEquivGroups(boolean direct) {
 
-		return Names.NO_NAMES;
+		return Collections.emptySet();
 	}
 
 	public boolean equivalentTo(DynamicOpsHandler other) {
