@@ -31,19 +31,90 @@ import java.util.*;
  */
 abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
+	private SupersResolver supersResolver = new SupersResolver();
+	private SubsResolver subsResolver = new SubsResolver();
+
+	private abstract class LinkedClassesResolver {
+
+		Names resolve(Names names, boolean direct) {
+
+			if (anyFreeNames(names)) {
+
+				return direct ? resolveForFreeDirects(names) : purgeAllFreeNames(names);
+			}
+
+			return names;
+		}
+
+		abstract Names getLinked(Name name, boolean direct);
+
+		private Names resolveForFreeDirects(Names withFreeNames) {
+
+			NameSet resolved = new NameSet();
+
+			for (Name d : withFreeNames) {
+
+				collectClosestLinkedMappeds(resolved, d);
+			}
+
+			for (Name d : resolved.copyNames()) {
+
+				resolved.removeAll(getLinked(d, false));
+			}
+
+			return resolved;
+		}
+
+		private void collectClosestLinkedMappeds(NameSet collected, Name n) {
+
+			if (n.mapped()) {
+
+				collected.add(n);
+			}
+			else {
+
+				for (Name l : getLinked(n, true)) {
+
+					collectClosestLinkedMappeds(collected, l);
+				}
+			}
+		}
+	}
+
+	private class SupersResolver extends LinkedClassesResolver {
+
+		Names getLinked(Name name, boolean direct) {
+
+			return name.getSupers(direct);
+		}
+	}
+
+	private class SubsResolver extends LinkedClassesResolver {
+
+		Names getLinked(Name name, boolean direct) {
+
+			return name.getSubs(ClassNode.class, direct);
+		}
+	}
+
+	public Names getEquivalentsGroup() {
+
+		return checkPurgeAllFreeNames(getEquivalents());
+	}
+
 	public Collection<Names> getSuperEquivGroups(boolean direct) {
 
-		return EquivalentsGrouper.group(getSupers(direct));
+		return toEquivGroups(supersResolver.resolve(getSupers(direct), direct));
 	}
 
 	public Collection<Names> getSubEquivGroups(boolean direct) {
 
-		return EquivalentsGrouper.group(getSubs(direct));
+		return toEquivGroups(subsResolver.resolve(getSubs(direct), direct));
 	}
 
 	public Collection<Names> getIndividualEquivGroups(boolean direct) {
 
-		return EquivalentsGrouper.group(getIndividuals(direct));
+		return toEquivGroups(checkPurgeAllFreeNames(getIndividuals(direct)));
 	}
 
 	public boolean equivalentTo(DynamicOpsHandler other) {
@@ -70,6 +141,8 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 	abstract NodeX getNode();
 
+	abstract Names getEquivalents();
+
 	abstract Names getSupers(boolean direct);
 
 	abstract Names getSubs(boolean direct);
@@ -86,5 +159,43 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		other.configureAsPotentialSubsumed();
 
 		return getNode().subsumes(other.getNode());
+	}
+
+	private Names checkPurgeAllFreeNames(Names names) {
+
+		return anyFreeNames(names) ? purgeAllFreeNames(names) : names;
+	}
+
+	private boolean anyFreeNames(Names names) {
+
+		for (Name n : names) {
+
+			if (!n.mapped()) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private Names purgeAllFreeNames(Names withFreeNames) {
+
+		NameList purged = new NameList();
+
+		for (Name n : withFreeNames) {
+
+			if (n.mapped()) {
+
+				purged.add(n);
+			}
+		}
+
+		return purged;
+	}
+
+	private Collection<Names> toEquivGroups(Names names) {
+
+		return new EquivalentsGrouper().group(names);
 	}
 }

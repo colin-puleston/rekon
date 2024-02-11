@@ -94,18 +94,6 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 	private DynamicExpression expression;
 
-	public Names getEquivalents() {
-
-		NameSet subsumeds = inferSubsumedClasses();
-
-		if (subsumeds.isEmpty()) {
-
-			return NameSet.NO_NAMES;
-		}
-
-		return inferEquivsForSubsumeds(subsumeds);
-	}
-
 	DynamicExpressionOpsHandler(Ontology ontology, DynamicExpression expression) {
 
 		this.expression = expression;
@@ -126,6 +114,18 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 	NodeX getNode() {
 
 		return getExpressionMatcher().getNode();
+	}
+
+	Names getEquivalents() {
+
+		NameSet subsumeds = inferSubsumedClasses();
+
+		if (subsumeds.isEmpty()) {
+
+			return NameSet.NO_NAMES;
+		}
+
+		return inferEquivsForSubsumeds(subsumeds);
 	}
 
 	Names getSupers(boolean direct) {

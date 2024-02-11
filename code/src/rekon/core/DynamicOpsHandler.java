@@ -31,7 +31,7 @@ import java.util.*;
  */
 public interface DynamicOpsHandler {
 
-	public Names getEquivalents();
+	public Names getEquivalentsGroup();
 
 	public Collection<Names> getSuperEquivGroups(boolean direct);
 

@@ -31,26 +31,22 @@ import java.util.*;
  */
 class EquivalentsGrouper {
 
-	static Collection<Names> group(Names names) {
+	private Set<Names> groups = new HashSet<Names>();
+	private NameSet initialGroupNames = new NameSet();
 
-		Set<Names> groups = new HashSet<Names>();
-		NameSet initialGroupNames = new NameSet();
+	Collection<Names> group(Names names) {
 
 		for (Name n : names) {
 
 			Names equivs = n.getEquivalents();
 
-			if (equivs.isEmpty()) {
+			if (newGroupFor(n, equivs)) {
 
-				groups.add(new NameSet(n));
-			}
-			else {
+				Names group = checkCreateGroup(n, equivs);
 
-				if (!initialGroupNames.containsAny(equivs)) {
+				if (!group.isEmpty()) {
 
-					groups.add(createEquivGroup(n, equivs));
-
-					initialGroupNames.add(n);
+					groups.add(group);
 				}
 			}
 		}
@@ -58,13 +54,42 @@ class EquivalentsGrouper {
 		return groups;
 	}
 
-	static private Names createEquivGroup(Name name, Names equivs) {
+	private boolean newGroupFor(Name name, Names equivs) {
+
+		if (equivs.isEmpty()) {
+
+			return true;
+		}
+
+		if (initialGroupNames.containsAny(equivs)) {
+
+			return false;
+		}
+
+		initialGroupNames.add(name);
+
+		return true;
+	}
+
+	private Names checkCreateGroup(Name name, Names equivs) {
 
 		Names group = new NameSet();
 
-		group.add(name);
-		group.addAll(equivs);
+		checkAddToGroup(group, name);
+
+		for (Name e : equivs) {
+
+			checkAddToGroup(group, e);
+		}
 
 		return group;
+	}
+
+	private void checkAddToGroup(Names group, Name name) {
+
+		if (name.mapped()) {
+
+			group.add(name);
+		}
 	}
 }

@@ -76,28 +76,25 @@ class EntityGroupsMapper {
 			return entityGroups;
 		}
 
-		Set<E> toEntityGroup(Names nameGroup) {
+		abstract Node<E> createGroupNode(Set<E> entities);
+
+		abstract NodeSet<E> createGroupsNode(Set<Node<E>> entityGroups);
+
+		void addEntity(Set<E> entities, Name name) {
+
+			entities.add(MappedNames.toMappedEntity(name, entityType));
+		}
+
+		private Set<E> toEntityGroup(Names nameGroup) {
 
 			Set<E> entities = new HashSet<E>();
 
 			for (Name n : nameGroup) {
 
-				checkAddEntity(entities, n);
+				addEntity(entities, n);
 			}
 
 			return entities;
-		}
-
-		abstract Node<E> createGroupNode(Set<E> entities);
-
-		abstract NodeSet<E> createGroupsNode(Set<Node<E>> entityGroups);
-
-		void checkAddEntity(Set<E> entities, Name name) {
-
-			if (name.mapped()) {
-
-				entities.add(MappedNames.toMappedEntity(name, entityType));
-			}
 		}
 	}
 
@@ -114,7 +111,7 @@ class EntityGroupsMapper {
 
 			for (Name n : names) {
 
-				checkAddEntity(entities, n);
+				addEntity(entities, n);
 			}
 
 			return new OWLClassNode(entities);
@@ -133,11 +130,7 @@ class EntityGroupsMapper {
 
 	private abstract class LinkedClassesMapper extends ClassesMapper {
 
-		private boolean direct = false;
-
 		NodeSet<OWLClass> toEntityGroups(Collection<Names> nameGroups, boolean direct) {
-
-			this.direct = direct;
 
 			Set<Node<OWLClass>> entityGroups = toEntityGroupsSet(nameGroups);
 
@@ -149,60 +142,7 @@ class EntityGroupsMapper {
 			return new OWLClassNodeSet(entityGroups);
 		}
 
-		Set<OWLClass> toEntityGroup(Names nameGroup) {
-
-			if (direct && anyFreeNames(nameGroup)) {
-
-				nameGroup = resolveForFreeDirects(nameGroup);
-			}
-
-			return super.toEntityGroup(nameGroup);
-		}
-
 		abstract Node<OWLClass> getDefaultEntityGroup();
-
-		abstract Names getLinked(Name name, boolean direct);
-
-		private Names resolveForFreeDirects(Names rawDirects) {
-
-			NameSet resDirects = new NameSet();
-
-			for (Name d : rawDirects) {
-
-				collectLinkedMappeds(resDirects, d);
-			}
-
-			for (Name d : resDirects.copyNames()) {
-
-				resDirects.removeAll(getLinked(d, false));
-			}
-
-			return resDirects;
-		}
-
-		private void collectLinkedMappeds(NameSet collected, Name n) {
-
-			if (!n.mapped() || collected.add(n)) {
-
-				for (Name l : getLinked(n, true)) {
-
-					collectLinkedMappeds(collected, l);
-				}
-			}
-		}
-
-		private boolean anyFreeNames(Names names) {
-
-			for (Name n : names) {
-
-				if (!n.mapped()) {
-
-					return true;
-				}
-			}
-
-			return false;
-		}
 	}
 
 	private class SupersMapper extends LinkedClassesMapper {
@@ -211,11 +151,6 @@ class EntityGroupsMapper {
 
 			return owlThingAsEntityGroup;
 		}
-
-		Names getLinked(Name name, boolean direct) {
-
-			return name.getSupers(direct);
-		}
 	}
 
 	private class SubsMapper extends LinkedClassesMapper {
@@ -223,11 +158,6 @@ class EntityGroupsMapper {
 		Node<OWLClass> getDefaultEntityGroup() {
 
 			return owlNothingAsEntityGroup;
-		}
-
-		Names getLinked(Name name, boolean direct) {
-
-			return name.getSubs(ClassNode.class, direct);
 		}
 	}
 

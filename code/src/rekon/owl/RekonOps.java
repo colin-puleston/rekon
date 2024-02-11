@@ -143,7 +143,7 @@ class RekonOps {
 			return owlNothingAsEquivGroup;
 		}
 
-		Names equivs = toDynamicHandler(expr).getEquivalents();
+		Names equivs = toDynamicHandler(expr).getEquivalentsGroup();
 
 		return entityGroupsMapper.mapEquivs(equivs, expr);
 	}

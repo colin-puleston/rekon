@@ -31,15 +31,6 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 
 	private NodeX node;
 
-	public Names getEquivalents() {
-
-		NameList equivs = new NameList(node);
-
-		equivs.addAll(node.getEquivalents());
-
-		return equivs;
-	}
-
 	DynamicNodeOpsHandler(NodeX node) {
 
 		this.node = node;
@@ -51,6 +42,15 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 	NodeX getNode() {
 
 		return node;
+	}
+
+	Names getEquivalents() {
+
+		NameList equivs = new NameList(node);
+
+		equivs.addAll(node.getEquivalents());
+
+		return equivs;
 	}
 
 	Names getSupers(boolean direct) {

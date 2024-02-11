@@ -34,7 +34,7 @@ class InvalidInputDynamicOpsHandler implements DynamicOpsHandler {
 	static final InvalidInputDynamicOpsHandler SINGLETON
 						= new InvalidInputDynamicOpsHandler();
 
-	public Names getEquivalents() {
+	public Names getEquivalentsGroup() {
 
 		return Names.NO_NAMES;
 	}

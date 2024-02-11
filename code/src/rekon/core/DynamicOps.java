@@ -59,7 +59,7 @@ public class DynamicOps {
 
 	public Collection<Names> namesToEquivGroups(Names names) {
 
-		return EquivalentsGrouper.group(names);
+		return new EquivalentsGrouper().group(names);
 	}
 
 	DynamicOps(Ontology ontology) {
