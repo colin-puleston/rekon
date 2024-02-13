@@ -293,7 +293,7 @@ class ExpressionConverter {
 
 			OWLClassExpression owlExpr = getOwlExpression();
 
-			if (allowNonComplexTypes()) {
+			if (allowSimpleTypes()) {
 
 				if (owlExpr instanceof OWLClass) {
 
@@ -311,7 +311,7 @@ class ExpressionConverter {
 				}
 			}
 
-			if (allowNonComplexSuperTypes()) {
+			if (allowConjunctions()) {
 
 				if (owlExpr instanceof OWLObjectIntersectionOf) {
 
@@ -379,12 +379,12 @@ class ExpressionConverter {
 			}
 		}
 
-		boolean allowNonComplexTypes() {
+		boolean allowSimpleTypes() {
 
 			return true;
 		}
 
-		boolean allowNonComplexSuperTypes() {
+		boolean allowConjunctions() {
 
 			return true;
 		}
@@ -414,7 +414,7 @@ class ExpressionConverter {
 			super(owlExpression);
 		}
 
-		boolean allowNonComplexTypes() {
+		boolean allowSimpleTypes() {
 
 			return false;
 		}
@@ -437,7 +437,7 @@ class ExpressionConverter {
 			super(owlExpression);
 		}
 
-		boolean allowNonComplexSuperTypes() {
+		boolean allowConjunctions() {
 
 			return false;
 		}
