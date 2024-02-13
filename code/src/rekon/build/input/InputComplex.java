@@ -41,7 +41,5 @@ public interface InputComplex extends InputComponent {
 
 	Collection<InputNode> asDisjuncts();
 
-	InputComplex asComplemented();
-
 	InputRelation asRelation();
 }

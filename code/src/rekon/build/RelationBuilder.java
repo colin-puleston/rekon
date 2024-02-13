@@ -63,41 +63,26 @@ class RelationBuilder {
 
 			this.complement = complement;
 
-			return get(source);
+			return source.getRelationType() == handledInputType() ? get(source) : null;
 		}
 
 		Relation checkCreate(InputRelation source) {
 
-			if (source.getRelationType() == convertedInputType()) {
-
-				NodeProperty p = source.getNodeProperty();
-				InputNode v = source.getExpressionValue();
-
-				if (complement) {
-
-					return checkCreateForComplement(p, v);
-				}
-
-				return checkCreate(p, v);
-			}
-
-			return null;
+			return checkCreate(source, complement);
 		}
 
-		Relation checkCreate(NodeProperty prop, InputNode filler) {
+		abstract Relation checkCreate(InputRelation source, boolean complement);
 
-			NodeValue target = toNodeValue(filler);
+		Relation checkCreateDefault(NodeProperty prop, InputNode value) {
+
+			NodeValue target = toNodeValue(value);
 
 			return target != null ? create(prop, target) : null;
 		}
 
-		abstract InputRelationType convertedInputType();
-
-		abstract Relation checkCreateForComplement(
-								NodeProperty prop,
-								InputNode filler);
-
 		abstract Relation create(NodeProperty prop, NodeValue target);
+
+		abstract InputRelationType handledInputType();
 
 		abstract NodeValue getNodeValueForEmptyDisjunction();
 
@@ -143,19 +128,32 @@ class RelationBuilder {
 			super(dynamic);
 		}
 
-		InputRelationType convertedInputType() {
+		Relation checkCreate(InputRelation source, boolean complement) {
 
-			return InputRelationType.SOME_NODES;
-		}
+			NodeProperty prop = source.getNodeProperty();
+			InputNode value = source.getExpressionValue();
 
-		Relation checkCreateForComplement(NodeProperty prop, InputNode filler) {
+			if (complement) {
 
-			return isClassNode(filler, rootClassNode) ? createForNoValue(prop) : null;
+				if (isClassNode(value, rootClassNode)) {
+
+					return createForNoValue(prop);
+				}
+
+				return null;
+			}
+
+			return checkCreateDefault(prop, value);
 		}
 
 		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new SomeRelation(prop, target);
+		}
+
+		InputRelationType handledInputType() {
+
+			return InputRelationType.SOME_NODES;
 		}
 
 		NodeValue getNodeValueForEmptyDisjunction() {
@@ -171,29 +169,32 @@ class RelationBuilder {
 			super(dynamic);
 		}
 
-		Relation checkCreate(NodeProperty prop, InputNode filler) {
+		Relation checkCreate(InputRelation source, boolean complement) {
 
-			if (isClassNode(filler, OntologyNames.ABSENT_CLASS_NODE)) {
+			if (complement) {
+
+				return null;
+			}
+
+			NodeProperty prop = source.getNodeProperty();
+			InputNode value = source.getExpressionValue();
+
+			if (isClassNode(value, OntologyNames.ABSENT_CLASS_NODE)) {
 
 				return createForNoValue(prop);
 			}
 
-			return super.checkCreate(prop, filler);
-		}
-
-		InputRelationType convertedInputType() {
-
-			return InputRelationType.ALL_NODES;
-		}
-
-		Relation checkCreateForComplement(NodeProperty prop, InputNode filler) {
-
-			return null;
+			return checkCreateDefault(prop, value);
 		}
 
 		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new AllRelation(prop, target);
+		}
+
+		InputRelationType handledInputType() {
+
+			return InputRelationType.ALL_NODES;
 		}
 
 		NodeValue getNodeValueForEmptyDisjunction() {
@@ -226,47 +227,18 @@ class RelationBuilder {
 		rootClassNode = names.getRootClassNode();
 	}
 
-	Relation toRelation(InputComplex source) {
-
-		return toRelation(source, false);
-	}
-
 	Relation toRelation(InputRelation source) {
 
 		return toRelation(source, false);
 	}
 
-	private Relation toRelation(InputComplex source, boolean complement) {
-
-		switch (source.getComplexType()) {
-
-			case CONJUNCTION:
-
-				return null;
-
-			case DISJUNCTION:
-
-				return null;
-
-			case COMPLEMENT:
-
-				return toRelation(source.asComplemented(), !complement);
-
-			case RELATION:
-
-				return toRelation(source.asRelation(), complement);
-
-			case OUT_OF_SCOPE:
-
-				return null;
-		}
-
-		throw new Error("Unexpected complex-type: " + source.getComplexType());
-	}
-
 	private Relation toRelation(InputRelation source, boolean complement) {
 
 		switch (source.getRelationType()) {
+
+			case COMPLEMENT:
+
+				return toRelation(source.asComplemented(), true);
 
 			case SOME_NODES:
 
@@ -290,11 +262,6 @@ class RelationBuilder {
 
 	private boolean isClassNode(InputNode node, ClassNode test) {
 
-		if (node.hasNodeType(InputNodeType.CLASS)) {
-
-			return node.asClassNode() == test;
-		}
-
-		return false;
+		return node.hasNodeType(InputNodeType.CLASS) && node.asClassNode() == test;
 	}
 }

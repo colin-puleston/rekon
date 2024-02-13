@@ -31,7 +31,6 @@ public enum InputComplexType {
 
 	CONJUNCTION,
 	DISJUNCTION,
-	COMPLEMENT,
 	RELATION,
 	OUT_OF_SCOPE;
 }

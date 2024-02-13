@@ -90,28 +90,6 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class ConvertedIndividualComplexType
-						extends ConvertedIndividualAttribute
-						implements InputIndividualComplexType {
-
-		private InputComplex type;
-
-		public InputComplex getComplexType() {
-
-			return type;
-		}
-
-		ConvertedIndividualComplexType(
-			OWLAxiom source,
-			IndividualNode individual,
-			InputComplex type) {
-
-			super(source, individual);
-
-			this.type = type;
-		}
-	}
-
 	private class ConvertedIndividualRelation
 						extends ConvertedIndividualAttribute
 						implements InputIndividualRelation {
@@ -293,23 +271,23 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class IndividualComplexTypeConverter
+	private class IndividualRelationTypeConverter
 						extends
-							IndividualTypeConverter<InputIndividualComplexType> {
+							IndividualTypeConverter<InputIndividualRelation> {
 
 		boolean convertsNamedTypes() {
 
 			return false;
 		}
 
-		InputIndividualComplexType createInputAxiom(
-										IndividualNode node,
-										OWLClassExpression typeExpr,
-										OWLClassAssertionAxiom source) {
+		InputIndividualRelation createInputAxiom(
+									IndividualNode node,
+									OWLClassExpression typeExpr,
+									OWLClassAssertionAxiom source) {
 
-			InputComplex type = expressions.toComplex(typeExpr);
+			InputRelation rel = expressions.toRelation(typeExpr);
 
-			return new ConvertedIndividualComplexType(source, node, type);
+			return new ConvertedIndividualRelation(source, node, rel);
 		}
 	}
 
@@ -377,7 +355,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 		new IndividualEquivalenceConverter();
 		new IndividualClassTypeConverter();
-		new IndividualComplexTypeConverter();
+		new IndividualRelationTypeConverter();
 		new IndividualObjectRelationConverter();
 		new IndividualDataRelationConverter();
 	}
@@ -392,15 +370,11 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		return getInputAxioms(IndividualClassTypeConverter.class);
 	}
 
-	Collection<InputIndividualComplexType> getIndividualComplexTypes() {
-
-		return getInputAxioms(IndividualComplexTypeConverter.class);
-	}
-
 	Collection<InputIndividualRelation> getIndividualRelations() {
 
 		List<InputIndividualRelation> all = new ArrayList<InputIndividualRelation>();
 
+		all.addAll(getInputAxioms(IndividualRelationTypeConverter.class));
 		all.addAll(getInputAxioms(IndividualObjectRelationConverter.class));
 		all.addAll(getInputAxioms(IndividualDataRelationConverter.class));
 

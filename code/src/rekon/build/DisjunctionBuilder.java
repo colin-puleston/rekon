@@ -51,7 +51,7 @@ class DisjunctionBuilder {
 
 			for (InputNode n : source) {
 
-				Set<? extends NodeX> djs = toDisjuncts(n);
+				Collection<? extends NodeX> djs = toDisjuncts(n);
 
 				if (djs == null) {
 
@@ -64,33 +64,16 @@ class DisjunctionBuilder {
 			return disjuncts;
 		}
 
-		private Set<? extends NodeX> toDisjuncts(InputNode source) {
+		private Collection<? extends NodeX> toDisjuncts(InputNode source) {
 
 			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
 
-				return toIndividualDisjuncts(source.asComplex().asDisjuncts());
+				return disjunctions.get(source.asComplex().asDisjuncts());
 			}
 
 			NodeX n = componentBuilder.toAtomicNode(source);
 
 			return n != null ? Collections.singleton(n) : null;
-		}
-
-		private Set<IndividualNode> toIndividualDisjuncts(Collection<InputNode> source) {
-
-			Set<IndividualNode> disjuncts = new HashSet<IndividualNode>();
-
-			for (InputNode d : source) {
-
-				if (!d.hasNodeType(InputNodeType.INDIVIDUAL)) {
-
-					return null;
-				}
-
-				disjuncts.add(d.asIndividualNode());
-			}
-
-			return disjuncts;
 		}
 	}
 

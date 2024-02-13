@@ -89,7 +89,7 @@ class PatternBuilder {
 
 		List<Pattern> checkCreate() {
 
-			List<Pattern> patternDisjunction = new ArrayList<Pattern>();
+			List<Pattern> patternDisjuncts = new ArrayList<Pattern>();
 
 			for (PatternSpec d : disjuncts) {
 
@@ -100,10 +100,10 @@ class PatternBuilder {
 					return null;
 				}
 
-				patternDisjunction.add(pd);
+				patternDisjuncts.add(pd);
 			}
 
-			return patternDisjunction;
+			return patternDisjuncts;
 		}
 
 		private void addDisjunctsFor(Collection<InputNode> source) {
@@ -194,9 +194,8 @@ class PatternBuilder {
 						return true;
 
 					case RELATION:
-					case COMPLEMENT:
 
-						Relation r = componentBuilder.toRelation(conjunct);
+						Relation r = componentBuilder.toRelation(conjunct.asRelation());
 
 						if (r == null) {
 
@@ -271,10 +270,6 @@ class PatternBuilder {
 					return checkCreateForConjuncts(source.asConjuncts());
 
 				case DISJUNCTION:
-
-					return null;
-
-				case COMPLEMENT:
 
 					return null;
 

@@ -30,7 +30,6 @@ package rekon.build.input;
 public enum InputComplexSuperType {
 
 	DISJUNCTION(InputComplexType.DISJUNCTION),
-	COMPLEMENT(InputComplexType.COMPLEMENT),
 	RELATION(InputComplexType.RELATION),
 	OUT_OF_SCOPE(InputComplexType.OUT_OF_SCOPE);
 

@@ -49,8 +49,6 @@ public interface InputAxioms {
 
 	public Collection<InputIndividualClassType> getIndividualClassTypes();
 
-	public Collection<InputIndividualComplexType> getIndividualComplexTypes();
-
 	public Collection<InputIndividualRelation> getIndividualRelations();
 
 	public Collection<InputNodePropertyEquivalence> getNodePropertyEquivalences();

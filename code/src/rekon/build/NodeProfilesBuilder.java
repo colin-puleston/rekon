@@ -41,25 +41,9 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		private Map<NodeX, List<Relation>> relationsByNode
 							= new HashMap<NodeX, List<Relation>>();
 
-		void checkAddRelation(InputAxiom axiom, NodeX node, InputComplex relSource) {
-
-			checkAddRelation(axiom, node, components.toRelation(relSource));
-		}
-
 		void checkAddRelation(InputAxiom axiom, NodeX node, InputRelation relSource) {
 
-			checkAddRelation(axiom, node, components.toRelation(relSource));
-		}
-
-		void createAllProfiles(Collection<? extends NodeX> nodes) {
-
-			for (NodeX n : nodes) {
-
-				checkAddProfilePattern(n, getRelations(n));
-			}
-		}
-
-		private void checkAddRelation(InputAxiom axiom, NodeX node, Relation rel) {
+			Relation rel = components.toRelation(relSource);
 
 			if (rel != null) {
 
@@ -68,6 +52,14 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			else {
 
 				axiom.notifyAxiomOutOfScope();
+			}
+		}
+
+		void createAllProfiles(Collection<? extends NodeX> nodes) {
+
+			for (NodeX n : nodes) {
+
+				checkAddProfilePattern(n, getRelations(n));
 			}
 		}
 
@@ -113,15 +105,29 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 		for (InputClassSubComplexSuper ax : axioms.getClassSubComplexSupers()) {
 
-			InputComplex sup = ComplexSuperConverter.toComplex(ax.getSuper());
+			ClassNode sub = ax.getSub();
+			InputComplexSuper sup = ax.getSuper();
 
-			if (sup.hasComplexType(InputComplexType.DISJUNCTION)) {
+			switch (sup.getComplexSuperType()) {
 
-				checkCreateDisjunctionProfile(ax, ax.getSub(), sup);
-			}
-			else {
+				case DISJUNCTION:
 
-				ppBuilders.checkAddRelation(ax, ax.getSub(), sup);
+					checkCreateDisjunctionProfile(ax, sub, sup);
+					break;
+
+				case RELATION:
+
+					ppBuilders.checkAddRelation(ax, sub, sup.toComplex().asRelation());
+					break;
+
+				case OUT_OF_SCOPE:
+
+					ax.notifyAxiomOutOfScope();
+					break;
+
+				default:
+
+					throw new Error("Unexpected complex-type: " + sup.getComplexSuperType());
 			}
 		}
 
@@ -131,11 +137,6 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 	private void createIndividualProfiles(OntologyNames names, InputAxioms axioms) {
 
 		ProfilePatternsBuilder ppBuilders = new ProfilePatternsBuilder();
-
-		for (InputIndividualComplexType ax : axioms.getIndividualComplexTypes()) {
-
-			ppBuilders.checkAddRelation(ax, ax.getIndividual(), ax.getComplexType());
-		}
 
 		for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
 
@@ -148,9 +149,9 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 	private void checkCreateDisjunctionProfile(
 						InputClassSubComplexSuper ax,
 						ClassNode sub,
-						InputComplex supDisjunction) {
+						InputComplexSuper supDisjunction) {
 
-		List<Pattern> djs = components.toPatternDisjunction(supDisjunction);
+		List<Pattern> djs = components.toPatternDisjunction(supDisjunction.toComplex());
 
 		if (djs != null) {
 

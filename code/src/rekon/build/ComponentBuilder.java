@@ -67,11 +67,6 @@ class ComponentBuilder {
 		return patternBuilder.toPatternDisjunction(source);
 	}
 
-	Relation toRelation(InputComplex source) {
-
-		return relationBuilder.toRelation(source);
-	}
-
 	Relation toRelation(InputRelation source) {
 
 		return relationBuilder.toRelation(source);

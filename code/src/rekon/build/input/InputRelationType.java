@@ -29,20 +29,9 @@ package rekon.build.input;
  */
 public enum InputRelationType {
 
-	SOME_NODES(true),
-	ALL_NODES(true),
-	DATA_VALUE(false),
-	OUT_OF_SCOPE(false);
-
-	private boolean nodeValued;
-
-	public boolean nodeValued() {
-
-		return nodeValued;
-	}
-
-	private InputRelationType(boolean nodeValued) {
-
-		this.nodeValued = nodeValued;
-	}
+	SOME_NODES,
+	ALL_NODES,
+	DATA_VALUE,
+	COMPLEMENT,
+	OUT_OF_SCOPE;
 }

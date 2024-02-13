@@ -156,14 +156,16 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 				subSuper.notifyAxiomOutOfScope();
 			}
+			else {
 
-			ClassNode supCls = resolveSuperClass(subSuper.getSuper());
+				ClassNode supCls = resolveSuperClass(subSuper.getSuper());
 
-			if (supCls != null) {
+				if (supCls != null) {
 
-				for (NodeX subCls : resolveDisjunctionToNodes(subDjs)) {
+					for (NodeX subCls : resolveDisjunctionToNodes(subDjs)) {
 
-					subCls.addSubsumer(supCls);
+						subCls.addSubsumer(supCls);
+					}
 				}
 			}
 		}

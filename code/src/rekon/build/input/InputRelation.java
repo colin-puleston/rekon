@@ -33,6 +33,10 @@ public interface InputRelation extends InputComponent {
 
 	InputRelationType getRelationType();
 
+	boolean hasRelationType(InputRelationType type);
+
+	InputRelation asComplemented();
+
 	NodeProperty getNodeProperty();
 
 	DataProperty getDataProperty();
