@@ -122,6 +122,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 				case OUT_OF_SCOPE:
 
+					sup.notifyComponentOutOfScope();
 					ax.notifyAxiomOutOfScope();
 					break;
 

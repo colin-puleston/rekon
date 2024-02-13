@@ -29,7 +29,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputRelation extends InputComponent {
+public interface InputRelation extends InputExpression {
 
 	InputRelationType getRelationType();
 

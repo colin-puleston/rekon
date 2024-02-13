@@ -224,5 +224,6 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		logger.logLine("AXIOM: " + axiom);
 
 		logger.logSeparatorLine();
+		logger.logSeparatorLine();
 	}
 }

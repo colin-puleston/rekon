@@ -40,9 +40,16 @@ class Logger {
 		loggingOn = Boolean.valueOf(System.getProperty(LOGGING_SYSTEM_PROPERTY));
 	}
 
-	void logOutOfScopeWarningLine(String entityDesc) {
+	void logOutOfScopeWarningLine(String entity) {
 
-		logLine("REKON WARNING: " + entityDesc + " out of scope...");
+		logOutOfScopeWarningLine(entity, false);
+	}
+
+	void logOutOfScopeWarningLine(String entity, boolean inContext) {
+
+		String qualifier = inContext ? " in context" : "";
+
+		logWarningLine(entity + " out-of-scope" + qualifier + "...");
 	}
 
 	void logSeparatorLine() {
@@ -56,5 +63,10 @@ class Logger {
 
 			System.out.println(line);
 		}
+	}
+
+	private void logWarningLine(String warning) {
+
+		logLine("REKON WARNING: " + warning);
 	}
 }

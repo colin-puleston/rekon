@@ -63,7 +63,7 @@ class RelationBuilder {
 
 			this.complement = complement;
 
-			return source.getRelationType() == handledInputType() ? get(source) : null;
+			return get(source);
 		}
 
 		Relation checkCreate(InputRelation source) {
@@ -82,9 +82,7 @@ class RelationBuilder {
 
 		abstract Relation create(NodeProperty prop, NodeValue target);
 
-		abstract InputRelationType handledInputType();
-
-		abstract NodeValue getNodeValueForEmptyDisjunction();
+		abstract NodeValue getNodeValueForEmptyDisjunction(InputNode source);
 
 		Relation createForNoValue(NodeProperty prop) {
 
@@ -95,7 +93,7 @@ class RelationBuilder {
 
 			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
 
-				return toNodeValue(source.asComplex().asDisjuncts());
+				return disjunctionToNodeValue(source);
 			}
 
 			NodeX n = componentBuilder.toAtomicNode(source);
@@ -103,9 +101,10 @@ class RelationBuilder {
 			return n != null ? new NodeValue(n) : null;
 		}
 
-		private NodeValue toNodeValue(Collection<InputNode> source) {
+		private NodeValue disjunctionToNodeValue(InputNode source) {
 
-			Collection<NodeX> disjuncts = componentBuilder.toDisjunction(source);
+			Collection<InputNode> sourceDjs = source.asComplex().asDisjuncts();
+			Collection<NodeX> disjuncts = componentBuilder.toDisjunction(sourceDjs);
 
 			if (disjuncts == null) {
 
@@ -114,7 +113,7 @@ class RelationBuilder {
 
 			if (disjuncts.isEmpty()) {
 
-				return getNodeValueForEmptyDisjunction();
+				return getNodeValueForEmptyDisjunction(source);
 			}
 
 			return new NodeValue(componentBuilder.disjunctsToAtomicNode(disjuncts));
@@ -151,12 +150,9 @@ class RelationBuilder {
 			return new SomeRelation(prop, target);
 		}
 
-		InputRelationType handledInputType() {
+		NodeValue getNodeValueForEmptyDisjunction(InputNode source) {
 
-			return InputRelationType.SOME_NODES;
-		}
-
-		NodeValue getNodeValueForEmptyDisjunction() {
+			source.notifyComponentOutOfScopeInContext();
 
 			return null;
 		}
@@ -172,6 +168,8 @@ class RelationBuilder {
 		Relation checkCreate(InputRelation source, boolean complement) {
 
 			if (complement) {
+
+				source.notifyComponentOutOfScopeInContext();
 
 				return null;
 			}
@@ -192,12 +190,7 @@ class RelationBuilder {
 			return new AllRelation(prop, target);
 		}
 
-		InputRelationType handledInputType() {
-
-			return InputRelationType.ALL_NODES;
-		}
-
-		NodeValue getNodeValueForEmptyDisjunction() {
+		NodeValue getNodeValueForEmptyDisjunction(InputNode source) {
 
 			return OntologyNames.ABSENT_CLASS_VALUE;
 		}
@@ -253,6 +246,8 @@ class RelationBuilder {
 				return dataRelations.get(source);
 
 			case OUT_OF_SCOPE:
+
+				source.notifyComponentOutOfScope();
 
 				return null;
 		}

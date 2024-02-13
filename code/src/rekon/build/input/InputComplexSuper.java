@@ -27,7 +27,7 @@ package rekon.build.input;
 /**
  * @author Colin Puleston
  */
-public interface InputComplexSuper extends InputComponent {
+public interface InputComplexSuper extends InputExpression {
 
 	InputComplexSuperType getComplexSuperType();
 

@@ -170,6 +170,8 @@ class PatternBuilder {
 
 					case OUT_OF_SCOPE:
 
+						conjunct.notifyComponentOutOfScope();
+
 						return false;
 
 				}
@@ -212,6 +214,8 @@ class PatternBuilder {
 						return true;
 
 					case OUT_OF_SCOPE:
+
+						conjunct.notifyComponentOutOfScope();
 
 						return false;
 				}
@@ -260,6 +264,8 @@ class PatternBuilder {
 
 				case OUT_OF_SCOPE:
 
+					source.notifyComponentOutOfScope();
+
 					return null;
 			}
 
@@ -276,6 +282,8 @@ class PatternBuilder {
 
 				case DISJUNCTION:
 
+					source.notifyComponentOutOfScopeInContext();
+
 					return null;
 
 				case RELATION:
@@ -283,6 +291,8 @@ class PatternBuilder {
 					return checkCreateForRelation(source.asRelation());
 
 				case OUT_OF_SCOPE:
+
+					source.notifyComponentOutOfScope();
 
 					return null;
 			}

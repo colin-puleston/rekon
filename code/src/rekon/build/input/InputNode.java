@@ -31,7 +31,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputNode extends InputComponent {
+public interface InputNode extends InputExpression {
 
 	InputNodeType getNodeType();
 

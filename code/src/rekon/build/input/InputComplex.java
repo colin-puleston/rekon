@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public interface InputComplex extends InputComponent {
+public interface InputComplex extends InputExpression {
 
 	InputComplexType getComplexType();
 

@@ -27,7 +27,11 @@ package rekon.build.input;
 /**
  * @author Colin Puleston
  */
-public interface InputComponent {
+public interface InputExpression {
 
 	Object getSourceObject();
+
+	void notifyComponentOutOfScope();
+
+	void notifyComponentOutOfScopeInContext();
 }

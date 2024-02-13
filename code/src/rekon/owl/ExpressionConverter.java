@@ -41,79 +41,7 @@ class ExpressionConverter {
 	private MappedNames names;
 	private DataTypes dataTypes = new DataTypes(false);
 
-	private class OwlIndividuals {
-
-		private OWLObjectOneOf owlOneOf;
-
-		OwlIndividuals(OWLObjectOneOf owlOneOf) {
-
-			this.owlOneOf = owlOneOf;
-		}
-
-		boolean singleInScopeIndividual() {
-
-			return inScopeIndividuals(true);
-		}
-
-		boolean multiInScopeIndividuals() {
-
-			return inScopeIndividuals(false);
-		}
-
-		OWLNamedIndividual asSingleOwlIndividual() {
-
-			Set<OWLIndividual> disjuncts = getDisjuncts();
-
-			if (disjuncts.size() != 1) {
-
-				throw new Error("Unexpected multiple individuals: " + disjuncts);
-			}
-
-			OWLIndividual i = disjuncts.iterator().next();
-
-			if (i instanceof OWLNamedIndividual) {
-
-				return (OWLNamedIndividual)i;
-			}
-
-			throw new RuntimeException("Unexpected anonymous individual!");
-		}
-
-		OWLClassExpression asOwlExpressionUnion() {
-
-			return owlOneOf.asObjectUnionOf();
-		}
-
-		private boolean inScopeIndividuals(boolean single) {
-
-			return allDisjunctsNamed() && singleDisjunct(single);
-		}
-
-		private boolean singleDisjunct(boolean single) {
-
-			return (getDisjuncts().size() == 1) == single;
-		}
-
-		private boolean allDisjunctsNamed() {
-
-			for (OWLIndividual d : getDisjuncts()) {
-
-				if (!(d instanceof OWLNamedIndividual)) {
-
-					return false;
-				}
-			}
-
-			return true;
-		}
-
-		private Set<OWLIndividual> getDisjuncts() {
-
-			return owlOneOf.getIndividuals();
-		}
-	}
-
-	private abstract class ConvertedExpression implements InputComponent {
+	private abstract class ConvertedExpression implements InputExpression {
 
 		private OWLClassExpression owlExpression;
 
@@ -140,6 +68,16 @@ class ExpressionConverter {
 		public Object getSourceObject() {
 
 			return owlExpression;
+		}
+
+		public void notifyComponentOutOfScope() {
+
+			logOutOfScope(false);
+		}
+
+		public void notifyComponentOutOfScopeInContext() {
+
+			logOutOfScope(true);
 		}
 
 		ConvertedExpression(OWLClassExpression owlExpression) {
@@ -170,6 +108,16 @@ class ExpressionConverter {
 		<T extends OWLClassExpression>T owlExpressionAs(Class<T> type) {
 
 			return owlObjectAs(owlExpression, type);
+		}
+
+		private void logOutOfScope(boolean inContext) {
+
+			Logger logger = Logger.SINGLETON;
+
+			logger.logOutOfScopeWarningLine("Expression", inContext);
+			logger.logLine("EXPRESSION: " + owlExpression);
+
+			logger.logSeparatorLine();
 		}
 	}
 
