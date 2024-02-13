@@ -31,15 +31,13 @@ import java.util.*;
  */
 public interface InputComplex extends InputExpression {
 
-	InputComplexType getComplexType();
-
-	boolean hasComplexType(InputComplexType type);
-
 	InputNode toNode();
 
-	Collection<InputNode> asConjuncts();
+	InputComplexType getComplexType();
+
+	InputRelation asRelation();
 
 	Collection<InputNode> asDisjuncts();
 
-	InputRelation asRelation();
+	Collection<InputNode> asConjuncts();
 }

@@ -55,9 +55,9 @@ class PatternBuilder {
 
 		PatternSpec(InputNode source) {
 
-			if (source.hasComplexType(InputComplexType.CONJUNCTION)) {
+			if (source.getNodeType() == InputNodeType.CONJUNCTION) {
 
-				conjuncts.addAll(source.asComplex().asConjuncts());
+				conjuncts.addAll(source.asConjuncts());
 			}
 			else {
 
@@ -82,7 +82,7 @@ class PatternBuilder {
 
 		PatternDisjunctionSpec(InputComplex source) {
 
-			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
+			if (source.getComplexType() == InputComplexType.DISJUNCTION) {
 
 				addDisjunctsFor(source.asDisjuncts());
 			}
@@ -160,33 +160,6 @@ class PatternBuilder {
 
 						return true;
 
-					case INDIVIDUAL:
-
-						return false;
-
-					case COMPLEX:
-
-						return processComplexConjunct(conjunct.asComplex());
-
-					case OUT_OF_SCOPE:
-
-						conjunct.notifyComponentOutOfScope();
-
-						return false;
-
-				}
-
-				throw new Error("Unexpected node-type: " + conjunct.getNodeType());
-			}
-
-			private boolean processComplexConjunct(InputComplex conjunct) {
-
-				switch (conjunct.getComplexType()) {
-
-					case CONJUNCTION:
-
-						return false;
-
 					case DISJUNCTION:
 
 						NodeX n = checkCreateNodeForDisjunction(conjunct.asDisjuncts());
@@ -213,14 +186,22 @@ class PatternBuilder {
 
 						return true;
 
+					case INDIVIDUAL:
+					case CONJUNCTION:
+
+						conjunct.notifyComponentOutOfScopeInContext();
+
+						return false;
+
 					case OUT_OF_SCOPE:
 
 						conjunct.notifyComponentOutOfScope();
 
 						return false;
+
 				}
 
-				throw new Error("Unexpected complex-type: " + conjunct.getComplexType());
+				throw new Error("Unexpected node-type: " + conjunct.getNodeType());
 			}
 		}
 
@@ -258,9 +239,19 @@ class PatternBuilder {
 
 					return new Pattern(source.asIndividualNode());
 
-				case COMPLEX:
+				case CONJUNCTION:
 
-					return checkCreateForComplex(source.asComplex());
+					return checkCreateForConjuncts(source.asConjuncts());
+
+				case RELATION:
+
+					return checkCreateForRelation(source.asRelation());
+
+				case DISJUNCTION:
+
+					source.notifyComponentOutOfScopeInContext();
+
+					return null;
 
 				case OUT_OF_SCOPE:
 
@@ -270,34 +261,6 @@ class PatternBuilder {
 			}
 
 			throw new Error("Unexpected node-type: " + source.getNodeType());
-		}
-
-		private Pattern checkCreateForComplex(InputComplex source) {
-
-			switch (source.getComplexType()) {
-
-				case CONJUNCTION:
-
-					return checkCreateForConjuncts(source.asConjuncts());
-
-				case DISJUNCTION:
-
-					source.notifyComponentOutOfScopeInContext();
-
-					return null;
-
-				case RELATION:
-
-					return checkCreateForRelation(source.asRelation());
-
-				case OUT_OF_SCOPE:
-
-					source.notifyComponentOutOfScope();
-
-					return null;
-			}
-
-			throw new Error("Unexpected complex-type: " + source.getComplexType());
 		}
 
 		private Pattern checkCreateForConjuncts(Collection<InputNode> source) {

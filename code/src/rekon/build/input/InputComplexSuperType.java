@@ -29,19 +29,7 @@ package rekon.build.input;
  */
 public enum InputComplexSuperType {
 
-	DISJUNCTION(InputComplexType.DISJUNCTION),
-	RELATION(InputComplexType.RELATION),
-	OUT_OF_SCOPE(InputComplexType.OUT_OF_SCOPE);
-
-	private InputComplexType complexType;
-
-	public InputComplexType toComplexType() {
-
-		return complexType;
-	}
-
-	InputComplexSuperType(InputComplexType complexType) {
-
-		this.complexType = complexType;
-	}
+	DISJUNCTION,
+	RELATION,
+	OUT_OF_SCOPE;
 }

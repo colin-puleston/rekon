@@ -112,12 +112,12 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 				case DISJUNCTION:
 
-					checkCreateDisjunctionProfile(ax, sub, sup.toComplex().asDisjuncts());
+					checkCreateDisjunctionProfile(ax, sub, sup.asDisjuncts());
 					break;
 
 				case RELATION:
 
-					ppBuilders.checkAddRelation(ax, sub, sup.toComplex().asRelation());
+					ppBuilders.checkAddRelation(ax, sub, sup.asRelation());
 					break;
 
 				case OUT_OF_SCOPE:

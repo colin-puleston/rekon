@@ -91,7 +91,7 @@ class RelationBuilder {
 
 		private NodeValue toNodeValue(InputNode source) {
 
-			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
+			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
 
 				return disjunctionToNodeValue(source);
 			}
@@ -103,7 +103,7 @@ class RelationBuilder {
 
 		private NodeValue disjunctionToNodeValue(InputNode source) {
 
-			Collection<InputNode> sourceDjs = source.asComplex().asDisjuncts();
+			Collection<InputNode> sourceDjs = source.asDisjuncts();
 			Collection<NodeX> disjuncts = componentBuilder.toDisjunction(sourceDjs);
 
 			if (disjuncts == null) {
@@ -257,6 +257,6 @@ class RelationBuilder {
 
 	private boolean isClassNode(InputNode node, ClassNode test) {
 
-		return node.hasNodeType(InputNodeType.CLASS) && node.asClassNode() == test;
+		return node.getNodeType() == InputNodeType.CLASS && node.asClassNode() == test;
 	}
 }

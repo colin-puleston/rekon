@@ -33,15 +33,17 @@ import rekon.core.*;
  */
 public interface InputNode extends InputExpression {
 
+	InputComplex toComplex();
+
 	InputNodeType getNodeType();
-
-	boolean hasNodeType(InputNodeType type);
-
-	boolean hasComplexType(InputComplexType type);
 
 	ClassNode asClassNode();
 
 	IndividualNode asIndividualNode();
 
-	InputComplex asComplex();
+	Collection<InputNode> asConjuncts();
+
+	Collection<InputNode> asDisjuncts();
+
+	InputRelation asRelation();
 }

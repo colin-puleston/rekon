@@ -24,12 +24,18 @@
 
 package rekon.build.input;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
 public interface InputComplexSuper extends InputExpression {
 
+	InputComplex toComplex();
+
 	InputComplexSuperType getComplexSuperType();
 
-	InputComplex toComplex();
+	InputRelation asRelation();
+
+	Collection<InputNode> asDisjuncts();
 }

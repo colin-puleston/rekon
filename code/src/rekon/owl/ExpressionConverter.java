@@ -282,38 +282,64 @@ class ExpressionConverter {
 		}
 	}
 
-	private class ConvertedComplex extends ConvertedExpression implements InputComplex {
+	private class ConvertedNode extends ConvertedExpression implements InputNode {
 
-		public InputComplexType getComplexType() {
+		public InputComplex toComplex() {
+
+			return new ConvertedComplex(getOwlExpression());
+		}
+
+		public InputNodeType getNodeType() {
 
 			OWLClassExpression owlExpr = getOwlExpression();
 
-			if (owlExpr instanceof OWLObjectIntersectionOf) {
+			if (allowNonComplexTypes()) {
 
-				return InputComplexType.CONJUNCTION;
+				if (owlExpr instanceof OWLClass) {
+
+					return InputNodeType.CLASS;
+				}
+
+				if (owlExpr instanceof OWLObjectOneOf) {
+
+					if (asOwlIndividuals().singleInScopeIndividual()) {
+
+						return InputNodeType.INDIVIDUAL;
+					}
+
+					return InputNodeType.OUT_OF_SCOPE;
+				}
+			}
+
+			if (allowNonComplexSuperTypes()) {
+
+				if (owlExpr instanceof OWLObjectIntersectionOf) {
+
+					return InputNodeType.CONJUNCTION;
+				}
 			}
 
 			if (owlExpr instanceof OWLObjectUnionOf) {
 
-				return InputComplexType.DISJUNCTION;
+				return InputNodeType.DISJUNCTION;
 			}
 
 			if (asRelationOrNull(owlExpr) != null) {
 
-				return InputComplexType.RELATION;
+				return InputNodeType.RELATION;
 			}
 
-			return InputComplexType.OUT_OF_SCOPE;
+			return InputNodeType.OUT_OF_SCOPE;
 		}
 
-		public boolean hasComplexType(InputComplexType type) {
+		public ClassNode asClassNode() {
 
-			return getComplexType() == type;
+			return names.get(owlExpressionAs(OWLClass.class));
 		}
 
-		public InputNode toNode() {
+		public IndividualNode asIndividualNode() {
 
-			return new ConvertedNode(getOwlExpression());
+			return names.get(asOwlIndividuals().asSingleOwlIndividual());
 		}
 
 		public Collection<InputNode> asConjuncts() {
@@ -338,7 +364,7 @@ class ExpressionConverter {
 			throw new Error("Unexpected OWL-object type: " + getOwlExpression());
 		}
 
-		ConvertedComplex(OWLClassExpression owlExpression) {
+		ConvertedNode(OWLClassExpression owlExpression) {
 
 			super(owlExpression);
 
@@ -353,6 +379,16 @@ class ExpressionConverter {
 			}
 		}
 
+		boolean allowNonComplexTypes() {
+
+			return true;
+		}
+
+		boolean allowNonComplexSuperTypes() {
+
+			return true;
+		}
+
 		private ConvertedRelation asRelationOrNull(OWLClassExpression owlExpr) {
 
 			ConvertedRelation rel = new ConvertedRelation(owlExpr);
@@ -361,102 +397,49 @@ class ExpressionConverter {
 		}
 	}
 
-	private class ConvertedComplexSuper
-						extends ConvertedExpression
-						implements InputComplexSuper {
+	private class ConvertedComplex extends ConvertedNode implements InputComplex {
 
-		private ConvertedComplex complex;
+		public InputNode toNode() {
 
-		public InputComplexSuperType getComplexSuperType() {
-
-			InputComplexType complexType = complex.getComplexType();
-
-			for (InputComplexSuperType supType : InputComplexSuperType.values()) {
-
-				if (supType.toComplexType() == complexType) {
-
-					return supType;
-				}
-			}
-
-			throw new RuntimeException("Cannot handle expression: " + getOwlExpression());
+			return this;
 		}
+
+		public InputComplexType getComplexType() {
+
+			return getNodeType().toComplexType();
+		}
+
+		ConvertedComplex(OWLClassExpression owlExpression) {
+
+			super(owlExpression);
+		}
+
+		boolean allowNonComplexTypes() {
+
+			return false;
+		}
+	}
+
+	private class ConvertedComplexSuper extends ConvertedComplex implements InputComplexSuper {
 
 		public InputComplex toComplex() {
 
-			return complex;
+			return this;
+		}
+
+		public InputComplexSuperType getComplexSuperType() {
+
+			return getComplexType().toComplexSuperType();
 		}
 
 		ConvertedComplexSuper(OWLClassExpression owlExpression) {
 
 			super(owlExpression);
-
-			complex = new ConvertedComplex(owlExpression);
-		}
-	}
-
-	private class ConvertedNode extends ConvertedExpression implements InputNode {
-
-		public InputNodeType getNodeType() {
-
-			OWLClassExpression owlExpr = getOwlExpression();
-
-			if (owlExpr instanceof OWLClass) {
-
-				return InputNodeType.CLASS;
-			}
-
-			if (isComplexSource(owlExpr)) {
-
-				return InputNodeType.COMPLEX;
-			}
-
-			if (owlExpr instanceof OWLObjectOneOf) {
-
-				if (asOwlIndividuals().singleInScopeIndividual()) {
-
-					return InputNodeType.INDIVIDUAL;
-				}
-			}
-
-			return InputNodeType.OUT_OF_SCOPE;
 		}
 
-		public boolean hasNodeType(InputNodeType type) {
+		boolean allowNonComplexSuperTypes() {
 
-			return getNodeType() == type;
-		}
-
-		public boolean hasComplexType(InputComplexType type) {
-
-			return hasNodeType(InputNodeType.COMPLEX) && asComplex().hasComplexType(type);
-		}
-
-		public ClassNode asClassNode() {
-
-			return names.get(owlExpressionAs(OWLClass.class));
-		}
-
-		public IndividualNode asIndividualNode() {
-
-			return names.get(asOwlIndividuals().asSingleOwlIndividual());
-		}
-
-		public InputComplex asComplex() {
-
-			return new ConvertedComplex(getOwlExpression());
-		}
-
-		ConvertedNode(OWLClassExpression owlExpression) {
-
-			super(owlExpression);
-		}
-
-		private boolean isComplexSource(OWLClassExpression owlExpr) {
-
-			ConvertedComplex asComplex = new ConvertedComplex(owlExpr);
-
-			return !asComplex.hasComplexType(InputComplexType.OUT_OF_SCOPE);
+			return false;
 		}
 	}
 
@@ -464,6 +447,11 @@ class ExpressionConverter {
 
 		this.factory = factory;
 		this.names = names;
+	}
+
+	InputNode toNode(OWLClassExpression owlExpression) {
+
+		return new ConvertedNode(owlExpression);
 	}
 
 	InputComplex toComplex(OWLClassExpression owlExpression) {
@@ -474,11 +462,6 @@ class ExpressionConverter {
 	InputComplexSuper toComplexSuper(OWLClassExpression owlExpression) {
 
 		return new ConvertedComplexSuper(owlExpression);
-	}
-
-	InputNode toNode(OWLClassExpression owlExpression) {
-
-		return new ConvertedNode(owlExpression);
 	}
 
 	InputRelation toRelation(OWLClassExpression owlExpression) {

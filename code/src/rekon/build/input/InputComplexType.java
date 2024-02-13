@@ -29,8 +29,25 @@ package rekon.build.input;
  */
 public enum InputComplexType {
 
-	CONJUNCTION,
-	DISJUNCTION,
-	RELATION,
-	OUT_OF_SCOPE;
+	CONJUNCTION(null),
+	DISJUNCTION(InputComplexSuperType.DISJUNCTION),
+	RELATION(InputComplexSuperType.RELATION),
+	OUT_OF_SCOPE(InputComplexSuperType.OUT_OF_SCOPE);
+
+	private InputComplexSuperType superType;
+
+	public InputComplexSuperType toComplexSuperType() {
+
+		if (superType != null) {
+
+			return superType;
+		}
+
+		throw new RuntimeException("Cannot convert type: " + this);
+	}
+
+	InputComplexType(InputComplexSuperType superType) {
+
+		this.superType = superType;
+	}
 }

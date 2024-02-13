@@ -66,9 +66,9 @@ class DisjunctionBuilder {
 
 		private Collection<? extends NodeX> toDisjuncts(InputNode source) {
 
-			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
+			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
 
-				return disjunctions.get(source.asComplex().asDisjuncts());
+				return disjunctions.get(source.asDisjuncts());
 			}
 
 			NodeX n = componentBuilder.toAtomicNode(source);

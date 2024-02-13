@@ -101,18 +101,16 @@ class ComponentBuilder {
 
 				return source.asIndividualNode();
 
-			case COMPLEX:
-
-				return toPatternClassNode(source.asComplex());
-
 			case OUT_OF_SCOPE:
 
 				source.notifyComponentOutOfScope();
 
 				return null;
-		}
 
-		throw new Error("Unexpected node-type: " + source.getNodeType());
+			default:
+
+				return toPatternClassNode(source.toComplex());
+		}
 	}
 
 	NodeX disjunctsToAtomicNode(Collection<? extends NodeX> disjuncts) {
