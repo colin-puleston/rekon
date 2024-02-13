@@ -41,11 +41,21 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 		private Set<Pattern> patternDefns = new HashSet<Pattern>();
 		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
 
-		boolean create(InputComplex... equivs) {
+		void checkCreate(InputEquivalence<?, ?> axiom, InputComplex... complexEquivs) {
 
-			for (InputComplex e : equivs) {
+			if (!create(complexEquivs)) {
 
-				if (!absorbEquiv(e)) {
+				axiom.notifyAxiomOutOfScope();
+			}
+		}
+
+		abstract ClassNode resolveDefinedClass();
+
+		private boolean create(InputComplex... complexEquivs) {
+
+			for (InputComplex e : complexEquivs) {
+
+				if (!absorbComplexEquiv(e)) {
 
 					return false;
 				}
@@ -69,31 +79,22 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			return true;
 		}
 
-		abstract boolean convertOutOfScopeEquiv(InputComplex equiv);
+		private boolean absorbComplexEquiv(InputComplex complexEquiv) {
 
-		abstract ClassNode resolveDefinedClass();
-
-		private boolean absorbEquiv(InputComplex equiv) {
-
-			List<Pattern> djs = components.toPatternDisjunction(equiv);
+			List<Pattern> djs = components.toPatternDisjunction(complexEquiv);
 
 			if (djs == null) {
 
-				if (!convertOutOfScopeEquiv(equiv)) {
+				return false;
+			}
 
-					return false;
-				}
+			if (djs.size() == 1) {
+
+				patternDefns.add(djs.get(0));
 			}
 			else {
 
-				if (djs.size() == 1) {
-
-					patternDefns.add(djs.get(0));
-				}
-				else {
-
-					disjunctionDefns.add(djs);
-				}
+				disjunctionDefns.add(djs);
 			}
 
 			return true;
@@ -102,41 +103,26 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private class ClassComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
 
-		private InputClassComplexEquivalence equivs;
+		private InputClassComplexEquivalence axiom;
 
-		ClassComplexEquivalenceBasedBuilder(InputClassComplexEquivalence equivs) {
+		ClassComplexEquivalenceBasedBuilder(InputClassComplexEquivalence axiom) {
 
-			this.equivs = equivs;
+			this.axiom = axiom;
 
-			create(equivs.getSecond());
-		}
-
-		boolean convertOutOfScopeEquiv(InputComplex equiv) {
-
-			equivs.notifyAxiomOutOfScope();
-
-			return true;
+			checkCreate(axiom, axiom.getSecond());
 		}
 
 		ClassNode resolveDefinedClass() {
 
-			return equivs.getFirst();
+			return axiom.getFirst();
 		}
 	}
 
 	private class ComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
 
-		ComplexEquivalenceBasedBuilder(InputComplexEquivalence equivs) {
+		ComplexEquivalenceBasedBuilder(InputComplexEquivalence axiom) {
 
-			if (!create(equivs.getFirst(), equivs.getSecond())) {
-
-				equivs.notifyAxiomOutOfScope();
-			}
-		}
-
-		boolean convertOutOfScopeEquiv(InputComplex equiv) {
-
-			return false;
+			checkCreate(axiom, axiom.getFirst(), axiom.getSecond());
 		}
 
 		ClassNode resolveDefinedClass() {
@@ -147,22 +133,22 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private abstract class ComplexSubBasedBuilder<SP> {
 
-		ComplexSubBasedBuilder(InputSubSuper<InputComplex, SP> subSuper) {
+		ComplexSubBasedBuilder(InputSubSuper<InputComplex, SP> axiom) {
 
-			if (!create(subSuper)) {
+			if (!create(axiom)) {
 
-				subSuper.notifyAxiomOutOfScope();
+				axiom.notifyAxiomOutOfScope();
 			}
 		}
 
-		private boolean create(InputSubSuper<InputComplex, SP> subSuper) {
+		private boolean create(InputSubSuper<InputComplex, SP> axiom) {
 
-			InputComplex sub = subSuper.getSub();
+			InputComplex sub = axiom.getSub();
 			List<Pattern> subDjs = components.toPatternDisjunction(sub);
 
 			if (subDjs != null) {
 
-				ClassNode supCls = resolveSuperClass(subSuper.getSuper());
+				ClassNode supCls = resolveSuperClass(axiom.getSuper());
 
 				if (supCls != null) {
 
@@ -183,9 +169,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private class ComplexSubClassSuperBasedBuilder extends ComplexSubBasedBuilder<ClassNode> {
 
-		ComplexSubClassSuperBasedBuilder(InputComplexSubClassSuper subSuper) {
+		ComplexSubClassSuperBasedBuilder(InputComplexSubClassSuper axiom) {
 
-			super(subSuper);
+			super(axiom);
 		}
 
 		ClassNode resolveSuperClass(ClassNode sup) {
@@ -196,9 +182,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private class ComplexSubSuperBasedBuilder extends ComplexSubBasedBuilder<InputComplexSuper> {
 
-		ComplexSubSuperBasedBuilder(InputComplexSubSuper subSuper) {
+		ComplexSubSuperBasedBuilder(InputComplexSubSuper axiom) {
 
-			super(subSuper);
+			super(axiom);
 		}
 
 		ClassNode resolveSuperClass(InputComplexSuper sup) {
