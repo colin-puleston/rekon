@@ -75,6 +75,11 @@ class PatternBuilder {
 
 		private Set<PatternSpec> disjuncts = new HashSet<PatternSpec>();
 
+		PatternDisjunctionSpec(Collection<InputNode> source) {
+
+			addDisjunctsFor(source);
+		}
+
 		PatternDisjunctionSpec(InputComplex source) {
 
 			if (source.hasComplexType(InputComplexType.DISJUNCTION)) {
@@ -324,6 +329,11 @@ class PatternBuilder {
 	}
 
 	List<Pattern> toPatternDisjunction(InputComplex source) {
+
+		return new PatternDisjunctionSpec(source).checkCreate();
+	}
+
+	List<Pattern> toPatternDisjunction(Collection<InputNode> source) {
 
 		return new PatternDisjunctionSpec(source).checkCreate();
 	}

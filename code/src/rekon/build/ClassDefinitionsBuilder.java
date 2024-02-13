@@ -149,14 +149,18 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		ComplexSubBasedBuilder(InputSubSuper<InputComplex, SP> subSuper) {
 
-			InputComplex sub = subSuper.getSub();
-			List<Pattern> subDjs = components.toPatternDisjunction(sub);
-
-			if (subDjs == null) {
+			if (!create(subSuper)) {
 
 				subSuper.notifyAxiomOutOfScope();
 			}
-			else {
+		}
+
+		private boolean create(InputSubSuper<InputComplex, SP> subSuper) {
+
+			InputComplex sub = subSuper.getSub();
+			List<Pattern> subDjs = components.toPatternDisjunction(sub);
+
+			if (subDjs != null) {
 
 				ClassNode supCls = resolveSuperClass(subSuper.getSuper());
 
@@ -166,8 +170,12 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 						subCls.addSubsumer(supCls);
 					}
+
+					return true;
 				}
 			}
+
+			return false;
 		}
 
 		abstract ClassNode resolveSuperClass(SP sup);
@@ -195,7 +203,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		ClassNode resolveSuperClass(InputComplexSuper sup) {
 
-			Pattern p = components.toPattern(ComplexSuperConverter.toComplex(sup));
+			Pattern p = components.toPattern(sup.toComplex());
 
 			return p != null ? addDefinitionClass(p) : null;
 		}

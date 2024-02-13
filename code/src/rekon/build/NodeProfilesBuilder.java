@@ -112,7 +112,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 				case DISJUNCTION:
 
-					checkCreateDisjunctionProfile(ax, sub, sup);
+					checkCreateDisjunctionProfile(ax, sub, sup.toComplex().asDisjuncts());
 					break;
 
 				case RELATION:
@@ -149,9 +149,9 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 	private void checkCreateDisjunctionProfile(
 						InputClassSubComplexSuper ax,
 						ClassNode sub,
-						InputComplexSuper supDisjunction) {
+						Collection<InputNode> supDisjuncts) {
 
-		List<Pattern> djs = components.toPatternDisjunction(supDisjunction.toComplex());
+		List<Pattern> djs = components.toPatternDisjunction(supDisjuncts);
 
 		if (djs != null) {
 
