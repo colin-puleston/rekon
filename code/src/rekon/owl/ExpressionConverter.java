@@ -344,12 +344,12 @@ class ExpressionConverter {
 
 		public Collection<InputNode> asConjuncts() {
 
-			return toInputExprs(owlExpressionAs(OWLObjectIntersectionOf.class).getOperands());
+			return toNodes(owlExpressionAs(OWLObjectIntersectionOf.class).getOperands());
 		}
 
 		public Collection<InputNode> asDisjuncts() {
 
-			return toInputExprs(owlExpressionAs(OWLObjectUnionOf.class).getOperands());
+			return toNodes(owlExpressionAs(OWLObjectUnionOf.class).getOperands());
 		}
 
 		public InputRelation asRelation() {
@@ -394,6 +394,18 @@ class ExpressionConverter {
 			ConvertedRelation rel = new ConvertedRelation(owlExpr);
 
 			return rel.hasRelationType(InputRelationType.OUT_OF_SCOPE) ? null : rel;
+		}
+
+		private List<InputNode> toNodes(Set<? extends OWLClassExpression> owlExprs) {
+
+			List<InputNode> nodes = new ArrayList<InputNode>();
+
+			for (OWLClassExpression e : owlExprs) {
+
+				nodes.add(new ConvertedNode(e));
+			}
+
+			return nodes;
 		}
 	}
 
@@ -467,18 +479,6 @@ class ExpressionConverter {
 	InputRelation toRelation(OWLClassExpression owlExpression) {
 
 		return new ConvertedRelation(owlExpression);
-	}
-
-	private List<InputNode> toInputExprs(Set<? extends OWLClassExpression> owlExprs) {
-
-		List<InputNode> exprs = new ArrayList<InputNode>();
-
-		for (OWLClassExpression oe : owlExprs) {
-
-			exprs.add(new ConvertedNode(oe));
-		}
-
-		return exprs;
 	}
 
 	private <O>O owlObjectAs(OWLObject obj, Class<O> type) {
