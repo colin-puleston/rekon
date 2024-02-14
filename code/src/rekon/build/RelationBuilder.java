@@ -139,6 +139,8 @@ class RelationBuilder {
 					return createForNoValue(prop);
 				}
 
+				source.notifyComponentOutOfScopeInContext();
+
 				return null;
 			}
 

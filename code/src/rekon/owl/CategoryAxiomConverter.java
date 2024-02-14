@@ -175,6 +175,16 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 					&& matches(secondOrSup, secondOrSupIsName);
 		}
 
+		Collection<E> getNonNames() {
+
+			List<E> nonNames = new ArrayList<E>();
+
+			checkAddNonName(nonNames, firstOrSub);
+			checkAddNonName(nonNames, secondOrSup);
+
+			return nonNames;
+		}
+
 		abstract Class<? extends E> getNameExprType();
 
 		abstract N asName(E e);
@@ -182,6 +192,14 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		private boolean matches(E e, boolean isName) {
 
 			return isNameExpr(e) == isName;
+		}
+
+		private void checkAddNonName(List<E> nonNames, E e) {
+
+			if (!isNameExpr(e)) {
+
+				nonNames.add(e);
+			}
 		}
 
 		private boolean isNameExpr(E test) {
@@ -216,14 +234,27 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		return parentConverter.getInputAxioms(converterType);
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom) {
+	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
+
+		logOutOfScopeAxiom(axiom, Collections.singleton(outOfScopeExpr));
+	}
+
+	void logOutOfScopeAxiom(
+			OWLAxiom axiom,
+			Collection<? extends OWLObject> outOfScopeExprs) {
 
 		Logger logger = Logger.SINGLETON;
 
-		logger.logOutOfScopeWarningLine("Axiom");
-		logger.logLine("AXIOM: " + axiom);
+		for (OWLObject e : outOfScopeExprs) {
 
-		logger.logSeparatorLine();
-		logger.logSeparatorLine();
+			logger.logOutOfScopeExpression(e, false);
+		}
+
+		logger.logOutOfScopeAxiom(axiom);
+	}
+
+	private void logOutOfScopeAxiom(OWLAxiom axiom) {
+
+		logOutOfScopeAxiom(axiom, Collections.emptySet());
 	}
 }

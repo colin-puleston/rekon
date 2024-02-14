@@ -112,12 +112,7 @@ class ExpressionConverter {
 
 		private void logOutOfScope(boolean inContext) {
 
-			Logger logger = Logger.SINGLETON;
-
-			logger.logOutOfScopeWarningLine("Expression", inContext);
-			logger.logLine("EXPRESSION: " + owlExpression);
-
-			logger.logSeparatorLine();
+			Logger.SINGLETON.logOutOfScopeExpression(owlExpression, inContext);
 		}
 	}
 

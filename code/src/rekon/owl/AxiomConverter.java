@@ -200,7 +200,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 		if (!outOfScopeTypes.isEmpty()) {
 
-			logOutOfScopeAxiomTypes(outOfScopeTypes);
+			Logger.SINGLETON.logOutOfScopeAxiomTypes(outOfScopeTypes);
 		}
 	}
 
@@ -242,19 +242,5 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		}
 
 		return ax instanceof OWLAnnotationAxiom;
-	}
-
-	private void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
-
-		Logger logger = Logger.SINGLETON;
-
-		logger.logOutOfScopeWarningLine("Axiom-types");
-
-		for (AxiomType<?> axType : outOfScopeTypes) {
-
-			logger.logLine("AXIOM-TYPE: " + axType);
-		}
-
-		logger.logSeparatorLine();
 	}
 }

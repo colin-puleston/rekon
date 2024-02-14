@@ -166,7 +166,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			}
 			else {
 
-				logOutOfScopeAxiom(source);
+				logOutOfScopeAxiom(source, owlLink.getNonNames());
 			}
 
 			return true;
@@ -189,7 +189,8 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 			if (convertsSourceAxiom(source)) {
 
-				IndividualNode n = toIndividualNode(getIndividualExpr(source));
+				OWLIndividual expr = getIndividualExpr(source);
+				IndividualNode n = toIndividualNode(expr);
 
 				if (n != null) {
 
@@ -197,7 +198,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 				}
 				else {
 
-					logOutOfScopeAxiom(source);
+					logOutOfScopeAxiom(source, expr);
 				}
 
 				return true;

@@ -24,6 +24,11 @@
 
 package rekon.owl;
 
+import java.util.*;
+
+import org.semanticweb.owlapi.model.*;
+import org.semanticweb.owlapi.model.parameters.*;
+
 /**
  * @author Colin Puleston
  */
@@ -40,24 +45,55 @@ class Logger {
 		loggingOn = Boolean.valueOf(System.getProperty(LOGGING_SYSTEM_PROPERTY));
 	}
 
-	void logOutOfScopeWarningLine(String entity) {
+	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
+
+		logSeparatorLine();
+		logOutOfScopeWarningLine("Axiom-types");
+
+		for (AxiomType<?> axType : outOfScopeTypes) {
+
+			logLine("AXIOM-TYPE: " + axType);
+		}
+
+		logSeparatorLine();
+		logSeparatorLine();
+	}
+
+	void logOutOfScopeAxiom(OWLAxiom axiom) {
+
+		logOutOfScopeWarningLine("Axiom");
+		logLine("AXIOM: " + axiom);
+
+		logSeparatorLine();
+		logSeparatorLine();
+	}
+
+	void logOutOfScopeExpression(OWLObject expr, boolean inContext) {
+
+		logOutOfScopeWarningLine("Expression", inContext);
+		logLine("EXPRESSION: " + expr);
+
+		logSeparatorLine();
+	}
+
+	private void logOutOfScopeWarningLine(String entity) {
 
 		logOutOfScopeWarningLine(entity, false);
 	}
 
-	void logOutOfScopeWarningLine(String entity, boolean inContext) {
+	private void logOutOfScopeWarningLine(String entity, boolean inContext) {
 
 		String qualifier = inContext ? " in context" : "";
 
 		logWarningLine(entity + " out-of-scope" + qualifier + "...");
 	}
 
-	void logSeparatorLine() {
+	private void logSeparatorLine() {
 
 		logLine("");
 	}
 
-	void logLine(String line) {
+	private void logLine(String line) {
 
 		if (loggingOn) {
 

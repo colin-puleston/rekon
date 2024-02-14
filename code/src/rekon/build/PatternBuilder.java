@@ -134,12 +134,9 @@ class PatternBuilder {
 
 			Pattern checkCreate(Collection<InputNode> conjuncts) {
 
-				for (InputNode c : conjuncts) {
+				if (!processConjuncts(conjuncts)) {
 
-					if (!processConjunct(c)) {
-
-						return null;
-					}
+					return null;
 				}
 
 				if (nodes.isEmpty()) {
@@ -148,6 +145,19 @@ class PatternBuilder {
 				}
 
 				return new Pattern(nodes, rels);
+			}
+
+			private boolean processConjuncts(Collection<InputNode> conjuncts) {
+
+				for (InputNode c : conjuncts) {
+
+					if (!processConjunct(c)) {
+
+						return false;
+					}
+				}
+
+				return true;
 			}
 
 			private boolean processConjunct(InputNode conjunct) {
@@ -159,6 +169,21 @@ class PatternBuilder {
 						nodes.absorb(conjunct.asClassNode());
 
 						return true;
+
+					case INDIVIDUAL:
+
+						conjunct.notifyComponentOutOfScopeInContext();
+
+						return false;
+
+					case CONJUNCTION:
+
+						if (processConjuncts(conjunct.asConjuncts())) {
+
+							return true;
+						}
+
+						return false;
 
 					case DISJUNCTION:
 
@@ -185,13 +210,6 @@ class PatternBuilder {
 						rels.add(r);
 
 						return true;
-
-					case INDIVIDUAL:
-					case CONJUNCTION:
-
-						conjunct.notifyComponentOutOfScopeInContext();
-
-						return false;
 
 					case OUT_OF_SCOPE:
 
@@ -243,15 +261,15 @@ class PatternBuilder {
 
 					return checkCreateForConjuncts(source.asConjuncts());
 
-				case RELATION:
-
-					return checkCreateForRelation(source.asRelation());
-
 				case DISJUNCTION:
 
 					source.notifyComponentOutOfScopeInContext();
 
 					return null;
+
+				case RELATION:
+
+					return checkCreateForRelation(source.asRelation());
 
 				case OUT_OF_SCOPE:
 

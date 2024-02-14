@@ -265,7 +265,7 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 			}
 			else {
 
-				logOutOfScopeAxiom(source);
+				logOutOfScopeAxiom(source, owlLink.getNonNames());
 			}
 
 			return true;
