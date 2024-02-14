@@ -66,7 +66,7 @@ public class CoreBuilder {
 
 	private class GeneralPatternBuilder implements SinglePatternBuilder, MultiPatternBuilder {
 
-		private InputComplex source;
+		private InputComplexNode source;
 
 		public Pattern create(MatchStructures matchStructures) {
 
@@ -78,7 +78,7 @@ public class CoreBuilder {
 			return createComponentBuilder(matchStructures, true).toPatternDisjunction(source);
 		}
 
-		GeneralPatternBuilder(InputComplex source) {
+		GeneralPatternBuilder(InputComplexNode source) {
 
 			this.source = source;
 		}
@@ -100,12 +100,12 @@ public class CoreBuilder {
 		return new StructureBuilderImpl(axioms);
 	}
 
-	public MultiPatternBuilder createMultiPatternBuilder(InputComplex source) {
+	public MultiPatternBuilder createMultiPatternBuilder(InputComplexNode source) {
 
 		return new GeneralPatternBuilder(source);
 	}
 
-	public SinglePatternBuilder createSinglePatternBuilder(InputComplex source) {
+	public SinglePatternBuilder createSinglePatternBuilder(InputComplexNode source) {
 
 		return new GeneralPatternBuilder(source);
 	}

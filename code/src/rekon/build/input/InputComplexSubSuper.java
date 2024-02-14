@@ -29,5 +29,5 @@ package rekon.build.input;
  */
 public interface InputComplexSubSuper
 					extends
-						InputSubSuper<InputComplex, InputComplexSuper> {
+						InputSubSuper<InputComplexNode, InputComplexSuper> {
 }

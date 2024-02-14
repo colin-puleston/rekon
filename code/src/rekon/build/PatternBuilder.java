@@ -80,9 +80,9 @@ class PatternBuilder {
 			addDisjunctsFor(source);
 		}
 
-		PatternDisjunctionSpec(InputComplex source) {
+		PatternDisjunctionSpec(InputComplexNode source) {
 
-			if (source.getComplexType() == InputComplexType.DISJUNCTION) {
+			if (source.getComplexNodeType() == InputComplexNodeType.DISJUNCTION) {
 
 				addDisjunctsFor(source.asDisjuncts());
 			}
@@ -210,7 +210,7 @@ class PatternBuilder {
 			super(dynamic);
 		}
 
-		Pattern get(InputComplex source) {
+		Pattern get(InputComplexNode source) {
 
 			return get(new PatternSpec(source.toNode()));
 		}
@@ -296,12 +296,12 @@ class PatternBuilder {
 		patterns = new Patterns(dynamic);
 	}
 
-	Pattern toPattern(InputComplex source) {
+	Pattern toPattern(InputComplexNode source) {
 
 		return patterns.get(source);
 	}
 
-	List<Pattern> toPatternDisjunction(InputComplex source) {
+	List<Pattern> toPatternDisjunction(InputComplexNode source) {
 
 		return new PatternDisjunctionSpec(source).checkCreate();
 	}

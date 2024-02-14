@@ -47,26 +47,26 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 	}
 
 	private class ConvertedClassComplexEquivalence
-						extends ConvertedEquivalence<ClassNode, InputComplex>
+						extends ConvertedEquivalence<ClassNode, InputComplexNode>
 						implements InputClassComplexEquivalence {
 
 		ConvertedClassComplexEquivalence(
 			OWLAxiom source,
 			ClassNode first,
-			InputComplex second) {
+			InputComplexNode second) {
 
 			super(source, first, second);
 		}
 	}
 
 	private class ConvertedComplexEquivalence
-						extends ConvertedEquivalence<InputComplex, InputComplex>
+						extends ConvertedEquivalence<InputComplexNode, InputComplexNode>
 						implements InputComplexEquivalence {
 
 		ConvertedComplexEquivalence(
 			OWLAxiom source,
-			InputComplex first,
-			InputComplex second) {
+			InputComplexNode first,
+			InputComplexNode second) {
 
 			super(source, first, second);
 		}
@@ -93,20 +93,20 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 	}
 
 	private class ConvertedComplexSubClassSuper
-						extends ConvertedSubSuper<InputComplex, ClassNode>
+						extends ConvertedSubSuper<InputComplexNode, ClassNode>
 						implements InputComplexSubClassSuper {
 
-		ConvertedComplexSubClassSuper(OWLAxiom source, InputComplex sub, ClassNode sup) {
+		ConvertedComplexSubClassSuper(OWLAxiom source, InputComplexNode sub, ClassNode sup) {
 
 			super(source, sub, sup);
 		}
 	}
 
 	private class ConvertedComplexSubSuper
-						extends ConvertedSubSuper<InputComplex, InputComplexSuper>
+						extends ConvertedSubSuper<InputComplexNode, InputComplexSuper>
 						implements InputComplexSubSuper {
 
-		ConvertedComplexSubSuper(OWLAxiom source, InputComplex sub, InputComplexSuper sup) {
+		ConvertedComplexSubSuper(OWLAxiom source, InputComplexNode sub, InputComplexSuper sup) {
 
 			super(source, sub, sup);
 		}
@@ -124,14 +124,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 			super(source, source.getSubClass(), source.getSuperClass());
 		}
 
-		InputComplex firstOrSubAsComplex() {
+		InputComplexNode firstOrSubAsComplex() {
 
-			return expressions.toComplex(firstOrSub);
+			return expressions.toComplexNode(firstOrSub);
 		}
 
-		InputComplex secondAsComplex() {
+		InputComplexNode secondAsComplex() {
 
-			return expressions.toComplex(secondOrSup);
+			return expressions.toComplexNode(secondOrSup);
 		}
 
 		InputComplexSuper supAsComplexSuper() {
@@ -284,7 +284,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					: owlLink.secondOrSupAsName();
 		}
 
-		private InputComplex getComplexEquiv(OwlClassExprLink owlLink) {
+		private InputComplexNode getComplexEquiv(OwlClassExprLink owlLink) {
 
 			return owlLink.matches(false, true)
 					? owlLink.firstOrSubAsComplex()

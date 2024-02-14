@@ -41,7 +41,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 		private Set<Pattern> patternDefns = new HashSet<Pattern>();
 		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
 
-		void checkCreate(InputEquivalence<?, ?> axiom, InputComplex... complexEquivs) {
+		void checkCreate(InputEquivalence<?, ?> axiom, InputComplexNode... complexEquivs) {
 
 			if (!create(complexEquivs)) {
 
@@ -51,9 +51,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		abstract ClassNode resolveDefinedClass();
 
-		private boolean create(InputComplex... complexEquivs) {
+		private boolean create(InputComplexNode... complexEquivs) {
 
-			for (InputComplex e : complexEquivs) {
+			for (InputComplexNode e : complexEquivs) {
 
 				if (!absorbComplexEquiv(e)) {
 
@@ -79,7 +79,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			return true;
 		}
 
-		private boolean absorbComplexEquiv(InputComplex complexEquiv) {
+		private boolean absorbComplexEquiv(InputComplexNode complexEquiv) {
 
 			List<Pattern> djs = components.toPatternDisjunction(complexEquiv);
 
@@ -133,7 +133,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private abstract class ComplexSubBasedBuilder<SP> {
 
-		ComplexSubBasedBuilder(InputSubSuper<InputComplex, SP> axiom) {
+		ComplexSubBasedBuilder(InputSubSuper<InputComplexNode, SP> axiom) {
 
 			if (!create(axiom)) {
 
@@ -141,9 +141,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		private boolean create(InputSubSuper<InputComplex, SP> axiom) {
+		private boolean create(InputSubSuper<InputComplexNode, SP> axiom) {
 
-			InputComplex sub = axiom.getSub();
+			InputComplexNode sub = axiom.getSub();
 			List<Pattern> subDjs = components.toPatternDisjunction(sub);
 
 			if (subDjs != null) {
@@ -189,7 +189,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		ClassNode resolveSuperClass(InputComplexSuper sup) {
 
-			Pattern p = components.toPattern(sup.toComplex());
+			Pattern p = components.toPattern(sup.toComplexNode());
 
 			return p != null ? addDefinitionClass(p) : null;
 		}

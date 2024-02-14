@@ -31,14 +31,14 @@ public enum InputNodeType {
 
 	CLASS(null),
 	INDIVIDUAL(null),
-	CONJUNCTION(InputComplexType.CONJUNCTION),
-	DISJUNCTION(InputComplexType.DISJUNCTION),
-	RELATION(InputComplexType.RELATION),
-	OUT_OF_SCOPE(InputComplexType.OUT_OF_SCOPE);
+	CONJUNCTION(InputComplexNodeType.CONJUNCTION),
+	DISJUNCTION(InputComplexNodeType.DISJUNCTION),
+	RELATION(InputComplexNodeType.RELATION),
+	OUT_OF_SCOPE(InputComplexNodeType.OUT_OF_SCOPE);
 
-	private InputComplexType complexType;
+	private InputComplexNodeType complexType;
 
-	public InputComplexType toComplexType() {
+	public InputComplexNodeType toComplexNodeType() {
 
 		if (complexType != null) {
 
@@ -48,7 +48,7 @@ public enum InputNodeType {
 		throw new RuntimeException("Cannot convert type: " + this);
 	}
 
-	InputNodeType(InputComplexType complexType) {
+	InputNodeType(InputComplexNodeType complexType) {
 
 		this.complexType = complexType;
 	}

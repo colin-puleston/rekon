@@ -203,9 +203,9 @@ public class RekonInstanceBox {
 		return queriesCoreBuilder.createMultiPatternBuilder(toInputComplex(expr));
 	}
 
-	private InputComplex toInputComplex(OWLClassExpression expr) {
+	private InputComplexNode toInputComplex(OWLClassExpression expr) {
 
-		return expressionConverter.toComplex(expr);
+		return expressionConverter.toComplexNode(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

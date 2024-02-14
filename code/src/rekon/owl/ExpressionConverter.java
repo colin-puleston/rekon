@@ -284,9 +284,9 @@ class ExpressionConverter {
 
 	private class ConvertedNode extends ConvertedExpression implements InputNode {
 
-		public InputComplex toComplex() {
+		public InputComplexNode toComplexNode() {
 
-			return new ConvertedComplex(getOwlExpression());
+			return new ConvertedComplexNode(getOwlExpression());
 		}
 
 		public InputNodeType getNodeType() {
@@ -409,19 +409,19 @@ class ExpressionConverter {
 		}
 	}
 
-	private class ConvertedComplex extends ConvertedNode implements InputComplex {
+	private class ConvertedComplexNode extends ConvertedNode implements InputComplexNode {
 
 		public InputNode toNode() {
 
 			return this;
 		}
 
-		public InputComplexType getComplexType() {
+		public InputComplexNodeType getComplexNodeType() {
 
-			return getNodeType().toComplexType();
+			return getNodeType().toComplexNodeType();
 		}
 
-		ConvertedComplex(OWLClassExpression owlExpression) {
+		ConvertedComplexNode(OWLClassExpression owlExpression) {
 
 			super(owlExpression);
 		}
@@ -432,16 +432,18 @@ class ExpressionConverter {
 		}
 	}
 
-	private class ConvertedComplexSuper extends ConvertedComplex implements InputComplexSuper {
+	private class ConvertedComplexSuper
+					extends ConvertedComplexNode
+					implements InputComplexSuper {
 
-		public InputComplex toComplex() {
+		public InputComplexNode toComplexNode() {
 
 			return this;
 		}
 
 		public InputComplexSuperType getComplexSuperType() {
 
-			return getComplexType().toComplexSuperType();
+			return getComplexNodeType().toComplexSuperType();
 		}
 
 		ConvertedComplexSuper(OWLClassExpression owlExpression) {
@@ -461,14 +463,9 @@ class ExpressionConverter {
 		this.names = names;
 	}
 
-	InputNode toNode(OWLClassExpression owlExpression) {
+	InputComplexNode toComplexNode(OWLClassExpression owlExpression) {
 
-		return new ConvertedNode(owlExpression);
-	}
-
-	InputComplex toComplex(OWLClassExpression owlExpression) {
-
-		return new ConvertedComplex(owlExpression);
+		return new ConvertedComplexNode(owlExpression);
 	}
 
 	InputComplexSuper toComplexSuper(OWLClassExpression owlExpression) {

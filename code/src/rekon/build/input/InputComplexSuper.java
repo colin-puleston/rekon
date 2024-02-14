@@ -31,7 +31,7 @@ import java.util.*;
  */
 public interface InputComplexSuper extends InputExpression {
 
-	InputComplex toComplex();
+	InputComplexNode toComplexNode();
 
 	InputComplexSuperType getComplexSuperType();
 

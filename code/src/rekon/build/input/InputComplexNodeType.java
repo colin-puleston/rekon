@@ -24,20 +24,30 @@
 
 package rekon.build.input;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public interface InputComplex extends InputExpression {
+public enum InputComplexNodeType {
 
-	InputNode toNode();
+	CONJUNCTION(null),
+	DISJUNCTION(InputComplexSuperType.DISJUNCTION),
+	RELATION(InputComplexSuperType.RELATION),
+	OUT_OF_SCOPE(InputComplexSuperType.OUT_OF_SCOPE);
 
-	InputComplexType getComplexType();
+	private InputComplexSuperType superType;
 
-	InputRelation asRelation();
+	public InputComplexSuperType toComplexSuperType() {
 
-	Collection<InputNode> asDisjuncts();
+		if (superType != null) {
 
-	Collection<InputNode> asConjuncts();
+			return superType;
+		}
+
+		throw new RuntimeException("Cannot convert type: " + this);
+	}
+
+	InputComplexNodeType(InputComplexSuperType superType) {
+
+		this.superType = superType;
+	}
 }

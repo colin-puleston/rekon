@@ -29,5 +29,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputClassComplexEquivalence extends InputEquivalence<ClassNode, InputComplex> {
+public interface InputClassComplexEquivalence
+					extends
+						InputEquivalence<ClassNode, InputComplexNode> {
 }
