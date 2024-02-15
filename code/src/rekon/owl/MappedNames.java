@@ -141,7 +141,10 @@ class MappedNames extends OntologyNames {
 
 				for (E e : getEntitiesInSignature(o)) {
 
-					addName(e);
+					if (mappingSource(e)) {
+
+						addName(e);
+					}
 				}
 			}
 		}
@@ -153,6 +156,20 @@ class MappedNames extends OntologyNames {
 			return n != null ? n : addName(entity);
 		}
 
+		boolean mappingSource(E entity) {
+
+			return true;
+		}
+
+		N addName(E entity) {
+
+			N n = createName(entity);
+
+			names.put(entity, n);
+
+			return n;
+		}
+
 		abstract N createName(E entity);
 
 		abstract Collection<E> getEntitiesInSignature(OWLOntology o);
@@ -160,15 +177,6 @@ class MappedNames extends OntologyNames {
 		Collection<N> getAllNames() {
 
 			return names.values();
-		}
-
-		private N addName(E entity) {
-
-			N n = createName(entity);
-
-			names.put(entity, n);
-
-			return n;
 		}
 	}
 
@@ -192,6 +200,11 @@ class MappedNames extends OntologyNames {
 			return entity.equals(rootEntity) ? rootName : super.resolveName(entity);
 		}
 
+		boolean mappingSource(E entity) {
+
+			return !entity.equals(rootEntity);
+		}
+
 		abstract N createRootName();
 
 		abstract E getRootEntity(OWLDataFactory factory);
@@ -202,6 +215,8 @@ class MappedNames extends OntologyNames {
 		ClassNodes(OWLOntologyManager manager) {
 
 			super(manager);
+
+			addName(getNoValueClass(manager.getOWLDataFactory()));
 		}
 
 		ClassNode createName(OWLClass entity) {
@@ -222,6 +237,11 @@ class MappedNames extends OntologyNames {
 		OWLClass getRootEntity(OWLDataFactory factory) {
 
 			return factory.getOWLThing();
+		}
+
+		private OWLClass getNoValueClass(OWLDataFactory factory) {
+
+			return NoValueOwlExpressionResolver.getNoValueClass(factory);
 		}
 	}
 

@@ -190,7 +190,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 				for (OWLAxiom rax : resolve(ax)) {
 
-					if (!annotationRelated(rax) && !convert(rax)) {
+					if (!ignoreAxiom(rax) && !convert(rax)) {
 
 						outOfScopeTypes.add(rax.getAxiomType());
 					}
@@ -232,15 +232,8 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return false;
 	}
 
-	private boolean annotationRelated(OWLAxiom ax) {
+	private boolean ignoreAxiom(OWLAxiom ax) {
 
-		if (ax instanceof OWLDeclarationAxiom) {
-
-			OWLDeclarationAxiom dax = (OWLDeclarationAxiom)ax;
-
-			return dax.getEntity() instanceof OWLAnnotationProperty;
-		}
-
-		return ax instanceof OWLAnnotationAxiom;
+		return ax instanceof OWLDeclarationAxiom || ax instanceof OWLAnnotationAxiom;
 	}
 }

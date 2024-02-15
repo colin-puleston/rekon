@@ -39,7 +39,9 @@ class ExpressionConverter {
 	private OWLDataFactory factory;
 
 	private MappedNames names;
-	private DataTypes dataTypes = new DataTypes(false);
+
+	private DataTypeConverter dataTypes = new DataTypeConverter(false);
+	private NoValueOwlExpressionResolver noValueResolver;
 
 	private abstract class ConvertedExpression implements InputExpression {
 
@@ -122,11 +124,6 @@ class ExpressionConverter {
 
 			OWLClassExpression owlExpr = getOwlExpression();
 
-			if (owlExpr instanceof OWLObjectComplementOf) {
-
-				return getRelationType((OWLObjectComplementOf)owlExpr);
-			}
-
 			if (owlExpr instanceof OWLRestriction) {
 
 				return getRelationType((OWLRestriction)owlExpr);
@@ -138,13 +135,6 @@ class ExpressionConverter {
 		public boolean hasRelationType(InputRelationType type) {
 
 			return getRelationType() == type;
-		}
-
-		public InputRelation asComplemented() {
-
-			OWLObjectComplementOf c = owlExpressionAs(OWLObjectComplementOf.class);
-
-			return new ConvertedRelation(c.getOperand());
 		}
 
 		public NodeProperty getNodeProperty() {
@@ -164,36 +154,19 @@ class ExpressionConverter {
 
 		public DataValue getDataValue() {
 
-			OWLRestriction owlRest = getOwlRestriction();
+			DataValue value = getDataValueOrNull();
 
-			if (owlRest instanceof OWLDataSomeValuesFrom) {
+			if (value != null) {
 
-				return extractDataType();
+				return value;
 			}
 
-			if (owlRest instanceof OWLDataHasValue) {
-
-				return extractDataValue();
-			}
-
-			throw new Error(
-						"Unexpected OWLDataRestriction type: "
-						+ owlRest.getClass());
+			throw new RuntimeException("Invalid data-value source: " + getOwlExpression());
 		}
 
 		ConvertedRelation(OWLClassExpression owlExpression) {
 
-			super(owlExpression);
-		}
-
-		private InputRelationType getRelationType(OWLObjectComplementOf owlExpr) {
-
-			if (complementedOwlRestriction(owlExpr)) {
-
-				return InputRelationType.COMPLEMENT;
-			}
-
-			return InputRelationType.OUT_OF_SCOPE;
+			super(noValueResolver.resolve(owlExpression));
 		}
 
 		private InputRelationType getRelationType(OWLRestriction owlExpr) {
@@ -211,19 +184,40 @@ class ExpressionConverter {
 					return InputRelationType.ALL_NODES;
 				}
 
-				if (owlExpr instanceof OWLDataSomeValuesFrom
-					|| owlExpr instanceof OWLDataHasValue) {
+				if (owlExpr instanceof OWLDataSomeValuesFrom) {
 
-					return InputRelationType.DATA_VALUE;
+					if (extractDataType() != null) {
+
+						return InputRelationType.DATA_VALUE;
+					}
+				}
+				else if (owlExpr instanceof OWLDataHasValue) {
+
+					if (extractDataValue() != null) {
+
+						return InputRelationType.DATA_VALUE;
+					}
 				}
 			}
 
 			return InputRelationType.OUT_OF_SCOPE;
 		}
 
-		private boolean complementedOwlRestriction(OWLObjectComplementOf owlComp) {
+		private DataValue getDataValueOrNull() {
 
-			return owlComp.getOperand() instanceof OWLRestriction;
+			OWLRestriction owlRest = getOwlRestriction();
+
+			if (owlRest instanceof OWLDataSomeValuesFrom) {
+
+				return extractDataType();
+			}
+
+			if (owlRest instanceof OWLDataHasValue) {
+
+				return extractDataValue();
+			}
+
+			throw new RuntimeException("Unexpected OWL-restriction type: " + owlRest);
 		}
 
 		private DataValue extractDataType() {
@@ -233,7 +227,7 @@ class ExpressionConverter {
 
 		private DataValue extractDataValue() {
 
-			return DataTypes.toDataValueExpression(owlFillerAs(OWLLiteral.class));
+			return DataTypeConverter.toDataValue(owlFillerAs(OWLLiteral.class));
 		}
 
 		private <P extends OWLProperty>P owlPropertyAs(Class<P> type) {
@@ -356,7 +350,7 @@ class ExpressionConverter {
 				return rel;
 			}
 
-			throw new Error("Unexpected OWL-object type: " + getOwlExpression());
+			throw new RuntimeException("Unexpected OWL-object type: " + getOwlExpression());
 		}
 
 		ConvertedNode(OWLClassExpression owlExpression) {
@@ -456,6 +450,8 @@ class ExpressionConverter {
 
 		this.factory = factory;
 		this.names = names;
+
+		noValueResolver = new NoValueOwlExpressionResolver(factory);
 	}
 
 	InputComplexNode toComplexNode(OWLClassExpression owlExpression) {

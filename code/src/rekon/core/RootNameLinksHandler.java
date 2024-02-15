@@ -73,7 +73,7 @@ class RootNameLinksHandler extends NameLinksHandler {
 		return subs;
 	}
 
-	boolean isSubsumer(Name test) {
+	boolean hasSubsumer(Name test) {
 
 		return false;
 	}

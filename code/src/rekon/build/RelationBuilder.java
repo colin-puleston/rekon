@@ -52,42 +52,20 @@ class RelationBuilder {
 
 	private abstract class NodeRelations extends Relations {
 
-		private boolean complement = false;
-
 		NodeRelations(boolean dynamic) {
 
 			super(dynamic);
 		}
 
-		Relation get(InputRelation source, boolean complement) {
-
-			this.complement = complement;
-
-			return get(source);
-		}
-
 		Relation checkCreate(InputRelation source) {
 
-			return checkCreate(source, complement);
-		}
-
-		abstract Relation checkCreate(InputRelation source, boolean complement);
-
-		Relation checkCreateDefault(NodeProperty prop, InputNode value) {
-
-			NodeValue target = toNodeValue(value);
+			NodeProperty prop = source.getNodeProperty();
+			NodeValue target = toNodeValue(source.getExpressionValue());
 
 			return target != null ? create(prop, target) : null;
 		}
 
 		abstract Relation create(NodeProperty prop, NodeValue target);
-
-		abstract NodeValue getNodeValueForEmptyDisjunction(InputNode source);
-
-		Relation createForNoValue(NodeProperty prop) {
-
-			return new AllRelation(prop, OntologyNames.ABSENT_CLASS_VALUE);
-		}
 
 		private NodeValue toNodeValue(InputNode source) {
 
@@ -111,11 +89,6 @@ class RelationBuilder {
 				return null;
 			}
 
-			if (disjuncts.isEmpty()) {
-
-				return getNodeValueForEmptyDisjunction(source);
-			}
-
 			return new NodeValue(componentBuilder.disjunctsToAtomicNode(disjuncts));
 		}
 	}
@@ -127,36 +100,9 @@ class RelationBuilder {
 			super(dynamic);
 		}
 
-		Relation checkCreate(InputRelation source, boolean complement) {
-
-			NodeProperty prop = source.getNodeProperty();
-			InputNode value = source.getExpressionValue();
-
-			if (complement) {
-
-				if (isClassNode(value, rootClassNode)) {
-
-					return createForNoValue(prop);
-				}
-
-				source.notifyComponentOutOfScopeInContext();
-
-				return null;
-			}
-
-			return checkCreateDefault(prop, value);
-		}
-
 		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new SomeRelation(prop, target);
-		}
-
-		NodeValue getNodeValueForEmptyDisjunction(InputNode source) {
-
-			source.notifyComponentOutOfScopeInContext();
-
-			return null;
 		}
 	}
 
@@ -167,34 +113,9 @@ class RelationBuilder {
 			super(dynamic);
 		}
 
-		Relation checkCreate(InputRelation source, boolean complement) {
-
-			if (complement) {
-
-				source.notifyComponentOutOfScopeInContext();
-
-				return null;
-			}
-
-			NodeProperty prop = source.getNodeProperty();
-			InputNode value = source.getExpressionValue();
-
-			if (isClassNode(value, OntologyNames.ABSENT_CLASS_NODE)) {
-
-				return createForNoValue(prop);
-			}
-
-			return checkCreateDefault(prop, value);
-		}
-
 		Relation create(NodeProperty prop, NodeValue target) {
 
 			return new AllRelation(prop, target);
-		}
-
-		NodeValue getNodeValueForEmptyDisjunction(InputNode source) {
-
-			return OntologyNames.ABSENT_CLASS_VALUE;
 		}
 	}
 
@@ -224,24 +145,15 @@ class RelationBuilder {
 
 	Relation toRelation(InputRelation source) {
 
-		return toRelation(source, false);
-	}
-
-	private Relation toRelation(InputRelation source, boolean complement) {
-
 		switch (source.getRelationType()) {
-
-			case COMPLEMENT:
-
-				return toRelation(source.asComplemented(), true);
 
 			case SOME_NODES:
 
-				return someRelations.get(source, complement);
+				return someRelations.get(source);
 
 			case ALL_NODES:
 
-				return allRelations.get(source, complement);
+				return allRelations.get(source);
 
 			case DATA_VALUE:
 

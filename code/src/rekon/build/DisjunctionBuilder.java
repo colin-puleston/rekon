@@ -61,7 +61,7 @@ class DisjunctionBuilder {
 				disjuncts.addAll(djs);
 			}
 
-			return disjuncts;
+			return disjuncts.isEmpty() ? null : disjuncts;
 		}
 
 		private Collection<? extends NodeX> toDisjuncts(InputNode source) {

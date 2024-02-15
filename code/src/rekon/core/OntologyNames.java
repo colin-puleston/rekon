@@ -32,36 +32,6 @@ import java.util.*;
 public abstract class OntologyNames {
 
 	static private final String ROOT_NAMES_LABEL = "ROOT";
-	static private final String ABSENT_CLASS_NAME_LABEL = "NOTHING";
-
-	static public final ClassNode ABSENT_CLASS_NODE = new AbsentClassNode();
-	static public final NodeValue ABSENT_CLASS_VALUE = new AbsentClassValue();
-
-	static private class AbsentClassNode extends ClassNode {
-
-		public String getLabel() {
-
-			return ABSENT_CLASS_NAME_LABEL;
-		}
-
-		AbsentClassNode() {
-
-			setClassification();
-		}
-	}
-
-	static private class AbsentClassValue extends NodeValue {
-
-		boolean subsumesOther(Value v) {
-
-			return v == this;
-		}
-
-		private AbsentClassValue() {
-
-			super(ABSENT_CLASS_NODE);
-		}
-	}
 
 	private class RootClassNode extends ClassNode {
 

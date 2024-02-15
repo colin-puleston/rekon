@@ -34,7 +34,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class DataTypes {
+class DataTypeConverter {
 
 	static private Set<TypeHandler> typeHandlers = new HashSet<TypeHandler>();
 
@@ -75,7 +75,7 @@ class DataTypes {
 		}
 	}
 
-	static DataValue toDataValueExpression(OWLLiteral value) {
+	static DataValue toDataValue(OWLLiteral value) {
 
 		if (value.isBoolean()) {
 
@@ -221,7 +221,7 @@ class DataTypes {
 		}
 	}
 
-	DataTypes(boolean dynamic) {
+	DataTypeConverter(boolean dynamic) {
 
 		this.dynamic = dynamic;
 

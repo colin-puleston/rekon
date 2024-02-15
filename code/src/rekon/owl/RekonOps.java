@@ -56,10 +56,10 @@ class RekonOps {
 	private DynamicOps dynamicOps;
 	private InstanceOps instanceOps;
 
-	private EntityGroupsMapper entityGroupsMapper;
-
 	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
 	private SameIndividualsChecker sameIndividualsChecker = new SameIndividualsChecker();
+
+	private MappedEntityRetriever mappedEntityRetriever;
 
 	private abstract class PairwiseMatchChecker<E> {
 
@@ -123,7 +123,7 @@ class RekonOps {
 		dynamicOps = ontology.createDynamicOps();
 		instanceOps = ontology.createInstanceOps();
 
-		entityGroupsMapper = new EntityGroupsMapper(owlThing, owlNothing);
+		mappedEntityRetriever = new MappedEntityRetriever(owlThing, owlNothing);
 	}
 
 	RekonInstanceBox createInstanceBox() {
@@ -145,7 +145,7 @@ class RekonOps {
 
 		Names equivs = toDynamicHandler(expr).getEquivalentsGroup();
 
-		return entityGroupsMapper.mapEquivs(equivs, expr);
+		return mappedEntityRetriever.mapEquivs(equivs, expr);
 	}
 
 	NodeSet<OWLClass> getSuperClasses(OWLClassExpression expr, boolean direct) {
@@ -157,12 +157,12 @@ class RekonOps {
 
 		if (expr.equals(owlNothing)) {
 
-			return entityGroupsMapper.mapClasses(getOwlNothingSuperEquivGroups(direct));
+			return mappedEntityRetriever.mapClasses(getOwlNothingSuperEquivGroups(direct));
 		}
 
 		Collection<Names> sups = toDynamicHandler(expr).getSuperEquivGroups(direct);
 
-		return entityGroupsMapper.mapSupers(sups, direct);
+		return mappedEntityRetriever.mapSupers(sups, direct);
 	}
 
 	NodeSet<OWLClass> getSubClasses(OWLClassExpression expr, boolean direct) {
@@ -174,21 +174,21 @@ class RekonOps {
 
 		Collection<Names> subs = toDynamicHandler(expr).getSubEquivGroups(direct);
 
-		return entityGroupsMapper.mapSubs(subs, direct);
+		return mappedEntityRetriever.mapSubs(subs, direct);
 	}
 
 	NodeSet<OWLNamedIndividual> getIndividuals(OWLClassExpression expr, boolean direct) {
 
 		Collection<Names> inds = toDynamicHandler(expr).getIndividualEquivGroups(direct);
 
-		return entityGroupsMapper.mapIndividuals(inds);
+		return mappedEntityRetriever.mapIndividuals(inds);
 	}
 
 	NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct) {
 
 		Collection<Names> types = toDynamicHandler(ind).getSuperEquivGroups(direct);
 
-		return entityGroupsMapper.mapClasses(types);
+		return mappedEntityRetriever.mapClasses(types);
 	}
 
 	boolean isEntailed(OWLAxiom axiom) {

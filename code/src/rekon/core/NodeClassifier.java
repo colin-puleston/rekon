@@ -323,6 +323,6 @@ class NodeClassifier extends NameClassifier {
 
 	private boolean newSubsumer(NodeX s) {
 
-		return s != getName() && !isSubsumer(s);
+		return s != getName() && !hasSubsumer(s);
 	}
 }

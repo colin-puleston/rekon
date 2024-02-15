@@ -234,9 +234,9 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		return parentConverter.getInputAxioms(converterType);
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
+	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject... outOfScopeExprs) {
 
-		logOutOfScopeAxiom(axiom, Collections.singleton(outOfScopeExpr));
+		logOutOfScopeAxiom(axiom, Arrays.asList(outOfScopeExprs));
 	}
 
 	void logOutOfScopeAxiom(

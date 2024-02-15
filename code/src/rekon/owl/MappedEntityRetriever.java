@@ -35,7 +35,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class EntityGroupsMapper {
+class MappedEntityRetriever {
 
 	private Node<OWLClass> owlThingAsEntityGroup;
 	private Node<OWLClass> owlNothingAsEntityGroup;
@@ -45,13 +45,18 @@ class EntityGroupsMapper {
 	private SubsMapper subsMapper = new SubsMapper();
 	private IndividualsMapper individualsMapper = new IndividualsMapper();
 
-	private abstract class EntitiesMapper<E extends OWLEntity> {
+	private abstract class TypeEntitiesMapper<E extends OWLEntity> {
 
 		private Class<E> entityType;
 
-		EntitiesMapper(Class<E> entityType) {
+		TypeEntitiesMapper(Class<E> entityType) {
 
 			this.entityType = entityType;
+		}
+
+		Node<E> toSingleEntityGroup(Names names) {
+
+			return createGroupNode(toEntityGroup(names));
 		}
 
 		NodeSet<E> toEntityGroups(Collection<Names> nameGroups) {
@@ -76,45 +81,48 @@ class EntityGroupsMapper {
 			return entityGroups;
 		}
 
+		boolean insertedEntity(E entity) {
+
+			return false;
+		}
+
 		abstract Node<E> createGroupNode(Set<E> entities);
 
 		abstract NodeSet<E> createGroupsNode(Set<Node<E>> entityGroups);
 
-		void addEntity(Set<E> entities, Name name) {
-
-			entities.add(MappedNames.toMappedEntity(name, entityType));
-		}
-
-		private Set<E> toEntityGroup(Names nameGroup) {
+		private Set<E> toEntityGroup(Names names) {
 
 			Set<E> entities = new HashSet<E>();
 
-			for (Name n : nameGroup) {
+			for (Name n : names) {
 
-				addEntity(entities, n);
+				E e = toMappedEntity(n);
+
+				if (!insertedEntity(e)) {
+
+					entities.add(e);
+				}
 			}
 
 			return entities;
 		}
+
+		private E toMappedEntity(Name name) {
+
+			return MappedNames.toMappedEntity(name, entityType);
+		}
 	}
 
-	private class ClassesMapper extends EntitiesMapper<OWLClass> {
+	private class ClassesMapper extends TypeEntitiesMapper<OWLClass> {
 
 		ClassesMapper() {
 
 			super(OWLClass.class);
 		}
 
-		Node<OWLClass> toSingleEntityGroup(Names names, OWLClassExpression sourceExpr) {
+		boolean insertedEntity(OWLClass entity) {
 
-			Set<OWLClass> entities = new HashSet<OWLClass>();
-
-			for (Name n : names) {
-
-				addEntity(entities, n);
-			}
-
-			return new OWLClassNode(entities);
+			return NoValueOwlExpressionResolver.isNoValueClass(entity);
 		}
 
 		Node<OWLClass> createGroupNode(Set<OWLClass> entities) {
@@ -161,7 +169,7 @@ class EntityGroupsMapper {
 		}
 	}
 
-	private class IndividualsMapper extends EntitiesMapper<OWLNamedIndividual> {
+	private class IndividualsMapper extends TypeEntitiesMapper<OWLNamedIndividual> {
 
 		IndividualsMapper() {
 
@@ -179,7 +187,7 @@ class EntityGroupsMapper {
 		}
 	}
 
-	EntityGroupsMapper(OWLClass owlThing, OWLClass owlNothing) {
+	MappedEntityRetriever(OWLClass owlThing, OWLClass owlNothing) {
 
 		owlThingAsEntityGroup = new OWLClassNode(owlThing);
 		owlNothingAsEntityGroup = new OWLClassNode(owlNothing);
@@ -187,7 +195,7 @@ class EntityGroupsMapper {
 
 	Node<OWLClass> mapEquivs(Names equivs, OWLClassExpression sourceExpr) {
 
-		return classesMapper.toSingleEntityGroup(equivs, sourceExpr);
+		return classesMapper.toSingleEntityGroup(equivs);
 	}
 
 	NodeSet<OWLClass> mapClasses(Collection<Names> equivGroups) {

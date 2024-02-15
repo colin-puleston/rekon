@@ -181,7 +181,7 @@ public abstract class Name {
 
 	private boolean hasSubsumer(Name name) {
 
-		return linksHandler.isSubsumer(name);
+		return linksHandler.hasSubsumer(name);
 	}
 
 	private RootNameLinksHandler getRootLinksHandler() {

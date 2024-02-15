@@ -297,7 +297,7 @@ class PatternBuilder {
 
 			Collection<NodeX> disjuncts = componentBuilder.toDisjunction(source);
 
-			if (disjuncts == null || disjuncts.isEmpty()) {
+			if (disjuncts == null) {
 
 				return null;
 			}

@@ -254,12 +254,12 @@ class NameClassification extends NameLinksHandler {
 
 		void resolveBasicLinksWithSubsumers() {
 
-			for (Name s : ancestors.copyNames()) {
+			for (Name a : ancestors.copyNames()) {
 
-				if (getInitialiserFor(s).checkSubsumedToEquiv(name)) {
+				if (getInitialiserFor(a).checkSubsumedToEquiv(name)) {
 
-					ancestors.remove(s);
-					equivalents.add(s);
+					ancestors.remove(a);
+					equivalents.add(a);
 				}
 			}
 		}
@@ -437,7 +437,7 @@ class NameClassification extends NameLinksHandler {
 		return subs.getExternal(direct);
 	}
 
-	boolean isSubsumer(Name test) {
+	boolean hasSubsumer(Name test) {
 
 		return equivalents.contains(test) || supers.hasLinkTo(test, new NameSet());
 	}

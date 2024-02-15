@@ -48,7 +48,7 @@ class Logger {
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 
 		logSeparatorLine();
-		logOutOfScopeWarningLine("Axiom-types");
+		logOutOfScopeWarningLine("Axiom types");
 
 		for (AxiomType<?> axType : outOfScopeTypes) {
 

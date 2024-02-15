@@ -92,7 +92,7 @@ class NameClassifier extends NameLinksHandler {
 		return handleGetLinked();
 	}
 
-	boolean isSubsumer(Name test) {
+	boolean hasSubsumer(Name test) {
 
 		return subsumers.contains(test);
 	}
@@ -120,7 +120,7 @@ class NameClassifier extends NameLinksHandler {
 
 	private boolean checkAddSubsumer(Name subsumer) {
 
-		return subsumer != name && subsumers.add(subsumer);
+		return subsumer != name && !subsumer.rootName() && subsumers.add(subsumer);
 	}
 
 	private Names handleGetLinked() {
