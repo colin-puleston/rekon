@@ -263,9 +263,7 @@ class PatternBuilder {
 
 				case DISJUNCTION:
 
-					source.notifyComponentOutOfScopeInContext();
-
-					return null;
+					throw new Error("Unexpected disjunction node: " + source);
 
 				case RELATION:
 

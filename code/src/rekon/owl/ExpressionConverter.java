@@ -74,12 +74,7 @@ class ExpressionConverter {
 
 		public void notifyComponentOutOfScope() {
 
-			logOutOfScope(false);
-		}
-
-		public void notifyComponentOutOfScopeInContext() {
-
-			logOutOfScope(true);
+			Logger.SINGLETON.logOutOfScopeExpression(owlExpression);
 		}
 
 		ConvertedExpression(OWLClassExpression owlExpression) {
@@ -110,11 +105,6 @@ class ExpressionConverter {
 		<T extends OWLClassExpression>T owlExpressionAs(Class<T> type) {
 
 			return owlObjectAs(owlExpression, type);
-		}
-
-		private void logOutOfScope(boolean inContext) {
-
-			Logger.SINGLETON.logOutOfScopeExpression(owlExpression, inContext);
 		}
 	}
 

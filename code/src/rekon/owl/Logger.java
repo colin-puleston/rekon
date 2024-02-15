@@ -68,9 +68,9 @@ class Logger {
 		logSeparatorLine();
 	}
 
-	void logOutOfScopeExpression(OWLObject expr, boolean inContext) {
+	void logOutOfScopeExpression(OWLObject expr) {
 
-		logOutOfScopeWarningLine("Expression", inContext);
+		logOutOfScopeWarningLine("Expression");
 		logLine("EXPRESSION: " + expr);
 
 		logSeparatorLine();
@@ -78,14 +78,7 @@ class Logger {
 
 	private void logOutOfScopeWarningLine(String entity) {
 
-		logOutOfScopeWarningLine(entity, false);
-	}
-
-	private void logOutOfScopeWarningLine(String entity, boolean inContext) {
-
-		String qualifier = inContext ? " in context" : "";
-
-		logWarningLine(entity + " out-of-scope" + qualifier + "...");
+		logWarningLine(entity + " out-of-scope...");
 	}
 
 	private void logSeparatorLine() {

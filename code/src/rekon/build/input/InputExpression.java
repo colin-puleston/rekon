@@ -32,6 +32,4 @@ public interface InputExpression {
 	Object getSourceObject();
 
 	void notifyComponentOutOfScope();
-
-	void notifyComponentOutOfScopeInContext();
 }

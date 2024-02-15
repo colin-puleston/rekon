@@ -247,7 +247,7 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 
 		for (OWLObject e : outOfScopeExprs) {
 
-			logger.logOutOfScopeExpression(e, false);
+			logger.logOutOfScopeExpression(e);
 		}
 
 		logger.logOutOfScopeAxiom(axiom);
