@@ -145,7 +145,7 @@ class RekonOps {
 
 		Names equivs = toDynamicHandler(expr).getEquivalentsGroup();
 
-		return mappedEntityRetriever.mapEquivs(equivs, expr);
+		return mappedEntityRetriever.retrieveEquivs(equivs, expr);
 	}
 
 	NodeSet<OWLClass> getSuperClasses(OWLClassExpression expr, boolean direct) {
@@ -157,12 +157,14 @@ class RekonOps {
 
 		if (expr.equals(owlNothing)) {
 
-			return mappedEntityRetriever.mapClasses(getOwlNothingSuperEquivGroups(direct));
+			Collection<Names> nothingSups = getOwlNothingSuperEquivGroups(direct);
+
+			return mappedEntityRetriever.retrieveClasses(nothingSups);
 		}
 
 		Collection<Names> sups = toDynamicHandler(expr).getSuperEquivGroups(direct);
 
-		return mappedEntityRetriever.mapSupers(sups, direct);
+		return mappedEntityRetriever.retrieveSupers(sups, direct);
 	}
 
 	NodeSet<OWLClass> getSubClasses(OWLClassExpression expr, boolean direct) {
@@ -174,21 +176,21 @@ class RekonOps {
 
 		Collection<Names> subs = toDynamicHandler(expr).getSubEquivGroups(direct);
 
-		return mappedEntityRetriever.mapSubs(subs, direct);
+		return mappedEntityRetriever.retrieveSubs(subs, direct);
 	}
 
 	NodeSet<OWLNamedIndividual> getIndividuals(OWLClassExpression expr, boolean direct) {
 
 		Collection<Names> inds = toDynamicHandler(expr).getIndividualEquivGroups(direct);
 
-		return mappedEntityRetriever.mapIndividuals(inds);
+		return mappedEntityRetriever.retrieveIndividuals(inds);
 	}
 
 	NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct) {
 
 		Collection<Names> types = toDynamicHandler(ind).getSuperEquivGroups(direct);
 
-		return mappedEntityRetriever.mapClasses(types);
+		return mappedEntityRetriever.retrieveClasses(types);
 	}
 
 	boolean isEntailed(OWLAxiom axiom) {

@@ -40,16 +40,16 @@ class MappedEntityRetriever {
 	private Node<OWLClass> owlThingAsEntityGroup;
 	private Node<OWLClass> owlNothingAsEntityGroup;
 
-	private ClassesMapper classesMapper = new ClassesMapper();
-	private SupersMapper supersMapper = new SupersMapper();
-	private SubsMapper subsMapper = new SubsMapper();
-	private IndividualsMapper individualsMapper = new IndividualsMapper();
+	private ClassesRetriever classesRetriever = new ClassesRetriever();
+	private SupersRetriever supersRetriever = new SupersRetriever();
+	private SubsRetriever subsRetriever = new SubsRetriever();
+	private IndividualsRetriever individualsRetriever = new IndividualsRetriever();
 
-	private abstract class TypeEntitiesMapper<E extends OWLEntity> {
+	private abstract class TypeEntitiesRetriever<E extends OWLEntity> {
 
 		private Class<E> entityType;
 
-		TypeEntitiesMapper(Class<E> entityType) {
+		TypeEntitiesRetriever(Class<E> entityType) {
 
 			this.entityType = entityType;
 		}
@@ -113,9 +113,9 @@ class MappedEntityRetriever {
 		}
 	}
 
-	private class ClassesMapper extends TypeEntitiesMapper<OWLClass> {
+	private class ClassesRetriever extends TypeEntitiesRetriever<OWLClass> {
 
-		ClassesMapper() {
+		ClassesRetriever() {
 
 			super(OWLClass.class);
 		}
@@ -136,7 +136,7 @@ class MappedEntityRetriever {
 		}
 	}
 
-	private abstract class LinkedClassesMapper extends ClassesMapper {
+	private abstract class LinkedClassesRetriever extends ClassesRetriever {
 
 		NodeSet<OWLClass> toEntityGroups(Collection<Names> nameGroups, boolean direct) {
 
@@ -153,7 +153,7 @@ class MappedEntityRetriever {
 		abstract Node<OWLClass> getDefaultEntityGroup();
 	}
 
-	private class SupersMapper extends LinkedClassesMapper {
+	private class SupersRetriever extends LinkedClassesRetriever {
 
 		Node<OWLClass> getDefaultEntityGroup() {
 
@@ -161,7 +161,7 @@ class MappedEntityRetriever {
 		}
 	}
 
-	private class SubsMapper extends LinkedClassesMapper {
+	private class SubsRetriever extends LinkedClassesRetriever {
 
 		Node<OWLClass> getDefaultEntityGroup() {
 
@@ -169,9 +169,9 @@ class MappedEntityRetriever {
 		}
 	}
 
-	private class IndividualsMapper extends TypeEntitiesMapper<OWLNamedIndividual> {
+	private class IndividualsRetriever extends TypeEntitiesRetriever<OWLNamedIndividual> {
 
-		IndividualsMapper() {
+		IndividualsRetriever() {
 
 			super(OWLNamedIndividual.class);
 		}
@@ -193,28 +193,28 @@ class MappedEntityRetriever {
 		owlNothingAsEntityGroup = new OWLClassNode(owlNothing);
 	}
 
-	Node<OWLClass> mapEquivs(Names equivs, OWLClassExpression sourceExpr) {
+	Node<OWLClass> retrieveEquivs(Names equivs, OWLClassExpression sourceExpr) {
 
-		return classesMapper.toSingleEntityGroup(equivs);
+		return classesRetriever.toSingleEntityGroup(equivs);
 	}
 
-	NodeSet<OWLClass> mapClasses(Collection<Names> equivGroups) {
+	NodeSet<OWLClass> retrieveClasses(Collection<Names> equivGroups) {
 
-		return classesMapper.toEntityGroups(equivGroups);
+		return classesRetriever.toEntityGroups(equivGroups);
 	}
 
-	NodeSet<OWLClass> mapSupers(Collection<Names> equivGroups, boolean direct) {
+	NodeSet<OWLClass> retrieveSupers(Collection<Names> equivGroups, boolean direct) {
 
-		return supersMapper.toEntityGroups(equivGroups, direct);
+		return supersRetriever.toEntityGroups(equivGroups, direct);
 	}
 
-	NodeSet<OWLClass> mapSubs(Collection<Names> equivGroups, boolean direct) {
+	NodeSet<OWLClass> retrieveSubs(Collection<Names> equivGroups, boolean direct) {
 
-		return subsMapper.toEntityGroups(equivGroups, direct);
+		return subsRetriever.toEntityGroups(equivGroups, direct);
 	}
 
-	NodeSet<OWLNamedIndividual> mapIndividuals(Collection<Names> equivGroups) {
+	NodeSet<OWLNamedIndividual> retrieveIndividuals(Collection<Names> equivGroups) {
 
-		return individualsMapper.toEntityGroups(equivGroups);
+		return individualsRetriever.toEntityGroups(equivGroups);
 	}
 }
