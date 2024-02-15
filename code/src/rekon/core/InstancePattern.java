@@ -31,7 +31,7 @@ class InstancePattern extends LocalExpression {
 
 	static private final String LOCAL_CLASS_NAMES_PREFIX_FORMAT = "%s(%s)";
 
-	private SinglePatternBuilder patternBuilder;
+	private SinglePatternSource patternBuilder;
 
 	private InstanceNode instanceNode;
 	private PatternMatcher patternMatcher;
@@ -60,7 +60,7 @@ class InstancePattern extends LocalExpression {
 		}
 	}
 
-	InstancePattern(InstanceNode instanceNode, SinglePatternBuilder patternBuilder) {
+	InstancePattern(InstanceNode instanceNode, SinglePatternSource patternBuilder) {
 
 		this.instanceNode = instanceNode;
 		this.patternBuilder = patternBuilder;

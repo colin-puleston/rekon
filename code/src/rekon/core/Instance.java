@@ -34,7 +34,7 @@ public abstract class Instance {
 	private InstanceNode node;
 	private Set<Instance> referencers = new HashSet<Instance>();
 
-	private SinglePatternBuilder profileRebuilder = null;
+	private SinglePatternSource profileRebuilder = null;
 
 	public String toString() {
 
@@ -60,7 +60,7 @@ public abstract class Instance {
 		node = new InstanceNode(this, undefinedRef);
 	}
 
-	void checkAddAsReferencer(SinglePatternBuilder profileBuilder) {
+	void checkAddAsReferencer(SinglePatternSource profileBuilder) {
 
 		Collection<Instance> refed = getReferenceds();
 
@@ -88,7 +88,7 @@ public abstract class Instance {
 		profileRebuilder = null;
 	}
 
-	SinglePatternBuilder getProfileRebuilder() {
+	SinglePatternSource getProfileRebuilder() {
 
 		if (profileRebuilder == null) {
 

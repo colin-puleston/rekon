@@ -310,7 +310,7 @@ class RekonOps {
 			return toDynamicHandler((OWLClass)expr);
 		}
 
-		return dynamicOps.createHandler(toDynamicPatternBuilder(expr));
+		return dynamicOps.createHandler(toDynamicPatternSource(expr));
 	}
 
 	private DynamicOpsHandler toDynamicHandler(OWLClass cls) {
@@ -323,8 +323,8 @@ class RekonOps {
 		return dynamicOps.createHandler(names.get(ind));
 	}
 
-	private MultiPatternBuilder toDynamicPatternBuilder(OWLClassExpression expr) {
+	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
 
-		return coreBuilder.createMultiPatternBuilder(expressionConverter.toNode(expr));
+		return coreBuilder.createMultiPatternSource(expressionConverter.toNode(expr));
 	}
 }

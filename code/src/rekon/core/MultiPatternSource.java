@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public interface MultiPatternBuilder {
+public interface MultiPatternSource {
 
 	public Collection<Pattern> createAll(MatchStructures matchStructures);
 }

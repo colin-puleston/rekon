@@ -38,7 +38,7 @@ public class InstanceOps {
 
 		private Set<Instance> added = new HashSet<Instance>();
 
-		void add(Instance instance, SinglePatternBuilder profileBuilder) {
+		void add(Instance instance, SinglePatternSource profileBuilder) {
 
 			InstanceNode node = instance.getNode();
 			InstancePattern ip = new InstancePattern(node, profileBuilder);
@@ -84,7 +84,7 @@ public class InstanceOps {
 		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
-	public void add(Instance instance, SinglePatternBuilder profileBuilder) {
+	public void add(Instance instance, SinglePatternSource profileBuilder) {
 
 		instance.getNode().checkClassifiable();
 
@@ -105,7 +105,7 @@ public class InstanceOps {
 		return true;
 	}
 
-	public List<Instance> match(MultiPatternBuilder queryBuilder) {
+	public List<Instance> match(MultiPatternSource queryBuilder) {
 
 		DynamicExpression q = createQueryExpression(queryBuilder);
 		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
@@ -116,8 +116,8 @@ public class InstanceOps {
 	}
 
 	public boolean matches(
-						MultiPatternBuilder queryBuilder,
-						SinglePatternBuilder profileBuilder) {
+						MultiPatternSource queryBuilder,
+						SinglePatternSource profileBuilder) {
 
 		DynamicExpression q = createQueryExpression(queryBuilder);
 		DynamicExpression p = createInstanceExpression(profileBuilder);
@@ -150,14 +150,14 @@ public class InstanceOps {
 		}
 	}
 
-	private DynamicExpression createQueryExpression(MultiPatternBuilder builder) {
+	private DynamicExpression createQueryExpression(MultiPatternSource source) {
 
-		return checkExpressionCreated(new DynamicExpression(builder), "query");
+		return checkExpressionCreated(new DynamicExpression(source), "query");
 	}
 
-	private DynamicExpression createInstanceExpression(SinglePatternBuilder builder) {
+	private DynamicExpression createInstanceExpression(SinglePatternSource source) {
 
-		return checkExpressionCreated(new DynamicExpression(builder), "instance");
+		return checkExpressionCreated(new DynamicExpression(source), "instance");
 	}
 
 	private DynamicExpression checkExpressionCreated(DynamicExpression expr, String exprDesc) {

@@ -38,7 +38,7 @@ public class DynamicOps {
 		return new DynamicNodeOpsHandler(nodes);
 	}
 
-	public DynamicOpsHandler createHandler(MultiPatternBuilder disjunctsBuilder) {
+	public DynamicOpsHandler createHandler(MultiPatternSource disjunctsBuilder) {
 
 		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
 

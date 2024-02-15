@@ -193,14 +193,14 @@ public class RekonInstanceBox {
 		return new CoreBuilder(names, new InstanceBoxBuildCustomiser(queries));
 	}
 
-	private SinglePatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
+	private SinglePatternSource createInstanceExprBuilder(OWLClassExpression expr) {
 
-		return instancesCoreBuilder.createSinglePatternBuilder(toInputNode(expr));
+		return instancesCoreBuilder.createSinglePatternSource(toInputNode(expr));
 	}
 
-	private MultiPatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
+	private MultiPatternSource createQueryExprBuilder(OWLClassExpression expr) {
 
-		return queriesCoreBuilder.createMultiPatternBuilder(toInputNode(expr));
+		return queriesCoreBuilder.createMultiPatternSource(toInputNode(expr));
 	}
 
 	private InputNode toInputNode(OWLClassExpression expr) {
