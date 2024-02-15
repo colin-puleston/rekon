@@ -189,9 +189,30 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		ClassNode resolveSuperClass(InputComplexSuper sup) {
 
+			if (sup.getComplexSuperType() == InputComplexSuperType.DISJUNCTION) {
+
+				return checkCreateDisjunctionSuperClass(sup.asDisjuncts());
+			}
+
 			Pattern p = components.toPattern(sup.toComplexNode());
 
 			return p != null ? addDefinitionClass(p) : null;
+		}
+
+		private ClassNode checkCreateDisjunctionSuperClass(Collection<InputNode> disjuncts) {
+
+			List<Pattern> djs = components.toPatternDisjunction(disjuncts);
+
+			if (djs == null) {
+
+				return null;
+			}
+
+			ClassNode c = addDefinitionClass();
+
+			addProfileDisjunction(c, djs);
+
+			return c;
 		}
 	}
 

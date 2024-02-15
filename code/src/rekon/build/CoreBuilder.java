@@ -36,7 +36,7 @@ public class CoreBuilder {
 
 	static private class NonCustomisingCustomiser implements BuildCustomiser {
 
-		public NodeX checkToCustomAtomicNode(InputNode source) {
+		public NodeX checkToCustomNode(InputNode source) {
 
 			return null;
 		}

@@ -125,10 +125,6 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 					sup.notifyComponentOutOfScope();
 					ax.notifyAxiomOutOfScope();
 					break;
-
-				default:
-
-					throw new Error("Unexpected complex-type: " + sup.getComplexSuperType());
 			}
 		}
 

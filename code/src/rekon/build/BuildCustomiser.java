@@ -32,5 +32,5 @@ import rekon.build.input.*;
  */
 public interface BuildCustomiser {
 
-	public NodeX checkToCustomAtomicNode(InputNode source);
+	public NodeX checkToCustomNode(InputNode source);
 }

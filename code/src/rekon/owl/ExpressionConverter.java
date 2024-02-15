@@ -147,7 +147,7 @@ class ExpressionConverter {
 			return names.get(owlPropertyAs(OWLDataProperty.class));
 		}
 
-		public InputNode getExpressionValue() {
+		public InputNode getNodeValue() {
 
 			return new ConvertedNode(resolveOwlFillerToClassExpression());
 		}

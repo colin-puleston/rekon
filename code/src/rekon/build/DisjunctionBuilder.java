@@ -71,7 +71,7 @@ class DisjunctionBuilder {
 				return disjunctions.get(source.asDisjuncts());
 			}
 
-			NodeX n = componentBuilder.toAtomicNode(source);
+			NodeX n = componentBuilder.toNode(source);
 
 			return n != null ? Collections.singleton(n) : null;
 		}

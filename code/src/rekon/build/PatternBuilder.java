@@ -172,7 +172,7 @@ class PatternBuilder {
 
 					case INDIVIDUAL:
 
-						conjunct.notifyComponentOutOfScopeInContext();
+						nodes.absorb(conjunct.asIndividualNode());
 
 						return false;
 
@@ -187,7 +187,7 @@ class PatternBuilder {
 
 					case DISJUNCTION:
 
-						NodeX n = checkCreateNodeForDisjunction(conjunct.asDisjuncts());
+						NodeX n = componentBuilder.disjunctsToNode(conjunct.asDisjuncts());
 
 						if (n == null) {
 
@@ -291,18 +291,6 @@ class PatternBuilder {
 			Relation r = componentBuilder.toRelation(source);
 
 			return r != null ? new Pattern(rootClassNode, r) : null;
-		}
-
-		private NodeX checkCreateNodeForDisjunction(Collection<InputNode> source) {
-
-			Collection<NodeX> disjuncts = componentBuilder.toDisjunction(source);
-
-			if (disjuncts == null) {
-
-				return null;
-			}
-
-			return componentBuilder.disjunctsToAtomicNode(disjuncts);
 		}
 	}
 

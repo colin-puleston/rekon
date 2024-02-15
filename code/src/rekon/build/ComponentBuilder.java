@@ -83,9 +83,9 @@ class ComponentBuilder {
 		return disjunctionBuilder.toDisjunction(source);
 	}
 
-	NodeX toAtomicNode(InputNode source) {
+	NodeX toNode(InputNode source) {
 
-		NodeX customNode = customiser.checkToCustomAtomicNode(source);
+		NodeX customNode = customiser.checkToCustomNode(source);
 
 		if (customNode != null) {
 
@@ -102,19 +102,33 @@ class ComponentBuilder {
 
 				return source.asIndividualNode();
 
+			case DISJUNCTION:
+
+				return disjunctsToNode(source.asDisjuncts());
+
+			case CONJUNCTION:
+			case RELATION:
+
+				return toPatternClassNode(source.toComplexNode());
+
 			case OUT_OF_SCOPE:
 
 				source.notifyComponentOutOfScope();
 
 				return null;
-
-			default:
-
-				return toPatternClassNode(source.toComplexNode());
 		}
+
+		throw new Error("Unexpected node-type: " + source.getNodeType());
 	}
 
-	NodeX disjunctsToAtomicNode(Collection<? extends NodeX> disjuncts) {
+	NodeX disjunctsToNode(Collection<InputNode> source) {
+
+		Collection<NodeX> disjuncts = toDisjunction(source);
+
+		if (disjuncts == null) {
+
+			return null;
+		}
 
 		if (disjuncts.size() == 1) {
 
@@ -134,7 +148,7 @@ class ComponentBuilder {
 
 		if (pCls == null) {
 
-			Pattern p = patternBuilder.toPattern(source);
+			Pattern p = toPattern(source);
 
 			if (p != null) {
 

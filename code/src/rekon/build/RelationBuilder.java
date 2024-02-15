@@ -60,37 +60,12 @@ class RelationBuilder {
 		Relation checkCreate(InputRelation source) {
 
 			NodeProperty prop = source.getNodeProperty();
-			NodeValue target = toNodeValue(source.getExpressionValue());
+			NodeX n = componentBuilder.toNode(source.getNodeValue());
 
-			return target != null ? create(prop, target) : null;
+			return n != null ? create(prop, new NodeValue(n)) : null;
 		}
 
 		abstract Relation create(NodeProperty prop, NodeValue target);
-
-		private NodeValue toNodeValue(InputNode source) {
-
-			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
-
-				return disjunctionToNodeValue(source);
-			}
-
-			NodeX n = componentBuilder.toAtomicNode(source);
-
-			return n != null ? new NodeValue(n) : null;
-		}
-
-		private NodeValue disjunctionToNodeValue(InputNode source) {
-
-			Collection<InputNode> sourceDjs = source.asDisjuncts();
-			Collection<NodeX> disjuncts = componentBuilder.toDisjunction(sourceDjs);
-
-			if (disjuncts == null) {
-
-				return null;
-			}
-
-			return new NodeValue(componentBuilder.disjunctsToAtomicNode(disjuncts));
-		}
 	}
 
 	private class SomeRelations extends NodeRelations {

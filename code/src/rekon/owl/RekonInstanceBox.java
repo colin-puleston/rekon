@@ -74,7 +74,7 @@ public class RekonInstanceBox {
 
 		private boolean queries;
 
-		public NodeX checkToCustomAtomicNode(InputNode source) {
+		public NodeX checkToCustomNode(InputNode source) {
 
 			Object owlSource = source.getSourceObject();
 
