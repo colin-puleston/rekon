@@ -83,9 +83,29 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 	static private class IndividualsResolver extends ResultsResolver {
 
+		Names resolve(NameSet inferreds, boolean direct) {
+
+			return purgeClassNodes(super.resolve(inferreds, direct));
+		}
+
 		Names getAllLinked(Name n) {
 
 			return n.getSubs(IndividualNode.class, false);
+		}
+
+		private Names purgeClassNodes(Names all) {
+
+			NameList purged = new NameList();
+
+			for (Name n : all) {
+
+				if (!(n instanceof ClassNode)) {
+
+					purged.add(n);
+				}
+			}
+
+			return purged;
 		}
 	}
 
