@@ -79,9 +79,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			return true;
 		}
 
-		private boolean absorbComplexEquiv(InputComplexNode complexEquiv) {
+		private boolean absorbComplexEquiv(InputComplexNode e) {
 
-			List<Pattern> djs = components.toPatternDisjunction(complexEquiv);
+			List<Pattern> djs = components.toPatternDisjunction(e.toNode());
 
 			if (djs == null) {
 
@@ -143,7 +143,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		private boolean create(InputSubSuper<InputComplexNode, SP> axiom) {
 
-			InputComplexNode sub = axiom.getSub();
+			InputNode sub = axiom.getSub().toNode();
 			List<Pattern> subDjs = components.toPatternDisjunction(sub);
 
 			if (subDjs != null) {
@@ -194,7 +194,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 				return checkCreateDisjunctionSuperClass(sup.asDisjuncts());
 			}
 
-			Pattern p = components.toPattern(sup.toComplexNode());
+			Pattern p = components.toPattern(sup.toNode());
 
 			return p != null ? addDefinitionClass(p) : null;
 		}

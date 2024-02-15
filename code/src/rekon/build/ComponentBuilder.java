@@ -41,8 +41,7 @@ class ComponentBuilder {
 	private RelationBuilder relationBuilder;
 	private DisjunctionBuilder disjunctionBuilder;
 
-	private Map<InputComplexNode, ClassNode> patternClasses
-					= new HashMap<InputComplexNode, ClassNode>();
+	private Map<InputNode, ClassNode> patternClasses = new HashMap<InputNode, ClassNode>();
 
 	ComponentBuilder(
 		OntologyNames names,
@@ -58,12 +57,12 @@ class ComponentBuilder {
 		disjunctionBuilder = new DisjunctionBuilder(this, dynamic);
 	}
 
-	Pattern toPattern(InputComplexNode source) {
+	Pattern toPattern(InputNode source) {
 
 		return patternBuilder.toPattern(source);
 	}
 
-	List<Pattern> toPatternDisjunction(InputComplexNode source) {
+	List<Pattern> toPatternDisjunction(InputNode source) {
 
 		return patternBuilder.toPatternDisjunction(source);
 	}
@@ -109,7 +108,7 @@ class ComponentBuilder {
 			case CONJUNCTION:
 			case RELATION:
 
-				return toPatternClassNode(source.toComplexNode());
+				return toPatternClassNode(source);
 
 			case OUT_OF_SCOPE:
 
@@ -142,7 +141,7 @@ class ComponentBuilder {
 		return c;
 	}
 
-	private ClassNode toPatternClassNode(InputComplexNode source) {
+	private ClassNode toPatternClassNode(InputNode source) {
 
 		ClassNode pCls = patternClasses.get(source);
 

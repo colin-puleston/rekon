@@ -263,11 +263,6 @@ class ExpressionConverter {
 
 	private class ConvertedNode extends ConvertedExpression implements InputNode {
 
-		public InputComplexNode toComplexNode() {
-
-			return new ConvertedComplexNode(getOwlExpression());
-		}
-
 		public InputNodeType getNodeType() {
 
 			OWLClassExpression owlExpr = getOwlExpression();
@@ -415,11 +410,6 @@ class ExpressionConverter {
 					extends ConvertedComplexNode
 					implements InputComplexSuper {
 
-		public InputComplexNode toComplexNode() {
-
-			return this;
-		}
-
 		public InputComplexSuperType getComplexSuperType() {
 
 			return getComplexNodeType().toComplexSuperType();
@@ -442,6 +432,11 @@ class ExpressionConverter {
 		this.names = names;
 
 		noValueResolver = new NoValueOwlExpressionResolver(factory);
+	}
+
+	InputNode toNode(OWLClassExpression owlExpression) {
+
+		return new ConvertedNode(owlExpression);
 	}
 
 	InputComplexNode toComplexNode(OWLClassExpression owlExpression) {

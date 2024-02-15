@@ -195,17 +195,17 @@ public class RekonInstanceBox {
 
 	private SinglePatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
 
-		return instancesCoreBuilder.createSinglePatternBuilder(toInputComplex(expr));
+		return instancesCoreBuilder.createSinglePatternBuilder(toInputNode(expr));
 	}
 
 	private MultiPatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
 
-		return queriesCoreBuilder.createMultiPatternBuilder(toInputComplex(expr));
+		return queriesCoreBuilder.createMultiPatternBuilder(toInputNode(expr));
 	}
 
-	private InputComplexNode toInputComplex(OWLClassExpression expr) {
+	private InputNode toInputNode(OWLClassExpression expr) {
 
-		return expressionConverter.toComplexNode(expr);
+		return expressionConverter.toNode(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

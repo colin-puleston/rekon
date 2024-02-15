@@ -325,8 +325,6 @@ class RekonOps {
 
 	private MultiPatternBuilder toDynamicPatternBuilder(OWLClassExpression expr) {
 
-		InputComplexNode n = expressionConverter.toComplexNode(expr);
-
-		return coreBuilder.createMultiPatternBuilder(n);
+		return coreBuilder.createMultiPatternBuilder(expressionConverter.toNode(expr));
 	}
 }
