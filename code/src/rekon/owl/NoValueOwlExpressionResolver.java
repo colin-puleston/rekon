@@ -69,14 +69,14 @@ class NoValueOwlExpressionResolver {
 
 	private OWLClassExpression checkCreateForNoValue(OWLClassExpression expr) {
 
-		if (expr instanceof OWLObjectAllValuesFrom) {
-
-			return checkCreateForNoValue((OWLObjectAllValuesFrom)expr, owlNothing);
-		}
-
 		if (expr instanceof OWLObjectComplementOf) {
 
 			return checkCreateForNoValue((OWLObjectComplementOf)expr);
+		}
+
+		if (expr instanceof OWLObjectAllValuesFrom) {
+
+			return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
 		}
 
 		return null;
@@ -88,26 +88,48 @@ class NoValueOwlExpressionResolver {
 
 		if (comp instanceof OWLObjectSomeValuesFrom) {
 
-			return checkCreateForNoValue((OWLObjectSomeValuesFrom)comp, owlThing);
+			OWLObjectSomeValuesFrom someComp = (OWLObjectSomeValuesFrom)comp;
+
+			if (noValueComplementedSomeRestriction(someComp)) {
+
+				return createForNoValue(someComp.getProperty());
+			}
 		}
 
 		return null;
 	}
 
-	private OWLClassExpression checkCreateForNoValue(
-									OWLQuantifiedObjectRestriction expr,
-									OWLClass testFiller) {
+	private OWLClassExpression checkCreateForNoValue(OWLObjectAllValuesFrom expr) {
 
-		if (expr.getFiller().equals(testFiller)) {
-
-			return createForNoValue(expr.getProperty());
-		}
-
-		return null;
+		return noValueAllRestriction(expr) ? createForNoValue(expr.getProperty()) : null;
 	}
 
-	private OWLRestriction createForNoValue(OWLObjectPropertyExpression p) {
+	private boolean noValueAllRestriction(OWLObjectAllValuesFrom expr) {
 
-		return factory.getOWLObjectSomeValuesFrom(p, rekonNoValue);
+		OWLClassExpression f = expr.getFiller();
+
+		if (f instanceof OWLObjectUnionOf) {
+
+			return ((OWLObjectUnionOf)f).getOperands().isEmpty();
+		}
+
+		return f.equals(owlNothing);
+	}
+
+	private boolean noValueComplementedSomeRestriction(OWLObjectSomeValuesFrom expr) {
+
+		OWLClassExpression f = expr.getFiller();
+
+		if (f instanceof OWLObjectIntersectionOf) {
+
+			return ((OWLObjectIntersectionOf)f).getOperands().isEmpty();
+		}
+
+		return f.equals(owlThing);
+	}
+
+	private OWLRestriction createForNoValue(OWLObjectPropertyExpression prop) {
+
+		return factory.getOWLObjectSomeValuesFrom(prop, rekonNoValue);
 	}
 }
