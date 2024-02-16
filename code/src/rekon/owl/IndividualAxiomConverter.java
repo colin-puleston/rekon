@@ -286,7 +286,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 									OWLClassExpression typeExpr,
 									OWLClassAssertionAxiom source) {
 
-			InputRelation rel = expressions.toRelation(typeExpr);
+			InputRelation rel = expressions.toRelation(source, typeExpr);
 
 			return new ConvertedIndividualRelation(source, node, rel);
 		}
@@ -316,7 +316,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 		private InputRelation toRelation(S source) {
 
-			return expressions.toRelation(toOwlRestriction(source));
+			return expressions.toRelation(source, toOwlRestriction(source));
 		}
 	}
 

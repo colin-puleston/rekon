@@ -126,17 +126,17 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 		InputComplexNode firstOrSubAsComplex() {
 
-			return expressions.toComplexNode(firstOrSub);
+			return expressions.toComplexNode(getSourceAxiom(), firstOrSub);
 		}
 
 		InputComplexNode secondAsComplex() {
 
-			return expressions.toComplexNode(secondOrSup);
+			return expressions.toComplexNode(getSourceAxiom(), secondOrSup);
 		}
 
 		InputComplexSuper supAsComplexSuper() {
 
-			return expressions.toComplexSuper(secondOrSup);
+			return expressions.toComplexSuper(getSourceAxiom(), secondOrSup);
 		}
 
 		Class<OWLClass> getNameExprType() {

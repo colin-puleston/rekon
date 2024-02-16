@@ -213,8 +213,6 @@ class PatternBuilder {
 
 					case OUT_OF_SCOPE:
 
-						conjunct.notifyComponentOutOfScope();
-
 						return false;
 
 				}
@@ -270,8 +268,6 @@ class PatternBuilder {
 					return checkCreateForRelation(source.asRelation());
 
 				case OUT_OF_SCOPE:
-
-					source.notifyComponentOutOfScope();
 
 					return null;
 			}

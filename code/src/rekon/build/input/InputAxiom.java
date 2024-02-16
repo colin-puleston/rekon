@@ -28,6 +28,4 @@ package rekon.build.input;
  * @author Colin Puleston
  */
 public interface InputAxiom {
-
-	void notifyAxiomOutOfScope();
 }

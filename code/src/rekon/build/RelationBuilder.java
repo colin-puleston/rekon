@@ -136,8 +136,6 @@ class RelationBuilder {
 
 			case OUT_OF_SCOPE:
 
-				source.notifyComponentOutOfScope();
-
 				return null;
 		}
 

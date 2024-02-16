@@ -48,37 +48,47 @@ class Logger {
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 
 		logSeparatorLine();
-		logOutOfScopeWarningLine("Axiom types");
+		logIgnoringOutOfScopeWarningLine("Axiom Types");
 
 		for (AxiomType<?> axType : outOfScopeTypes) {
 
-			logLine("AXIOM-TYPE: " + axType);
+			logLine("AXIOM TYPE: " + axType);
 		}
 
 		logSeparatorLine();
 		logSeparatorLine();
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom) {
+	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject... outOfScopeExprs) {
 
-		logOutOfScopeWarningLine("Axiom");
+		logOutOfScopeAxiom(axiom, Arrays.asList(outOfScopeExprs));
+	}
+
+	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
+
+		logIgnoringOutOfScopeWarningLine("Axiom/Expression(s)");
 		logLine("AXIOM: " + axiom);
 
-		logSeparatorLine();
+		for (OWLObject e : outOfScopeExprs) {
+
+			logLine("EXPRESSION: " + e);
+		}
+
 		logSeparatorLine();
 	}
 
 	void logOutOfScopeExpression(OWLObject expr) {
 
-		logOutOfScopeWarningLine("Expression");
+		logIgnoringOutOfScopeWarningLine("Expression");
 		logLine("EXPRESSION: " + expr);
+		logLine("No results returned!");
 
 		logSeparatorLine();
 	}
 
-	private void logOutOfScopeWarningLine(String entity) {
+	private void logIgnoringOutOfScopeWarningLine(String things) {
 
-		logWarningLine(entity + " out-of-scope...");
+		logWarningLine("Ignoring out-of-scope " + things + "...");
 	}
 
 	private void logSeparatorLine() {

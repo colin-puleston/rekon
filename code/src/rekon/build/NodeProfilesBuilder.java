@@ -41,17 +41,13 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		private Map<NodeX, List<Relation>> relationsByNode
 							= new HashMap<NodeX, List<Relation>>();
 
-		void checkAddRelation(InputAxiom axiom, NodeX node, InputRelation relSource) {
+		void checkAddRelation(NodeX node, InputRelation relSource) {
 
 			Relation rel = components.toRelation(relSource);
 
 			if (rel != null) {
 
 				resolveRelations(node).add(rel);
-			}
-			else {
-
-				axiom.notifyAxiomOutOfScope();
 			}
 		}
 
@@ -112,18 +108,16 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 				case DISJUNCTION:
 
-					checkCreateDisjunctionProfile(ax, sub, sup.asDisjuncts());
+					checkCreateDisjunctionProfile(sub, sup.asDisjuncts());
 					break;
 
 				case RELATION:
 
-					ppBuilders.checkAddRelation(ax, sub, sup.asRelation());
+					ppBuilders.checkAddRelation(sub, sup.asRelation());
 					break;
 
 				case OUT_OF_SCOPE:
 
-					sup.notifyComponentOutOfScope();
-					ax.notifyAxiomOutOfScope();
 					break;
 			}
 		}
@@ -137,14 +131,13 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 		for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
 
-			ppBuilders.checkAddRelation(ax, ax.getIndividual(), ax.getRelation());
+			ppBuilders.checkAddRelation(ax.getIndividual(), ax.getRelation());
 		}
 
 		ppBuilders.createAllProfiles(names.getIndividualNodes());
 	}
 
 	private void checkCreateDisjunctionProfile(
-						InputClassSubComplexSuper ax,
 						ClassNode sub,
 						Collection<InputNode> supDisjuncts) {
 
@@ -153,10 +146,6 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		if (djs != null) {
 
 			addProfileDisjunction(sub, djs);
-		}
-		else {
-
-			ax.notifyAxiomOutOfScope();
 		}
 	}
 }

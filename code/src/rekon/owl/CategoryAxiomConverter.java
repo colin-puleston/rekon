@@ -51,11 +51,6 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 			return getClass().getSimpleName() + "[" + source + "]";
 		}
 
-		public void notifyAxiomOutOfScope() {
-
-			logOutOfScopeAxiom(source);
-		}
-
 		ConvertedAxiom(OWLAxiom source) {
 
 			this.source = source;
@@ -159,6 +154,11 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 			secondOrSup = sup;
 		}
 
+		OWLAxiom getSourceAxiom() {
+
+			return source;
+		}
+
 		N firstOrSubAsName() {
 
 			return asName(firstOrSub);
@@ -236,25 +236,11 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject... outOfScopeExprs) {
 
-		logOutOfScopeAxiom(axiom, Arrays.asList(outOfScopeExprs));
+		Logger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExprs);
 	}
 
-	void logOutOfScopeAxiom(
-			OWLAxiom axiom,
-			Collection<? extends OWLObject> outOfScopeExprs) {
+	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
 
-		Logger logger = Logger.SINGLETON;
-
-		for (OWLObject e : outOfScopeExprs) {
-
-			logger.logOutOfScopeExpression(e);
-		}
-
-		logger.logOutOfScopeAxiom(axiom);
-	}
-
-	private void logOutOfScopeAxiom(OWLAxiom axiom) {
-
-		logOutOfScopeAxiom(axiom, Collections.emptySet());
+		Logger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExprs);
 	}
 }

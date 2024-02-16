@@ -30,6 +30,4 @@ package rekon.build.input;
 public interface InputExpression {
 
 	Object getSourceObject();
-
-	void notifyComponentOutOfScope();
 }

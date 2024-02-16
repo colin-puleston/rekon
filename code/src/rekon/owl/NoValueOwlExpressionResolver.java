@@ -15,10 +15,10 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR E PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OUT_OF_SCOPEWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OUT_OF_SCOPE DEALINGS IN
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
@@ -104,18 +104,6 @@ class NoValueOwlExpressionResolver {
 		return noValueAllRestriction(expr) ? createForNoValue(expr.getProperty()) : null;
 	}
 
-	private boolean noValueAllRestriction(OWLObjectAllValuesFrom expr) {
-
-		OWLClassExpression f = expr.getFiller();
-
-		if (f instanceof OWLObjectUnionOf) {
-
-			return ((OWLObjectUnionOf)f).getOperands().isEmpty();
-		}
-
-		return f.equals(owlNothing);
-	}
-
 	private boolean noValueComplementedSomeRestriction(OWLObjectSomeValuesFrom expr) {
 
 		OWLClassExpression f = expr.getFiller();
@@ -126,6 +114,18 @@ class NoValueOwlExpressionResolver {
 		}
 
 		return f.equals(owlThing);
+	}
+
+	private boolean noValueAllRestriction(OWLObjectAllValuesFrom expr) {
+
+		OWLClassExpression f = expr.getFiller();
+
+		if (f instanceof OWLObjectUnionOf) {
+
+			return ((OWLObjectUnionOf)f).getOperands().isEmpty();
+		}
+
+		return f.equals(owlNothing);
 	}
 
 	private OWLRestriction createForNoValue(OWLObjectPropertyExpression prop) {

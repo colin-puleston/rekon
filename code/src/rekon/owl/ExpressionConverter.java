@@ -15,10 +15,10 @@
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR E PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OUT_OF_SCOPEWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OUT_OF_SCOPE DEALINGS IN
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
 
@@ -45,13 +45,16 @@ class ExpressionConverter {
 
 	private abstract class ConvertedExpression implements InputExpression {
 
-		private OWLClassExpression owlExpression;
+		private OWLAxiom owlAxiom;
+		private OWLClassExpression owlExpr;
+
+		private boolean outOfScopeLoggingEnabled = true;
 
 		public boolean equals(Object other) {
 
 			if (getClass() == other.getClass()) {
 
-				return owlExpression.equals(((ConvertedExpression)other).owlExpression);
+				return owlExpr.equals(((ConvertedExpression)other).owlExpr);
 			}
 
 			return false;
@@ -59,52 +62,77 @@ class ExpressionConverter {
 
 		public int hashCode() {
 
-			return owlExpression.hashCode();
+			return owlExpr.hashCode();
 		}
 
 		public String toString() {
 
-			return getClass().getSimpleName() + "[" + owlExpression + "]";
+			return getClass().getSimpleName() + "[" + owlExpr + "]";
 		}
 
 		public Object getSourceObject() {
 
-			return owlExpression;
+			return owlExpr;
 		}
 
-		public void notifyComponentOutOfScope() {
+		ConvertedExpression(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			Logger.SINGLETON.logOutOfScopeExpression(owlExpression);
+			this.owlAxiom = owlAxiom;
+			this.owlExpr = owlExpr;
 		}
 
-		ConvertedExpression(OWLClassExpression owlExpression) {
+		void resetOwlExpression(OWLClassExpression owlExpr) {
 
-			this.owlExpression = owlExpression;
-		}
-
-		void resetOwlExpression(OWLClassExpression owlExpression) {
-
-			this.owlExpression = owlExpression;
+			this.owlExpr = owlExpr;
 		}
 
 		OwlIndividuals asOwlIndividuals() {
 
-			return new OwlIndividuals(owlExpressionAs(OWLObjectOneOf.class));
+			return new OwlIndividuals(owlExprAs(OWLObjectOneOf.class));
 		}
 
-		OWLClassExpression getOwlExpression() {
+		OWLAxiom getOwlAxiom() {
 
-			return owlExpression;
+			return owlAxiom;
 		}
 
-		boolean owlExpressionType(Class<? extends OWLClassExpression> type) {
+		OWLClassExpression getOwlExpr() {
 
-			return type.isAssignableFrom(owlExpression.getClass());
+			return owlExpr;
 		}
 
-		<T extends OWLClassExpression>T owlExpressionAs(Class<T> type) {
+		boolean owlExprType(Class<? extends OWLClassExpression> type) {
 
-			return owlObjectAs(owlExpression, type);
+			return type.isAssignableFrom(owlExpr.getClass());
+		}
+
+		<T extends OWLClassExpression>T owlExprAs(Class<T> type) {
+
+			return owlObjectAs(owlExpr, type);
+		}
+
+		void checkLogOutOfScope() {
+
+			if (outOfScopeLoggingEnabled) {
+
+				Logger logger = Logger.SINGLETON;
+
+				if (owlAxiom != null) {
+
+					logger.logOutOfScopeAxiom(owlAxiom, owlExpr);
+				}
+				else {
+
+					logger.logOutOfScopeExpression(owlExpr);
+				}
+
+				outOfScopeLoggingEnabled = false;
+			}
+		}
+
+		void disableOutOfScopeLogging() {
+
+			outOfScopeLoggingEnabled = false;
 		}
 	}
 
@@ -112,12 +140,14 @@ class ExpressionConverter {
 
 		public InputRelationType getRelationType() {
 
-			OWLClassExpression owlExpr = getOwlExpression();
+			OWLClassExpression owlExpr = getOwlExpr();
 
 			if (owlExpr instanceof OWLRestriction) {
 
 				return getRelationType((OWLRestriction)owlExpr);
 			}
+
+			checkLogOutOfScope();
 
 			return InputRelationType.OUT_OF_SCOPE;
 		}
@@ -139,7 +169,7 @@ class ExpressionConverter {
 
 		public InputNode getNodeValue() {
 
-			return new ConvertedNode(resolveOwlFillerToClassExpression());
+			return new ConvertedNode(getOwlAxiom(), resolveOwlFillerToClassExpression());
 		}
 
 		public DataValue getDataValue() {
@@ -151,12 +181,12 @@ class ExpressionConverter {
 				return value;
 			}
 
-			throw new RuntimeException("Invalid data-value source: " + getOwlExpression());
+			throw new RuntimeException("Invalid data-value source: " + getOwlExpr());
 		}
 
-		ConvertedRelation(OWLClassExpression owlExpression) {
+		ConvertedRelation(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			super(noValueResolver.resolve(owlExpression));
+			super(owlAxiom, noValueResolver.resolve(owlExpr));
 		}
 
 		private InputRelationType getRelationType(OWLRestriction owlExpr) {
@@ -189,6 +219,8 @@ class ExpressionConverter {
 					}
 				}
 			}
+
+			checkLogOutOfScope();
 
 			return InputRelationType.OUT_OF_SCOPE;
 		}
@@ -227,7 +259,7 @@ class ExpressionConverter {
 
 		private OWLClassExpression resolveOwlFillerToClassExpression() {
 
-			if (owlExpressionType(OWLObjectHasValue.class)) {
+			if (owlExprType(OWLObjectHasValue.class)) {
 
 				return individualToClassExpression(owlFillerAs(OWLIndividual.class));
 			}
@@ -257,7 +289,7 @@ class ExpressionConverter {
 
 		private OWLRestriction getOwlRestriction() {
 
-			return owlExpressionAs(OWLRestriction.class);
+			return owlExprAs(OWLRestriction.class);
 		}
 	}
 
@@ -265,7 +297,7 @@ class ExpressionConverter {
 
 		public InputNodeType getNodeType() {
 
-			OWLClassExpression owlExpr = getOwlExpression();
+			OWLClassExpression owlExpr = getOwlExpr();
 
 			if (allowSimpleTypes()) {
 
@@ -280,6 +312,8 @@ class ExpressionConverter {
 
 						return InputNodeType.INDIVIDUAL;
 					}
+
+					checkLogOutOfScope();
 
 					return InputNodeType.OUT_OF_SCOPE;
 				}
@@ -298,17 +332,19 @@ class ExpressionConverter {
 				return InputNodeType.DISJUNCTION;
 			}
 
-			if (asRelationOrNull(owlExpr) != null) {
+			if (validRelationSource(owlExpr)) {
 
 				return InputNodeType.RELATION;
 			}
+
+			checkLogOutOfScope();
 
 			return InputNodeType.OUT_OF_SCOPE;
 		}
 
 		public ClassNode asClassNode() {
 
-			return names.get(owlExpressionAs(OWLClass.class));
+			return names.get(owlExprAs(OWLClass.class));
 		}
 
 		public IndividualNode asIndividualNode() {
@@ -318,31 +354,31 @@ class ExpressionConverter {
 
 		public Collection<InputNode> asConjuncts() {
 
-			return toNodes(owlExpressionAs(OWLObjectIntersectionOf.class).getOperands());
+			return toNodes(owlExprAs(OWLObjectIntersectionOf.class).getOperands());
 		}
 
 		public Collection<InputNode> asDisjuncts() {
 
-			return toNodes(owlExpressionAs(OWLObjectUnionOf.class).getOperands());
+			return toNodes(owlExprAs(OWLObjectUnionOf.class).getOperands());
 		}
 
 		public InputRelation asRelation() {
 
-			ConvertedRelation rel = asRelationOrNull(getOwlExpression());
+			ConvertedRelation rel = new ConvertedRelation(getOwlAxiom(), getOwlExpr());
 
-			if (rel != null) {
+			if (!rel.hasRelationType(InputRelationType.OUT_OF_SCOPE)) {
 
 				return rel;
 			}
 
-			throw new RuntimeException("Unexpected OWL-object type: " + getOwlExpression());
+			throw new RuntimeException("Unexpected OWL-object type: " + getOwlExpr());
 		}
 
-		ConvertedNode(OWLClassExpression owlExpression) {
+		ConvertedNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			super(owlExpression);
+			super(owlAxiom, owlExpr);
 
-			if (owlExpression instanceof OWLObjectOneOf) {
+			if (owlExpr instanceof OWLObjectOneOf) {
 
 				OwlIndividuals inds = asOwlIndividuals();
 
@@ -363,11 +399,13 @@ class ExpressionConverter {
 			return true;
 		}
 
-		private ConvertedRelation asRelationOrNull(OWLClassExpression owlExpr) {
+		private boolean validRelationSource(OWLClassExpression owlExpr) {
 
-			ConvertedRelation rel = new ConvertedRelation(owlExpr);
+			ConvertedRelation rel = new ConvertedRelation(null, owlExpr);
 
-			return rel.hasRelationType(InputRelationType.OUT_OF_SCOPE) ? null : rel;
+			rel.disableOutOfScopeLogging();
+
+			return !rel.hasRelationType(InputRelationType.OUT_OF_SCOPE);
 		}
 
 		private List<InputNode> toNodes(Set<? extends OWLClassExpression> owlExprs) {
@@ -376,7 +414,7 @@ class ExpressionConverter {
 
 			for (OWLClassExpression e : owlExprs) {
 
-				nodes.add(new ConvertedNode(e));
+				nodes.add(new ConvertedNode(getOwlAxiom(), e));
 			}
 
 			return nodes;
@@ -395,9 +433,9 @@ class ExpressionConverter {
 			return getNodeType().toComplexNodeType();
 		}
 
-		ConvertedComplexNode(OWLClassExpression owlExpression) {
+		ConvertedComplexNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			super(owlExpression);
+			super(owlAxiom, owlExpr);
 		}
 
 		boolean allowSimpleTypes() {
@@ -415,9 +453,9 @@ class ExpressionConverter {
 			return getComplexNodeType().toComplexSuperType();
 		}
 
-		ConvertedComplexSuper(OWLClassExpression owlExpression) {
+		ConvertedComplexSuper(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			super(owlExpression);
+			super(owlAxiom, owlExpr);
 		}
 
 		boolean allowConjunctions() {
@@ -434,24 +472,24 @@ class ExpressionConverter {
 		noValueResolver = new NoValueOwlExpressionResolver(factory);
 	}
 
-	InputNode toNode(OWLClassExpression owlExpression) {
+	InputNode toNode(OWLClassExpression owlExpr) {
 
-		return new ConvertedNode(owlExpression);
+		return new ConvertedNode(null, owlExpr);
 	}
 
-	InputComplexNode toComplexNode(OWLClassExpression owlExpression) {
+	InputComplexNode toComplexNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-		return new ConvertedComplexNode(owlExpression);
+		return new ConvertedComplexNode(owlAxiom, owlExpr);
 	}
 
-	InputComplexSuper toComplexSuper(OWLClassExpression owlExpression) {
+	InputComplexSuper toComplexSuper(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-		return new ConvertedComplexSuper(owlExpression);
+		return new ConvertedComplexSuper(owlAxiom, owlExpr);
 	}
 
-	InputRelation toRelation(OWLClassExpression owlExpression) {
+	InputRelation toRelation(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-		return new ConvertedRelation(owlExpression);
+		return new ConvertedRelation(owlAxiom, owlExpr);
 	}
 
 	private <O>O owlObjectAs(OWLObject obj, Class<O> type) {
