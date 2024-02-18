@@ -123,7 +123,7 @@ class ExpressionConverter {
 				}
 				else {
 
-					logger.logOutOfScopeExpression(owlExpr);
+					logger.logOutOfScopeQueryExpression(owlExpr);
 				}
 
 				outOfScopeLoggingEnabled = false;
@@ -186,7 +186,7 @@ class ExpressionConverter {
 
 		ConvertedRelation(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			super(owlAxiom, noValueResolver.resolve(owlExpr));
+			super(owlAxiom, resolveRelationExpression(owlAxiom, owlExpr));
 		}
 
 		private InputRelationType getRelationType(OWLRestriction owlExpr) {
@@ -490,6 +490,18 @@ class ExpressionConverter {
 	InputRelation toRelation(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
 		return new ConvertedRelation(owlAxiom, owlExpr);
+	}
+
+	private OWLClassExpression resolveRelationExpression(
+									OWLAxiom owlAxiom,
+									OWLClassExpression owlExpr) {
+
+		if (owlAxiom != null) {
+
+			return noValueResolver.resolveAxiomExpression(owlAxiom, owlExpr);
+		}
+
+		return noValueResolver.resolveQueryExpression(owlExpr);
 	}
 
 	private <O>O owlObjectAs(OWLObject obj, Class<O> type) {

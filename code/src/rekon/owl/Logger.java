@@ -48,7 +48,7 @@ class Logger {
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 
 		logSeparatorLine();
-		logIgnoringOutOfScopeWarningLine("Axiom Types");
+		logIgnoringOutOfScopeWarningLine("axiom types");
 
 		for (AxiomType<?> axType : outOfScopeTypes) {
 
@@ -66,29 +66,80 @@ class Logger {
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
 
-		logIgnoringOutOfScopeWarningLine("Axiom/Expression(s)");
+		logIgnoringOutOfScopeWarningLine("axiom");
 		logLine("AXIOM: " + axiom);
 
 		for (OWLObject e : outOfScopeExprs) {
 
-			logLine("EXPRESSION: " + e);
+			logLine("OUT-OF-SCOPE EXPRESSION: " + e);
 		}
 
 		logSeparatorLine();
 	}
 
-	void logOutOfScopeExpression(OWLObject expr) {
+	void logOutOfScopeQueryExpression(OWLObject expr) {
 
-		logIgnoringOutOfScopeWarningLine("Expression");
+		logOutOfScopeWarningLine("Cannot handle", "query");
 		logLine("EXPRESSION: " + expr);
 		logLine("No results returned!");
 
 		logSeparatorLine();
 	}
 
-	private void logIgnoringOutOfScopeWarningLine(String things) {
+	void logNoValueAxiomExpressionReplacement(
+				OWLAxiom axiom,
+				OWLClassExpression replacing,
+				OWLClassExpression replacement) {
 
-		logWarningLine("Ignoring out-of-scope " + things + "...");
+		logNoValueReplacementWarningLine("axiom/expression");
+		logLine("AXIOM: " + axiom);
+		logNoValueReplacementInfo(replacing, replacement);
+	}
+
+	void logNoValueQueryExpressionReplacement(
+				OWLClassExpression replacing,
+				OWLClassExpression replacement) {
+
+		logNoValueReplacementWarningLine("query");
+		logNoValueReplacementInfo(replacing, replacement);
+
+		logSeparatorLine();
+	}
+
+	private void logNoValueExpressionReplacement(
+					OWLAxiom axiom,
+					OWLClassExpression replacing,
+					OWLClassExpression replacement) {
+
+		logNoValueReplacementWarningLine("axiom/expression");
+		logLine("AXIOM: " + axiom);
+		logNoValueReplacementInfo(replacing, replacement);
+
+		logSeparatorLine();
+	}
+
+	private void logNoValueReplacementInfo(
+					OWLClassExpression replacing,
+					OWLClassExpression replacement) {
+
+		logLine("REPLACING: " + replacing);
+		logLine("REPLACEMENT: " + replacement);
+		logLine("[CAUTION: Weaker interpretation. No consistency checks]");
+	}
+
+	private void logNoValueReplacementWarningLine(String thing) {
+
+		logOutOfScopeWarningLine("Replacing", "\"No Value\" " + thing);
+	}
+
+	private void logIgnoringOutOfScopeWarningLine(String thing) {
+
+		logOutOfScopeWarningLine("Ignoring", thing);
+	}
+
+	private void logOutOfScopeWarningLine(String status, String thing) {
+
+		logWarningLine(status + " out-of-scope " + thing + "...");
 	}
 
 	private void logSeparatorLine() {

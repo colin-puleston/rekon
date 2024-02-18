@@ -60,11 +60,32 @@ class NoValueOwlExpressionResolver {
 		rekonNoValue = getNoValueClass(factory);
 	}
 
-	OWLClassExpression resolve(OWLClassExpression expr) {
+	OWLClassExpression resolveAxiomExpression(OWLAxiom axiom, OWLClassExpression expr) {
 
-		OWLClassExpression resolvedExpr = checkCreateForNoValue(expr);
+		OWLClassExpression newExpr = checkCreateForNoValue(expr);
 
-		return resolvedExpr != null ? resolvedExpr : expr;
+		if (newExpr == null) {
+
+			return expr;
+		}
+
+		Logger.SINGLETON.logNoValueAxiomExpressionReplacement(axiom, expr, newExpr);
+
+		return newExpr;
+	}
+
+	OWLClassExpression resolveQueryExpression(OWLClassExpression expr) {
+
+		OWLClassExpression newExpr = checkCreateForNoValue(expr);
+
+		if (newExpr == null) {
+
+			return expr;
+		}
+
+		Logger.SINGLETON.logNoValueQueryExpressionReplacement(expr, newExpr);
+
+		return newExpr;
 	}
 
 	private OWLClassExpression checkCreateForNoValue(OWLClassExpression expr) {
