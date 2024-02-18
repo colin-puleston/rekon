@@ -90,6 +90,28 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
+	private class ConvertedIndividualComplexType
+						extends ConvertedIndividualAttribute
+						implements InputIndividualComplexType {
+
+		private InputComplexSuper type;
+
+		public InputComplexSuper getType() {
+
+			return type;
+		}
+
+		ConvertedIndividualComplexType(
+			OWLAxiom source,
+			IndividualNode individual,
+			InputComplexSuper type) {
+
+			super(source, individual);
+
+			this.type = type;
+		}
+	}
+
 	private class ConvertedIndividualRelation
 						extends ConvertedIndividualAttribute
 						implements InputIndividualRelation {
@@ -142,6 +164,31 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		Collection<? extends OWLAxiom> resolveAxiomOfType(OWLSameIndividualAxiom axiom) {
 
 			return axiom.asPairwiseAxioms();
+		}
+	}
+
+	private class IndividualTypeSplitter
+					extends
+						SubSuperSplitter<OWLClassAssertionAxiom, OWLIndividual> {
+
+		Class<OWLClassAssertionAxiom> getAxiomType() {
+
+			return OWLClassAssertionAxiom.class;
+		}
+
+		OWLClassExpression getSuper(OWLClassAssertionAxiom axiom) {
+
+			return axiom.getClassExpression();
+		}
+
+		OWLIndividual getSub(OWLClassAssertionAxiom axiom) {
+
+			return axiom.getIndividual();
+		}
+
+		OWLAxiom createComponentAxiom(OWLClassExpression sup, OWLIndividual sub) {
+
+			return factory.getOWLClassAssertionAxiom(sup, sub);
 		}
 	}
 
@@ -272,23 +319,23 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class IndividualRelationTypeConverter
+	private class IndividualComplexTypeConverter
 						extends
-							IndividualTypeConverter<InputIndividualRelation> {
+							IndividualTypeConverter<InputIndividualComplexType> {
 
 		boolean convertsNamedTypes() {
 
 			return false;
 		}
 
-		InputIndividualRelation createInputAxiom(
-									IndividualNode node,
-									OWLClassExpression typeExpr,
-									OWLClassAssertionAxiom source) {
+		InputIndividualComplexType createInputAxiom(
+										IndividualNode node,
+										OWLClassExpression typeExpr,
+										OWLClassAssertionAxiom source) {
 
-			InputRelation rel = expressions.toRelation(source, typeExpr);
+			InputComplexSuper type = expressions.toComplexSuper(source, typeExpr);
 
-			return new ConvertedIndividualRelation(source, node, rel);
+			return new ConvertedIndividualComplexType(source, node, type);
 		}
 	}
 
@@ -354,9 +401,12 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 		super(parentConverter);
 
+		new IndividualEquivalenceSplitter();
+		new IndividualTypeSplitter();
+
 		new IndividualEquivalenceConverter();
 		new IndividualClassTypeConverter();
-		new IndividualRelationTypeConverter();
+		new IndividualComplexTypeConverter();
 		new IndividualObjectRelationConverter();
 		new IndividualDataRelationConverter();
 	}
@@ -371,11 +421,15 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		return getInputAxioms(IndividualClassTypeConverter.class);
 	}
 
+	Collection<InputIndividualComplexType> getIndividualComplexTypes() {
+
+		return getInputAxioms(IndividualComplexTypeConverter.class);
+	}
+
 	Collection<InputIndividualRelation> getIndividualRelations() {
 
 		List<InputIndividualRelation> all = new ArrayList<InputIndividualRelation>();
 
-		all.addAll(getInputAxioms(IndividualRelationTypeConverter.class));
 		all.addAll(getInputAxioms(IndividualObjectRelationConverter.class));
 		all.addAll(getInputAxioms(IndividualDataRelationConverter.class));
 

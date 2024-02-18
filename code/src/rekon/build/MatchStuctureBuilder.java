@@ -46,7 +46,7 @@ class MatchStuctureBuilder {
 		matchStructures.checkAddProfilePattern(node, relations);
 	}
 
-	void addProfileDisjunction(ClassNode node, List<Pattern> disjuncts) {
+	void addProfileDisjunction(NodeX node, List<Pattern> disjuncts) {
 
 		addDisjunction(node, disjuncts, false);
 	}
@@ -87,7 +87,7 @@ class MatchStuctureBuilder {
 		return nodeDjs;
 	}
 
-	private void addDisjunction(ClassNode node, List<Pattern> disjuncts, boolean definition) {
+	private void addDisjunction(NodeX node, List<Pattern> disjuncts, boolean definition) {
 
 		List<NodeX> nodeDjs = resolveDisjunctionToNodes(disjuncts);
 

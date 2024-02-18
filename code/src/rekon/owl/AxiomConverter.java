@@ -133,6 +133,11 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return individualAxioms.getIndividualClassTypes();
 	}
 
+	public Collection<InputIndividualComplexType> getIndividualComplexTypes() {
+
+		return individualAxioms.getIndividualComplexTypes();
+	}
+
 	public Collection<InputIndividualRelation> getIndividualRelations() {
 
 		return individualAxioms.getIndividualRelations();

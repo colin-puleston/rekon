@@ -34,6 +34,8 @@ import rekon.build.input.*;
  */
 class NodeProfilesBuilder extends MatchStuctureBuilder {
 
+	private OntologyNames names;
+	private InputAxioms axioms;
 	private ComponentBuilder components;
 
 	private class ProfilePatternsBuilder {
@@ -81,6 +83,124 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		}
 	}
 
+	private abstract class TypeNodesProfileCreator<A extends InputAxiom> {
+
+		TypeNodesProfileCreator() {
+
+			ProfilePatternsBuilder ppBuilder = new ProfilePatternsBuilder();
+
+			addRelations(ppBuilder);
+
+			ppBuilder.createAllProfiles(getTypeNodes());
+		}
+
+		void addRelations(ProfilePatternsBuilder ppBuilder) {
+
+			for (A ax : getAxioms()) {
+
+				NodeX sub = getSub(ax);
+				InputComplexSuper sup = getSuper(ax);
+
+				switch (sup.getComplexSuperType()) {
+
+					case DISJUNCTION:
+
+						checkCreateDisjunctionProfile(sub, sup.asDisjuncts());
+						break;
+
+					case RELATION:
+
+						ppBuilder.checkAddRelation(sub, sup.asRelation());
+						break;
+
+					case OUT_OF_SCOPE:
+
+						break;
+				}
+			}
+		}
+
+		abstract Collection<A> getAxioms();
+
+		abstract NodeX getSub(A axiom);
+
+		abstract InputComplexSuper getSuper(A axiom);
+
+		abstract Collection<? extends NodeX> getTypeNodes();
+
+		private void checkCreateDisjunctionProfile(
+						NodeX sub,
+						Collection<InputNode> supDisjuncts) {
+
+			List<Pattern> djs = components.toPatternDisjunction(supDisjuncts);
+
+			if (djs != null) {
+
+				addProfileDisjunction(sub, djs);
+			}
+		}
+	}
+
+	private class ClassNodesProfileCreator
+						extends
+							TypeNodesProfileCreator<InputClassSubComplexSuper> {
+
+		Collection<InputClassSubComplexSuper> getAxioms() {
+
+			return axioms.getClassSubComplexSupers();
+		}
+
+		NodeX getSub(InputClassSubComplexSuper axiom) {
+
+			return axiom.getSub();
+		}
+
+		InputComplexSuper getSuper(InputClassSubComplexSuper axiom) {
+
+			return axiom.getSuper();
+		}
+
+		Collection<? extends NodeX> getTypeNodes() {
+
+			return names.getClassNodes();
+		}
+	}
+
+	private class IndividualNodesProfileCreator
+						extends
+							TypeNodesProfileCreator<InputIndividualComplexType> {
+
+		void addRelations(ProfilePatternsBuilder ppBuilder) {
+
+			super.addRelations(ppBuilder);
+
+			for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
+
+				ppBuilder.checkAddRelation(ax.getIndividual(), ax.getRelation());
+			}
+		}
+
+		Collection<InputIndividualComplexType> getAxioms() {
+
+			return axioms.getIndividualComplexTypes();
+		}
+
+		NodeX getSub(InputIndividualComplexType axiom) {
+
+			return axiom.getIndividual();
+		}
+
+		InputComplexSuper getSuper(InputIndividualComplexType axiom) {
+
+			return axiom.getType();
+		}
+
+		Collection<? extends NodeX> getTypeNodes() {
+
+			return names.getIndividualNodes();
+		}
+	}
+
 	NodeProfilesBuilder(
 		MatchStructures matchStructures,
 		OntologyNames names,
@@ -89,63 +209,11 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 		super(matchStructures);
 
+		this.names = names;
+		this.axioms = axioms;
 		this.components = components;
 
-		createClassProfiles(names, axioms);
-		createIndividualProfiles(names, axioms);
-	}
-
-	private void createClassProfiles(OntologyNames names, InputAxioms axioms) {
-
-		ProfilePatternsBuilder ppBuilders = new ProfilePatternsBuilder();
-
-		for (InputClassSubComplexSuper ax : axioms.getClassSubComplexSupers()) {
-
-			ClassNode sub = ax.getSub();
-			InputComplexSuper sup = ax.getSuper();
-
-			switch (sup.getComplexSuperType()) {
-
-				case DISJUNCTION:
-
-					checkCreateDisjunctionProfile(sub, sup.asDisjuncts());
-					break;
-
-				case RELATION:
-
-					ppBuilders.checkAddRelation(sub, sup.asRelation());
-					break;
-
-				case OUT_OF_SCOPE:
-
-					break;
-			}
-		}
-
-		ppBuilders.createAllProfiles(names.getClassNodes());
-	}
-
-	private void createIndividualProfiles(OntologyNames names, InputAxioms axioms) {
-
-		ProfilePatternsBuilder ppBuilders = new ProfilePatternsBuilder();
-
-		for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
-
-			ppBuilders.checkAddRelation(ax.getIndividual(), ax.getRelation());
-		}
-
-		ppBuilders.createAllProfiles(names.getIndividualNodes());
-	}
-
-	private void checkCreateDisjunctionProfile(
-						ClassNode sub,
-						Collection<InputNode> supDisjuncts) {
-
-		List<Pattern> djs = components.toPatternDisjunction(supDisjuncts);
-
-		if (djs != null) {
-
-			addProfileDisjunction(sub, djs);
-		}
+		new ClassNodesProfileCreator();
+		new IndividualNodesProfileCreator();
 	}
 }

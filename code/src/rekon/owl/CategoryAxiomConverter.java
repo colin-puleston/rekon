@@ -208,6 +208,45 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		}
 	}
 
+	abstract class SubSuperSplitter
+						<A extends OWLAxiom, SB extends OWLObject>
+						extends TypeAxiomResolver<A> {
+
+		Collection<? extends OWLAxiom> resolveAxiomOfType(A axiom) {
+
+			OWLClassExpression sup = getSuper(axiom);
+
+			if (sup instanceof OWLObjectIntersectionOf) {
+
+				SB sub = getSub(axiom);
+
+				return createComponentAxioms((OWLObjectIntersectionOf)sup, sub);
+			}
+
+			return Collections.singleton(axiom);
+		}
+
+		abstract OWLClassExpression getSuper(A axiom);
+
+		abstract SB getSub(A axiom);
+
+		abstract OWLAxiom createComponentAxiom(OWLClassExpression sup, SB sub);
+
+		private Collection<OWLAxiom> createComponentAxioms(
+										OWLObjectIntersectionOf sups,
+										SB sub) {
+
+			List<OWLAxiom> components = new ArrayList<OWLAxiom>();
+
+			for (OWLClassExpression sup : sups.getOperands()) {
+
+				components.add(createComponentAxiom(sup, sub));
+			}
+
+			return components;
+		}
+	}
+
 	CategoryAxiomConverter(AxiomConverter parentConverter) {
 
 		this.parentConverter = parentConverter;

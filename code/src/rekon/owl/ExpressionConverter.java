@@ -487,7 +487,7 @@ class ExpressionConverter {
 		return new ConvertedComplexSuper(owlAxiom, owlExpr);
 	}
 
-	InputRelation toRelation(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
+	InputRelation toRelation(OWLAxiom owlAxiom, OWLRestriction owlExpr) {
 
 		return new ConvertedRelation(owlAxiom, owlExpr);
 	}

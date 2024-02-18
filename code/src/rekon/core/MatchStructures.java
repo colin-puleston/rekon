@@ -93,7 +93,7 @@ public class MatchStructures {
 	}
 
 	public DisjunctionMatcher addDisjunction(
-									ClassNode node,
+									NodeX node,
 									Collection<? extends NodeX> disjuncts,
 									boolean definition) {
 

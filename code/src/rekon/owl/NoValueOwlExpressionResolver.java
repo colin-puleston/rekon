@@ -88,7 +88,7 @@ class NoValueOwlExpressionResolver {
 		return newExpr;
 	}
 
-	private OWLClassExpression checkCreateForNoValue(OWLClassExpression expr) {
+	private OWLRestriction checkCreateForNoValue(OWLClassExpression expr) {
 
 		if (expr instanceof OWLObjectComplementOf) {
 
@@ -103,7 +103,7 @@ class NoValueOwlExpressionResolver {
 		return null;
 	}
 
-	private OWLClassExpression checkCreateForNoValue(OWLObjectComplementOf expr) {
+	private OWLRestriction checkCreateForNoValue(OWLObjectComplementOf expr) {
 
 		OWLClassExpression comp = expr.getOperand();
 
@@ -120,7 +120,7 @@ class NoValueOwlExpressionResolver {
 		return null;
 	}
 
-	private OWLClassExpression checkCreateForNoValue(OWLObjectAllValuesFrom expr) {
+	private OWLRestriction checkCreateForNoValue(OWLObjectAllValuesFrom expr) {
 
 		return noValueAllRestriction(expr) ? createForNoValue(expr.getProperty()) : null;
 	}

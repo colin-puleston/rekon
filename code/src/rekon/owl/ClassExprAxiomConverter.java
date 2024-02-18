@@ -165,39 +165,28 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class ClassExprSubSuperSplitter extends TypeAxiomResolver<OWLSubClassOfAxiom> {
+	private class ClassExprSubSuperSplitter
+					extends
+						SubSuperSplitter<OWLSubClassOfAxiom, OWLClassExpression> {
 
 		Class<OWLSubClassOfAxiom> getAxiomType() {
 
 			return OWLSubClassOfAxiom.class;
 		}
 
-		Collection<? extends OWLAxiom> resolveAxiomOfType(OWLSubClassOfAxiom axiom) {
+		OWLClassExpression getSuper(OWLSubClassOfAxiom axiom) {
 
-			OWLClassExpression sup = axiom.getSuperClass();
-
-			if (sup instanceof OWLObjectIntersectionOf) {
-
-				OWLClassExpression sub = axiom.getSubClass();
-
-				return createComponentAxioms((OWLObjectIntersectionOf)sup, sub);
-			}
-
-			return Collections.singleton(axiom);
+			return axiom.getSuperClass();
 		}
 
-		private Collection<OWLAxiom> createComponentAxioms(
-										OWLObjectIntersectionOf sup,
-										OWLClassExpression sub) {
+		OWLClassExpression getSub(OWLSubClassOfAxiom axiom) {
 
-			List<OWLAxiom> components = new ArrayList<OWLAxiom>();
+			return axiom.getSubClass();
+		}
 
-			for (OWLClassExpression compSup : sup.getOperands()) {
+		OWLAxiom createComponentAxiom(OWLClassExpression sup, OWLClassExpression sub) {
 
-				components.add(factory.getOWLSubClassOfAxiom(sub, compSup));
-			}
-
-			return components;
+			return factory.getOWLSubClassOfAxiom(sup, sub);
 		}
 	}
 
