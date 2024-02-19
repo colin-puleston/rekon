@@ -122,7 +122,7 @@ class MappedEntityRetriever {
 
 		boolean insertedEntity(OWLClass entity) {
 
-			return NoValueOwlExpressionResolver.isNoValueClass(entity);
+			return OwlRestrictionResolver.isNoValueClass(entity);
 		}
 
 		Node<OWLClass> createGroupNode(Set<OWLClass> entities) {

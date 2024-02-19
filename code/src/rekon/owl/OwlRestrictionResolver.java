@@ -29,7 +29,7 @@ import org.semanticweb.owlapi.model.*;
 /**
  * @author Colin Puleston
  */
-class NoValueOwlExpressionResolver {
+class OwlRestrictionResolver {
 
 	static private final IRI REKON_NO_VALUE_IRI = IRI.create("urn:rekon:RekonNoValue");
 
@@ -50,7 +50,89 @@ class NoValueOwlExpressionResolver {
 
 	private OWLClass rekonNoValue;
 
-	NoValueOwlExpressionResolver(OWLDataFactory factory) {
+	private ExpressionResolver expressionResolver = new ExpressionResolver();
+	private RestrictionResolver restrictionResolver = new RestrictionResolver();
+
+	private abstract class Resolver<E extends OWLClassExpression> {
+
+		E resolve(OWLAxiom axiom, E expr) {
+
+			OWLRestriction newExpr = checkResolveToRestriction(expr);
+
+			if (newExpr != null) {
+
+				logNoValueReplacement(axiom, expr, newExpr);
+
+				return toTypeExpression(newExpr);
+			}
+
+			return expr;
+		}
+
+		abstract OWLRestriction checkResolveToRestriction(E expr);
+
+		abstract E toTypeExpression(OWLRestriction expr);
+
+		private void logNoValueReplacement(
+						OWLAxiom axiom,
+						OWLClassExpression replaced,
+						OWLRestriction replacement) {
+
+			Logger logger = Logger.SINGLETON;
+
+			if (axiom != null) {
+
+				logger.logNoValueAxiomExpressionReplacement(axiom, replaced, replacement);
+			}
+			else {
+
+				logger.logNoValueQueryExpressionReplacement(replaced, replacement);
+			}
+		}
+	}
+
+	private class ExpressionResolver extends Resolver<OWLClassExpression> {
+
+		OWLRestriction checkResolveToRestriction(OWLClassExpression expr) {
+
+			if (expr instanceof OWLObjectComplementOf) {
+
+				return checkCreateForNoValue((OWLObjectComplementOf)expr);
+			}
+
+			if (expr instanceof OWLObjectAllValuesFrom) {
+
+				return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
+			}
+
+			return null;
+		}
+
+		OWLClassExpression toTypeExpression(OWLRestriction expr) {
+
+			return expr;
+		}
+	}
+
+	private class RestrictionResolver extends Resolver<OWLRestriction> {
+
+		OWLRestriction checkResolveToRestriction(OWLRestriction expr) {
+
+			if (expr instanceof OWLObjectAllValuesFrom) {
+
+				return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
+			}
+
+			return null;
+		}
+
+		OWLRestriction toTypeExpression(OWLRestriction expr) {
+
+			return expr;
+		}
+	}
+
+	OwlRestrictionResolver(OWLDataFactory factory) {
 
 		this.factory = factory;
 
@@ -60,47 +142,14 @@ class NoValueOwlExpressionResolver {
 		rekonNoValue = getNoValueClass(factory);
 	}
 
-	OWLClassExpression resolveAxiomExpression(OWLAxiom axiom, OWLClassExpression expr) {
+	OWLClassExpression resolve(OWLAxiom axiom, OWLClassExpression expr) {
 
-		OWLClassExpression newExpr = checkCreateForNoValue(expr);
-
-		if (newExpr == null) {
-
-			return expr;
-		}
-
-		Logger.SINGLETON.logNoValueAxiomExpressionReplacement(axiom, expr, newExpr);
-
-		return newExpr;
+		return expressionResolver.resolve(axiom, expr);
 	}
 
-	OWLClassExpression resolveQueryExpression(OWLClassExpression expr) {
+	OWLRestriction resolve(OWLAxiom axiom, OWLRestriction expr) {
 
-		OWLClassExpression newExpr = checkCreateForNoValue(expr);
-
-		if (newExpr == null) {
-
-			return expr;
-		}
-
-		Logger.SINGLETON.logNoValueQueryExpressionReplacement(expr, newExpr);
-
-		return newExpr;
-	}
-
-	private OWLRestriction checkCreateForNoValue(OWLClassExpression expr) {
-
-		if (expr instanceof OWLObjectComplementOf) {
-
-			return checkCreateForNoValue((OWLObjectComplementOf)expr);
-		}
-
-		if (expr instanceof OWLObjectAllValuesFrom) {
-
-			return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
-		}
-
-		return null;
+		return restrictionResolver.resolve(axiom, expr);
 	}
 
 	private OWLRestriction checkCreateForNoValue(OWLObjectComplementOf expr) {

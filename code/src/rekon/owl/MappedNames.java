@@ -241,7 +241,7 @@ class MappedNames extends OntologyNames {
 
 		private OWLClass getNoValueClass(OWLDataFactory factory) {
 
-			return NoValueOwlExpressionResolver.getNoValueClass(factory);
+			return OwlRestrictionResolver.getNoValueClass(factory);
 		}
 	}
 

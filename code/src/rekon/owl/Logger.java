@@ -88,41 +88,41 @@ class Logger {
 
 	void logNoValueAxiomExpressionReplacement(
 				OWLAxiom axiom,
-				OWLClassExpression replacing,
+				OWLClassExpression replaced,
 				OWLClassExpression replacement) {
 
 		logNoValueReplacementWarningLine("axiom/expression");
 		logLine("AXIOM: " + axiom);
-		logNoValueReplacementInfo(replacing, replacement);
+		logNoValueReplacementInfo(replaced, replacement);
 	}
 
 	void logNoValueQueryExpressionReplacement(
-				OWLClassExpression replacing,
+				OWLClassExpression replaced,
 				OWLClassExpression replacement) {
 
 		logNoValueReplacementWarningLine("query");
-		logNoValueReplacementInfo(replacing, replacement);
+		logNoValueReplacementInfo(replaced, replacement);
 
 		logSeparatorLine();
 	}
 
 	private void logNoValueExpressionReplacement(
 					OWLAxiom axiom,
-					OWLClassExpression replacing,
+					OWLClassExpression replaced,
 					OWLClassExpression replacement) {
 
 		logNoValueReplacementWarningLine("axiom/expression");
 		logLine("AXIOM: " + axiom);
-		logNoValueReplacementInfo(replacing, replacement);
+		logNoValueReplacementInfo(replaced, replacement);
 
 		logSeparatorLine();
 	}
 
 	private void logNoValueReplacementInfo(
-					OWLClassExpression replacing,
+					OWLClassExpression replaced,
 					OWLClassExpression replacement) {
 
-		logLine("REPLACING: " + replacing);
+		logLine("REPLACING: " + replaced);
 		logLine("REPLACEMENT: " + replacement);
 		logLine("[CAUTION: Weaker interpretation. No consistency checks]");
 	}
