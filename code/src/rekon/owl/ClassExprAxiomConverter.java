@@ -186,7 +186,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 		OWLAxiom createComponentAxiom(OWLClassExpression sup, OWLClassExpression sub) {
 
-			return factory.getOWLSubClassOfAxiom(sup, sub);
+			return factory.getOWLSubClassOfAxiom(sub, sup);
 		}
 	}
 
