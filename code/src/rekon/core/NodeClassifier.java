@@ -44,7 +44,10 @@ class NodeClassifier extends NameClassifier {
 
 		void processElement(NodeX n) {
 
-			getInferredSubsumers(n).expandLatestInferences(forMatchables);
+			if (n.matchable() == forMatchables) {
+
+				getInferredSubsumers(n).expandLatestInferences();
+			}
 		}
 	}
 
@@ -78,9 +81,9 @@ class NodeClassifier extends NameClassifier {
 		return expansions;
 	}
 
-	static private InferredSubsumers getInferredSubsumers(Name n) {
+	static private InferredSubsumers getInferredSubsumers(NodeX n) {
 
-		return ((NodeX)n).getNodeClassifier().inferredSubsumers;
+		return n.getNodeClassifier().inferredSubsumers;
 	}
 
 	private InferredSubsumers inferredSubsumers = new NonMatcherInferredSubsumers();
@@ -94,21 +97,7 @@ class NodeClassifier extends NameClassifier {
 
 		abstract void addDirectlyInferred(Name subsumer);
 
-		void expandLatestInferences(boolean forMatchable) {
-
-			if (forMatchable) {
-
-				expandLatestInferencesForMatchable();
-			}
-			else {
-
-				expandLatestInferencesForNonMatchable();
-			}
-		}
-
-		abstract void expandLatestInferencesForMatchable();
-
-		abstract void expandLatestInferencesForNonMatchable();
+		abstract void expandLatestInferences();
 
 		abstract boolean configureForNextExpansion();
 
@@ -159,13 +148,10 @@ class NodeClassifier extends NameClassifier {
 			latestInferreds.add(subsumer);
 		}
 
-		void expandLatestInferencesForMatchable() {
+		void expandLatestInferences() {
 
 			expandDirectLatestInferences();
 			expandCurrentSubsumerLatestInferences();
-		}
-
-		void expandLatestInferencesForNonMatchable() {
 		}
 
 		boolean configureForNextExpansion() {
@@ -228,10 +214,7 @@ class NodeClassifier extends NameClassifier {
 			throw new UnexpectedMethodInvocationError();
 		}
 
-		void expandLatestInferencesForMatchable() {
-		}
-
-		void expandLatestInferencesForNonMatchable() {
+		void expandLatestInferences() {
 
 			for (NodeX s : getSubsumers().asNodes()) {
 
