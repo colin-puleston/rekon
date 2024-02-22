@@ -39,6 +39,7 @@ class Logger {
 	static private final String LOGGING_SYSTEM_PROPERTY = "rekon.logging";
 
 	static private boolean loggingOn = false;
+	static private boolean firstLogLine = true;
 
 	static {
 
@@ -47,31 +48,29 @@ class Logger {
 
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 
-		logSeparatorLine();
-		logIgnoringOutOfScopeWarningLine("axiom types");
+		logWarningLine("Ignoring out-of-scope axiom types");
 
 		for (AxiomType<?> axType : outOfScopeTypes) {
 
-			logLine("AXIOM TYPE: " + axType);
+			logLine("Axiom-type: " + axType);
 		}
 
 		logSeparatorLine();
-		logSeparatorLine();
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject... outOfScopeExprs) {
+	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
 
-		logOutOfScopeAxiom(axiom, Arrays.asList(outOfScopeExprs));
+		logOutOfScopeAxiom(axiom, Collections.singleton(outOfScopeExpr));
 	}
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
 
-		logIgnoringOutOfScopeWarningLine("axiom");
-		logLine("AXIOM: " + axiom);
+		logWarningLine("Ignoring axiom containing out-of-scope expression(s)");
+		logLine("Axiom: " + axiom);
 
 		for (OWLObject e : outOfScopeExprs) {
 
-			logLine("OUT-OF-SCOPE EXPRESSION: " + e);
+			logLine("Expression: " + e);
 		}
 
 		logSeparatorLine();
@@ -79,8 +78,8 @@ class Logger {
 
 	void logOutOfScopeQueryExpression(OWLObject expr) {
 
-		logOutOfScopeWarningLine("Cannot handle", "query");
-		logLine("EXPRESSION: " + expr);
+		logWarningLine("Cannot handle out-of-scope query");
+		logLine("Expression: " + expr);
 		logLine("No results returned!");
 
 		logSeparatorLine();
@@ -91,55 +90,39 @@ class Logger {
 				OWLClassExpression replaced,
 				OWLClassExpression replacement) {
 
-		logNoValueReplacementWarningLine("axiom/expression");
-		logLine("AXIOM: " + axiom);
-		logNoValueReplacementInfo(replaced, replacement);
+		logNoValueExpressionReplacement(axiom, replaced, replacement, "axiom/expression");
 	}
 
 	void logNoValueQueryExpressionReplacement(
 				OWLClassExpression replaced,
 				OWLClassExpression replacement) {
 
-		logNoValueReplacementWarningLine("query");
-		logNoValueReplacementInfo(replaced, replacement);
-
-		logSeparatorLine();
+		logNoValueExpressionReplacement(null, replaced, replacement, "query");
 	}
 
 	private void logNoValueExpressionReplacement(
 					OWLAxiom axiom,
 					OWLClassExpression replaced,
-					OWLClassExpression replacement) {
+					OWLClassExpression replacement,
+					String description) {
 
-		logNoValueReplacementWarningLine("axiom/expression");
-		logLine("AXIOM: " + axiom);
-		logNoValueReplacementInfo(replaced, replacement);
+		logWarningLine("Replacing out-of-scope \"No Value\" " + description);
+
+		if (axiom != null) {
+
+			logLine("Axiom: " + axiom);
+		}
+
+		logLine("Replacing: " + replaced);
+		logLine("Replacement: " + replacement);
+		logLine("[CAUTION: Weaker constraint - no contradiction checking]");
 
 		logSeparatorLine();
 	}
 
-	private void logNoValueReplacementInfo(
-					OWLClassExpression replaced,
-					OWLClassExpression replacement) {
+	private void logWarningLine(String warning) {
 
-		logLine("REPLACING: " + replaced);
-		logLine("REPLACEMENT: " + replacement);
-		logLine("[CAUTION: Weaker interpretation. No consistency checks]");
-	}
-
-	private void logNoValueReplacementWarningLine(String thing) {
-
-		logOutOfScopeWarningLine("Replacing", "\"No Value\" " + thing);
-	}
-
-	private void logIgnoringOutOfScopeWarningLine(String thing) {
-
-		logOutOfScopeWarningLine("Ignoring", thing);
-	}
-
-	private void logOutOfScopeWarningLine(String status, String thing) {
-
-		logWarningLine(status + " out-of-scope " + thing + "...");
+		logLine("REKON WARNING: " + warning + "...");
 	}
 
 	private void logSeparatorLine() {
@@ -151,12 +134,14 @@ class Logger {
 
 		if (loggingOn) {
 
+			if (firstLogLine) {
+
+				firstLogLine = false;
+
+				logSeparatorLine();
+			}
+
 			System.out.println(line);
 		}
-	}
-
-	private void logWarningLine(String warning) {
-
-		logLine("REKON WARNING: " + warning);
 	}
 }

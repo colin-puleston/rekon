@@ -36,6 +36,8 @@ import rekon.build.input.*;
  */
 class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
+	private OWLClass owlNothing;
+
 	private class ConvertedClassEquivalence
 						extends ConvertedNameEquivalence<ClassNode>
 						implements InputClassEquivalence {
@@ -139,14 +141,24 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 			return expressions.toComplexSuper(getSourceAxiom(), secondOrSup);
 		}
 
-		Class<OWLClass> getNameExprType() {
+		OwlLinkStatus checkMatch(OWLClassExpression expr, boolean isName) {
 
-			return OWLClass.class;
+			if (expr instanceof OWLClass == isName) {
+
+				if (isName && expr.equals(owlNothing)) {
+
+					return OwlLinkStatus.INVALID_MATCH;
+				}
+
+				return OwlLinkStatus.VALID_MATCH;
+			}
+
+			return OwlLinkStatus.NON_MATCH;
 		}
 
-		ClassNode asName(OWLClassExpression e) {
+		ClassNode asName(OWLClassExpression expr) {
 
-			return names.get((OWLClass)e);
+			return names.get((OWLClass)expr);
 		}
 	}
 
@@ -198,19 +210,26 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 			OwlClassExprLink owlLink = createOwlLink(source);
 
-			if (convertsSourceAxiom(owlLink)) {
+			switch (owlLink.checkMatch(firstOrSubIsName(), secondOrSupIsName())) {
 
-				inputAxioms.add(createInputAxiom(owlLink));
+				case VALID_MATCH:
 
-				return true;
+					inputAxioms.add(createInputAxiom(owlLink));
+					break;
+
+				case NON_MATCH:
+
+					return false;
 			}
 
-			return false;
+			return true;
 		}
 
 		abstract OwlClassExprLink createOwlLink(S source);
 
-		abstract boolean convertsSourceAxiom(OwlClassExprLink owlLink);
+		abstract boolean firstOrSubIsName();
+
+		abstract boolean secondOrSupIsName();
 
 		abstract I createInputAxiom(OwlClassExprLink owlLink);
 	}
@@ -235,9 +254,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprEquivalenceConverter<InputClassEquivalence> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(true, true);
+			return true;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return true;
 		}
 
 		InputClassEquivalence createInputAxiom(OwlClassExprLink owlLink) {
@@ -253,31 +277,45 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprEquivalenceConverter<InputClassComplexEquivalence> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(true, false) || owlLink.matches(true, false);
+			return true;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return false;
 		}
 
 		InputClassComplexEquivalence createInputAxiom(OwlClassExprLink owlLink) {
 
 			return new ConvertedClassComplexEquivalence(
 							owlLink.source,
-							getClassNodeEquiv(owlLink),
-							getComplexEquiv(owlLink));
+							owlLink.firstOrSubAsName(),
+							owlLink.secondAsComplex());
+		}
+	}
+
+	private class ComplexClassEquivalenceConverter
+					extends
+						ClassExprEquivalenceConverter<InputClassComplexEquivalence> {
+
+		boolean firstOrSubIsName() {
+
+			return false;
 		}
 
-		private ClassNode getClassNodeEquiv(OwlClassExprLink owlLink) {
+		boolean secondOrSupIsName() {
 
-			return owlLink.matches(true, false)
-					? owlLink.firstOrSubAsName()
-					: owlLink.secondOrSupAsName();
+			return true;
 		}
 
-		private InputComplexNode getComplexEquiv(OwlClassExprLink owlLink) {
+		InputClassComplexEquivalence createInputAxiom(OwlClassExprLink owlLink) {
 
-			return owlLink.matches(false, true)
-					? owlLink.firstOrSubAsComplex()
-					: owlLink.secondAsComplex();
+			return new ConvertedClassComplexEquivalence(
+							owlLink.source,
+							owlLink.secondOrSupAsName(),
+							owlLink.firstOrSubAsComplex());
 		}
 	}
 
@@ -285,9 +323,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprEquivalenceConverter<InputComplexEquivalence> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(false, false);
+			return false;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return false;
 		}
 
 		InputComplexEquivalence createInputAxiom(OwlClassExprLink owlLink) {
@@ -319,9 +362,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprSubSuperConverter<InputClassSubSuper> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(true, true);
+			return true;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return true;
 		}
 
 		InputClassSubSuper createInputAxiom(OwlClassExprLink owlLink) {
@@ -337,9 +385,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprSubSuperConverter<InputClassSubComplexSuper> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(true, false);
+			return true;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return false;
 		}
 
 		InputClassSubComplexSuper createInputAxiom(OwlClassExprLink owlLink) {
@@ -355,9 +408,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprSubSuperConverter<InputComplexSubClassSuper> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(false, true);
+			return false;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return true;
 		}
 
 		InputComplexSubClassSuper createInputAxiom(OwlClassExprLink owlLink) {
@@ -373,9 +431,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 					extends
 						ClassExprSubSuperConverter<InputComplexSubSuper> {
 
-		boolean convertsSourceAxiom(OwlClassExprLink owlLink) {
+		boolean firstOrSubIsName() {
 
-			return owlLink.matches(false, false);
+			return false;
+		}
+
+		boolean secondOrSupIsName() {
+
+			return false;
 		}
 
 		InputComplexSubSuper createInputAxiom(OwlClassExprLink owlLink) {
@@ -391,11 +454,14 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 		super(parentConverter);
 
+		owlNothing = factory.getOWLNothing();
+
 		new ClassExprEquivalenceSplitter();
 		new ClassExprSubSuperSplitter();
 
 		new ClassEquivalenceConverter();
 		new ClassComplexEquivalenceConverter();
+		new ComplexClassEquivalenceConverter();
 		new ComplexEquivalenceConverter();
 		new ClassSubSuperConverter();
 		new ClassSubComplexSuperConverter();
@@ -410,7 +476,12 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 	Collection<InputClassComplexEquivalence> getClassComplexEquivalences() {
 
-		return getInputAxioms(ClassComplexEquivalenceConverter.class);
+		List<InputClassComplexEquivalence> all = new ArrayList<InputClassComplexEquivalence>();
+
+		all.addAll(getInputAxioms(ClassComplexEquivalenceConverter.class));
+		all.addAll(getInputAxioms(ComplexClassEquivalenceConverter.class));
+
+		return all;
 	}
 
 	Collection<InputComplexEquivalence> getComplexEquivalences() {

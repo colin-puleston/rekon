@@ -36,6 +36,9 @@ import rekon.build.input.*;
  */
 class PropertyAxiomConverter extends CategoryAxiomConverter {
 
+	private OWLObjectProperty owlBottomObjectProperty;
+	private OWLDataProperty owlBottomDataProperty;
+
 	private class ConvertedNodePropertyEquivalence
 						extends ConvertedNameEquivalence<NodeProperty>
 						implements InputNodePropertyEquivalence {
@@ -185,14 +188,19 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 			super(source, source.getFirstProperty(), source.getSecondProperty());
 		}
 
-		Class<OWLObjectProperty> getNameExprType() {
+		OwlLinkStatus checkMatch(OWLObjectPropertyExpression expr, boolean isName) {
 
-			return OWLObjectProperty.class;
+			if (expr instanceof OWLObjectProperty && !expr.equals(owlBottomObjectProperty)) {
+
+				return OwlLinkStatus.VALID_MATCH;
+			}
+
+			return OwlLinkStatus.INVALID_MATCH;
 		}
 
-		NodeProperty asName(OWLObjectPropertyExpression e) {
+		NodeProperty asName(OWLObjectPropertyExpression expr) {
 
-			return names.get((OWLObjectProperty)e);
+			return names.get((OWLObjectProperty)expr);
 		}
 	}
 
@@ -208,14 +216,19 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 			super(source, source.getSubProperty(), source.getSuperProperty());
 		}
 
-		Class<OWLDataProperty> getNameExprType() {
+		OwlLinkStatus checkMatch(OWLDataPropertyExpression expr, boolean isName) {
 
-			return OWLDataProperty.class;
+			if (expr instanceof OWLDataProperty && !expr.equals(owlBottomDataProperty)) {
+
+				return OwlLinkStatus.VALID_MATCH;
+			}
+
+			return OwlLinkStatus.INVALID_MATCH;
 		}
 
-		DataProperty asName(OWLDataPropertyExpression e) {
+		DataProperty asName(OWLDataPropertyExpression expr) {
 
-			return names.get((OWLDataProperty)e);
+			return names.get((OWLDataProperty)expr);
 		}
 	}
 
@@ -259,13 +272,9 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 			SA owlLink = createOwlLink(source);
 
-			if (owlLink.matches(true, true)) {
+			if (owlLink.checkMatch(true, true) == OwlLinkStatus.VALID_MATCH) {
 
 				inputAxioms.add(createInputAxiom(owlLink));
-			}
-			else {
-
-				logOutOfScopeAxiom(source, owlLink.getNonNames());
 			}
 
 			return true;
@@ -362,7 +371,8 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 		boolean convertAxiomOfType(S source) {
 
-			NodeProperty p = toNodeProperty(getPropertyExpr(source));
+			OWLObjectPropertyExpression expr = getPropertyExpr(source);
+			NodeProperty p = toNodeProperty(expr);
 
 			if (p != null) {
 
@@ -376,7 +386,7 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 				}
 			}
 
-			logOutOfScopeAxiom(source);
+			logOutOfScopeAxiom(source, expr);
 
 			return true;
 		}
@@ -518,6 +528,9 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 	PropertyAxiomConverter(AxiomConverter parentConverter) {
 
 		super(parentConverter);
+
+		owlBottomObjectProperty = factory.getOWLBottomObjectProperty();
+		owlBottomDataProperty = factory.getOWLBottomDataProperty();
 
 		new NodePropertyEquivalenceSplitter();
 		new DataPropertyEquivalenceSplitter();

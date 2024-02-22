@@ -141,14 +141,19 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			super(source, source.getIndividuals());
 		}
 
-		Class<OWLNamedIndividual> getNameExprType() {
+		OwlLinkStatus checkMatch(OWLIndividual expr, boolean isName) {
 
-			return OWLNamedIndividual.class;
+			if (expr instanceof OWLNamedIndividual) {
+
+				return OwlLinkStatus.VALID_MATCH;
+			}
+
+			return OwlLinkStatus.INVALID_MATCH;
 		}
 
-		IndividualNode asName(OWLIndividual e) {
+		IndividualNode asName(OWLIndividual expr) {
 
-			return names.get((OWLNamedIndividual)e);
+			return names.get((OWLNamedIndividual)expr);
 		}
 	}
 
@@ -207,13 +212,9 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 			OwlIndividualLink owlLink = new OwlIndividualLink(source);
 
-			if (owlLink.matches(true, true)) {
+			if (owlLink.checkMatch(true, true) == OwlLinkStatus.VALID_MATCH) {
 
 				inputAxioms.add(createInputAxiom(owlLink));
-			}
-			else {
-
-				logOutOfScopeAxiom(source, owlLink.getNonNames());
 			}
 
 			return true;

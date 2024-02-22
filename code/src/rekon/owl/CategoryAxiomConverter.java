@@ -129,6 +129,8 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		}
 	}
 
+	enum OwlLinkStatus {VALID_MATCH, INVALID_MATCH, NON_MATCH}
+
 	abstract class OwlLink<E extends OWLObject, N extends Name> {
 
 		final OWLAxiom source;
@@ -169,43 +171,47 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 			return asName(secondOrSup);
 		}
 
-		boolean matches(boolean firstOrSubIsName, boolean secondOrSupIsName) {
+		OwlLinkStatus checkMatch(boolean firstOrSubIsName, boolean secondOrSupIsName) {
 
-			return matches(firstOrSub, firstOrSubIsName)
-					&& matches(secondOrSup, secondOrSupIsName);
-		}
+			OwlLinkStatus status1 = checkMatch(firstOrSub, firstOrSubIsName);
 
-		Collection<E> getNonNames() {
+			if (status1 == OwlLinkStatus.NON_MATCH) {
 
-			List<E> nonNames = new ArrayList<E>();
-
-			checkAddNonName(nonNames, firstOrSub);
-			checkAddNonName(nonNames, secondOrSup);
-
-			return nonNames;
-		}
-
-		abstract Class<? extends E> getNameExprType();
-
-		abstract N asName(E e);
-
-		private boolean matches(E e, boolean isName) {
-
-			return isNameExpr(e) == isName;
-		}
-
-		private void checkAddNonName(List<E> nonNames, E e) {
-
-			if (!isNameExpr(e)) {
-
-				nonNames.add(e);
+				return OwlLinkStatus.NON_MATCH;
 			}
+
+			OwlLinkStatus status2 = checkMatch(secondOrSup, secondOrSupIsName);
+
+			if (status2 == OwlLinkStatus.NON_MATCH) {
+
+				return OwlLinkStatus.NON_MATCH;
+			}
+
+			List<E> outOfScopeExprs = new ArrayList<E>();
+
+			if (status1 == OwlLinkStatus.INVALID_MATCH) {
+
+				outOfScopeExprs.add(firstOrSub);
+			}
+
+			if (status2 == OwlLinkStatus.INVALID_MATCH) {
+
+				outOfScopeExprs.add(secondOrSup);
+			}
+
+			if (outOfScopeExprs.isEmpty()) {
+
+				return OwlLinkStatus.VALID_MATCH;
+			}
+
+			logOutOfScopeAxiom(source, outOfScopeExprs);
+
+			return OwlLinkStatus.INVALID_MATCH;
 		}
 
-		private boolean isNameExpr(E test) {
+		abstract OwlLinkStatus checkMatch(E expr, boolean isName);
 
-			return getNameExprType().isAssignableFrom(test.getClass());
-		}
+		abstract N asName(E expr);
 	}
 
 	abstract class SubSuperSplitter
@@ -273,9 +279,9 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		return parentConverter.getInputAxioms(converterType);
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject... outOfScopeExprs) {
+	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
 
-		Logger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExprs);
+		Logger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExpr);
 	}
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
