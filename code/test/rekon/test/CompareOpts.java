@@ -42,7 +42,7 @@ class CompareOpts extends TestOpts {
 
 	enum TestScope {
 
-		EQUIVS, SUPS, SUBS, ANCS, DECS, ALL;
+		EQUIVS, SUPS, SUBS, ANCS, DECS, SUB_INDS, DEC_INDS, ALL;
 
 		TestScope[] toAtoms() {
 

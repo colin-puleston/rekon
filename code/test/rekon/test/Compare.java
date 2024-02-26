@@ -63,9 +63,9 @@ public class Compare extends Tester {
 	private OntoQueries ontoQueries;
 	private LinkComparator linkComparator = new LinkComparator();
 
-	private class LinkComparator implements Comparator<OWLClass> {
+	private class LinkComparator implements Comparator<OWLEntity> {
 
-		public int compare(OWLClass first, OWLClass second) {
+		public int compare(OWLEntity first, OWLEntity second) {
 
 			return first.toString().compareTo(second.toString());
 		}
@@ -84,14 +84,14 @@ public class Compare extends Tester {
 
 		void performOp(OWLClassExpression c) {
 
-			Set<OWLClass> rl = getLinks(rekon, c);
-			Set<OWLClass> cl = getLinks(control, c);
+			Set<? extends OWLEntity> rl = getLinks(rekon, c);
+			Set<? extends OWLEntity> cl = getLinks(control, c);
 
 			if (!rl.equals(cl)) {
 
-				Set<OWLClass> rOnly = new HashSet<OWLClass>(rl);
-				Set<OWLClass> cOnly = new HashSet<OWLClass>(cl);
-				Set<OWLClass> common = new HashSet<OWLClass>(rl);
+				Set<OWLEntity> rOnly = new HashSet<OWLEntity>(rl);
+				Set<OWLEntity> cOnly = new HashSet<OWLEntity>(cl);
+				Set<OWLEntity> common = new HashSet<OWLEntity>(rl);
 
 				rOnly.removeAll(cl);
 				cOnly.removeAll(rl);
@@ -106,7 +106,7 @@ public class Compare extends Tester {
 			}
 		}
 
-		private Set<OWLClass> getLinks(OWLReasoner reasoner, OWLClassExpression e) {
+		private Set<? extends OWLEntity> getLinks(OWLReasoner reasoner, OWLClassExpression e) {
 
 			switch (scope) {
 
@@ -119,19 +119,25 @@ public class Compare extends Tester {
 				case SUBS:
 					return reasoner.getSubClasses(e, true).getFlattened();
 
+				case SUB_INDS:
+					return reasoner.getInstances(e, true).getFlattened();
+
 				case ANCS:
 					return reasoner.getSuperClasses(e, false).getFlattened();
 
 				case DECS:
 					return reasoner.getSubClasses(e, false).getFlattened();
+
+				case DEC_INDS:
+					return reasoner.getInstances(e, false).getFlattened();
 			}
 
 			throw new Error("Unrecognised compare option: " + scope);
 		}
 
-		private SortedSet<OWLClass> orderLinks(Collection<OWLClass> links) {
+		private SortedSet<OWLEntity> orderLinks(Collection<OWLEntity> links) {
 
-			SortedSet<OWLClass> ordered = new TreeSet<OWLClass>(linkComparator);
+			SortedSet<OWLEntity> ordered = new TreeSet<OWLEntity>(linkComparator);
 
 			ordered.addAll(links);
 
