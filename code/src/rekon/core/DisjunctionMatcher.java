@@ -223,19 +223,19 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean matchable(boolean initialPass) {
 
-		return classifiable(initialPass, NodeSelector.MATCHABLE_DISJUNCT);
+		return unprocessedSubsumers(initialPass, NodeSelector.MATCHABLE_DISJUNCT);
 	}
 
-	boolean classifiable(boolean initialPass) {
+	boolean unprocessedSubsumers(boolean initialPass) {
 
-		return classifiable(initialPass, NodeSelector.ANY);
+		return unprocessedSubsumers(initialPass, NodeSelector.ANY);
 	}
 
-	boolean classifiable(boolean initialPass, NodeSelector selector) {
+	boolean unprocessedSubsumers(boolean initialPass, NodeSelector selector) {
 
 		for (NodeX d : expandDisjuncts().asNodes()) {
 
-			if (d.classifiable(initialPass, selector)) {
+			if (d.unprocessedSubsumers(initialPass, selector)) {
 
 				return true;
 			}

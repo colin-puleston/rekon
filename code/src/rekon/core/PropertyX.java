@@ -31,6 +31,19 @@ public abstract class PropertyX extends Name {
 
 	boolean matchablePatternProperty() {
 
-		return anyDefinitionRefs();
+		if (definitionRefed()) {
+
+			return true;
+		}
+
+		for (Name s : getSubsumers()) {
+
+			if (s.definitionRefed()) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 }

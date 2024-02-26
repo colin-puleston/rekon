@@ -98,6 +98,9 @@ class OntologyClassifier {
 		private List<DisjunctionMatcher> disjunctionMatchCandidates = new ArrayList<DisjunctionMatcher>();
 		private List<DisjunctionMatcher> disjunctionClassifyCandidates = new ArrayList<DisjunctionMatcher>();
 
+		private AllRelationTargetSubsumptions allRelationTargetSubsumptions
+												= new AllRelationTargetSubsumptions();
+
 		PassConfig() {
 
 			findPatternMatchCandidates();
@@ -107,7 +110,8 @@ class OntologyClassifier {
 		boolean potentialInferences() {
 
 			return !patternMatchCandidates.isEmpty()
-					|| !disjunctionClassifyCandidates.isEmpty();
+					|| !disjunctionClassifyCandidates.isEmpty()
+					|| allRelationTargetSubsumptions.potentialInferences();
 		}
 
 		void checkSubsumptions() {
@@ -116,6 +120,7 @@ class OntologyClassifier {
 			new DisjunctionSubsumedsChecker(disjunctionMatchCandidates);
 
 			inferNewCommonDisjunctSubsumers();
+			allRelationTargetSubsumptions.inferNewSubsumptions();
 		}
 
 		abstract boolean initialPhasePass();
@@ -130,9 +135,17 @@ class OntologyClassifier {
 
 				Pattern p = pp.getPattern();
 
-				if (potentialPatternMatchCandidate(p) && p.matchable(initPass)) {
+				if (potentialPatternMatchCandidate(p)) {
 
-					patternMatchCandidates.add(pp);
+					if (p.matchable(initPass)) {
+
+						patternMatchCandidates.add(pp);
+					}
+
+					if (pp.getNode() instanceof IndividualNode) {
+
+						allRelationTargetSubsumptions.checkAddSourceIndividual(pp, initPass);
+					}
 				}
 			}
 		}
@@ -143,7 +156,7 @@ class OntologyClassifier {
 
 			for (DisjunctionMatcher d : allDisjunctions) {
 
-				if (d.classifiable(initPass)) {
+				if (d.unprocessedSubsumers(initPass)) {
 
 					disjunctionClassifyCandidates.add(d);
 

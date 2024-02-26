@@ -28,4 +28,13 @@ package rekon.core;
  * @author Colin Puleston
  */
 public abstract class IndividualNode extends NodeX {
+
+	NameClassifier createClassifier() {
+
+		NodeClassifier classifier = new NodeClassifier(this);
+
+		classifier.setClassifiableNode();
+
+		return classifier;
+	}
 }

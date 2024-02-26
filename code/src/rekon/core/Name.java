@@ -146,22 +146,9 @@ public abstract class Name {
 		return rootName() || name == this || name.hasSubsumer(this);
 	}
 
-	boolean anyDefinitionRefs() {
+	boolean anyNewSubsumers() {
 
-		if (definitionRefed()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (s.definitionRefed()) {
-
-				return true;
-			}
-		}
-
-		return false;
+		return anyNewSubsumers(NodeSelector.ANY);
 	}
 
 	boolean anyNewSubsumers(NodeSelector selector) {

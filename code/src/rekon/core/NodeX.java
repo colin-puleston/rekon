@@ -204,15 +204,15 @@ public abstract class NodeX extends Name {
 
 	boolean matchablePatternRoot(boolean initialPass) {
 
-		return classifiable(initialPass, NodeSelector.MATCHABLE_PATTERN_ROOT);
+		return unprocessedSubsumers(initialPass, NodeSelector.MATCHABLE_PATTERN_ROOT);
 	}
 
 	boolean matchablePatternValue(boolean initialPass) {
 
-		return classifiable(initialPass, NodeSelector.MATCHABLE_PATTERN_VALUE);
+		return unprocessedSubsumers(initialPass, NodeSelector.MATCHABLE_PATTERN_VALUE);
 	}
 
-	boolean classifiable(boolean initialPass, NodeSelector selector) {
+	boolean unprocessedSubsumers(boolean initialPass, NodeSelector selector) {
 
 		return initialPass ? anyMatches(selector) : anyNewSubsumers(selector);
 	}
@@ -243,7 +243,7 @@ public abstract class NodeX extends Name {
 
 			matchers = new ArrayList<NodeMatcher>();
 
-			getNodeClassifier().setMatchableNode();
+			getNodeClassifier().setClassifiableNode();
 		}
 
 		matchers.add(matcher);
