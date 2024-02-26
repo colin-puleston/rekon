@@ -33,14 +33,105 @@ class AllRelationTargetSubsumptions {
 
 	private List<PatternMatcher> sourceIndividualProfiles = new ArrayList<PatternMatcher>();
 
+	private PotentialSourceIndividualTester potentialSourceIndividualTester
+												= new PotentialSourceIndividualTester();
+
+	private abstract class SubsumerAllRelationProcessor {
+
+		boolean processForAllSubsumers(IndividualNode indNode) {
+
+			for (NodeX s : indNode.getSubsumers().asNodes()) {
+
+				PatternMatcher p = s.getProfilePatternMatcher();
+
+				if (p != null && processForSubsumer(p)) {
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		abstract boolean process(AllRelation rel);
+
+		private boolean processForSubsumer(PatternMatcher profile) {
+
+			for (Relation r : profile.getPattern().getDirectRelations()) {
+
+				if (r instanceof AllRelation && process((AllRelation)r)) {
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+	}
+
+	private class PotentialSourceIndividualTester extends SubsumerAllRelationProcessor {
+
+		boolean test(PatternMatcher indProfile, boolean initialPass) {
+
+			if (initialPass) {
+
+				return true;
+			}
+
+			IndividualNode indNode = (IndividualNode)indProfile.getNode();
+
+			if (indNode.anyNewSubsumers()) {
+
+				return true;
+			}
+
+			return processForAllSubsumers(indNode);
+		}
+
+		boolean process(AllRelation rel) {
+
+			return rel.getTarget().anyNewSubsumers(NodeSelector.ANY);
+		}
+	}
+
 	private class TargetSubsumptionsFinder {
 
 		private Map<NodeProperty, Set<NodeX>> subsumerAllRelations
 								= new HashMap<NodeProperty, Set<NodeX>>();
 
+		private class SubsumerAllRelationCollector extends SubsumerAllRelationProcessor {
+
+			SubsumerAllRelationCollector(PatternMatcher indProfile) {
+
+				processForAllSubsumers((IndividualNode)indProfile.getNode());
+			}
+
+			boolean process(AllRelation rel) {
+
+				add(rel);
+
+				return false;
+			}
+
+			private void add(AllRelation rel) {
+
+				NodeProperty p = rel.getNodeProperty();
+				Set<NodeX> targets = subsumerAllRelations.get(p);
+
+				if (targets == null) {
+
+					targets = new HashSet<NodeX>();
+
+					subsumerAllRelations.put(p, targets);
+				}
+
+				targets.add(rel.getNodeValueTarget().getValueNode());
+			}
+		}
+
 		TargetSubsumptionsFinder(PatternMatcher indProfile) {
 
-			findSubsumerAllRelations((IndividualNode)indProfile.getNode());
+			new SubsumerAllRelationCollector(indProfile);
 
 			for (Relation r : indProfile.getPattern().getDirectRelations()) {
 
@@ -49,43 +140,6 @@ class AllRelationTargetSubsumptions {
 					checkAddForTarget((SomeRelation)r);
 				}
 			}
-		}
-
-		private void findSubsumerAllRelations(IndividualNode indNode) {
-
-			for (NodeX s : indNode.getSubsumers().asNodes()) {
-
-				if (s.matchable()) {
-
-					findSubsumerAllRelations(s.getProfilePatternMatcher());
-				}
-			}
-		}
-
-		private void findSubsumerAllRelations(PatternMatcher subsumerProfile) {
-
-			for (Relation r : subsumerProfile.getPattern().getDirectRelations()) {
-
-				if (r instanceof AllRelation) {
-
-					addSubsumerAllRelation((AllRelation)r);
-				}
-			}
-		}
-
-		private void addSubsumerAllRelation(AllRelation r) {
-
-			NodeProperty p = r.getNodeProperty();
-			Set<NodeX> targets = subsumerAllRelations.get(p);
-
-			if (targets == null) {
-
-				targets = new HashSet<NodeX>();
-
-				subsumerAllRelations.put(p, targets);
-			}
-
-			targets.add(r.getNodeValueTarget().getValueNode());
 		}
 
 		private void checkAddForTarget(SomeRelation r) {
@@ -122,11 +176,11 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	void checkAddSourceIndividual(PatternMatcher profile, boolean initialPass) {
+	void checkAddSourceIndividual(PatternMatcher indProfile, boolean initialPass) {
 
-		if (initialPass || potentialNewSourceIndividual(profile.getNode())) {
+		if (potentialSourceIndividualTester.test(indProfile, initialPass)) {
 
-			sourceIndividualProfiles.add(profile);
+			sourceIndividualProfiles.add(indProfile);
 		}
 	}
 
@@ -141,25 +195,5 @@ class AllRelationTargetSubsumptions {
 
 			new TargetSubsumptionsFinder(p);
 		}
-	}
-
-	private boolean potentialNewSourceIndividual(NodeX indNode) {
-
-		if (indNode.anyNewSubsumers()) {
-
-			return true;
-		}
-
-		for (NodeX s : indNode.getSubsumers().asNodes()) {
-
-			PatternMatcher sp = s.getProfilePatternMatcher();
-
-			if (sp != null && sp.getPattern().matchable(false)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 }
