@@ -46,7 +46,8 @@ public class Ontology {
 		allNames.addAll(names.getNodeProperties());
 		allNames.addAll(names.getDataProperties());
 
-		createStructure(structureBuilder);
+		structureBuilder.build(createMatchStructures());
+
 		processAllNamesPostAdditions();
 
 		NodeMatchers nodeMatchers = new NodeMatchers(nodes);
@@ -89,13 +90,6 @@ public class Ontology {
 
 			n.getClassifier().onPostAssertionAdditions();
 		}
-	}
-
-	private void createStructure(StructureBuilder builder) {
-
-		builder.build(createMatchStructures());
-
-		new InverseRelationsAdder(nodes);
 	}
 
 	private MatchStructures createMatchStructures() {

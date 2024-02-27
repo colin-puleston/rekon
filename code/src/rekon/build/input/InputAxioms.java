@@ -57,11 +57,7 @@ public interface InputAxioms {
 
 	public Collection<InputNodePropertySubSuper> getNodePropertySubSupers();
 
-	public Collection<InputNodePropertyInverse> getNodePropertyInverses();
-
 	public Collection<InputNodePropertyChain> getNodePropertyChains();
-
-	public Collection<InputNodePropertySymmetric> getNodePropertySymmetrics();
 
 	public Collection<InputNodePropertyTransitive> getNodePropertyTransitives();
 

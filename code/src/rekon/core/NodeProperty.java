@@ -31,28 +31,11 @@ import java.util.*;
  */
 public abstract class NodeProperty extends PropertyX {
 
-	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
-
-	public void setSymmetric() {
-
-		inverses.add(this);
-	}
-
-	public void addInverse(NodeProperty inverse) {
-
-		inverses.add(inverse);
-		inverse.inverses.add(this);
-	}
 
 	public void addChain(PropertyChain chain) {
 
 		chains.add(chain);
-	}
-
-	Collection<NodeProperty> getInverses() {
-
-		return inverses;
 	}
 
 	boolean anyChains() {

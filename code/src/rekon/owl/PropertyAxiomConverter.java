@@ -84,28 +84,6 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class ConvertedNodePropertyInverse
-						extends ConvertedNodePropertyAttribute
-						implements InputNodePropertyInverse {
-
-		private NodeProperty inverse;
-
-		public NodeProperty getInverse() {
-
-			return inverse;
-		}
-
-		ConvertedNodePropertyInverse(
-			OWLAxiom source,
-			NodeProperty property,
-			NodeProperty inverse) {
-
-			super(source, property);
-
-			this.inverse = inverse;
-		}
-	}
-
 	private class ConvertedNodePropertyChain
 						extends ConvertedNodePropertyAttribute
 						implements InputNodePropertyChain {
@@ -133,16 +111,6 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 						implements InputNodePropertyTransitive {
 
 		ConvertedNodePropertyTransitive(OWLAxiom source, NodeProperty property) {
-
-			super(source, property);
-		}
-	}
-
-	private class ConvertedNodePropertySymmetric
-						extends ConvertedNodePropertyAttribute
-						implements InputNodePropertySymmetric {
-
-		ConvertedNodePropertySymmetric(OWLAxiom source, NodeProperty property) {
 
 			super(source, property);
 		}
@@ -340,31 +308,6 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class NodePropertyInverseConverter
-					extends
-						NodePropertyLinkConverter
-							<OWLInverseObjectPropertiesAxiom,
-							InputNodePropertyInverse> {
-
-		Class<OWLInverseObjectPropertiesAxiom> getSourceAxiomType() {
-
-			return OWLInverseObjectPropertiesAxiom.class;
-		}
-
-		OwlObjectPropertyLink createOwlLink(OWLInverseObjectPropertiesAxiom source) {
-
-			return new OwlObjectPropertyLink(source);
-		}
-
-		InputNodePropertyInverse createInputAxiom(OwlObjectPropertyLink owlLink) {
-
-			return new ConvertedNodePropertyInverse(
-							owlLink.source,
-							owlLink.firstOrSubAsName(),
-							owlLink.secondOrSupAsName());
-		}
-	}
-
 	private abstract class NodePropertyAttributeConverter
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
@@ -446,30 +389,6 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
-	private class NodePropertySymmetricConverter
-					extends
-						NodePropertyAttributeConverter
-							<OWLSymmetricObjectPropertyAxiom,
-							InputNodePropertySymmetric> {
-
-		Class<OWLSymmetricObjectPropertyAxiom> getSourceAxiomType() {
-
-			return OWLSymmetricObjectPropertyAxiom.class;
-		}
-
-		OWLObjectPropertyExpression getPropertyExpr(OWLSymmetricObjectPropertyAxiom source) {
-
-			return source.getProperty();
-		}
-
-		InputNodePropertySymmetric createInputAxiom(
-										NodeProperty prop,
-										OWLSymmetricObjectPropertyAxiom source) {
-
-			return new ConvertedNodePropertySymmetric(source, prop);
-		}
-	}
-
 	private abstract class DataPropertyLinkConverter
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends PropertyLinkConverter<S, OwlDataPropertyLink, I> {
@@ -537,9 +456,7 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 		new NodePropertyEquivalenceConverter();
 		new NodePropertySubSuperConverter();
-		new NodePropertyInverseConverter();
 		new NodePropertyChainConverter();
-		new NodePropertySymmetricConverter();
 		new NodePropertyTransitiveConverter();
 		new DataPropertyEquivalenceConverter();
 		new DataPropertySubSuperConverter();
@@ -555,19 +472,9 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		return getInputAxioms(NodePropertySubSuperConverter.class);
 	}
 
-	Collection<InputNodePropertyInverse> getNodePropertyInverses() {
-
-		return getInputAxioms(NodePropertyInverseConverter.class);
-	}
-
 	Collection<InputNodePropertyChain> getNodePropertyChains() {
 
 		return getInputAxioms(NodePropertyChainConverter.class);
-	}
-
-	Collection<InputNodePropertySymmetric> getNodePropertySymmetrics() {
-
-		return getInputAxioms(NodePropertySymmetricConverter.class);
 	}
 
 	Collection<InputNodePropertyTransitive> getNodePropertyTransitives() {
