@@ -32,6 +32,7 @@ import java.util.*;
 public class MultiIterable<E> implements Iterable<E> {
 
 	private List<Iterable<? extends E>> components = new ArrayList<Iterable<? extends E>>();
+	private MultiListReader<E> listReader = new MultiListReader<E>();
 
 	private class MultiIterator implements Iterator<E> {
 
@@ -73,28 +74,32 @@ public class MultiIterable<E> implements Iterable<E> {
 
 		if (component instanceof MultiIterable) {
 
-			addComponents((MultiIterable<? extends E>)component);
+			addMultiComponents((MultiIterable<? extends E>)component);
 		}
 		else {
 
-			components.add(component);
+			addAtomicComponent(component);
 		}
 	}
 
 	ListReader<E> asListReader() {
 
-		MultiListReader<E> listReader = new MultiListReader<E>();
-
-		for (Iterable<? extends E> comp : components) {
-
-			listReader.addComponent(comp);
-		}
-
 		return listReader;
 	}
 
-	private void addComponents(MultiIterable<? extends E> multiIter) {
+	private void addMultiComponents(MultiIterable<? extends E> multiIter) {
 
-		components.addAll(multiIter.components);
+		for (Iterable<? extends E> comp : multiIter.components) {
+
+			addAtomicComponent(comp);
+		}
 	}
+
+	private void addAtomicComponent(Iterable<? extends E> comp) {
+
+		components.add(comp);
+		listReader.addComponent(comp);
+	}
+
 }
+

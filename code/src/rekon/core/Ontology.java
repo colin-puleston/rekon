@@ -33,15 +33,17 @@ import rekon.util.*;
  */
 public class Ontology {
 
-	private MultiIterable<Name> allNames = new MultiIterable<Name>();
-	private MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
-
-	private List<FreeClassNode> freeClassNodes = new ArrayList<FreeClassNode>();
-
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
+	private List<FreeClassNode> freeClassNodes = new ArrayList<FreeClassNode>();
+
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
+
+		structureBuilder.build(createMatchStructures());
+
+		MultiIterable<Name> allNames = new MultiIterable<Name>();
+		MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
 
 		allNodes.addComponent(names.getClassNodes());
 		allNodes.addComponent(names.getIndividualNodes());
@@ -51,9 +53,7 @@ public class Ontology {
 		allNames.addComponent(names.getNodeProperties());
 		allNames.addComponent(names.getDataProperties());
 
-		structureBuilder.build(createMatchStructures());
-
-		processAllNamesPostAdditions();
+		processAllNamesPostAdditions(allNames);
 
 		NodeMatchers nodeMatchers = new NodeMatchers(allNodes);
 
@@ -88,7 +88,7 @@ public class Ontology {
 		return dynamicSubsumeds;
 	}
 
-	private void processAllNamesPostAdditions() {
+	private void processAllNamesPostAdditions(Iterable<Name> allNames) {
 
 		for (Name n : allNames) {
 
