@@ -29,6 +29,8 @@ import java.util.*;
 import com.carrotsearch.hppc.*;
 import com.carrotsearch.hppc.cursors.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -281,6 +283,16 @@ abstract class PotentialSubsumptions<O> {
 		private List<UpdateOp> registerOps = new ArrayList<UpdateOp>();
 		private boolean completedMultiReg = true;
 
+		protected void execThreadProcess(int totalThreads, int threadIndex) {
+
+			registerRanks(totalThreads, threadIndex);
+		}
+
+		protected void execAllInSingleThread() {
+
+			registerRanks(1, 0);
+		}
+
 		MultiOptionRegistrar(int startRank, int stopRank) {
 
 			this.startRank = startRank;
@@ -302,16 +314,6 @@ abstract class PotentialSubsumptions<O> {
 		boolean completedMultiReg() {
 
 			return completedMultiReg;
-		}
-
-		void execThreadProcess(int totalThreads, int threadIndex) {
-
-			registerRanks(totalThreads, threadIndex);
-		}
-
-		void execAllInSingleThread() {
-
-			registerRanks(1, 0);
 		}
 
 		private void registerRanks(int totalThreads, int threadIndex) {

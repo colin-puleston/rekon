@@ -22,39 +22,29 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.util;
 
 import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-public class NameList extends Names {
+class SingleListReader<E> extends ListReader<E> {
 
-	static public final NameList NO_NAMES = new NameList();
+	private List<? extends E> list;
 
-	private List<Name> names = new ArrayList<Name>();
+	SingleListReader(Iterable<? extends E> elements) {
 
-	public NameList() {
+		list = toList(elements);
 	}
 
-	public NameList(Name name) {
+	int size() {
 
-		add(name);
+		return list.size();
 	}
 
-	public NameList(Names template) {
+	E get(int index) {
 
-		this(template.getNames());
-	}
-
-	public NameList(Iterable<? extends Name> names) {
-
-		addNames(this.names, names);
-	}
-
-	public Collection<Name> getNames() {
-
-		return names;
+		return list.get(index);
 	}
 }

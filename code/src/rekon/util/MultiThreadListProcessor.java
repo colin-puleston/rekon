@@ -22,26 +22,26 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.util;
 
 import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E> {
+public abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E> {
 
-	private List<E> list = null;
+	private ListReader<E> list = null;
 
-	void invokeListProcesses(List<E> list) {
+	public void invokeListProcesses(Iterable<E> elements) {
 
-		this.list = list;
+		list = toListReader(elements);
 
 		setMaxProcesses(list.size());
 		execProcesses();
 	}
 
-	void execThreadProcess(int totalThreads, int threadIndex) {
+	protected void execThreadProcess(int totalThreads, int threadIndex) {
 
 		for (int i = threadIndex ; i < list.size() ; i += totalThreads) {
 
@@ -49,13 +49,20 @@ abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E> {
 		}
 	}
 
-	void execAllInSingleThread() {
+	protected void execAllInSingleThread() {
 
-		for (E e : list) {
-
-			processElement(e);
-		}
+		execThreadProcess(1, 0);
 	}
 
-	abstract void processElement(E e);
+	protected abstract void processElement(E e);
+
+	private ListReader<E> toListReader(Iterable<E> elements) {
+
+		if (elements instanceof MultiIterable) {
+
+			return ((MultiIterable<E>)elements).asListReader();
+		}
+
+		return new SingleListReader<E>(elements);
+	}
 }

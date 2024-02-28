@@ -33,6 +33,14 @@ public abstract class Names implements Iterable<Name> {
 
 	static public final Names NO_NAMES = new NameList();
 
+	static void addNames(Collection<Name> target, Iterable<? extends Name> names) {
+
+		for (Name n : names) {
+
+			target.add(n);
+		}
+	}
+
 	private class AsNodes implements Iterable<NodeX> {
 
 		private class NodesIterator implements Iterator<NodeX> {

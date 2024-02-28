@@ -22,39 +22,46 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.util;
 
 import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-public class NameList extends Names {
+class MultiListReader<E> extends ListReader<E> {
 
-	static public final NameList NO_NAMES = new NameList();
+	private int size = 0;
+	private List<List<? extends E>> components = new ArrayList<List<? extends E>>();
 
-	private List<Name> names = new ArrayList<Name>();
+	int size() {
 
-	public NameList() {
+		return size;
 	}
 
-	public NameList(Name name) {
+	E get(int index) {
 
-		add(name);
+		int compIndex = index;
+
+		for (List<? extends E> comp : components) {
+
+			if (compIndex < comp.size()) {
+
+				return comp.get(compIndex);
+			}
+
+			compIndex -= comp.size();
+		}
+
+		throw new Error("Index out of bounds: " + index);
 	}
 
-	public NameList(Names template) {
+	void addComponent(Iterable<? extends E> elements) {
 
-		this(template.getNames());
-	}
+		List<? extends E> component = toList(elements);
 
-	public NameList(Iterable<? extends Name> names) {
+		components.add(component);
 
-		addNames(this.names, names);
-	}
-
-	public Collection<Name> getNames() {
-
-		return names;
+		size += component.size();
 	}
 }

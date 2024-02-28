@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
 import rekon.build.input.*;
+import rekon.util.*;
 
 /**
  * @author Colin Puleston
@@ -469,42 +470,43 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 		new ComplexSubSuperConverter();
 	}
 
-	Collection<InputClassEquivalence> getClassEquivalences() {
+	Iterable<InputClassEquivalence> getClassEquivalences() {
 
 		return getInputAxioms(ClassEquivalenceConverter.class);
 	}
 
-	Collection<InputClassComplexEquivalence> getClassComplexEquivalences() {
+	Iterable<InputClassComplexEquivalence> getClassComplexEquivalences() {
 
-		List<InputClassComplexEquivalence> all = new ArrayList<InputClassComplexEquivalence>();
+		MultiIterable<InputClassComplexEquivalence> all
+			= new MultiIterable<InputClassComplexEquivalence>();
 
-		all.addAll(getInputAxioms(ClassComplexEquivalenceConverter.class));
-		all.addAll(getInputAxioms(ComplexClassEquivalenceConverter.class));
+		all.addComponent(getInputAxioms(ClassComplexEquivalenceConverter.class));
+		all.addComponent(getInputAxioms(ComplexClassEquivalenceConverter.class));
 
 		return all;
 	}
 
-	Collection<InputComplexEquivalence> getComplexEquivalences() {
+	Iterable<InputComplexEquivalence> getComplexEquivalences() {
 
 		return getInputAxioms(ComplexEquivalenceConverter.class);
 	}
 
-	Collection<InputClassSubSuper> getClassSubSupers() {
+	Iterable<InputClassSubSuper> getClassSubSupers() {
 
 		return getInputAxioms(ClassSubSuperConverter.class);
 	}
 
-	Collection<InputClassSubComplexSuper> getClassSubComplexSupers() {
+	Iterable<InputClassSubComplexSuper> getClassSubComplexSupers() {
 
 		return getInputAxioms(ClassSubComplexSuperConverter.class);
 	}
 
-	Collection<InputComplexSubClassSuper> getComplexSubClassSupers() {
+	Iterable<InputComplexSubClassSuper> getComplexSubClassSupers() {
 
 		return getInputAxioms(ComplexSubClassSuperConverter.class);
 	}
 
-	Collection<InputComplexSubSuper> getComplexSubSupers() {
+	Iterable<InputComplexSubSuper> getComplexSubSupers() {
 
 		return getInputAxioms(ComplexSubSuperConverter.class);
 	}

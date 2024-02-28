@@ -172,9 +172,9 @@ class MappedNames extends OntologyNames {
 
 		abstract N createName(E entity);
 
-		abstract Collection<E> getEntitiesInSignature(OWLOntology o);
+		abstract Iterable<E> getEntitiesInSignature(OWLOntology o);
 
-		Collection<N> getAllNames() {
+		Iterable<N> getAllNames() {
 
 			return names.values();
 		}
@@ -229,7 +229,7 @@ class MappedNames extends OntologyNames {
 			return createRootClassNode(getAllNames());
 		}
 
-		Collection<OWLClass> getEntitiesInSignature(OWLOntology o) {
+		Iterable<OWLClass> getEntitiesInSignature(OWLOntology o) {
 
 			return o.getClassesInSignature();
 		}
@@ -257,7 +257,7 @@ class MappedNames extends OntologyNames {
 			return new MappedIndividualNode(entity);
 		}
 
-		Collection<OWLNamedIndividual> getEntitiesInSignature(OWLOntology o) {
+		Iterable<OWLNamedIndividual> getEntitiesInSignature(OWLOntology o) {
 
 			return o.getIndividualsInSignature();
 		}
@@ -280,7 +280,7 @@ class MappedNames extends OntologyNames {
 			return createRootNodeProperty(getAllNames());
 		}
 
-		Collection<OWLObjectProperty> getEntitiesInSignature(OWLOntology o) {
+		Iterable<OWLObjectProperty> getEntitiesInSignature(OWLOntology o) {
 
 			return o.getObjectPropertiesInSignature();
 		}
@@ -308,7 +308,7 @@ class MappedNames extends OntologyNames {
 			return createRootDataProperty(getAllNames());
 		}
 
-		Collection<OWLDataProperty> getEntitiesInSignature(OWLOntology o) {
+		Iterable<OWLDataProperty> getEntitiesInSignature(OWLOntology o) {
 
 			return o.getDataPropertiesInSignature();
 		}
@@ -324,22 +324,22 @@ class MappedNames extends OntologyNames {
 		return classes.rootName;
 	}
 
-	public Collection<ClassNode> getClassNodes() {
+	public Iterable<ClassNode> getClassNodes() {
 
 		return classes.getAllNames();
 	}
 
-	public Collection<IndividualNode> getIndividualNodes() {
+	public Iterable<IndividualNode> getIndividualNodes() {
 
 		return individuals.getAllNames();
 	}
 
-	public Collection<NodeProperty> getNodeProperties() {
+	public Iterable<NodeProperty> getNodeProperties() {
 
 		return nodeProperties.getAllNames();
 	}
 
-	public Collection<DataProperty> getDataProperties() {
+	public Iterable<DataProperty> getDataProperties() {
 
 		return dataProperties.getAllNames();
 	}

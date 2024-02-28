@@ -53,7 +53,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		void createAllProfiles(Collection<? extends NodeX> nodes) {
+		void createAllProfiles(Iterable<? extends NodeX> nodes) {
 
 			for (NodeX n : nodes) {
 
@@ -120,13 +120,13 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		abstract Collection<A> getAxioms();
+		abstract Iterable<A> getAxioms();
 
 		abstract NodeX getSub(A axiom);
 
 		abstract InputComplexSuper getSuper(A axiom);
 
-		abstract Collection<? extends NodeX> getTypeNodes();
+		abstract Iterable<? extends NodeX> getTypeNodes();
 
 		private void checkCreateDisjunctionProfile(
 						NodeX sub,
@@ -145,7 +145,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 						extends
 							TypeNodesProfileCreator<InputClassSubComplexSuper> {
 
-		Collection<InputClassSubComplexSuper> getAxioms() {
+		Iterable<InputClassSubComplexSuper> getAxioms() {
 
 			return axioms.getClassSubComplexSupers();
 		}
@@ -160,7 +160,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			return axiom.getSuper();
 		}
 
-		Collection<? extends NodeX> getTypeNodes() {
+		Iterable<? extends NodeX> getTypeNodes() {
 
 			return names.getClassNodes();
 		}
@@ -180,7 +180,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		Collection<InputIndividualComplexType> getAxioms() {
+		Iterable<InputIndividualComplexType> getAxioms() {
 
 			return axioms.getIndividualComplexTypes();
 		}
@@ -195,7 +195,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			return axiom.getType();
 		}
 
-		Collection<? extends NodeX> getTypeNodes() {
+		Iterable<? extends NodeX> getTypeNodes() {
 
 			return names.getIndividualNodes();
 		}

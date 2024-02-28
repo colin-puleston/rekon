@@ -37,7 +37,7 @@ class NodeMatchers {
 	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
 	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
 
-	NodeMatchers(List<NodeX> nodes) {
+	NodeMatchers(Iterable<NodeX> nodes) {
 
 		for (NodeX n : nodes) {
 

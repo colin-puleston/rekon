@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.util;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -30,7 +30,7 @@ import java.util.concurrent.*;
 /**
  * @author Colin Puleston
  */
-abstract class MultiThreadProcessor<E> {
+public abstract class MultiThreadProcessor<E> {
 
 	static private final String MULTI_THREAD_SYSTEM_PROPERTY = "rekon.multithread";
 
@@ -75,7 +75,7 @@ abstract class MultiThreadProcessor<E> {
 		}
 	}
 
-	void setMaxProcesses(int maxProcesses) {
+	public void setMaxProcesses(int maxProcesses) {
 
 		if (maxProcesses < totalThreads) {
 
@@ -83,7 +83,7 @@ abstract class MultiThreadProcessor<E> {
 		}
 	}
 
-	void execProcesses() {
+	public void execProcesses() {
 
 		if (multiThreadEnabled) {
 
@@ -95,9 +95,9 @@ abstract class MultiThreadProcessor<E> {
 		}
 	}
 
-	abstract void execThreadProcess(int totalThreads, int threadIndex);
+	protected abstract void execThreadProcess(int totalThreads, int threadIndex);
 
-	abstract void execAllInSingleThread();
+	protected abstract void execAllInSingleThread();
 
 	private List<ThreadProcessor> createThreadProcessors() {
 

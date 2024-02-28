@@ -31,9 +31,9 @@ import java.util.*;
  */
 class RootNameLinksHandler extends NameLinksHandler {
 
-	private Collection<? extends Name> allSubs = null;
+	private Iterable<? extends Name> allSubs = null;
 
-	void configure(Collection<? extends Name> allSubs) {
+	void configure(Iterable<? extends Name> allSubs) {
 
 		this.allSubs = allSubs;
 	}

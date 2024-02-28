@@ -26,6 +26,8 @@ package rekon.core;
 
 import java.util.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -35,23 +37,23 @@ class NodeClassifier extends NameClassifier {
 
 		private boolean forMatchables;
 
-		NewInferredSubsumerExpander(List<NodeX> all, boolean forMatchables) {
-
-			this.forMatchables = forMatchables;
-
-			invokeListProcesses(all);
-		}
-
-		void processElement(NodeX n) {
+		protected void processElement(NodeX n) {
 
 			if (n.matchable() == forMatchables) {
 
 				getInferredSubsumers(n).expandLatestInferences();
 			}
 		}
+
+		NewInferredSubsumerExpander(Iterable<NodeX> all, boolean forMatchables) {
+
+			this.forMatchables = forMatchables;
+
+			invokeListProcesses(all);
+		}
 	}
 
-	static void expandAllNewInferredSubsumers(List<NodeX> all) {
+	static void expandAllNewInferredSubsumers(Iterable<NodeX> all) {
 
 		do {
 
@@ -61,7 +63,7 @@ class NodeClassifier extends NameClassifier {
 		while(configureForNextInferenceExpansion(all));
 	}
 
-	static void absorbAllNewInferredSubsumers(List<NodeX> all) {
+	static void absorbAllNewInferredSubsumers(Iterable<NodeX> all) {
 
 		for (NodeX n : all) {
 
@@ -69,7 +71,7 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
-	static private boolean configureForNextInferenceExpansion(List<NodeX> all) {
+	static private boolean configureForNextInferenceExpansion(Iterable<NodeX> all) {
 
 		boolean expansions = false;
 

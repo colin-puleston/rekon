@@ -33,16 +33,12 @@ public class NameSet extends Names {
 
 	static public final NameSet NO_NAMES = new NameSet();
 
-	private Set<Name> names;
+	private Set<Name> names = new HashSet<Name>();
 
 	public NameSet() {
-
-		names = new HashSet<Name>();
 	}
 
 	public NameSet(Name name) {
-
-		this();
 
 		add(name);
 	}
@@ -54,7 +50,7 @@ public class NameSet extends Names {
 
 	public NameSet(Collection<? extends Name> names) {
 
-		this.names = new HashSet<Name>(names);
+		addNames(this.names, names);
 	}
 
 	public boolean remove(Name name) {

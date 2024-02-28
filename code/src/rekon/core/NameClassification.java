@@ -26,6 +26,8 @@ package rekon.core;
 
 import java.util.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -168,7 +170,7 @@ class NameClassification extends NameLinksHandler {
 		}
 	}
 
-	static void completeAllClassifications(List<Name> allNames) {
+	static void completeAllClassifications(Iterable<Name> allNames) {
 
 		for (Name n : allNames) {
 
@@ -184,7 +186,7 @@ class NameClassification extends NameLinksHandler {
 		}
 	}
 
-	static private void initialiseAllClassifications(List<Name> allNames) {
+	static private void initialiseAllClassifications(Iterable<Name> allNames) {
 
 		for (Name n : allNames) {
 
@@ -199,7 +201,7 @@ class NameClassification extends NameLinksHandler {
 		}
 	}
 
-	static private void optimiseAllLinks(List<Name> allNames) {
+	static private void optimiseAllLinks(Iterable<Name> allNames) {
 
 		for (Name n : allNames) {
 
@@ -224,14 +226,14 @@ class NameClassification extends NameLinksHandler {
 
 	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
 
-		DirectSupersSetter(List<Name> allNames) {
-
-			invokeListProcesses(allNames);
-		}
-
-		void processElement(Name n) {
+		protected void processElement(Name n) {
 
 			getInitialiserFor(n).setDirectSupers();
+		}
+
+		DirectSupersSetter(Iterable<Name> allNames) {
+
+			invokeListProcesses(allNames);
 		}
 	}
 

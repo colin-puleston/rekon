@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.util.dev;
 
 import java.util.*;
 

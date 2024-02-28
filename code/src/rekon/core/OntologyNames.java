@@ -45,7 +45,7 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootClassNode(Collection<ClassNode> allSubs) {
+		RootClassNode(Iterable<ClassNode> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
@@ -63,7 +63,7 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootNodeProperty(Collection<NodeProperty> allSubs) {
+		RootNodeProperty(Iterable<NodeProperty> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
@@ -81,7 +81,7 @@ public abstract class OntologyNames {
 			return true;
 		}
 
-		RootDataProperty(Collection<DataProperty> allSubs) {
+		RootDataProperty(Iterable<DataProperty> allSubs) {
 
 			configureAsRootName(allSubs);
 		}
@@ -89,25 +89,25 @@ public abstract class OntologyNames {
 
 	public abstract ClassNode getRootClassNode();
 
-	public abstract Collection<ClassNode> getClassNodes();
+	public abstract Iterable<ClassNode> getClassNodes();
 
-	public abstract Collection<IndividualNode> getIndividualNodes();
+	public abstract Iterable<IndividualNode> getIndividualNodes();
 
-	public abstract Collection<NodeProperty> getNodeProperties();
+	public abstract Iterable<NodeProperty> getNodeProperties();
 
-	public abstract Collection<DataProperty> getDataProperties();
+	public abstract Iterable<DataProperty> getDataProperties();
 
-	protected ClassNode createRootClassNode(Collection<ClassNode> allSubs) {
+	protected ClassNode createRootClassNode(Iterable<ClassNode> allSubs) {
 
 		return new RootClassNode(allSubs);
 	}
 
-	protected NodeProperty createRootNodeProperty(Collection<NodeProperty> allSubs) {
+	protected NodeProperty createRootNodeProperty(Iterable<NodeProperty> allSubs) {
 
 		return new RootNodeProperty(allSubs);
 	}
 
-	protected DataProperty createRootDataProperty(Collection<DataProperty> allSubs) {
+	protected DataProperty createRootDataProperty(Iterable<DataProperty> allSubs) {
 
 		return new RootDataProperty(allSubs);
 	}

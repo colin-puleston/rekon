@@ -31,37 +31,37 @@ import java.util.*;
  */
 public interface InputAxioms {
 
-	public Collection<InputClassEquivalence> getClassEquivalences();
+	public Iterable<InputClassEquivalence> getClassEquivalences();
 
-	public Collection<InputClassComplexEquivalence> getClassComplexEquivalences();
+	public Iterable<InputClassComplexEquivalence> getClassComplexEquivalences();
 
-	public Collection<InputComplexEquivalence> getComplexEquivalences();
+	public Iterable<InputComplexEquivalence> getComplexEquivalences();
 
-	public Collection<InputClassSubSuper> getClassSubSupers();
+	public Iterable<InputClassSubSuper> getClassSubSupers();
 
-	public Collection<InputClassSubComplexSuper> getClassSubComplexSupers();
+	public Iterable<InputClassSubComplexSuper> getClassSubComplexSupers();
 
-	public Collection<InputComplexSubClassSuper> getComplexSubClassSupers();
+	public Iterable<InputComplexSubClassSuper> getComplexSubClassSupers();
 
-	public Collection<InputComplexSubSuper> getComplexSubSupers();
+	public Iterable<InputComplexSubSuper> getComplexSubSupers();
 
-	public Collection<InputIndividualEquivalence> getIndividualEquivalences();
+	public Iterable<InputIndividualEquivalence> getIndividualEquivalences();
 
-	public Collection<InputIndividualClassType> getIndividualClassTypes();
+	public Iterable<InputIndividualClassType> getIndividualClassTypes();
 
-	public Collection<InputIndividualComplexType> getIndividualComplexTypes();
+	public Iterable<InputIndividualComplexType> getIndividualComplexTypes();
 
-	public Collection<InputIndividualRelation> getIndividualRelations();
+	public Iterable<InputIndividualRelation> getIndividualRelations();
 
-	public Collection<InputNodePropertyEquivalence> getNodePropertyEquivalences();
+	public Iterable<InputNodePropertyEquivalence> getNodePropertyEquivalences();
 
-	public Collection<InputNodePropertySubSuper> getNodePropertySubSupers();
+	public Iterable<InputNodePropertySubSuper> getNodePropertySubSupers();
 
-	public Collection<InputNodePropertyChain> getNodePropertyChains();
+	public Iterable<InputNodePropertyChain> getNodePropertyChains();
 
-	public Collection<InputNodePropertyTransitive> getNodePropertyTransitives();
+	public Iterable<InputNodePropertyTransitive> getNodePropertyTransitives();
 
-	public Collection<InputDataPropertyEquivalence> getDataPropertyEquivalences();
+	public Iterable<InputDataPropertyEquivalence> getDataPropertyEquivalences();
 
-	public Collection<InputDataPropertySubSuper> getDataPropertySubSupers();
+	public Iterable<InputDataPropertySubSuper> getDataPropertySubSupers();
 }

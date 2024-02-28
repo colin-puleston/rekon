@@ -48,87 +48,87 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 	private List<TypeAxiomResolver<?>> axiomTypeResolvers = new ArrayList<TypeAxiomResolver<?>>();
 	private List<TypeAxiomConverter<?, ?>> axiomTypeConverters = new ArrayList<TypeAxiomConverter<?, ?>>();
 
-	public Collection<InputClassEquivalence> getClassEquivalences() {
+	public Iterable<InputClassEquivalence> getClassEquivalences() {
 
 		return classExprAxioms.getClassEquivalences();
 	}
 
-	public Collection<InputClassComplexEquivalence> getClassComplexEquivalences() {
+	public Iterable<InputClassComplexEquivalence> getClassComplexEquivalences() {
 
 		return classExprAxioms.getClassComplexEquivalences();
 	}
 
-	public Collection<InputComplexEquivalence> getComplexEquivalences() {
+	public Iterable<InputComplexEquivalence> getComplexEquivalences() {
 
 		return classExprAxioms.getComplexEquivalences();
 	}
 
-	public Collection<InputClassSubSuper> getClassSubSupers() {
+	public Iterable<InputClassSubSuper> getClassSubSupers() {
 
 		return classExprAxioms.getClassSubSupers();
 	}
 
-	public Collection<InputClassSubComplexSuper> getClassSubComplexSupers() {
+	public Iterable<InputClassSubComplexSuper> getClassSubComplexSupers() {
 
 		return classExprAxioms.getClassSubComplexSupers();
 	}
 
-	public Collection<InputComplexSubClassSuper> getComplexSubClassSupers() {
+	public Iterable<InputComplexSubClassSuper> getComplexSubClassSupers() {
 
 		return classExprAxioms.getComplexSubClassSupers();
 	}
 
-	public Collection<InputComplexSubSuper> getComplexSubSupers() {
+	public Iterable<InputComplexSubSuper> getComplexSubSupers() {
 
 		return classExprAxioms.getComplexSubSupers();
 	}
 
-	public Collection<InputNodePropertyEquivalence> getNodePropertyEquivalences() {
+	public Iterable<InputNodePropertyEquivalence> getNodePropertyEquivalences() {
 
 		return propertyAxioms.getNodePropertyEquivalences();
 	}
 
-	public Collection<InputNodePropertySubSuper> getNodePropertySubSupers() {
+	public Iterable<InputNodePropertySubSuper> getNodePropertySubSupers() {
 
 		return propertyAxioms.getNodePropertySubSupers();
 	}
 
-	public Collection<InputNodePropertyChain> getNodePropertyChains() {
+	public Iterable<InputNodePropertyChain> getNodePropertyChains() {
 
 		return propertyAxioms.getNodePropertyChains();
 	}
 
-	public Collection<InputNodePropertyTransitive> getNodePropertyTransitives() {
+	public Iterable<InputNodePropertyTransitive> getNodePropertyTransitives() {
 
 		return propertyAxioms.getNodePropertyTransitives();
 	}
 
-	public Collection<InputDataPropertyEquivalence> getDataPropertyEquivalences() {
+	public Iterable<InputDataPropertyEquivalence> getDataPropertyEquivalences() {
 
 		return propertyAxioms.getDataPropertyEquivalences();
 	}
 
-	public Collection<InputDataPropertySubSuper> getDataPropertySubSupers() {
+	public Iterable<InputDataPropertySubSuper> getDataPropertySubSupers() {
 
 		return propertyAxioms.getDataPropertySubSupers();
 	}
 
-	public Collection<InputIndividualEquivalence> getIndividualEquivalences() {
+	public Iterable<InputIndividualEquivalence> getIndividualEquivalences() {
 
 		return individualAxioms.getIndividualEquivalences();
 	}
 
-	public Collection<InputIndividualClassType> getIndividualClassTypes() {
+	public Iterable<InputIndividualClassType> getIndividualClassTypes() {
 
 		return individualAxioms.getIndividualClassTypes();
 	}
 
-	public Collection<InputIndividualComplexType> getIndividualComplexTypes() {
+	public Iterable<InputIndividualComplexType> getIndividualComplexTypes() {
 
 		return individualAxioms.getIndividualComplexTypes();
 	}
 
-	public Collection<InputIndividualRelation> getIndividualRelations() {
+	public Iterable<InputIndividualRelation> getIndividualRelations() {
 
 		return individualAxioms.getIndividualRelations();
 	}

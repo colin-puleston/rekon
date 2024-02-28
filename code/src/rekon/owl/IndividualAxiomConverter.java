@@ -30,6 +30,7 @@ import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
 import rekon.build.input.*;
+import rekon.util.*;
 
 /**
  * @author Colin Puleston
@@ -412,27 +413,28 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		new IndividualDataRelationConverter();
 	}
 
-	Collection<InputIndividualEquivalence> getIndividualEquivalences() {
+	Iterable<InputIndividualEquivalence> getIndividualEquivalences() {
 
 		return getInputAxioms(IndividualEquivalenceConverter.class);
 	}
 
-	Collection<InputIndividualClassType> getIndividualClassTypes() {
+	Iterable<InputIndividualClassType> getIndividualClassTypes() {
 
 		return getInputAxioms(IndividualClassTypeConverter.class);
 	}
 
-	Collection<InputIndividualComplexType> getIndividualComplexTypes() {
+	Iterable<InputIndividualComplexType> getIndividualComplexTypes() {
 
 		return getInputAxioms(IndividualComplexTypeConverter.class);
 	}
 
-	Collection<InputIndividualRelation> getIndividualRelations() {
+	Iterable<InputIndividualRelation> getIndividualRelations() {
 
-		List<InputIndividualRelation> all = new ArrayList<InputIndividualRelation>();
+		MultiIterable<InputIndividualRelation> all
+			= new MultiIterable<InputIndividualRelation>();
 
-		all.addAll(getInputAxioms(IndividualObjectRelationConverter.class));
-		all.addAll(getInputAxioms(IndividualDataRelationConverter.class));
+		all.addComponent(getInputAxioms(IndividualObjectRelationConverter.class));
+		all.addComponent(getInputAxioms(IndividualDataRelationConverter.class));
 
 		return all;
 	}

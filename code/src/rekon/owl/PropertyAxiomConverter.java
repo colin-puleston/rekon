@@ -462,32 +462,32 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		new DataPropertySubSuperConverter();
 	}
 
-	Collection<InputNodePropertyEquivalence> getNodePropertyEquivalences() {
+	Iterable<InputNodePropertyEquivalence> getNodePropertyEquivalences() {
 
 		return getInputAxioms(NodePropertyEquivalenceConverter.class);
 	}
 
-	Collection<InputNodePropertySubSuper> getNodePropertySubSupers() {
+	Iterable<InputNodePropertySubSuper> getNodePropertySubSupers() {
 
 		return getInputAxioms(NodePropertySubSuperConverter.class);
 	}
 
-	Collection<InputNodePropertyChain> getNodePropertyChains() {
+	Iterable<InputNodePropertyChain> getNodePropertyChains() {
 
 		return getInputAxioms(NodePropertyChainConverter.class);
 	}
 
-	Collection<InputNodePropertyTransitive> getNodePropertyTransitives() {
+	Iterable<InputNodePropertyTransitive> getNodePropertyTransitives() {
 
 		return getInputAxioms(NodePropertyTransitiveConverter.class);
 	}
 
-	Collection<InputDataPropertyEquivalence> getDataPropertyEquivalences() {
+	Iterable<InputDataPropertyEquivalence> getDataPropertyEquivalences() {
 
 		return getInputAxioms(DataPropertyEquivalenceConverter.class);
 	}
 
-	Collection<InputDataPropertySubSuper> getDataPropertySubSupers() {
+	Iterable<InputDataPropertySubSuper> getDataPropertySubSupers() {
 
 		return getInputAxioms(DataPropertySubSuperConverter.class);
 	}

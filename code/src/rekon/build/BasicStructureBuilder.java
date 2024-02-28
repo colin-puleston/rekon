@@ -46,7 +46,7 @@ class BasicStructureBuilder {
 			}
 		}
 
-		abstract Collection<? extends InputNameEquivalence<N>> getEquivalences();
+		abstract Iterable<? extends InputNameEquivalence<N>> getEquivalences();
 	}
 
 	private abstract class HierarchyNameConverter
@@ -61,17 +61,17 @@ class BasicStructureBuilder {
 			}
 		}
 
-		abstract Collection<? extends InputNameSubSuper<N>> getSubSupers();
+		abstract Iterable<? extends InputNameSubSuper<N>> getSubSupers();
 	}
 
 	private class ClassNodeConverter extends HierarchyNameConverter<ClassNode> {
 
-		Collection<InputClassEquivalence> getEquivalences() {
+		Iterable<InputClassEquivalence> getEquivalences() {
 
 			return axioms.getClassEquivalences();
 		}
 
-		Collection<InputClassSubSuper> getSubSupers() {
+		Iterable<InputClassSubSuper> getSubSupers() {
 
 			return axioms.getClassSubSupers();
 		}
@@ -87,7 +87,7 @@ class BasicStructureBuilder {
 			}
 		}
 
-		Collection<InputIndividualEquivalence> getEquivalences() {
+		Iterable<InputIndividualEquivalence> getEquivalences() {
 
 			return axioms.getIndividualEquivalences();
 		}
@@ -108,12 +108,12 @@ class BasicStructureBuilder {
 			}
 		}
 
-		Collection<InputNodePropertyEquivalence> getEquivalences() {
+		Iterable<InputNodePropertyEquivalence> getEquivalences() {
 
 			return axioms.getNodePropertyEquivalences();
 		}
 
-		Collection<InputNodePropertySubSuper> getSubSupers() {
+		Iterable<InputNodePropertySubSuper> getSubSupers() {
 
 			return axioms.getNodePropertySubSupers();
 		}
@@ -121,12 +121,12 @@ class BasicStructureBuilder {
 
 	private class DataPropertyConverter extends HierarchyNameConverter<DataProperty> {
 
-		Collection<InputDataPropertyEquivalence> getEquivalences() {
+		Iterable<InputDataPropertyEquivalence> getEquivalences() {
 
 			return axioms.getDataPropertyEquivalences();
 		}
 
-		Collection<InputDataPropertySubSuper> getSubSupers() {
+		Iterable<InputDataPropertySubSuper> getSubSupers() {
 
 			return axioms.getDataPropertySubSupers();
 		}

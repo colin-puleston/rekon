@@ -96,7 +96,7 @@ public abstract class Name {
 		linksHandler = createInitialLinksHandler();
 	}
 
-	void configureAsRootName(Collection<? extends Name> allSubs) {
+	void configureAsRootName(Iterable<? extends Name> allSubs) {
 
 		getRootLinksHandler().configure(allSubs);
 	}

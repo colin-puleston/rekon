@@ -26,33 +26,38 @@ package rekon.core;
 
 import java.util.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
 public class Ontology {
 
-	private List<Name> allNames = new ArrayList<Name>();
-	private List<NodeX> nodes = new ArrayList<NodeX>();
+	private MultiIterable<Name> allNames = new MultiIterable<Name>();
+	private MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
+
+	private List<FreeClassNode> freeClassNodes = new ArrayList<FreeClassNode>();
 
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		nodes.addAll(names.getClassNodes());
-		nodes.addAll(names.getIndividualNodes());
+		allNodes.addComponent(names.getClassNodes());
+		allNodes.addComponent(names.getIndividualNodes());
+		allNodes.addComponent(freeClassNodes);
 
-		allNames.addAll(nodes);
-		allNames.addAll(names.getNodeProperties());
-		allNames.addAll(names.getDataProperties());
+		allNames.addComponent(allNodes);
+		allNames.addComponent(names.getNodeProperties());
+		allNames.addComponent(names.getDataProperties());
 
 		structureBuilder.build(createMatchStructures());
 
 		processAllNamesPostAdditions();
 
-		NodeMatchers nodeMatchers = new NodeMatchers(nodes);
+		NodeMatchers nodeMatchers = new NodeMatchers(allNodes);
 
-		new OntologyClassifier(allNames, nodes, nodeMatchers);
+		new OntologyClassifier(allNames, allNodes, nodeMatchers);
 
 		dynamicSubsumers = new DynamicSubsumers(nodeMatchers);
 		dynamicSubsumeds = new DynamicSubsumeds(nodeMatchers);
@@ -70,8 +75,7 @@ public class Ontology {
 
 	void addFreeClass(FreeClassNode cn) {
 
-		allNames.add(cn);
-		nodes.add(cn);
+		freeClassNodes.add(cn);
 	}
 
 	DynamicSubsumers getDynamicSubsumers() {
