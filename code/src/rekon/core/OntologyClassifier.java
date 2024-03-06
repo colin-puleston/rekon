@@ -44,7 +44,7 @@ class OntologyClassifier {
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
 
 	private boolean initialPhase = true;
-	private boolean nextPhaseRequired = true;
+	private boolean expansionsInCurrentPhase = false;
 
 	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
@@ -105,6 +105,11 @@ class OntologyClassifier {
 
 		PassConfig() {
 
+			findClassifyCandidates();
+		}
+
+		void findClassifyCandidates() {
+
 			findPatternMatchCandidates();
 			findDisjunctionClassifyCandidates();
 		}
@@ -125,13 +130,13 @@ class OntologyClassifier {
 			allRelationTargetSubsumptions.inferNewSubsumptions();
 		}
 
-		abstract boolean initialPhasePass();
+		abstract boolean initialPass();
 
 		abstract boolean potentialPatternMatchCandidate(Pattern p);
 
 		private void findPatternMatchCandidates() {
 
-			boolean initPass = initialPhasePass();
+			boolean initPass = initialPass();
 
 			for (PatternMatcher pp : profilePatterns) {
 
@@ -154,7 +159,7 @@ class OntologyClassifier {
 
 		private void findDisjunctionClassifyCandidates() {
 
-			boolean initPass = initialPhasePass();
+			boolean initPass = initialPass();
 
 			for (DisjunctionMatcher d : allDisjunctions) {
 
@@ -179,26 +184,41 @@ class OntologyClassifier {
 		}
 	}
 
-	private class InitialPhasePassConfig extends PassConfig {
+	private class InitialPassConfig extends PassConfig {
 
-		boolean initialPhasePass() {
+		void findClassifyCandidates() {
+
+			setAllProfileExpansionStatuses(true);
+			super.findClassifyCandidates();
+			setAllProfileExpansionStatuses(false);
+		}
+
+		boolean initialPass() {
 
 			return true;
 		}
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
-			boolean expanded = p.updateForProfileExpansion();
+			boolean expanded = p.checkProfileExpansion();
 
-			nextPhaseRequired |= expanded;
+			expansionsInCurrentPhase |= expanded;
 
 			return initialPhase || expanded;
+		}
+
+		private void setAllProfileExpansionStatuses(boolean checkRequired) {
+
+			for (PatternMatcher p : profilePatterns) {
+
+				p.getPattern().setProfileExpansionStatus(checkRequired);
+			}
 		}
 	}
 
 	private class DefaultPassConfig extends PassConfig {
 
-		boolean initialPhasePass() {
+		boolean initialPass() {
 
 			return false;
 		}
@@ -229,7 +249,7 @@ class OntologyClassifier {
 
 		while (initialiseNextPhase()) {
 
-			PassConfig config = new InitialPhasePassConfig();
+			PassConfig config = new InitialPassConfig();
 
 			while (config.potentialInferences()) {
 
@@ -244,13 +264,11 @@ class OntologyClassifier {
 
 	private boolean initialiseNextPhase() {
 
-		if (nextPhaseRequired) {
-
-			nextPhaseRequired = false;
+		if (initialPhase || expansionsInCurrentPhase) {
 
 			if (initialPhase || resetAllPhaseInferredSubsumers()) {
 
-				setAllProfileExpansionCheckRequireds();
+				expansionsInCurrentPhase = false;
 
 				return true;
 			}
@@ -272,14 +290,6 @@ class OntologyClassifier {
 		}
 
 		return anyInfs;
-	}
-
-	private void setAllProfileExpansionCheckRequireds() {
-
-		for (PatternMatcher p : profilePatterns) {
-
-			p.getPattern().setProfileExpansionCheckRequired();
-		}
 	}
 
 	private PassConfig perfomPass(PassConfig config) {

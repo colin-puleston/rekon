@@ -85,14 +85,14 @@ class PatternMatcher extends NodeMatcher {
 		pattern.checkExpandProfile();
 	}
 
-	void setProfileExpansionCheckRequired() {
+	void setProfileExpansionStatus(boolean checkRequired) {
 
-		pattern.setProfileExpansionCheckRequired();
+		pattern.setProfileExpansionStatus(checkRequired);
 	}
 
-	boolean updateForProfileExpansion() {
+	boolean checkProfileExpansion() {
 
-		return pattern.updateForProfileExpansion();
+		return pattern.checkProfileExpansion();
 	}
 
 	Pattern getPattern() {

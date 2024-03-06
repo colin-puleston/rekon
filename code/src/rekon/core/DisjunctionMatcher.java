@@ -152,10 +152,10 @@ class DisjunctionMatcher extends NodeMatcher {
 	void checkExpandProfile() {
 	}
 
-	void setProfileExpansionCheckRequired() {
+	void setProfileExpansionStatus(boolean checkRequired) {
 	}
 
-	boolean updateForProfileExpansion() {
+	boolean checkProfileExpansion() {
 
 		return false;
 	}

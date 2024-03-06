@@ -128,18 +128,17 @@ public class Pattern extends PatternComponent {
 
 	void checkExpandProfile() {
 
-		setProfileExpansionCheckRequired();
-		updateForProfileExpansion();
+		getProfileRelations().checkExpand();
 	}
 
-	void setProfileExpansionCheckRequired() {
+	void setProfileExpansionStatus(boolean checkRequired) {
 
-		getProfileRelations().setExpansionCheckRequired();
+		getProfileRelations().setProfileExpansionStatus(checkRequired);
 	}
 
-	boolean updateForProfileExpansion() {
+	boolean checkProfileExpansion() {
 
-		return getProfileRelations().updateForExpansion();
+		return getProfileRelations().checkExpansion();
 	}
 
 	void collectNames(NameCollector collector) {

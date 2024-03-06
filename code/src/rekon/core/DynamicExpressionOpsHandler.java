@@ -126,9 +126,9 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 		NodeMatcher m = getExpressionMatcher();
 
-		m.setProfileExpansionCheckRequired();
+		m.setProfileExpansionStatus(true);
 		inferSubsumers();
-		m.updateForProfileExpansion();
+		m.checkProfileExpansion();
 	}
 
 	NodeX getNode() {

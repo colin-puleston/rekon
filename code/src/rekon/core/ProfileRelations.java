@@ -36,7 +36,7 @@ class ProfileRelations {
 
 	private ExpansionStatus expansionStatus = ExpansionStatus.NONE;
 
-	private enum ExpansionStatus {NONE, PRE_EXPANDED, CHECK_EXPANSION}
+	private enum ExpansionStatus {NONE, CHECK, EXPANDED}
 
 	private class Expander extends ProfileRelationCollector {
 
@@ -63,32 +63,30 @@ class ProfileRelations {
 		profileRelations = getDirectRelations();
 	}
 
-	void setExpansionCheckRequired() {
+	void checkExpand() {
 
-		expansionStatus = ExpansionStatus.CHECK_EXPANSION;
-	}
+		expansionStatus = ExpansionStatus.CHECK;
 
-	boolean updateForExpansion() {
-
-		boolean expanded = false;
-
-		switch (expansionStatus) {
-
-			case CHECK_EXPANSION:
-				expanded = checkExpansion(null);
-				break;
-
-			case PRE_EXPANDED:
-				expanded = true;
-				break;
-
-			case NONE:
-				throw new Error("Should never happen!");
-		}
+		checkExpansion();
 
 		expansionStatus = ExpansionStatus.NONE;
+	}
 
-		return expanded;
+	void setProfileExpansionStatus(boolean checkRequired) {
+
+		expansionStatus = checkRequired ? ExpansionStatus.CHECK : ExpansionStatus.NONE;
+	}
+
+	boolean checkExpansion() {
+
+		if (expansionStatus == ExpansionStatus.CHECK) {
+
+			expansionStatus = expanded(null)
+								? ExpansionStatus.EXPANDED
+								: ExpansionStatus.NONE;
+		}
+
+		return expansionStatus == ExpansionStatus.EXPANDED;
 	}
 
 	Collection<Relation> getAll() {
@@ -98,11 +96,11 @@ class ProfileRelations {
 
 	Collection<Relation> ensureExpansions(NodeVisitMonitor visitMonitor) {
 
-		if (expansionStatus == ExpansionStatus.CHECK_EXPANSION) {
+		if (expansionStatus == ExpansionStatus.CHECK) {
 
 			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
 
-			if (checkExpansion(visitMonitor)) {
+			if (expanded(visitMonitor)) {
 
 				if (visitMonitor.incompleteTraversal()) {
 
@@ -113,7 +111,7 @@ class ProfileRelations {
 					return postProfileRels;
 				}
 
-				expansionStatus = ExpansionStatus.PRE_EXPANDED;
+				expansionStatus = ExpansionStatus.EXPANDED;
 			}
 		}
 
@@ -133,7 +131,7 @@ class ProfileRelations {
 		return false;
 	}
 
-	private boolean checkExpansion(NodeVisitMonitor visitMonitor) {
+	private boolean expanded(NodeVisitMonitor visitMonitor) {
 
 		boolean newSubsumers = anyLastPhaseInferredSubsumers();
 		boolean expandableRels = anyExpandableRelations();
@@ -156,6 +154,7 @@ class ProfileRelations {
 
 				e.collectFromRelationExpansions(getDirectRelations());
 			}
+
 			return e.anyAdditions();
 		}
 
