@@ -78,9 +78,9 @@ public class RekonInstanceBox {
 
 			Object owlSource = source.getSourceObject();
 
-			if (owlSource instanceof RekonOwlInstanceRef) {
+			if (owlSource instanceof RekonInstanceRef) {
 
-				return toInstanceNode((RekonOwlInstanceRef)owlSource);
+				return toInstanceNode((RekonInstanceRef)owlSource);
 			}
 
 			return null;
@@ -91,7 +91,7 @@ public class RekonInstanceBox {
 			this.queries = queries;
 		}
 
-		private InstanceNode toInstanceNode(RekonOwlInstanceRef source) {
+		private InstanceNode toInstanceNode(RekonInstanceRef source) {
 
 			IRI iri = source.getIRI();
 			Instance i = instances.get(iri);
@@ -172,7 +172,7 @@ public class RekonInstanceBox {
 
 	public OWLClassExpression createInstanceRef(IRI iri) {
 
-		return new RekonOwlInstanceRef(iri);
+		return new RekonInstanceRef(iri);
 	}
 
 	RekonInstanceBox(
