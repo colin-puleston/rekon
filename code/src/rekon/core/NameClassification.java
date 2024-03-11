@@ -439,6 +439,11 @@ class NameClassification extends NameLinksHandler {
 		return subs.getExternal(direct);
 	}
 
+	boolean hasEquivalent(Name test) {
+
+		return equivalents.contains(test);
+	}
+
 	boolean hasSubsumer(Name test) {
 
 		return equivalents.contains(test) || supers.hasLinkTo(test, new NameSet());

@@ -136,7 +136,7 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return getExpressionMatcher().getNode();
 	}
 
-	Names getEquivalents() {
+	Names getRawEquivalents() {
 
 		NameSet subsumeds = inferSubsumedClasses();
 
@@ -148,7 +148,7 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return inferEquivsForSubsumeds(subsumeds);
 	}
 
-	Names getSupers(boolean direct) {
+	Names getRawSupers(boolean direct) {
 
 		NameSet subsumers = inferSubsumers();
 
@@ -167,7 +167,7 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return superClassesResolver.resolve(subsumers, direct);
 	}
 
-	Names getSubs(boolean direct) {
+	Names getRawSubs(boolean direct) {
 
 		NameSet subsumeds = inferSubsumedClasses();
 
@@ -186,7 +186,7 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 		return subClassesResolver.resolve(subsumeds, direct);
 	}
 
-	Names getIndividuals(boolean direct) {
+	Names getRawIndividuals(boolean direct) {
 
 		NameSet subs = inferAllSubsumedNodes();
 

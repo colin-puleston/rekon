@@ -24,8 +24,6 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
@@ -34,24 +32,24 @@ class InvalidInputDynamicOpsHandler implements DynamicOpsHandler {
 	static final InvalidInputDynamicOpsHandler SINGLETON
 						= new InvalidInputDynamicOpsHandler();
 
-	public Names getEquivalentsGroup() {
+	public Names getEquivalents() {
 
 		return Names.NO_NAMES;
 	}
 
-	public Collection<Names> getSuperEquivGroups(boolean direct) {
+	public Names getSupers(boolean direct) {
 
-		return Collections.emptySet();
+		return Names.NO_NAMES;
 	}
 
-	public Collection<Names> getSubEquivGroups(boolean direct) {
+	public Names getSubs(boolean direct) {
 
-		return Collections.emptySet();
+		return Names.NO_NAMES;
 	}
 
-	public Collection<Names> getIndividualEquivGroups(boolean direct) {
+	public Names getIndividuals(boolean direct) {
 
-		return Collections.emptySet();
+		return Names.NO_NAMES;
 	}
 
 	public boolean equivalentTo(DynamicOpsHandler other) {

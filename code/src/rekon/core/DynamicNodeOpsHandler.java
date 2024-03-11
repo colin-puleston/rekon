@@ -44,7 +44,7 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		return node;
 	}
 
-	Names getEquivalents() {
+	Names getRawEquivalents() {
 
 		NameList equivs = new NameList(node);
 
@@ -53,17 +53,17 @@ class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
 		return equivs;
 	}
 
-	Names getSupers(boolean direct) {
+	Names getRawSupers(boolean direct) {
 
 		return node.getSupers(direct);
 	}
 
-	Names getSubs(boolean direct) {
+	Names getRawSubs(boolean direct) {
 
 		return node.getSubs(ClassNode.class, direct);
 	}
 
-	Names getIndividuals(boolean direct) {
+	Names getRawIndividuals(boolean direct) {
 
 		return node.getSubs(IndividualNode.class, direct);
 	}

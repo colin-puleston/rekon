@@ -22,74 +22,38 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
 
-import java.util.*;
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class EquivalentsGrouper {
+class DataPropertyOps extends PropertyOps<OWLDataProperty> {
 
-	private Set<Names> groups = new HashSet<Names>();
-	private NameSet initialGroupNames = new NameSet();
+	private MappedNames names;
 
-	Collection<Names> group(Names names) {
+	DataPropertyOps(OWLDataFactory factory, MappedNames names) {
 
-		for (Name n : names) {
+		super(factory.getOWLTopDataProperty(), factory.getOWLBottomDataProperty());
 
-			Names equivs = n.getEquivalents();
-
-			if (newGroupFor(n, equivs)) {
-
-				Names group = checkCreateGroup(n, equivs);
-
-				if (!group.isEmpty()) {
-
-					groups.add(group);
-				}
-			}
-		}
-
-		return groups;
+		this.names = names;
 	}
 
-	private boolean newGroupFor(Name name, Names equivs) {
+	Iterable<? extends Name> getAllEntityNames() {
 
-		if (equivs.isEmpty()) {
-
-			return true;
-		}
-
-		if (initialGroupNames.containsAny(equivs)) {
-
-			return false;
-		}
-
-		initialGroupNames.add(name);
-
-		return true;
+		return names.getNodeProperties();
 	}
 
-	private Names checkCreateGroup(Name name, Names equivs) {
+	Class<OWLDataProperty> getEntityType() {
 
-		Names group = new NameSet();
-
-		checkAddToGroup(group, name);
-
-		for (Name e : equivs) {
-
-			checkAddToGroup(group, e);
-		}
-
-		return group;
+		return OWLDataProperty.class;
 	}
 
-	private void checkAddToGroup(Names group, Name name) {
+	PropertyX getPropertyName(OWLDataProperty prop) {
 
-		if (name.mapped()) {
-
-			group.add(name);
-		}
+		return names.get(prop);
 	}
 }

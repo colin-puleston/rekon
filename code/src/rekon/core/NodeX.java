@@ -35,6 +35,26 @@ public abstract class NodeX extends Name {
 
 	private List<NodeMatcher> matchers = NO_MATCHERS;
 
+	public boolean subsumes(Name name) {
+
+		if (name == this) {
+
+			return true;
+		}
+
+		if (name instanceof NodeX) {
+
+			if (local() ) {
+
+				return subsumesNodeOrSubsumerViaMatcher((NodeX)name);
+			}
+
+			return super.subsumes(name);
+		}
+
+		return false;
+	}
+
 	PatternMatcher addProfilePatternMatcher() {
 
 		return addProfilePatternMatcher(new Pattern(this));
@@ -149,26 +169,6 @@ public abstract class NodeX extends Name {
 		all.addAll(getDefinitionDisjunctionMatchers());
 
 		return all;
-	}
-
-	boolean subsumes(Name name) {
-
-		if (name == this) {
-
-			return true;
-		}
-
-		if (name instanceof NodeX) {
-
-			if (local() ) {
-
-				return subsumesNodeOrSubsumerViaMatcher((NodeX)name);
-			}
-
-			return super.subsumes(name);
-		}
-
-		return false;
 	}
 
 	boolean subsumesDirectly(NodeX node) {

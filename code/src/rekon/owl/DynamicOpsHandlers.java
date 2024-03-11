@@ -22,22 +22,59 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
+
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
  */
-public interface DynamicOpsHandler {
+class DynamicOpsHandlers {
 
-	public Names getEquivalents();
+	private MappedNames names;
 
-	public Names getSupers(boolean direct);
+	private DynamicOps dynamicOps;
 
-	public Names getSubs(boolean direct);
+	private CoreBuilder coreBuilder;
+	private ExpressionConverter expressionConverter;
 
-	public Names getIndividuals(boolean direct);
+	DynamicOpsHandlers(
+		MappedNames names,
+		DynamicOps dynamicOps,
+		CoreBuilder coreBuilder,
+		ExpressionConverter expressionConverter) {
 
-	public boolean equivalentTo(DynamicOpsHandler other);
+		this.names = names;
+		this.dynamicOps = dynamicOps;
+		this.coreBuilder = coreBuilder;
+		this.expressionConverter = expressionConverter;
+	}
 
-	public boolean subsumes(DynamicOpsHandler other);
+	DynamicOpsHandler getFor(OWLClassExpression expr) {
+
+		if (expr instanceof OWLClass) {
+
+			return getFor((OWLClass)expr);
+		}
+
+		return dynamicOps.createHandler(toDynamicPatternSource(expr));
+	}
+
+	DynamicOpsHandler getFor(OWLClass cls) {
+
+		return dynamicOps.createHandler(names.get(cls));
+	}
+
+	DynamicOpsHandler getFor(OWLNamedIndividual ind) {
+
+		return dynamicOps.createHandler(names.get(ind));
+	}
+
+	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
+
+		return coreBuilder.createMultiPatternSource(expressionConverter.toNode(expr));
+	}
 }

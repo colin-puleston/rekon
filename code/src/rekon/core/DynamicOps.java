@@ -24,8 +24,6 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
@@ -55,11 +53,6 @@ public class DynamicOps {
 		}
 
 		return InvalidInputDynamicOpsHandler.SINGLETON;
-	}
-
-	public Collection<Names> namesToEquivGroups(Names names) {
-
-		return new EquivalentsGrouper().group(names);
 	}
 
 	DynamicOps(Ontology ontology) {

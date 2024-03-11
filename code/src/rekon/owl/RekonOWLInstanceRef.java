@@ -31,11 +31,11 @@ import uk.ac.manchester.cs.owl.owlapi.*;
 /**
  * @author Colin Puleston
  */
-class RekonOWLInstanceRef extends OWLClassImpl {
+class RekonOwlInstanceRef extends OWLClassImpl {
 
 	static private final long serialVersionUID = -1;
 
-	RekonOWLInstanceRef(IRI iri) {
+	RekonOwlInstanceRef(IRI iri) {
 
 		super(iri);
 	}

@@ -22,22 +22,38 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
+
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface DynamicOpsHandler {
+class ObjectPropertyOps extends PropertyOps<OWLObjectProperty> {
 
-	public Names getEquivalents();
+	private MappedNames names;
 
-	public Names getSupers(boolean direct);
+	ObjectPropertyOps(OWLDataFactory factory, MappedNames names) {
 
-	public Names getSubs(boolean direct);
+		super(factory.getOWLTopObjectProperty(), factory.getOWLBottomObjectProperty());
 
-	public Names getIndividuals(boolean direct);
+		this.names = names;
+	}
 
-	public boolean equivalentTo(DynamicOpsHandler other);
+	Iterable<? extends Name> getAllEntityNames() {
 
-	public boolean subsumes(DynamicOpsHandler other);
+		return names.getNodeProperties();
+	}
+
+	Class<OWLObjectProperty> getEntityType() {
+
+		return OWLObjectProperty.class;
+	}
+
+	PropertyX getPropertyName(OWLObjectProperty prop) {
+
+		return names.get(prop);
+	}
 }

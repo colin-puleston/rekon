@@ -24,8 +24,6 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
@@ -97,24 +95,24 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		}
 	}
 
-	public Names getEquivalentsGroup() {
+	public Names getEquivalents() {
 
-		return checkPurgeAllFreeNames(getEquivalents());
+		return checkPurgeAllFreeNames(getRawEquivalents());
 	}
 
-	public Collection<Names> getSuperEquivGroups(boolean direct) {
+	public Names getSupers(boolean direct) {
 
-		return toEquivGroups(supersResolver.resolve(getSupers(direct), direct));
+		return supersResolver.resolve(getRawSupers(direct), direct);
 	}
 
-	public Collection<Names> getSubEquivGroups(boolean direct) {
+	public Names getSubs(boolean direct) {
 
-		return toEquivGroups(subsResolver.resolve(getSubs(direct), direct));
+		return subsResolver.resolve(getRawSubs(direct), direct);
 	}
 
-	public Collection<Names> getIndividualEquivGroups(boolean direct) {
+	public Names getIndividuals(boolean direct) {
 
-		return toEquivGroups(checkPurgeAllFreeNames(getIndividuals(direct)));
+		return checkPurgeAllFreeNames(getRawIndividuals(direct));
 	}
 
 	public boolean equivalentTo(DynamicOpsHandler other) {
@@ -141,13 +139,13 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 	abstract NodeX getNode();
 
-	abstract Names getEquivalents();
+	abstract Names getRawEquivalents();
 
-	abstract Names getSupers(boolean direct);
+	abstract Names getRawSupers(boolean direct);
 
-	abstract Names getSubs(boolean direct);
+	abstract Names getRawSubs(boolean direct);
 
-	abstract Names getIndividuals(boolean direct);
+	abstract Names getRawIndividuals(boolean direct);
 
 	private boolean equivalentTo(ValidInputDynamicOpsHandler other) {
 
@@ -192,10 +190,5 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		}
 
 		return purged;
-	}
-
-	private Collection<Names> toEquivGroups(Names names) {
-
-		return new EquivalentsGrouper().group(names);
 	}
 }

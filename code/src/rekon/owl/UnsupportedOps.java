@@ -34,62 +34,7 @@ import org.semanticweb.owlapi.reasoner.*;
  */
 class UnsupportedOps {
 
-    public BufferingMode getBufferingMode() {
-
-		throw new UnsupportedOperationException();
-    }
-
-	public List<OWLOntologyChange> getPendingChanges() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Set<OWLAxiom> getPendingAxiomAdditions() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Set<OWLAxiom> getPendingAxiomRemovals() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public OWLOntology getRootOntology() {
-
-		throw new UnsupportedOperationException();
-	}
-
 	public void interrupt() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean isPrecomputed(InferenceType inferenceType) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Set<InferenceType> getPrecomputableInferenceTypes() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean isConsistent() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean isSatisfiable(OWLClassExpression classExpression) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLClass> getUnsatisfiableClasses() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean isEntailed(Set<? extends OWLAxiom> axioms) {
 
 		throw new UnsupportedOperationException();
 	}
@@ -99,42 +44,7 @@ class UnsupportedOps {
 		throw new UnsupportedOperationException();
 	}
 
-	public Node<OWLClass> getTopClassNode() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLClass> getBottomClassNode() {
-
-		throw new UnsupportedOperationException();
-	}
-
 	public NodeSet<OWLClass> getDisjointClasses(OWLClassExpression ce) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLObjectPropertyExpression> getTopObjectPropertyNode() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLObjectPropertyExpression> getBottomObjectPropertyNode() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public NodeSet<OWLObjectPropertyExpression> getSubObjectProperties(OWLObjectPropertyExpression pe, boolean direct) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public NodeSet<OWLObjectPropertyExpression> getSuperObjectProperties(OWLObjectPropertyExpression pe, boolean direct) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLObjectPropertyExpression> getEquivalentObjectProperties(OWLObjectPropertyExpression pe) {
 
 		throw new UnsupportedOperationException();
 	}
@@ -159,31 +69,6 @@ class UnsupportedOps {
 		throw new UnsupportedOperationException();
 	}
 
-	public Node<OWLDataProperty> getTopDataPropertyNode() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLDataProperty> getBottomDataPropertyNode() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public NodeSet<OWLDataProperty> getSubDataProperties(OWLDataProperty pe, boolean direct) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public NodeSet<OWLDataProperty> getSuperDataProperties(OWLDataProperty pe, boolean direct) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Node<OWLDataProperty> getEquivalentDataProperties(OWLDataProperty pe) {
-
-		throw new UnsupportedOperationException();
-	}
-
 	public NodeSet<OWLDataProperty> getDisjointDataProperties(OWLDataPropertyExpression pe) {
 
 		throw new UnsupportedOperationException();
@@ -204,32 +89,17 @@ class UnsupportedOps {
 		throw new UnsupportedOperationException();
 	}
 
-	public Node<OWLNamedIndividual> getSameIndividuals(OWLNamedIndividual ind) {
-
-		throw new UnsupportedOperationException();
-	}
-
 	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual ind) {
 
 		throw new UnsupportedOperationException();
 	}
 
+	public boolean isSatisfiable(OWLClassExpression classExpression) {
+
+		throw new UnsupportedOperationException();
+	}
+
 	public long getTimeOut() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public FreshEntityPolicy getFreshEntityPolicy() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public IndividualNodeSetPolicy getIndividualNodeSetPolicy() {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public void dispose() {
 
 		throw new UnsupportedOperationException();
 	}

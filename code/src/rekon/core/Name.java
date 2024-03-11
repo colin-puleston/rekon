@@ -81,6 +81,16 @@ public abstract class Name {
 		return getSubs(direct).filterForType(type);
 	}
 
+	public boolean hasEquivalent(Name name) {
+
+		return getClassification().hasEquivalent(name);
+	}
+
+	public boolean subsumes(Name name) {
+
+		return rootName() || name == this || name.hasSubsumer(this);
+	}
+
 	Name() {
 
 		linksHandler = createInitialLinksHandler();
@@ -139,11 +149,6 @@ public abstract class Name {
 	Names getSubsumers() {
 
 		return linksHandler.getSubsumers();
-	}
-
-	boolean subsumes(Name name) {
-
-		return rootName() || name == this || name.hasSubsumer(this);
 	}
 
 	boolean anyNewSubsumers() {

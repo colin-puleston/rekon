@@ -24,307 +24,137 @@
 
 package rekon.owl;
 
-import java.util.*;
-
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.*;
-import org.semanticweb.owlapi.reasoner.impl.*;
 
 import rekon.core.*;
 import rekon.build.*;
-import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
 class RekonOps {
 
-	static private NodeSet<OWLClass> EMPTY_EQUIV_CLASS_GROUPS = new OWLClassNodeSet();
+	final ClassOps classOps;
+	final IndividualOps individualOps;
+	final ObjectPropertyOps objectPropertyOps;
+	final DataPropertyOps dataPropertyOps;
 
-	private OWLDataFactory factory;
+	final EntailmentTester entailmentTester;
 
-	private OWLClass owlThing;
-	private OWLClass owlNothing;
+	private InstanceBoxCreator instanceBoxCreator;
 
-	private Node<OWLClass> owlThingAsEquivGroup;
-	private Node<OWLClass> owlNothingAsEquivGroup;
+	private class InstanceBoxCreator {
 
-	private MappedNames names;
-	private CoreBuilder coreBuilder;
-	private ExpressionConverter expressionConverter;
+		private MappedNames names;
+		private ExpressionConverter expressionConverter;
 
-	private DynamicOps dynamicOps;
-	private InstanceOps instanceOps;
+		private InstanceOps instanceOps;
 
-	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
-	private SameIndividualsChecker sameIndividualsChecker = new SameIndividualsChecker();
+		InstanceBoxCreator(
+			Ontology ontology,
+			MappedNames names,
+			ExpressionConverter expressionConverter) {
 
-	private MappedEntityRetriever mappedEntityRetriever;
+			this.names = names;
+			this.expressionConverter = expressionConverter;
 
-	private abstract class PairwiseMatchChecker<E> {
-
-		boolean allMatch(Set<E> entities) {
-
-			if (entities.size() < 2) {
-
-				return true;
-			}
-
-			Iterator<E> i = entities.iterator();
-			E first = i.next();
-
-			do {
-
-				if (!match(first, i.next())) {
-
-					return false;
-				}
-			}
-			while (i.hasNext());
-
-			return true;
+			instanceOps = ontology.createInstanceOps();
 		}
 
-		abstract boolean match(E e1, E e2);
-	}
+		RekonInstanceBox create() {
 
-	private class EquivalenceChecker extends PairwiseMatchChecker<OWLClassExpression> {
-
-		boolean match(OWLClassExpression e1, OWLClassExpression e2) {
-
-			return toDynamicHandler(e1).equivalentTo(toDynamicHandler(e2));
+			return new RekonInstanceBox(instanceOps, names, expressionConverter);
 		}
 	}
 
-	private class SameIndividualsChecker extends PairwiseMatchChecker<OWLNamedIndividual> {
+	private class Initialiser {
 
-		boolean match(OWLNamedIndividual e1, OWLNamedIndividual e2) {
+		private OWLOntologyManager manager;
+		private OWLDataFactory factory;
 
-			return toDynamicHandler(e1).equivalentTo(toDynamicHandler(e2));
+		private MappedNames names;
+		private ExpressionConverter expressionConverter;
+		private CoreBuilder coreBuilder;
+
+		private Ontology ontology;
+		private DynamicOpsHandlers dynamicOpsHdlrs;
+
+		Initialiser(OWLOntologyManager manager) {
+
+			this.manager = manager;
+
+			factory = manager.getOWLDataFactory();
+			names = new MappedNames(manager);
+			expressionConverter = new ExpressionConverter(factory, names);
+			coreBuilder = new CoreBuilder(names);
+			ontology = createOntology();
+			dynamicOpsHdlrs = createDynamicOpsHandlers();
+		}
+
+		ClassOps createClassOps() {
+
+			return new ClassOps(factory, names, dynamicOpsHdlrs);
+		}
+
+		IndividualOps createIndividualOps() {
+
+			return new IndividualOps(dynamicOpsHdlrs);
+		}
+
+		ObjectPropertyOps createObjectPropertyOps() {
+
+			return new ObjectPropertyOps(factory, names);
+		}
+
+		DataPropertyOps createDataPropertyOps() {
+
+			return new DataPropertyOps(factory, names);
+		}
+
+		InstanceBoxCreator createInstanceBoxCreator() {
+
+			return new InstanceBoxCreator(ontology, names, expressionConverter);
+		}
+
+		private Ontology createOntology() {
+
+			return new Ontology(names, createStructureBuilder());
+		}
+
+		private StructureBuilder createStructureBuilder() {
+
+			return coreBuilder.createStructureBuilder(createAxiomConverter());
+		}
+
+		private AxiomConverter createAxiomConverter() {
+
+			return new AxiomConverter(manager, names, expressionConverter);
+		}
+
+		private DynamicOpsHandlers createDynamicOpsHandlers() {
+
+			DynamicOps ops = ontology.createDynamicOps();
+
+			return new DynamicOpsHandlers(names, ops, coreBuilder, expressionConverter);
 		}
 	}
 
 	RekonOps(OWLOntologyManager manager) {
 
-		factory = manager.getOWLDataFactory();
+		Initialiser init = new Initialiser(manager);
 
-		owlThing = factory.getOWLThing();
-		owlNothing = factory.getOWLNothing();
+		classOps = init.createClassOps();
+		individualOps = init.createIndividualOps();
+		objectPropertyOps = init.createObjectPropertyOps();
+		dataPropertyOps = init.createDataPropertyOps();
 
-		owlThingAsEquivGroup = new OWLClassNode(owlThing);
-		owlNothingAsEquivGroup = new OWLClassNode(owlNothing);
+		entailmentTester = new EntailmentTester(this);
 
-		names = new MappedNames(manager);
-		coreBuilder = new CoreBuilder(names);
-		expressionConverter = new ExpressionConverter(factory, names);
-
-		Ontology ontology = new Ontology(names, createStructureBuilder(manager));
-
-		dynamicOps = ontology.createDynamicOps();
-		instanceOps = ontology.createInstanceOps();
-
-		mappedEntityRetriever = new MappedEntityRetriever(owlThing, owlNothing);
+		instanceBoxCreator = init.createInstanceBoxCreator();
 	}
 
 	RekonInstanceBox createInstanceBox() {
 
-		return new RekonInstanceBox(instanceOps, names, expressionConverter);
-	}
-
-	Node<OWLClass> getEquivalentClasses(OWLClassExpression expr) {
-
-		if (expr.equals(owlThing)) {
-
-			return owlThingAsEquivGroup;
-		}
-
-		if (expr.equals(owlNothing)) {
-
-			return owlNothingAsEquivGroup;
-		}
-
-		Names equivs = toDynamicHandler(expr).getEquivalentsGroup();
-
-		return mappedEntityRetriever.retrieveEquivs(equivs, expr);
-	}
-
-	NodeSet<OWLClass> getSuperClasses(OWLClassExpression expr, boolean direct) {
-
-		if (expr.equals(owlThing)) {
-
-			return EMPTY_EQUIV_CLASS_GROUPS;
-		}
-
-		if (expr.equals(owlNothing)) {
-
-			Collection<Names> nothingSups = getOwlNothingSuperEquivGroups(direct);
-
-			return mappedEntityRetriever.retrieveClasses(nothingSups);
-		}
-
-		Collection<Names> sups = toDynamicHandler(expr).getSuperEquivGroups(direct);
-
-		return mappedEntityRetriever.retrieveSupers(sups, direct);
-	}
-
-	NodeSet<OWLClass> getSubClasses(OWLClassExpression expr, boolean direct) {
-
-		if (expr.equals(owlNothing)) {
-
-			return EMPTY_EQUIV_CLASS_GROUPS;
-		}
-
-		Collection<Names> subs = toDynamicHandler(expr).getSubEquivGroups(direct);
-
-		return mappedEntityRetriever.retrieveSubs(subs, direct);
-	}
-
-	NodeSet<OWLNamedIndividual> getIndividuals(OWLClassExpression expr, boolean direct) {
-
-		Collection<Names> inds = toDynamicHandler(expr).getIndividualEquivGroups(direct);
-
-		return mappedEntityRetriever.retrieveIndividuals(inds);
-	}
-
-	NodeSet<OWLClass> getTypes(OWLNamedIndividual ind, boolean direct) {
-
-		Collection<Names> types = toDynamicHandler(ind).getSuperEquivGroups(direct);
-
-		return mappedEntityRetriever.retrieveClasses(types);
-	}
-
-	boolean isEntailed(OWLAxiom axiom) {
-
-		if (axiom instanceof OWLEquivalentClassesAxiom) {
-
-			OWLEquivalentClassesAxiom equAx = (OWLEquivalentClassesAxiom)axiom;
-
-			return equivalenceChecker.allMatch(equAx.getClassExpressions());
-		}
-
-		if (axiom instanceof OWLSubClassOfAxiom) {
-
-			OWLSubClassOfAxiom subAx = (OWLSubClassOfAxiom)axiom;
-
-			return subsumption(subAx.getSuperClass(), subAx.getSubClass());
-		}
-
-		if (axiom instanceof OWLClassAssertionAxiom) {
-
-			OWLClassAssertionAxiom typeAx = (OWLClassAssertionAxiom)axiom;
-
-			return instanceOf(typeAx.getClassExpression(), typeAx.getIndividual());
-		}
-
-		if (axiom instanceof OWLSameIndividualAxiom) {
-
-			OWLSameIndividualAxiom sameAx = (OWLSameIndividualAxiom)axiom;
-
-			return sameIndividuals(sameAx.getIndividuals());
-		}
-
-		return false;
-	}
-
-	public StructureBuilder createStructureBuilder(OWLOntologyManager manager) {
-
-		return coreBuilder.createStructureBuilder(createAxiomConverter(manager));
-	}
-
-	private AxiomConverter createAxiomConverter(OWLOntologyManager manager) {
-
-		return new AxiomConverter(manager, names, expressionConverter);
-	}
-
-	private boolean sameIndividuals(Set<OWLIndividual> inds) {
-
-		Set<OWLNamedIndividual> namedInds = toNamedIndividuals(inds);
-
-		return namedInds != null && sameIndividualsChecker.allMatch(namedInds);
-	}
-
-	private boolean subsumption(OWLClassExpression sup, OWLClassExpression sub) {
-
-		return toDynamicHandler(sup).subsumes(toDynamicHandler(sub));
-	}
-
-	private boolean instanceOf(OWLClassExpression type, OWLIndividual ind) {
-
-		return ind instanceof OWLNamedIndividual
-				&& instanceOf(type, (OWLNamedIndividual)ind);
-	}
-
-	private boolean instanceOf(OWLClassExpression type, OWLNamedIndividual ind) {
-
-		return toDynamicHandler(type).subsumes(toDynamicHandler(ind));
-	}
-
-	private Set<OWLNamedIndividual> toNamedIndividuals(Set<OWLIndividual> inds) {
-
-		Set<OWLNamedIndividual> namedInds = new HashSet<OWLNamedIndividual>();
-
-		for (OWLIndividual ind : inds) {
-
-			if (ind instanceof OWLNamedIndividual) {
-
-				namedInds.add((OWLNamedIndividual)ind);
-			}
-			else {
-
-				return null;
-			}
-		}
-
-		return namedInds;
-	}
-
-	private Collection<Names> getOwlNothingSuperEquivGroups(boolean direct) {
-
-		return dynamicOps.namesToEquivGroups(getOwlNothingSupers(direct));
-	}
-
-	private Names getOwlNothingSupers(boolean direct) {
-
-		return direct ? getLeafClassNodes() : new NameList(names.getClassNodes());
-	}
-
-	private Names getLeafClassNodes() {
-
-		NameSet leafs = new NameSet();
-
-		for (Name n : names.getClassNodes()) {
-
-			if (n.getSubs(ClassNode.class, true).isEmpty()) {
-
-				leafs.add(n);
-			}
-		}
-
-		return leafs;
-	}
-
-	private DynamicOpsHandler toDynamicHandler(OWLClassExpression expr) {
-
-		if (expr instanceof OWLClass) {
-
-			return toDynamicHandler((OWLClass)expr);
-		}
-
-		return dynamicOps.createHandler(toDynamicPatternSource(expr));
-	}
-
-	private DynamicOpsHandler toDynamicHandler(OWLClass cls) {
-
-		return dynamicOps.createHandler(names.get(cls));
-	}
-
-	private DynamicOpsHandler toDynamicHandler(OWLNamedIndividual ind) {
-
-		return dynamicOps.createHandler(names.get(ind));
-	}
-
-	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
-
-		return coreBuilder.createMultiPatternSource(expressionConverter.toNode(expr));
+		return instanceBoxCreator.create();
 	}
 }

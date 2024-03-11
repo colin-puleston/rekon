@@ -22,22 +22,76 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
+
+import java.util.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface DynamicOpsHandler {
+class EquivalentsGrouper {
 
-	public Names getEquivalents();
+	private Set<Names> groups = new HashSet<Names>();
+	private NameSet initialGroupNames = new NameSet();
 
-	public Names getSupers(boolean direct);
+	Collection<Names> group(Names names) {
 
-	public Names getSubs(boolean direct);
+		for (Name n : names) {
 
-	public Names getIndividuals(boolean direct);
+			Names equivs = n.getEquivalents();
 
-	public boolean equivalentTo(DynamicOpsHandler other);
+			if (newGroupFor(n, equivs)) {
 
-	public boolean subsumes(DynamicOpsHandler other);
+				Names group = checkCreateGroup(n, equivs);
+
+				if (!group.isEmpty()) {
+
+					groups.add(group);
+				}
+			}
+		}
+
+		return groups;
+	}
+
+	private boolean newGroupFor(Name name, Names equivs) {
+
+		if (equivs.isEmpty()) {
+
+			return true;
+		}
+
+		if (initialGroupNames.containsAny(equivs)) {
+
+			return false;
+		}
+
+		initialGroupNames.add(name);
+
+		return true;
+	}
+
+	private Names checkCreateGroup(Name name, Names equivs) {
+
+		Names group = new NameSet();
+
+		checkAddToGroup(group, name);
+
+		for (Name e : equivs) {
+
+			checkAddToGroup(group, e);
+		}
+
+		return group;
+	}
+
+	private void checkAddToGroup(Names group, Name name) {
+
+		if (name.mapped()) {
+
+			group.add(name);
+		}
+	}
 }

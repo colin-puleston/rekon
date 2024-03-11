@@ -22,22 +22,51 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
+
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public interface DynamicOpsHandler {
+abstract class PropertyOps<P extends OWLProperty> extends HierarchyEntityOps<P, P> {
 
-	public Names getEquivalents();
+	PropertyOps(P topEntity, P bottomEntity) {
 
-	public Names getSupers(boolean direct);
+		super(topEntity, bottomEntity);
+	}
 
-	public Names getSubs(boolean direct);
+	boolean equivalent(P inObject1, P inObject2) {
 
-	public Names getIndividuals(boolean direct);
+		return getPropertyName(inObject1).hasEquivalent(getPropertyName(inObject2));
+	}
 
-	public boolean equivalentTo(DynamicOpsHandler other);
+	boolean subsumption(P inSup, P inSub) {
 
-	public boolean subsumes(DynamicOpsHandler other);
+		return getPropertyName(inSup).subsumes(getPropertyName(inSub));
+	}
+
+	Names getEquivalentNames(P inObject) {
+
+		return getPropertyName(inObject).getEquivalents();
+	}
+
+	Names getSuperNames(P inObject, boolean direct) {
+
+		return getPropertyName(inObject).getSupers(direct);
+	}
+
+	Names getSubNames(P inObject, boolean direct) {
+
+		return getPropertyName(inObject).getSubs(direct);
+	}
+
+	Names getDirectEntitySubs(Name name) {
+
+		return name.getSubs(true);
+	}
+
+	abstract PropertyX getPropertyName(P prop);
 }
