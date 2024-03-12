@@ -63,9 +63,9 @@ public class Ontology {
 		dynamicSubsumeds = new DynamicSubsumeds(nodeMatchers);
 	}
 
-	public DynamicOps createDynamicOps() {
+	public Queriables createQueriables() {
 
-		return new DynamicOps(this);
+		return new Queriables(this);
 	}
 
 	public InstanceOps createInstanceOps() {

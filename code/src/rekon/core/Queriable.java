@@ -27,46 +27,19 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class InvalidInputDynamicOpsHandler implements DynamicOpsHandler {
+public interface Queriable {
 
-	static final InvalidInputDynamicOpsHandler SINGLETON
-						= new InvalidInputDynamicOpsHandler();
+	public boolean validOps();
 
-	public boolean validOps() {
+	public Names getEquivalents();
 
-		return false;
-	}
+	public Names getSupers(boolean direct);
 
-	public Names getEquivalents() {
+	public Names getSubs(boolean direct);
 
-		return Names.NO_NAMES;
-	}
+	public Names getIndividuals(boolean direct);
 
-	public Names getSupers(boolean direct) {
+	public boolean equivalentTo(Queriable other);
 
-		return Names.NO_NAMES;
-	}
-
-	public Names getSubs(boolean direct) {
-
-		return Names.NO_NAMES;
-	}
-
-	public Names getIndividuals(boolean direct) {
-
-		return Names.NO_NAMES;
-	}
-
-	public boolean equivalentTo(DynamicOpsHandler other) {
-
-		return false;
-	}
-
-	public boolean subsumes(DynamicOpsHandler other) {
-
-		return false;
-	}
-
-	private InvalidInputDynamicOpsHandler() {
-	}
+	public boolean subsumes(Queriable other);
 }

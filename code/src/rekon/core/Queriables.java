@@ -27,16 +27,16 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public class DynamicOps {
+public class Queriables {
 
 	private Ontology ontology;
 
-	public DynamicOpsHandler createHandler(NodeX nodes) {
+	public Queriable create(NodeX nodes) {
 
-		return new DynamicNodeOpsHandler(nodes);
+		return new QueriableNode(nodes);
 	}
 
-	public DynamicOpsHandler createHandler(MultiPatternSource disjunctsBuilder) {
+	public Queriable create(MultiPatternSource disjunctsBuilder) {
 
 		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
 
@@ -46,16 +46,16 @@ public class DynamicOps {
 
 			if (node != null) {
 
-				return new DynamicNodeOpsHandler(node);
+				return new QueriableNode(node);
 			}
 
-			return new DynamicExpressionOpsHandler(ontology, expr);
+			return new QueriableExpression(ontology, expr);
 		}
 
-		return InvalidInputDynamicOpsHandler.SINGLETON;
+		return InvalidInputQueriable.SINGLETON;
 	}
 
-	DynamicOps(Ontology ontology) {
+	Queriables(Ontology ontology) {
 
 		this.ontology = ontology;
 	}

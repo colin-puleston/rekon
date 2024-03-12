@@ -22,59 +22,51 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import org.semanticweb.owlapi.model.*;
-
-import rekon.core.*;
-import rekon.build.*;
+package rekon.core;
 
 /**
  * @author Colin Puleston
  */
-class DynamicOpsHandlers {
+class InvalidInputQueriable implements Queriable {
 
-	private MappedNames names;
+	static final InvalidInputQueriable SINGLETON
+						= new InvalidInputQueriable();
 
-	private DynamicOps dynamicOps;
+	public boolean validOps() {
 
-	private CoreBuilder coreBuilder;
-	private ExpressionConverter expressionConverter;
-
-	DynamicOpsHandlers(
-		MappedNames names,
-		DynamicOps dynamicOps,
-		CoreBuilder coreBuilder,
-		ExpressionConverter expressionConverter) {
-
-		this.names = names;
-		this.dynamicOps = dynamicOps;
-		this.coreBuilder = coreBuilder;
-		this.expressionConverter = expressionConverter;
+		return false;
 	}
 
-	DynamicOpsHandler getFor(OWLClassExpression expr) {
+	public Names getEquivalents() {
 
-		if (expr instanceof OWLClass) {
-
-			return getFor((OWLClass)expr);
-		}
-
-		return dynamicOps.createHandler(toDynamicPatternSource(expr));
+		return Names.NO_NAMES;
 	}
 
-	DynamicOpsHandler getFor(OWLClass cls) {
+	public Names getSupers(boolean direct) {
 
-		return dynamicOps.createHandler(names.get(cls));
+		return Names.NO_NAMES;
 	}
 
-	DynamicOpsHandler getFor(OWLNamedIndividual ind) {
+	public Names getSubs(boolean direct) {
 
-		return dynamicOps.createHandler(names.get(ind));
+		return Names.NO_NAMES;
 	}
 
-	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
+	public Names getIndividuals(boolean direct) {
 
-		return coreBuilder.createMultiPatternSource(expressionConverter.toNode(expr));
+		return Names.NO_NAMES;
+	}
+
+	public boolean equivalentTo(Queriable other) {
+
+		return false;
+	}
+
+	public boolean subsumes(Queriable other) {
+
+		return false;
+	}
+
+	private InvalidInputQueriable() {
 	}
 }

@@ -22,24 +22,59 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
+
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
  */
-public interface DynamicOpsHandler {
+class QueriablesAccessor {
 
-	public boolean validOps();
+	private MappedNames names;
+	private CoreBuilder coreBuilder;
+	private ExpressionConverter exprConverter;
 
-	public Names getEquivalents();
+	private Queriables queriables;
 
-	public Names getSupers(boolean direct);
+	QueriablesAccessor(
+		Ontology ontology,
+		MappedNames names,
+		CoreBuilder coreBuilder,
+		ExpressionConverter exprConverter) {
 
-	public Names getSubs(boolean direct);
+		this.names = names;
+		this.coreBuilder = coreBuilder;
+		this.exprConverter = exprConverter;
 
-	public Names getIndividuals(boolean direct);
+		queriables = ontology.createQueriables();
+	}
 
-	public boolean equivalentTo(DynamicOpsHandler other);
+	Queriable create(OWLClassExpression expr) {
 
-	public boolean subsumes(DynamicOpsHandler other);
+		if (expr instanceof OWLClass) {
+
+			return create((OWLClass)expr);
+		}
+
+		return queriables.create(toDynamicPatternSource(expr));
+	}
+
+	Queriable create(OWLClass cls) {
+
+		return queriables.create(names.get(cls));
+	}
+
+	Queriable create(OWLNamedIndividual ind) {
+
+		return queriables.create(names.get(ind));
+	}
+
+	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
+
+		return coreBuilder.createMultiPatternSource(exprConverter.toNode(expr));
+	}
 }

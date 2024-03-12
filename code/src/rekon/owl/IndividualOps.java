@@ -38,30 +38,26 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 	private OWLDataFactory factory;
 
 	private MappedNames names;
-	private DynamicOpsHandlers dynamicOpsHandlers;
+	private QueriablesAccessor queriables;
 
 	IndividualOps(
 		OWLDataFactory factory,
 		MappedNames names,
-		DynamicOpsHandlers dynamicOpsHandlers) {
+		QueriablesAccessor queriables) {
 
 		this.factory = factory;
 		this.names = names;
-		this.dynamicOpsHandlers = dynamicOpsHandlers;
+		this.queriables = queriables;
 	}
 
 	Set<Set<OWLNamedIndividual>> getIndividuals(OWLClassExpression expr, boolean direct) {
 
-		DynamicOpsHandler hdlr = dynamicOpsHandlers.getFor(expr);
-
-		return defaultRetriever.toEquivGroups(hdlr.getIndividuals(direct));
+		return toEquivGroups(queriables.create(expr).getIndividuals(direct));
 	}
 
 	Set<Set<OWLNamedIndividual>> getObjectValues(OWLNamedIndividual ind, OWLObjectProperty prop) {
 
-		Names vals = names.get(ind).getIndividualValues(names.get(prop));
-
-		return defaultRetriever.toEquivGroups(vals);
+		return toEquivGroups(names.get(ind).getIndividualValues(names.get(prop)));
 	}
 
 	Set<OWLLiteral> getDataValues(OWLNamedIndividual ind, OWLDataProperty prop) {
@@ -71,31 +67,22 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 	boolean equivalent(OWLNamedIndividual inObject1, OWLNamedIndividual inObject2) {
 
-		DynamicOpsHandler hdlr1 = dynamicOpsHandlers.getFor(inObject1);
-		DynamicOpsHandler hdlr2 = dynamicOpsHandlers.getFor(inObject2);
-
-		return hdlr1.equivalentTo(hdlr2);
+		return queriables.create(inObject1).equivalentTo(queriables.create(inObject2));
 	}
 
 	boolean subsumption(OWLNamedIndividual inSup, OWLNamedIndividual inSub) {
 
-		DynamicOpsHandler supHdlr = dynamicOpsHandlers.getFor(inSup);
-		DynamicOpsHandler subHdlr = dynamicOpsHandlers.getFor(inSub);
-
-		return supHdlr.subsumes(subHdlr);
+		return queriables.create(inSup).subsumes(queriables.create(inSub));
 	}
 
 	boolean hasType(OWLNamedIndividual ind, OWLClassExpression type) {
 
-		DynamicOpsHandler typeHdlr = dynamicOpsHandlers.getFor(type);
-		DynamicOpsHandler indHdlr = dynamicOpsHandlers.getFor(ind);
-
-		return typeHdlr.subsumes(indHdlr);
+		return queriables.create(type).subsumes(queriables.create(ind));
 	}
 
 	Names getEquivalentNames(OWLNamedIndividual inObject) {
 
-		return dynamicOpsHandlers.getFor(inObject).getEquivalents();
+		return queriables.create(inObject).getEquivalents();
 	}
 
 	Class<OWLNamedIndividual> getEntityType() {

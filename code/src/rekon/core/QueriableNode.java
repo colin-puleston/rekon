@@ -27,11 +27,11 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class DynamicNodeOpsHandler extends ValidInputDynamicOpsHandler {
+class QueriableNode extends ValidInputQueriable {
 
 	private NodeX node;
 
-	DynamicNodeOpsHandler(NodeX node) {
+	QueriableNode(NodeX node) {
 
 		this.node = node;
 	}

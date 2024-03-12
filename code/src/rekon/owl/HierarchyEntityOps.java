@@ -114,7 +114,7 @@ abstract class HierarchyEntityOps
 
 		if (inObject.equals(bottomEntity)) {
 
-			return defaultRetriever.toEquivGroups(getBottomNameSupers(direct));
+			return toEquivGroups(getBottomNameSupers(direct));
 		}
 
 		Names sups = getSuperNames(inObject, direct);

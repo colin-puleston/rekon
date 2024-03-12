@@ -39,7 +39,7 @@ public class RekonInstanceBox {
 
 	private InstanceOps instanceOps;
 	private MappedNames names;
-	private ExpressionConverter expressionConverter;
+	private ExpressionConverter exprConverter;
 
 	private CoreBuilder instancesCoreBuilder;
 	private CoreBuilder queriesCoreBuilder;
@@ -178,11 +178,11 @@ public class RekonInstanceBox {
 	RekonInstanceBox(
 		InstanceOps instanceOps,
 		MappedNames names,
-		ExpressionConverter expressionConverter) {
+		ExpressionConverter exprConverter) {
 
 		this.instanceOps = instanceOps;
 		this.names = names;
-		this.expressionConverter = expressionConverter;
+		this.exprConverter = exprConverter;
 
 		instancesCoreBuilder = createCoreBuilder(false);
 		queriesCoreBuilder = createCoreBuilder(true);
@@ -205,7 +205,7 @@ public class RekonInstanceBox {
 
 	private InputNode toInputNode(OWLClassExpression expr) {
 
-		return expressionConverter.toNode(expr);
+		return exprConverter.toNode(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

@@ -36,60 +36,52 @@ import rekon.core.*;
 class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 
 	private MappedNames names;
-	private DynamicOpsHandlers dynamicOpsHandlers;
+	private QueriablesAccessor queriables;
 
 	ClassOps(
 		OWLDataFactory factory,
 		MappedNames names,
-		DynamicOpsHandlers dynamicOpsHandlers) {
+		QueriablesAccessor queriables) {
 
 		super(factory.getOWLThing(), factory.getOWLNothing());
 
 		this.names = names;
-		this.dynamicOpsHandlers = dynamicOpsHandlers;
+		this.queriables = queriables;
 	}
 
 	boolean validExpression(OWLClassExpression expr) {
 
-		return dynamicOpsHandlers.getFor(expr).validOps();
+		return queriables.create(expr).validOps();
 	}
 
 	Set<Set<OWLClass>> getTypes(OWLNamedIndividual ind, boolean direct) {
 
-		DynamicOpsHandler indHdlr = dynamicOpsHandlers.getFor(ind);
-
-		return defaultRetriever.toEquivGroups(indHdlr.getSupers(direct));
+		return toEquivGroups(queriables.create(ind).getSupers(direct));
 	}
 
 	boolean equivalent(OWLClassExpression inObject1, OWLClassExpression inObject2) {
 
-		DynamicOpsHandler hdlr1 = dynamicOpsHandlers.getFor(inObject1);
-		DynamicOpsHandler hdlr2 = dynamicOpsHandlers.getFor(inObject2);
-
-		return hdlr1.equivalentTo(hdlr2);
+		return queriables.create(inObject1).equivalentTo(queriables.create(inObject2));
 	}
 
 	boolean subsumption(OWLClassExpression inSup, OWLClassExpression inSub) {
 
-		DynamicOpsHandler supHdlr = dynamicOpsHandlers.getFor(inSup);
-		DynamicOpsHandler subHdlr = dynamicOpsHandlers.getFor(inSub);
-
-		return supHdlr.subsumes(subHdlr);
+		return queriables.create(inSup).subsumes(queriables.create(inSub));
 	}
 
 	Names getEquivalentNames(OWLClassExpression inObject) {
 
-		return dynamicOpsHandlers.getFor(inObject).getEquivalents();
+		return queriables.create(inObject).getEquivalents();
 	}
 
 	Names getSuperNames(OWLClassExpression inObject, boolean direct) {
 
-		return dynamicOpsHandlers.getFor(inObject).getSupers(direct);
+		return queriables.create(inObject).getSupers(direct);
 	}
 
 	Names getSubNames(OWLClassExpression inObject, boolean direct) {
 
-		return dynamicOpsHandlers.getFor(inObject).getSubs(direct);
+		return queriables.create(inObject).getSubs(direct);
 	}
 
 	Iterable<? extends Name> getAllEntityNames() {

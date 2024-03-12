@@ -42,7 +42,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 	private OWLOntologyManager manager;
 	private OWLDataFactory factory;
 
-	private RekonOps operations = null;
+	private Classification classification = null;
 	private UpdateHandler updateHandler;
 
 	public RekonReasoner(OWLOntology rootOntology) {
@@ -61,7 +61,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 		updateHandler.notifyInstanceBoxPresent();
 
-		return resolveOps().createInstanceBox();
+		return ensureClassification().createInstanceBox();
 	}
 
 	public String getReasonerName() {
@@ -101,7 +101,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 	public void precomputeInferences(InferenceType... types) {
 
-		resolveOps();
+		ensureClassification();
 	}
 
 	public List<OWLOntologyChange> getPendingChanges() {
@@ -282,12 +282,12 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 	public void flush() {
 
-		operations = null;
+		classification = null;
 	}
 
 	public void dispose() {
 
-		operations = null;
+		classification = null;
 	}
 
 	private NodeSet<OWLNamedIndividual> getObjectPropertyValues(
@@ -319,38 +319,38 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 	private ClassOps getClassOps() {
 
-		return resolveOps().classOps;
+		return ensureClassification().classOps;
 	}
 
 	private IndividualOps getIndividualOps() {
 
-		return resolveOps().individualOps;
+		return ensureClassification().individualOps;
 	}
 
 	private ObjectPropertyOps getObjectPropertyOps() {
 
-		return resolveOps().objectPropertyOps;
+		return ensureClassification().objectPropertyOps;
 	}
 
 	private DataPropertyOps getDataPropertyOps() {
 
-		return resolveOps().dataPropertyOps;
+		return ensureClassification().dataPropertyOps;
 	}
 
 	private EntailmentTester getEntailmentTester() {
 
-		return resolveOps().entailmentTester;
+		return ensureClassification().entailmentTester;
 	}
 
-	private RekonOps resolveOps() {
+	private Classification ensureClassification() {
 
-		if (operations == null) {
+		if (classification == null) {
 
-			operations = new RekonOps(manager);
+			classification = new Classification(manager);
 
 			updateHandler.reset();
 		}
 
-		return operations;
+		return classification;
 	}
 }

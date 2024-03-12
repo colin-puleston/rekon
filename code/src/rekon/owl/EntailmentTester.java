@@ -33,11 +33,14 @@ import org.semanticweb.owlapi.model.*;
  */
 class EntailmentTester {
 
-	private RekonOps ops;
+	private ClassOps classOps;
+	private IndividualOps individualOps;
+	private ObjectPropertyOps objectPropertyOps;
+	private DataPropertyOps dataPropertyOps;
 
 	private IndividualResolver individualResolver = new IndividualResolver();
-	private ObjectPropertyResolver objectPropertyResolver = new ObjectPropertyResolver();
-	private DataPropertyResolver dataPropertyResolver = new DataPropertyResolver();
+	private ObjectPropertyResolver objectPropResolver = new ObjectPropertyResolver();
+	private DataPropertyResolver dataPropResolver = new DataPropertyResolver();
 
 	private abstract class NamedEntityResolver<E extends OWLObject, N extends E> {
 
@@ -100,9 +103,12 @@ class EntailmentTester {
 		}
 	}
 
-	EntailmentTester(RekonOps ops) {
+	EntailmentTester(Classification classification) {
 
-		this.ops = ops;
+		classOps = classification.classOps;
+		individualOps = classification.individualOps;
+		objectPropertyOps = classification.objectPropertyOps;
+		dataPropertyOps = classification.dataPropertyOps;
 	}
 
 	boolean entailed(Set<? extends OWLAxiom> axioms) {
@@ -155,55 +161,55 @@ class EntailmentTester {
 
 	private boolean entailed(OWLEquivalentClassesAxiom axiom) {
 
-		return ops.classOps.equivalents(axiom.getClassExpressions());
+		return classOps.equivalents(axiom.getClassExpressions());
 	}
 
 	private boolean entailed(OWLSubClassOfAxiom axiom) {
 
-		return ops.classOps.subsumption(axiom.getSuperClass(), axiom.getSubClass());
+		return classOps.subsumption(axiom.getSuperClass(), axiom.getSubClass());
 	}
 
 	private boolean entailed(OWLClassAssertionAxiom axiom) {
 
 		OWLNamedIndividual ind = individualResolver.resolve(axiom.getIndividual());
 
-		return ind != null && ops.individualOps.hasType(ind, axiom.getClassExpression());
+		return ind != null && individualOps.hasType(ind, axiom.getClassExpression());
 	}
 
 	private boolean entailed(OWLSameIndividualAxiom axiom) {
 
 		Set<OWLNamedIndividual> inds = individualResolver.resolveAll(axiom.getIndividuals());
 
-		return inds != null && ops.individualOps.equivalents(inds);
+		return inds != null && individualOps.equivalents(inds);
 	}
 
 	private boolean entailed(OWLEquivalentObjectPropertiesAxiom axiom) {
 
-		Set<OWLObjectProperty> props = objectPropertyResolver.resolveAll(axiom.getProperties());
+		Set<OWLObjectProperty> props = objectPropResolver.resolveAll(axiom.getProperties());
 
-		return ops.objectPropertyOps.equivalents(props);
+		return objectPropertyOps.equivalents(props);
 	}
 
 	private boolean entailed(OWLSubObjectPropertyOfAxiom axiom) {
 
-		OWLObjectProperty sup = objectPropertyResolver.resolve(axiom.getSuperProperty());
-		OWLObjectProperty sub = objectPropertyResolver.resolve(axiom.getSubProperty());
+		OWLObjectProperty sup = objectPropResolver.resolve(axiom.getSuperProperty());
+		OWLObjectProperty sub = objectPropResolver.resolve(axiom.getSubProperty());
 
-		return sup != null && sub != null && ops.objectPropertyOps.subsumption(sup, sub);
+		return sup != null && sub != null && objectPropertyOps.subsumption(sup, sub);
 	}
 
 	private boolean entailed(OWLEquivalentDataPropertiesAxiom axiom) {
 
-		Set<OWLDataProperty> props = dataPropertyResolver.resolveAll(axiom.getProperties());
+		Set<OWLDataProperty> props = dataPropResolver.resolveAll(axiom.getProperties());
 
-		return ops.dataPropertyOps.equivalents(props);
+		return dataPropertyOps.equivalents(props);
 	}
 
 	private boolean entailed(OWLSubDataPropertyOfAxiom axiom) {
 
-		OWLDataProperty sup = dataPropertyResolver.resolve(axiom.getSuperProperty());
-		OWLDataProperty sub = dataPropertyResolver.resolve(axiom.getSubProperty());
+		OWLDataProperty sup = dataPropResolver.resolve(axiom.getSuperProperty());
+		OWLDataProperty sub = dataPropResolver.resolve(axiom.getSubProperty());
 
-		return sup != null && sub != null && ops.dataPropertyOps.subsumption(sup, sub);
+		return sup != null && sub != null && dataPropertyOps.subsumption(sup, sub);
 	}
 }

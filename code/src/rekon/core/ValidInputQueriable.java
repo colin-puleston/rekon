@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
+abstract class ValidInputQueriable implements Queriable {
 
 	private SupersResolver supersResolver = new SupersResolver();
 	private SubsResolver subsResolver = new SubsResolver();
@@ -120,21 +120,21 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		return checkPurgeAllFreeNames(getRawIndividuals(direct));
 	}
 
-	public boolean equivalentTo(DynamicOpsHandler other) {
+	public boolean equivalentTo(Queriable other) {
 
-		if (other instanceof ValidInputDynamicOpsHandler) {
+		if (other instanceof ValidInputQueriable) {
 
-			return equivalentTo((ValidInputDynamicOpsHandler)other);
+			return equivalentTo((ValidInputQueriable)other);
 		}
 
 		return false;
 	}
 
-	public boolean subsumes(DynamicOpsHandler other) {
+	public boolean subsumes(Queriable other) {
 
-		if (other instanceof ValidInputDynamicOpsHandler) {
+		if (other instanceof ValidInputQueriable) {
 
-			return subsumes((ValidInputDynamicOpsHandler)other);
+			return subsumes((ValidInputQueriable)other);
 		}
 
 		return false;
@@ -152,12 +152,12 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 
 	abstract Names getRawIndividuals(boolean direct);
 
-	private boolean equivalentTo(ValidInputDynamicOpsHandler other) {
+	private boolean equivalentTo(ValidInputQueriable other) {
 
 		return subsumes(other) && other.subsumes(this);
 	}
 
-	private boolean subsumes(ValidInputDynamicOpsHandler other) {
+	private boolean subsumes(ValidInputQueriable other) {
 
 		other.configureAsPotentialSubsumed();
 

@@ -32,7 +32,7 @@ import rekon.build.*;
 /**
  * @author Colin Puleston
  */
-class RekonOps {
+class Classification {
 
 	final ClassOps classOps;
 	final IndividualOps individualOps;
@@ -46,24 +46,24 @@ class RekonOps {
 	private class InstanceBoxCreator {
 
 		private MappedNames names;
-		private ExpressionConverter expressionConverter;
+		private ExpressionConverter exprConverter;
 
 		private InstanceOps instanceOps;
 
 		InstanceBoxCreator(
 			Ontology ontology,
 			MappedNames names,
-			ExpressionConverter expressionConverter) {
+			ExpressionConverter exprConverter) {
 
 			this.names = names;
-			this.expressionConverter = expressionConverter;
+			this.exprConverter = exprConverter;
 
 			instanceOps = ontology.createInstanceOps();
 		}
 
 		RekonInstanceBox create() {
 
-			return new RekonInstanceBox(instanceOps, names, expressionConverter);
+			return new RekonInstanceBox(instanceOps, names, exprConverter);
 		}
 	}
 
@@ -73,11 +73,11 @@ class RekonOps {
 		private OWLDataFactory factory;
 
 		private MappedNames names;
-		private ExpressionConverter expressionConverter;
+		private ExpressionConverter exprConverter;
 		private CoreBuilder coreBuilder;
 
 		private Ontology ontology;
-		private DynamicOpsHandlers dynamicOpsHdlrs;
+		private QueriablesAccessor queriables;
 
 		Initialiser(OWLOntologyManager manager) {
 
@@ -85,20 +85,20 @@ class RekonOps {
 
 			factory = manager.getOWLDataFactory();
 			names = new MappedNames(manager);
-			expressionConverter = new ExpressionConverter(factory, names);
+			exprConverter = new ExpressionConverter(factory, names);
 			coreBuilder = new CoreBuilder(names);
 			ontology = createOntology();
-			dynamicOpsHdlrs = createDynamicOpsHandlers();
+			queriables = createQueriablesAccessor();
 		}
 
 		ClassOps createClassOps() {
 
-			return new ClassOps(factory, names, dynamicOpsHdlrs);
+			return new ClassOps(factory, names, queriables);
 		}
 
 		IndividualOps createIndividualOps() {
 
-			return new IndividualOps(factory, names, dynamicOpsHdlrs);
+			return new IndividualOps(factory, names, queriables);
 		}
 
 		ObjectPropertyOps createObjectPropertyOps() {
@@ -113,7 +113,7 @@ class RekonOps {
 
 		InstanceBoxCreator createInstanceBoxCreator() {
 
-			return new InstanceBoxCreator(ontology, names, expressionConverter);
+			return new InstanceBoxCreator(ontology, names, exprConverter);
 		}
 
 		private Ontology createOntology() {
@@ -128,18 +128,16 @@ class RekonOps {
 
 		private AxiomConverter createAxiomConverter() {
 
-			return new AxiomConverter(manager, names, expressionConverter);
+			return new AxiomConverter(manager, names, exprConverter);
 		}
 
-		private DynamicOpsHandlers createDynamicOpsHandlers() {
+		private QueriablesAccessor createQueriablesAccessor() {
 
-			DynamicOps ops = ontology.createDynamicOps();
-
-			return new DynamicOpsHandlers(names, ops, coreBuilder, expressionConverter);
+			return new QueriablesAccessor(ontology, names, coreBuilder, exprConverter);
 		}
 	}
 
-	RekonOps(OWLOntologyManager manager) {
+	Classification(OWLOntologyManager manager) {
 
 		Initialiser init = new Initialiser(manager);
 

@@ -35,8 +35,7 @@ import rekon.core.*;
  */
 abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 
-	final EntityRetriever defaultRetriever = new EntityRetriever();
-
+	private EntityRetriever defaultRetriever = new EntityRetriever();
 	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
 
 	class EntityRetriever {
@@ -124,6 +123,11 @@ abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 	boolean equivalents(Set<I> inObjects) {
 
 		return equivalenceChecker.check(inObjects);
+	}
+
+	Set<Set<E>> toEquivGroups(Names names) {
+
+		return defaultRetriever.toEquivGroups(names);
 	}
 
 	abstract Names getEquivalentNames(I inObject);

@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
+class QueriableExpression extends ValidInputQueriable {
 
 	static private SuperClassesResolver superClassesResolver = new SuperClassesResolver();
 	static private SubClassesResolver subClassesResolver = new SubClassesResolver();
@@ -114,7 +114,7 @@ class DynamicExpressionOpsHandler extends ValidInputDynamicOpsHandler {
 
 	private DynamicExpression expression;
 
-	DynamicExpressionOpsHandler(Ontology ontology, DynamicExpression expression) {
+	QueriableExpression(Ontology ontology, DynamicExpression expression) {
 
 		this.expression = expression;
 
