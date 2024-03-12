@@ -79,22 +79,7 @@ class UnsupportedOps {
 		throw new UnsupportedOperationException();
 	}
 
-	public NodeSet<OWLNamedIndividual> getObjectPropertyValues(OWLNamedIndividual ind, OWLObjectPropertyExpression pe) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public Set<OWLLiteral> getDataPropertyValues(OWLNamedIndividual ind, OWLDataProperty pe) {
-
-		throw new UnsupportedOperationException();
-	}
-
 	public NodeSet<OWLNamedIndividual> getDifferentIndividuals(OWLNamedIndividual ind) {
-
-		throw new UnsupportedOperationException();
-	}
-
-	public boolean isSatisfiable(OWLClassExpression classExpression) {
 
 		throw new UnsupportedOperationException();
 	}

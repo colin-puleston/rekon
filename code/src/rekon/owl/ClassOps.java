@@ -49,6 +49,11 @@ class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 		this.dynamicOpsHandlers = dynamicOpsHandlers;
 	}
 
+	boolean validExpression(OWLClassExpression expr) {
+
+		return dynamicOpsHandlers.getFor(expr).validOps();
+	}
+
 	Set<Set<OWLClass>> getTypes(OWLNamedIndividual ind, boolean direct) {
 
 		DynamicOpsHandler indHdlr = dynamicOpsHandlers.getFor(ind);

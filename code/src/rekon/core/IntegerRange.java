@@ -41,6 +41,11 @@ public class IntegerRange extends NumberRange {
 		super(min, max);
 	}
 
+	public Integer toInteger() {
+
+		return toNumber(Integer.class);
+	}
+
 	IntegerRange asIntegerRange() {
 
 		return this;

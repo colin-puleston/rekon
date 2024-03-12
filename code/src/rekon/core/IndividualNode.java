@@ -24,10 +24,99 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
 public abstract class IndividualNode extends NodeX {
+
+	private abstract class ValueRetriever<V> {
+
+		private PropertyX prop;
+
+		ValueRetriever(PropertyX prop) {
+
+			this.prop = prop;
+		}
+
+		List<V> retrieve() {
+
+			PatternMatcher p = getProfilePatternMatcher();
+
+			return p != null ? retrieve(p) : Collections.emptyList();
+		}
+
+		abstract V toValueOrNull(Value target);
+
+		private List<V> retrieve(PatternMatcher profile) {
+
+			List<V> values = new ArrayList<V>();
+
+			for (Relation r : profile.getPattern().getDirectRelations()) {
+
+				if (r.getProperty() == prop) {
+
+					V v = toValueOrNull(r.getTarget());
+
+					if (v != null) {
+
+						values.add(v);
+					}
+				}
+			}
+
+			return values;
+		}
+	}
+
+	private class IndividualValueRetriever extends ValueRetriever<IndividualNode> {
+
+		IndividualValueRetriever(PropertyX prop) {
+
+			super(prop);
+		}
+
+		IndividualNode toValueOrNull(Value target) {
+
+			NodeValue nv = target.asNodeValue();
+
+			if (nv != null) {
+
+				NodeX vn = nv.getValueNode();
+
+				if (vn instanceof IndividualNode) {
+
+					return (IndividualNode)vn;
+				}
+			}
+
+			return null;
+		}
+	}
+
+	private class DataValueRetriever extends ValueRetriever<DataValue> {
+
+		DataValueRetriever(PropertyX prop) {
+
+			super(prop);
+		}
+
+		DataValue toValueOrNull(Value target) {
+
+			return target instanceof DataValue ? (DataValue)target : null;
+		}
+	}
+
+	public Names getIndividualValues(PropertyX prop) {
+
+		return new NameList(new IndividualValueRetriever(prop).retrieve());
+	}
+
+	public List<DataValue> getDataValues(PropertyX prop) {
+
+		return null;
+	}
 
 	NameClassifier createClassifier() {
 

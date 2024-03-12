@@ -38,6 +38,16 @@ public abstract class NumberRange extends DataValue {
 		this.max = max;
 	}
 
+	<N extends Number>N toNumber(Class<N> type) {
+
+		if (min.equals(max)) {
+
+			return type.cast(min);
+		}
+
+		throw new RuntimeException("Does not represent exact value: " + this);
+	}
+
 	boolean subsumesOther(Value v) {
 
 		NumberRange r = asTypeRange(v);

@@ -40,6 +40,16 @@ public class BooleanValue extends DataValue {
 
 	private String name;
 
+	public Boolean toBoolean() {
+
+		if (this == BOOLEAN) {
+
+			throw new RuntimeException("Does not represent specific value: " + this);
+		}
+
+		return this == TRUE;
+	}
+
 	BooleanValue asBooleanValue() {
 
 		return this;

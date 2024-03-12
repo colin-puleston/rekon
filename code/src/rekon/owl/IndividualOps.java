@@ -35,10 +35,18 @@ import rekon.core.*;
  */
 class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
+	private OWLDataFactory factory;
+
+	private MappedNames names;
 	private DynamicOpsHandlers dynamicOpsHandlers;
 
-	IndividualOps(DynamicOpsHandlers dynamicOpsHandlers) {
+	IndividualOps(
+		OWLDataFactory factory,
+		MappedNames names,
+		DynamicOpsHandlers dynamicOpsHandlers) {
 
+		this.factory = factory;
+		this.names = names;
 		this.dynamicOpsHandlers = dynamicOpsHandlers;
 	}
 
@@ -47,6 +55,18 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 		DynamicOpsHandler hdlr = dynamicOpsHandlers.getFor(expr);
 
 		return retrieveEntities(toEquivGroups(hdlr.getIndividuals(direct)));
+	}
+
+	Set<Set<OWLNamedIndividual>> getObjectValues(OWLNamedIndividual ind, OWLObjectProperty prop) {
+
+		Names vals = names.get(ind).getIndividualValues(names.get(prop));
+
+		return retrieveEntities(toEquivGroups(vals));
+	}
+
+	Set<OWLLiteral> getDataValues(OWLNamedIndividual ind, OWLDataProperty prop) {
+
+		return null;
 	}
 
 	boolean equivalent(OWLNamedIndividual inObject1, OWLNamedIndividual inObject2) {
@@ -86,5 +106,42 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 	private Collection<Names> toEquivGroups(Names names) {
 
 		return new EquivalentsGrouper().group(names);
+	}
+
+	private Set<OWLLiteral> toLiterals(List<DataValue> values) {
+
+		Set<OWLLiteral> literals = new HashSet<OWLLiteral>();
+
+		for (DataValue v : values) {
+
+			literals.add(toLiteral(v));
+		}
+
+		return literals;
+	}
+
+	private OWLLiteral toLiteral(DataValue value) {
+
+		if (value instanceof BooleanValue) {
+
+			return factory.getOWLLiteral(value.toBoolean());
+		}
+
+		if (value instanceof IntegerRange) {
+
+			return factory.getOWLLiteral(value.toInteger());
+		}
+
+		if (value instanceof FloatRange) {
+
+			return factory.getOWLLiteral(value.toFloat());
+		}
+
+		if (value instanceof DoubleRange) {
+
+			return factory.getOWLLiteral(value.toDouble());
+		}
+
+		throw new Error("Unrecognised DataValue type: " + value.getClass());
 	}
 }

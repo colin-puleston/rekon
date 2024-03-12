@@ -98,7 +98,7 @@ class RekonOps {
 
 		IndividualOps createIndividualOps() {
 
-			return new IndividualOps(dynamicOpsHdlrs);
+			return new IndividualOps(factory, names, dynamicOpsHdlrs);
 		}
 
 		ObjectPropertyOps createObjectPropertyOps() {

@@ -41,6 +41,11 @@ public class FloatRange extends NumberRange {
 		super(min, max);
 	}
 
+	public Float toFloat() {
+
+		return toNumber(Float.class);
+	}
+
 	FloatRange asFloatRange() {
 
 		return this;

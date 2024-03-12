@@ -41,6 +41,11 @@ public class DoubleRange extends NumberRange {
 		super(min, max);
 	}
 
+	public Double toDouble() {
+
+		return toNumber(Double.class);
+	}
+
 	DoubleRange asDoubleRange() {
 
 		return this;

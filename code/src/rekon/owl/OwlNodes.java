@@ -33,7 +33,7 @@ import org.semanticweb.owlapi.reasoner.impl.*;
 /**
  * @author Colin Puleston
  */
-class NodeCreator {
+class OwlNodes {
 
 	static private ClassNodes classNodes = new ClassNodes();
 	static private IndividualNodes individualNodes = new IndividualNodes();
@@ -168,6 +168,11 @@ class NodeCreator {
 	static NodeSet<OWLNamedIndividual> forIndividualSets(Set<Set<OWLNamedIndividual>> groups) {
 
 		return individualNodes.toSet(groups);
+	}
+
+	static NodeSet<OWLNamedIndividual> forNoIndividualSets() {
+
+		return new OWLNamedIndividualNodeSet();
 	}
 
 	static Node<OWLObjectPropertyExpression> forObjectProperty(OWLObjectProperty entity) {

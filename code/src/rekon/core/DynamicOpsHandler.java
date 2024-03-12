@@ -29,6 +29,8 @@ package rekon.core;
  */
 public interface DynamicOpsHandler {
 
+	public boolean validOps();
+
 	public Names getEquivalents();
 
 	public Names getSupers(boolean direct);

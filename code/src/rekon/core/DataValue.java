@@ -29,6 +29,26 @@ package rekon.core;
  */
 public abstract class DataValue extends Value {
 
+	public Boolean toBoolean() {
+
+		return null;
+	}
+
+	public Integer toInteger() {
+
+		return null;
+	}
+
+	public Float toFloat() {
+
+		return null;
+	}
+
+	public Double toDouble() {
+
+		return null;
+	}
+
 	void collectNames(NameCollector collector) {
 	}
 }

@@ -95,6 +95,11 @@ abstract class ValidInputDynamicOpsHandler implements DynamicOpsHandler {
 		}
 	}
 
+	public boolean validOps() {
+
+		return true;
+	}
+
 	public Names getEquivalents() {
 
 		return checkPurgeAllFreeNames(getRawEquivalents());
