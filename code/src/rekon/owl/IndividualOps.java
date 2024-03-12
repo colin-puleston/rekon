@@ -54,14 +54,14 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 		DynamicOpsHandler hdlr = dynamicOpsHandlers.getFor(expr);
 
-		return retrieveEntities(toEquivGroups(hdlr.getIndividuals(direct)));
+		return defaultRetriever.toEquivGroups(hdlr.getIndividuals(direct));
 	}
 
 	Set<Set<OWLNamedIndividual>> getObjectValues(OWLNamedIndividual ind, OWLObjectProperty prop) {
 
 		Names vals = names.get(ind).getIndividualValues(names.get(prop));
 
-		return retrieveEntities(toEquivGroups(vals));
+		return defaultRetriever.toEquivGroups(vals);
 	}
 
 	Set<OWLLiteral> getDataValues(OWLNamedIndividual ind, OWLDataProperty prop) {
@@ -101,11 +101,6 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 	Class<OWLNamedIndividual> getEntityType() {
 
 		return OWLNamedIndividual.class;
-	}
-
-	private Collection<Names> toEquivGroups(Names names) {
-
-		return new EquivalentsGrouper().group(names);
 	}
 
 	private Set<OWLLiteral> toLiterals(List<DataValue> values) {

@@ -58,7 +58,7 @@ class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 
 		DynamicOpsHandler indHdlr = dynamicOpsHandlers.getFor(ind);
 
-		return retrieveEntities(toEquivGroups(indHdlr.getSupers(direct)));
+		return defaultRetriever.toEquivGroups(indHdlr.getSupers(direct));
 	}
 
 	boolean equivalent(OWLClassExpression inObject1, OWLClassExpression inObject2) {
@@ -110,10 +110,5 @@ class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 	boolean insertedEntity(OWLClass entity) {
 
 		return OwlRestrictionResolver.isNoValueClass(entity);
-	}
-
-	private Collection<Names> toEquivGroups(Names names) {
-
-		return new EquivalentsGrouper().group(names);
 	}
 }

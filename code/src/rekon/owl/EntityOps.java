@@ -35,36 +35,37 @@ import rekon.core.*;
  */
 abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 
+	final EntityRetriever defaultRetriever = new EntityRetriever();
+
 	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
-	private EntityRetriever defaultRetriever = new EntityRetriever();
 
 	class EntityRetriever {
 
-		Set<E> toSingleEntityGroup(Names names) {
+		Set<E> toSingleGroup(Names names) {
 
 			return toEntityGroup(names);
 		}
 
-		Set<Set<E>> toEntityGroups(Collection<Names> nameGroups) {
+		Set<Set<E>> toEquivGroups(Names names) {
 
-			return toEntityGroupsSet(nameGroups);
-		}
+			Set<Set<E>> groups = new HashSet<Set<E>>();
 
-		Set<Set<E>> toEntityGroupsSet(Collection<Names> nameGroups) {
-
-			Set<Set<E>> entityGroups = new HashSet<Set<E>>();
-
-			for (Names nameGroup : nameGroups) {
+			for (Names nameGroup : groupEquivs(names)) {
 
 				Set<E> entities = toEntityGroup(nameGroup);
 
 				if (!entities.isEmpty()) {
 
-					entityGroups.add(entities);
+					groups.add(entities);
 				}
 			}
 
-			return entityGroups;
+			return groups;
+		}
+
+		private Collection<Names> groupEquivs(Names names) {
+
+			return new EquivalentsGrouper().group(names);
 		}
 
 		private Set<E> toEntityGroup(Names names) {
@@ -117,7 +118,7 @@ abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 
 	Set<E> getEquivalents(I inObject) {
 
-		return retrieveEntities(getEquivalentNames(inObject));
+		return defaultRetriever.toSingleGroup(getEquivalentNames(inObject));
 	}
 
 	boolean equivalents(Set<I> inObjects) {
@@ -128,16 +129,6 @@ abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 	abstract Names getEquivalentNames(I inObject);
 
 	abstract boolean equivalent(I inObject1, I inObject2);
-
-	Set<E> retrieveEntities(Names equivs) {
-
-		return defaultRetriever.toSingleEntityGroup(equivs);
-	}
-
-	Set<Set<E>> retrieveEntities(Collection<Names> equivGroups) {
-
-		return defaultRetriever.toEntityGroups(equivGroups);
-	}
 
 	abstract Class<E> getEntityType();
 

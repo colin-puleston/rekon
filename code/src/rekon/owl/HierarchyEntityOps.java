@@ -50,16 +50,16 @@ abstract class HierarchyEntityOps
 
 	private abstract class LinkedEntityRetriever extends EntityRetriever {
 
-		Set<Set<E>> toEntityGroups(Collection<Names> nameGroups, boolean direct) {
+		Set<Set<E>> toEquivGroups(Names names, boolean direct) {
 
-			Set<Set<E>> entityGroups = toEntityGroupsSet(nameGroups);
+			Set<Set<E>> groups = toEquivGroups(names);
 
-			if (!direct || entityGroups.isEmpty()) {
+			if (!direct || groups.isEmpty()) {
 
-				entityGroups.add(getDefaultEntityGroup());
+				groups.add(getDefaultEntityGroup());
 			}
 
-			return entityGroups;
+			return groups;
 		}
 
 		abstract Set<E> getDefaultEntityGroup();
@@ -114,12 +114,12 @@ abstract class HierarchyEntityOps
 
 		if (inObject.equals(bottomEntity)) {
 
-			return retrieveEntities(toEquivGroups(getBottomNameSupers(direct)));
+			return defaultRetriever.toEquivGroups(getBottomNameSupers(direct));
 		}
 
 		Names sups = getSuperNames(inObject, direct);
 
-		return supersRetriever.toEntityGroups(toEquivGroups(sups), direct);
+		return supersRetriever.toEquivGroups(sups, direct);
 	}
 
 	Set<Set<E>> getSubs(I inObject, boolean direct) {
@@ -131,7 +131,7 @@ abstract class HierarchyEntityOps
 
 		Names subs = getSubNames(inObject, direct);
 
-		return subsRetriever.toEntityGroups(toEquivGroups(subs), direct);
+		return subsRetriever.toEquivGroups(subs, direct);
 	}
 
 	abstract boolean subsumption(I inSup, I inSub);
@@ -162,10 +162,5 @@ abstract class HierarchyEntityOps
 		}
 
 		return leafs;
-	}
-
-	private Collection<Names> toEquivGroups(Names names) {
-
-		return new EquivalentsGrouper().group(names);
 	}
 }
