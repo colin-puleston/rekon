@@ -24,17 +24,17 @@
 
 package rekon.owl;
 
+import java.io.*;
 import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.model.parameters.*;
 
 /**
  * @author Colin Puleston
  */
-class Logger {
+public class RekonLogger {
 
-	static final Logger SINGLETON = new Logger();
+	static final RekonLogger SINGLETON = new RekonLogger();
 
 	static private final String LOGGING_SYSTEM_PROPERTY = "rekon.logging";
 
@@ -44,6 +44,16 @@ class Logger {
 	static {
 
 		loggingOn = Boolean.valueOf(System.getProperty(LOGGING_SYSTEM_PROPERTY));
+	}
+
+	static public void setLoggingOn(boolean on) {
+
+		loggingOn = on;
+	}
+
+	void logExecutionPoint(String text) {
+
+		System.out.println("\nREKON: " + text);
 	}
 
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
@@ -115,7 +125,7 @@ class Logger {
 
 		logLine("Replacing: " + replaced);
 		logLine("Replacement: " + replacement);
-		logLine("[CAUTION: Weaker constraint - no contradiction checking]");
+		logLine("CAUTION!!! Weaker constraint. No contradiction checking.");
 
 		logSeparatorLine();
 	}

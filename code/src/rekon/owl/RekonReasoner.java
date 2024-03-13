@@ -42,8 +42,10 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 	private OWLOntologyManager manager;
 	private OWLDataFactory factory;
 
-	private Classification classification = null;
 	private UpdateHandler updateHandler;
+
+	private Classification classification = null;
+	private ClassificationMonitor classificationMonitor = new ClassificationMonitor();
 
 	public RekonReasoner(OWLOntology rootOntology) {
 
@@ -62,6 +64,16 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		updateHandler.notifyInstanceBoxPresent();
 
 		return ensureClassification().createInstanceBox();
+	}
+
+	public void addListener(RekonListener listener) {
+
+		classificationMonitor.addListener(listener);
+	}
+
+	public void addListeners(Collection<RekonListener> listeners) {
+
+		classificationMonitor.addListeners(listeners);
 	}
 
 	public String getReasonerName() {
@@ -270,9 +282,14 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		return getEntailmentTester().entailed(axioms);
 	}
 
-	public boolean isSatisfiable(OWLClassExpression classExpression) {
+	public boolean isSatisfiable(OWLClassExpression expr) {
 
-		return getClassOps().validExpression(classExpression);
+		if (expr.equals(factory.getOWLNothing())) {
+
+			return false;
+		}
+
+		return getClassOps().validExpression(expr);
 	}
 
 	public Node<OWLClass> getUnsatisfiableClasses() {
@@ -346,7 +363,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 		if (classification == null) {
 
-			classification = new Classification(manager);
+			classification = new Classification(manager, classificationMonitor);
 
 			updateHandler.reset();
 		}

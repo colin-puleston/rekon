@@ -113,7 +113,7 @@ class ExpressionConverter {
 
 			if (outOfScopeLoggingEnabled) {
 
-				Logger logger = Logger.SINGLETON;
+				RekonLogger logger = RekonLogger.SINGLETON;
 
 				if (owlAxiom != null) {
 

@@ -186,28 +186,39 @@ class MappedNames extends OntologyNames {
 
 		final N rootName = createRootName();
 
-		private E rootEntity;
+		private E topEntity;
+		private E bottomEntity;
 
 		HierarchyNames(OWLOntologyManager manager) {
 
-			rootEntity = getRootEntity(manager.getOWLDataFactory());
+			OWLDataFactory factory = manager.getOWLDataFactory();
+
+			topEntity = getTopEntity(factory);
+			bottomEntity = getBottomEntity(factory);
 
 			initialise(manager);
 		}
 
 		N resolveName(E entity) {
 
-			return entity.equals(rootEntity) ? rootName : super.resolveName(entity);
+			if (entity.equals(bottomEntity)) {
+
+				throw new Error("Unexpected bottom-entity: " + entity);
+			}
+
+			return entity.equals(topEntity) ? rootName : super.resolveName(entity);
 		}
 
 		boolean mappingSource(E entity) {
 
-			return !entity.equals(rootEntity);
+			return !entity.equals(topEntity) && !entity.equals(bottomEntity);
 		}
 
 		abstract N createRootName();
 
-		abstract E getRootEntity(OWLDataFactory factory);
+		abstract E getTopEntity(OWLDataFactory factory);
+
+		abstract E getBottomEntity(OWLDataFactory factory);
 	}
 
 	private class ClassNodes extends HierarchyNames<OWLClass, ClassNode> {
@@ -234,9 +245,14 @@ class MappedNames extends OntologyNames {
 			return o.getClassesInSignature();
 		}
 
-		OWLClass getRootEntity(OWLDataFactory factory) {
+		OWLClass getTopEntity(OWLDataFactory factory) {
 
 			return factory.getOWLThing();
+		}
+
+		OWLClass getBottomEntity(OWLDataFactory factory) {
+
+			return factory.getOWLNothing();
 		}
 
 		private OWLClass getNoValueClass(OWLDataFactory factory) {
@@ -285,9 +301,14 @@ class MappedNames extends OntologyNames {
 			return o.getObjectPropertiesInSignature();
 		}
 
-		OWLObjectProperty getRootEntity(OWLDataFactory factory) {
+		OWLObjectProperty getTopEntity(OWLDataFactory factory) {
 
 			return factory.getOWLTopObjectProperty();
+		}
+
+		OWLObjectProperty getBottomEntity(OWLDataFactory factory) {
+
+			return factory.getOWLBottomObjectProperty();
 		}
 	}
 
@@ -313,9 +334,14 @@ class MappedNames extends OntologyNames {
 			return o.getDataPropertiesInSignature();
 		}
 
-		OWLDataProperty getRootEntity(OWLDataFactory factory) {
+		OWLDataProperty getTopEntity(OWLDataFactory factory) {
 
 			return factory.getOWLTopDataProperty();
+		}
+
+		OWLDataProperty getBottomEntity(OWLDataFactory factory) {
+
+			return factory.getOWLBottomDataProperty();
 		}
 	}
 

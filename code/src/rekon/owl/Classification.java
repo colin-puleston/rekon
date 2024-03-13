@@ -79,16 +79,21 @@ class Classification {
 		private Ontology ontology;
 		private QueriablesAccessor queriables;
 
-		Initialiser(OWLOntologyManager manager) {
+		Initialiser(OWLOntologyManager manager, ClassificationMonitor monitor) {
 
 			this.manager = manager;
 
 			factory = manager.getOWLDataFactory();
-			names = new MappedNames(manager);
-			exprConverter = new ExpressionConverter(factory, names);
-			coreBuilder = new CoreBuilder(names);
-			ontology = createOntology();
-			queriables = createQueriablesAccessor();
+
+			monitor.onLoadingStart();
+			performLoad();
+			monitor.onLoadingComplete();
+
+			monitor.onClassificationStart();
+			ontology.classify();
+			monitor.onClassificationComplete();
+
+			queriables = createQueriables();
 		}
 
 		ClassOps createClassOps() {
@@ -116,9 +121,12 @@ class Classification {
 			return new InstanceBoxCreator(ontology, names, exprConverter);
 		}
 
-		private Ontology createOntology() {
+		private void performLoad() {
 
-			return new Ontology(names, createStructureBuilder());
+			names = new MappedNames(manager);
+			exprConverter = new ExpressionConverter(factory, names);
+			coreBuilder = new CoreBuilder(names);
+			ontology = new Ontology(names, createStructureBuilder());
 		}
 
 		private StructureBuilder createStructureBuilder() {
@@ -131,15 +139,15 @@ class Classification {
 			return new AxiomConverter(manager, names, exprConverter);
 		}
 
-		private QueriablesAccessor createQueriablesAccessor() {
+		private QueriablesAccessor createQueriables() {
 
 			return new QueriablesAccessor(ontology, names, coreBuilder, exprConverter);
 		}
 	}
 
-	Classification(OWLOntologyManager manager) {
+	Classification(OWLOntologyManager manager, ClassificationMonitor monitor) {
 
-		Initialiser init = new Initialiser(manager);
+		Initialiser init = new Initialiser(manager, monitor);
 
 		classOps = init.createClassOps();
 		individualOps = init.createIndividualOps();

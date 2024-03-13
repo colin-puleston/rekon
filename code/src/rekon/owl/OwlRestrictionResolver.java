@@ -78,7 +78,7 @@ class OwlRestrictionResolver {
 						OWLClassExpression replaced,
 						OWLRestriction replacement) {
 
-			Logger logger = Logger.SINGLETON;
+			RekonLogger logger = RekonLogger.SINGLETON;
 
 			if (axiom != null) {
 

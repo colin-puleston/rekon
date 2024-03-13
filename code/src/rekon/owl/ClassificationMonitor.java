@@ -26,49 +26,89 @@ package rekon.owl;
 
 import java.util.*;
 
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.*;
-
 /**
  * @author Colin Puleston
  */
-public class RekonReasonerFactory implements OWLReasonerFactory {
+class ClassificationMonitor {
 
 	private List<RekonListener> listeners = new ArrayList<RekonListener>();
 
-	public void addListener(RekonListener listener) {
+	private long processStartTime = 0;
+
+	void addListener(RekonListener listener) {
 
 		listeners.add(listener);
 	}
 
-	public String getReasonerName() {
+	void addListeners(Collection<RekonListener> listeners) {
 
-		return RekonReasoner.REASONER_NAME;
+		this.listeners.addAll(listeners);
 	}
 
-	public OWLReasoner createReasoner(OWLOntology ontology) {
+	void onLoadingStart() {
 
-		RekonReasoner reasoner = new RekonReasoner(ontology);
+		onProcessStart("Loading");
 
-		reasoner.addListeners(listeners);
+		for (RekonListener listener : listeners) {
 
-		return reasoner;
+			listener.onLoadingStart();
+		}
 	}
 
- 	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) {
+	void onLoadingComplete() {
 
- 		return createReasoner(ontology);
- 	}
+		onProcessComplete("Loading");
 
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
+		for (RekonListener listener : listeners) {
 
-		return createReasoner(ontology);
+			listener.onLoadingComplete();
+		}
 	}
 
-	public OWLReasoner createNonBufferingReasoner(
-							OWLOntology ontology,
-							OWLReasonerConfiguration config) {
+	void onClassificationStart() {
 
-		return createReasoner(ontology);
+		onProcessStart("Classifying");
+
+		for (RekonListener listener : listeners) {
+
+			listener.onClassificationStart();
+		}
+	}
+
+	void onClassificationComplete() {
+
+		onProcessComplete("Classification");
+
+		for (RekonListener listener : listeners) {
+
+			listener.onClassificationComplete();
+		}
+	}
+
+	private void onProcessStart(String text) {
+
+		startProcessTimer();
+
+		logExecutionPoint(text + "...");
+	}
+
+	private void onProcessComplete(String text) {
+
+		logExecutionPoint(text + " Complete (Time " + getProcessTime() + "s)");
+	}
+
+	private void logExecutionPoint(String text) {
+
+		RekonLogger.SINGLETON.logExecutionPoint(text);
+	}
+
+	private void startProcessTimer() {
+
+		processStartTime = System.currentTimeMillis();
+	}
+
+	private long getProcessTime() {
+
+		return (System.currentTimeMillis() - processStartTime) / 1000;
 	}
 }
