@@ -29,8 +29,6 @@ package rekon.core;
  */
 public interface Queriable {
 
-	public boolean validOps();
-
 	public Names getEquivalents();
 
 	public Names getSupers(boolean direct);

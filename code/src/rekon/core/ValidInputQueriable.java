@@ -95,11 +95,6 @@ abstract class ValidInputQueriable implements Queriable {
 		}
 	}
 
-	public boolean validOps() {
-
-		return true;
-	}
-
 	public Names getEquivalents() {
 
 		return checkPurgeAllFreeNames(getRawEquivalents());

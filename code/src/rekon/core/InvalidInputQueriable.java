@@ -32,11 +32,6 @@ class InvalidInputQueriable implements Queriable {
 	static final InvalidInputQueriable SINGLETON
 						= new InvalidInputQueriable();
 
-	public boolean validOps() {
-
-		return false;
-	}
-
 	public Names getEquivalents() {
 
 		return Names.NO_NAMES;

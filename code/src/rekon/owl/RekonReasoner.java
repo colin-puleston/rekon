@@ -284,12 +284,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 	public boolean isSatisfiable(OWLClassExpression expr) {
 
-		if (expr.equals(factory.getOWLNothing())) {
-
-			return false;
-		}
-
-		return getClassOps().validExpression(expr);
+		return !expr.equals(factory.getOWLNothing());
 	}
 
 	public Node<OWLClass> getUnsatisfiableClasses() {

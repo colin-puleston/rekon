@@ -49,11 +49,6 @@ class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 		this.queriables = queriables;
 	}
 
-	boolean validExpression(OWLClassExpression expr) {
-
-		return queriables.create(expr).validOps();
-	}
-
 	Set<Set<OWLClass>> getTypes(OWLNamedIndividual ind, boolean direct) {
 
 		return toEquivGroups(queriables.create(ind).getSupers(direct));
