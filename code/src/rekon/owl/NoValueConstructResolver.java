@@ -29,9 +29,21 @@ import org.semanticweb.owlapi.model.*;
 /**
  * @author Colin Puleston
  */
-class OwlRestrictionResolver {
+class NoValueConstructResolver {
 
 	static private final IRI REKON_NO_VALUE_IRI = IRI.create("urn:rekon:RekonNoValue");
+
+	static private boolean substitutionsEnabled;
+
+	static void setSubstitutionsEnabled(boolean value) {
+
+		substitutionsEnabled = value;
+	}
+
+	static boolean substitutionsEnabled() {
+
+		return substitutionsEnabled;
+	}
 
 	static OWLClass getNoValueClass(OWLDataFactory factory) {
 
@@ -57,13 +69,16 @@ class OwlRestrictionResolver {
 
 		E resolve(OWLAxiom axiom, E expr) {
 
-			OWLRestriction newExpr = checkResolveToRestriction(expr);
+			if (substitutionsEnabled) {
 
-			if (newExpr != null) {
+				OWLRestriction newExpr = checkResolveToRestriction(expr);
 
-				logNoValueReplacement(axiom, expr, newExpr);
+				if (newExpr != null) {
 
-				return toTypeExpression(newExpr);
+					logReplacement(axiom, expr, newExpr);
+
+					return toTypeExpression(newExpr);
+				}
 			}
 
 			return expr;
@@ -73,12 +88,12 @@ class OwlRestrictionResolver {
 
 		abstract E toTypeExpression(OWLRestriction expr);
 
-		private void logNoValueReplacement(
+		private void logReplacement(
 						OWLAxiom axiom,
 						OWLClassExpression replaced,
 						OWLRestriction replacement) {
 
-			RekonLogger logger = RekonLogger.SINGLETON;
+			Logger logger = Logger.SINGLETON;
 
 			if (axiom != null) {
 
@@ -132,7 +147,7 @@ class OwlRestrictionResolver {
 		}
 	}
 
-	OwlRestrictionResolver(OWLDataFactory factory) {
+	NoValueConstructResolver(OWLDataFactory factory) {
 
 		this.factory = factory;
 

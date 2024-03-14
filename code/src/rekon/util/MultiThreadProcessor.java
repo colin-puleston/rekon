@@ -32,18 +32,16 @@ import java.util.concurrent.*;
  */
 public abstract class MultiThreadProcessor<E> {
 
-	static private final String MULTI_THREAD_SYSTEM_PROPERTY = "rekon.multithread";
-
 	static private boolean multiThreadEnabled = true;
 
-	static {
+	static public void setMultiThreadEnabled(boolean value) {
 
-		String p = System.getProperty(MULTI_THREAD_SYSTEM_PROPERTY);
+		multiThreadEnabled = value;
+	}
 
-		if (p != null) {
+	static public boolean multiThreadEnabled() {
 
-			multiThreadEnabled = Boolean.valueOf(p);
-		}
+		return multiThreadEnabled;
 	}
 
 	private int totalThreads = Runtime.getRuntime().availableProcessors();

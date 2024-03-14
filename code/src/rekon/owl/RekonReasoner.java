@@ -47,6 +47,8 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 	private Classification classification = null;
 	private ClassificationMonitor classificationMonitor = new ClassificationMonitor();
 
+	private RekonConfig config = new RekonConfig();
+
 	public RekonReasoner(OWLOntology rootOntology) {
 
 		this.rootOntology = rootOntology;

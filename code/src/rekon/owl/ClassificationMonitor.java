@@ -99,7 +99,7 @@ class ClassificationMonitor {
 
 	private void logExecutionPoint(String text) {
 
-		RekonLogger.SINGLETON.logExecutionPoint(text);
+		Logger.SINGLETON.logExecutionPoint(text);
 	}
 
 	private void startProcessTimer() {

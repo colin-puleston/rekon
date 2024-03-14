@@ -24,7 +24,6 @@
 
 package rekon.owl;
 
-import java.io.*;
 import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
@@ -32,28 +31,27 @@ import org.semanticweb.owlapi.model.*;
 /**
  * @author Colin Puleston
  */
-public class RekonLogger {
+class Logger {
 
-	static final RekonLogger SINGLETON = new RekonLogger();
-
-	static private final String LOGGING_SYSTEM_PROPERTY = "rekon.logging";
+	static final Logger SINGLETON = new Logger();
 
 	static private boolean loggingOn = false;
 	static private boolean firstLogLine = true;
 
-	static {
-
-		loggingOn = Boolean.valueOf(System.getProperty(LOGGING_SYSTEM_PROPERTY));
-	}
-
-	static public void setLoggingOn(boolean on) {
+	static void setLoggingOn(boolean on) {
 
 		loggingOn = on;
 	}
 
+	static boolean loggingOn() {
+
+		return loggingOn;
+	}
+
 	void logExecutionPoint(String text) {
 
-		System.out.println("\nREKON: " + text);
+		logLine("REKON: " + text);
+		logSeparatorLine();
 	}
 
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
