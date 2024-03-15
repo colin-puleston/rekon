@@ -94,7 +94,7 @@ class ClassificationMonitor {
 
 	private void onProcessComplete(String text) {
 
-		logExecutionPoint(text + " Complete (Time " + getProcessTime() + "s)");
+		logExecutionPoint(text + " Complete (" + getProcessTime() + " seconds)");
 	}
 
 	private void logExecutionPoint(String text) {

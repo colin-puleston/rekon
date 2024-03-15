@@ -32,17 +32,7 @@ import java.util.concurrent.*;
  */
 public abstract class MultiThreadProcessor<E> {
 
-	static private boolean multiThreadEnabled = true;
-
-	static public void setMultiThreadEnabled(boolean value) {
-
-		multiThreadEnabled = value;
-	}
-
-	static public boolean multiThreadEnabled() {
-
-		return multiThreadEnabled;
-	}
+	static public final Enabler ENABLER = new Enabler(true, "multithread");
 
 	private int totalThreads = Runtime.getRuntime().availableProcessors();
 
@@ -83,7 +73,7 @@ public abstract class MultiThreadProcessor<E> {
 
 	public void execProcesses() {
 
-		if (multiThreadEnabled) {
+		if (ENABLER.enabled()) {
 
 			ForkJoinTask.invokeAll(createThreadProcessors());
 		}

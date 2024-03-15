@@ -26,6 +26,8 @@ package rekon.owl;
 
 import org.semanticweb.owlapi.model.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -33,17 +35,7 @@ class NoValueConstructResolver {
 
 	static private final IRI REKON_NO_VALUE_IRI = IRI.create("urn:rekon:RekonNoValue");
 
-	static private boolean substitutionsEnabled;
-
-	static void setSubstitutionsEnabled(boolean value) {
-
-		substitutionsEnabled = value;
-	}
-
-	static boolean substitutionsEnabled() {
-
-		return substitutionsEnabled;
-	}
+	static final Enabler ENABLER = new Enabler(false, "novalue-substitutions");
 
 	static OWLClass getNoValueClass(OWLDataFactory factory) {
 
@@ -69,7 +61,7 @@ class NoValueConstructResolver {
 
 		E resolve(OWLAxiom axiom, E expr) {
 
-			if (substitutionsEnabled) {
+			if (ENABLER.enabled()) {
 
 				OWLRestriction newExpr = checkResolveToRestriction(expr);
 

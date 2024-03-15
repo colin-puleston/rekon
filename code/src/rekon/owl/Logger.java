@@ -28,25 +28,17 @@ import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
 class Logger {
 
 	static final Logger SINGLETON = new Logger();
+	static final Enabler ENABLER = new Enabler(false, "logging");
 
-	static private boolean loggingOn = false;
 	static private boolean firstLogLine = true;
-
-	static void setLoggingOn(boolean on) {
-
-		loggingOn = on;
-	}
-
-	static boolean loggingOn() {
-
-		return loggingOn;
-	}
 
 	void logExecutionPoint(String text) {
 
@@ -140,7 +132,7 @@ class Logger {
 
 	private void logLine(String line) {
 
-		if (loggingOn) {
+		if (ENABLER.enabled()) {
 
 			if (firstLogLine) {
 

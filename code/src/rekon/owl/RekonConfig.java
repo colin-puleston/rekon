@@ -31,87 +31,15 @@ import rekon.util.*;
  */
 public class RekonConfig {
 
-	static public final Option MULTI_THREADING = new MultiThreadingOption();
-	static public final Option NO_VALUE_SUBSTITUTIONS = new NoValueSubstitutionsOption();
-	static public final Option LOGGING = new LoggingOption();
+	static public final RekonConfig SINGLETON = new RekonConfig();
 
-	static private final String SYSTEM_PROPERTY_NAME_HEAD = "rekon.";
-
-	static public abstract class Option {
-
-		public abstract void set(boolean value);
-
-		public abstract boolean get();
-
-		Option() {
-
-			String valueStr = System.getProperty(getSystemPropertyName());
-
-			if (valueStr != null) {
-
-				set(Boolean.valueOf(valueStr));
-			}
-		}
-
-		abstract String getSystemPropertyNameTail();
-
-		private String getSystemPropertyName() {
-
-			return SYSTEM_PROPERTY_NAME_HEAD + getSystemPropertyNameTail();
-		}
+	static void ensureInitialised() {
 	}
 
-	static private class MultiThreadingOption extends Option {
+	public final Enabler multiThread = MultiThreadProcessor.ENABLER;
+	public final Enabler noValueSubstitutions = NoValueConstructResolver.ENABLER;
+	public final Enabler logging = Logger.ENABLER;
 
-		public void set(boolean value) {
-
-			MultiThreadProcessor.setMultiThreadEnabled(value);
-		}
-
-		public boolean get() {
-
-			return MultiThreadProcessor.multiThreadEnabled();
-		}
-
-		String getSystemPropertyNameTail() {
-
-			return "multithread";
-		}
-	}
-
-	static private class NoValueSubstitutionsOption extends Option {
-
-		public void set(boolean value) {
-
-			NoValueConstructResolver.setSubstitutionsEnabled(value);
-		}
-
-		public boolean get() {
-
-			return NoValueConstructResolver.substitutionsEnabled();
-		}
-
-		String getSystemPropertyNameTail() {
-
-			return "novalue-substitutions";
-		}
-	}
-
-	static private class LoggingOption extends Option {
-
-		public void set(boolean value) {
-
-			Logger.setLoggingOn(value);
-		}
-
-		public boolean get() {
-
-			return Logger.loggingOn();
-		}
-
-		String getSystemPropertyNameTail() {
-
-			return "logging";
-		}
+	private RekonConfig() {
 	}
 }
