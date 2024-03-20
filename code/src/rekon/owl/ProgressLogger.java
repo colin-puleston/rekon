@@ -32,7 +32,7 @@ import rekon.util.*;
 class ProgressLogger {
 
 	static final ProgressLogger SINGLETON = new ProgressLogger();
-	static final Option OPTION = new Option(false, "log-progress");
+	static final Option OPTION = new Option(false, "logging.progress");
 
 	void logMajorStartupStartPoint(String text) {
 

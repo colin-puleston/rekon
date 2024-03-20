@@ -36,7 +36,7 @@ import rekon.util.*;
 class WarningLogger {
 
 	static final WarningLogger SINGLETON = new WarningLogger();
-	static final Option OPTION = new Option(false, "log-warnings");
+	static final Option OPTION = new Option(false, "logging.warnings");
 
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 
