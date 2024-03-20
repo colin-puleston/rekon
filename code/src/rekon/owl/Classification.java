@@ -79,7 +79,7 @@ class Classification {
 		private Ontology ontology;
 		private QueriablesAccessor queriables;
 
-		Initialiser(OWLOntologyManager manager, ClassificationMonitor monitor) {
+		Initialiser(OWLOntologyManager manager, StartupMonitor monitor) {
 
 			this.manager = manager;
 
@@ -90,7 +90,7 @@ class Classification {
 			monitor.onLoadingComplete();
 
 			monitor.onClassificationStart();
-			ontology.classify();
+			performClassification(monitor);
 			monitor.onClassificationComplete();
 
 			queriables = createQueriables();
@@ -129,6 +129,11 @@ class Classification {
 			ontology = new Ontology(names, createStructureBuilder());
 		}
 
+		private void performClassification(StartupMonitor monitor) {
+
+			ontology.classify(monitor.createClassifyListener());
+		}
+
 		private StructureBuilder createStructureBuilder() {
 
 			return coreBuilder.createStructureBuilder(createAxiomConverter());
@@ -145,7 +150,7 @@ class Classification {
 		}
 	}
 
-	Classification(OWLOntologyManager manager, ClassificationMonitor monitor) {
+	Classification(OWLOntologyManager manager, StartupMonitor monitor) {
 
 		Initialiser init = new Initialiser(manager, monitor);
 

@@ -22,54 +22,16 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import java.util.*;
-
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.*;
+package rekon.core;
 
 /**
  * @author Colin Puleston
  */
-public class RekonReasonerFactory implements OWLReasonerFactory {
+public interface OntologyClassifyListener {
 
-	private List<RekonStartupListener> reasonerStartupListeners
-								= new ArrayList<RekonStartupListener>();
+	public void onPhaseStart();
 
-	public void addReasonerStartupListener(RekonStartupListener listener) {
+	public void onPassStart(int candidateCount);
 
-		reasonerStartupListeners.add(listener);
-	}
-
-	public String getReasonerName() {
-
-		return RekonReasoner.REASONER_NAME;
-	}
-
-	public OWLReasoner createReasoner(OWLOntology ontology) {
-
-		RekonReasoner reasoner = new RekonReasoner(ontology);
-
-		reasoner.addStartupListeners(reasonerStartupListeners);
-
-		return reasoner;
-	}
-
- 	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) {
-
- 		return createReasoner(ontology);
- 	}
-
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
-
-		return createReasoner(ontology);
-	}
-
-	public OWLReasoner createNonBufferingReasoner(
-							OWLOntology ontology,
-							OWLReasonerConfiguration config) {
-
-		return createReasoner(ontology);
-	}
+	public void onCompletionStart();
 }

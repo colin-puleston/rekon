@@ -31,11 +31,11 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-class NoValueConstructResolver {
+class NoValueSubstitutions {
 
 	static private final IRI REKON_NO_VALUE_IRI = IRI.create("urn:rekon:RekonNoValue");
 
-	static final Enabler ENABLER = new Enabler(false, "novalue-substitutions");
+	static final Option OPTION = new Option(false, "novalue-substitutions");
 
 	static OWLClass getNoValueClass(OWLDataFactory factory) {
 
@@ -61,7 +61,7 @@ class NoValueConstructResolver {
 
 		E resolve(OWLAxiom axiom, E expr) {
 
-			if (ENABLER.enabled()) {
+			if (OPTION.enabled()) {
 
 				OWLRestriction newExpr = checkResolveToRestriction(expr);
 
@@ -85,7 +85,7 @@ class NoValueConstructResolver {
 						OWLClassExpression replaced,
 						OWLRestriction replacement) {
 
-			Logger logger = Logger.SINGLETON;
+			WarningLogger logger = WarningLogger.SINGLETON;
 
 			if (axiom != null) {
 
@@ -139,7 +139,7 @@ class NoValueConstructResolver {
 		}
 	}
 
-	NoValueConstructResolver(OWLDataFactory factory) {
+	NoValueSubstitutions(OWLDataFactory factory) {
 
 		this.factory = factory;
 

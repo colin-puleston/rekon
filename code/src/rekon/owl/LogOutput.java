@@ -22,46 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.util;
+package rekon.owl;
 
 /**
  * @author Colin Puleston
  */
-public class Enabler {
+public interface LogOutput {
 
-	static private final String SYSTEM_PROPERTY_NAME_PREFIX = "rekon.";
-
-	private boolean enabled;
-
-	public Enabler(boolean initAsEnabled, String systemPropertyId) {
-
-		enabled = initAsEnabled;
-
-		checkInitFromSystemProperty(systemPropertyId);
-	}
-
-	public void setEnabled(boolean enabled) {
-
-		this.enabled = enabled;
-	}
-
-	public boolean enabled() {
-
-		return enabled;
-	}
-
-	private void checkInitFromSystemProperty(String propId) {
-
-		String value = System.getProperty(getSystemPropertyName(propId));
-
-		if (value != null) {
-
-			setEnabled(Boolean.valueOf(value));
-		}
-	}
-
-	private String getSystemPropertyName(String propId) {
-
-		return SYSTEM_PROPERTY_NAME_PREFIX + propId;
-	}
+	public void writeLine(String line);
 }

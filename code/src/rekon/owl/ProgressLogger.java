@@ -24,16 +24,49 @@
 
 package rekon.owl;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
-public interface RekonListener {
+class ProgressLogger {
 
-	public void onLoadingStart();
+	static final ProgressLogger SINGLETON = new ProgressLogger();
+	static final Option OPTION = new Option(false, "log-progress");
 
-	public void onLoadingComplete();
+	void logMajorStartupStartPoint(String text) {
 
-	public void onClassificationStart();
+		logSeparatorLine();
+		logMajorStartupPoint(text);
+	}
 
-	public void onClassificationComplete();
+	void logMajorStartupEndPoint(String text) {
+
+		logSeparatorLine();
+		logMajorStartupPoint(text);
+		logSeparatorLine();
+	}
+
+	void logMinorStartupPoint(String text) {
+
+		logLine("  " + text);
+	}
+
+	private void logMajorStartupPoint(String text) {
+
+		logLine("REKON: " + text);
+	}
+
+	private void logSeparatorLine() {
+
+		logLine("");
+	}
+
+	private void logLine(String line) {
+
+		if (OPTION.enabled()) {
+
+			Logger.SINGLETON.logLine(line);
+		}
+	}
 }

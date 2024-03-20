@@ -42,7 +42,7 @@ class ExpressionConverter {
 	private MappedNames names;
 
 	private DataTypeConverter dataTypes = new DataTypeConverter(false);
-	private NoValueConstructResolver noValueConstructResolver;
+	private NoValueSubstitutions noValueSubstitutions;
 
 	private abstract class ConvertedExpression
 								<E extends OWLClassExpression>
@@ -113,7 +113,7 @@ class ExpressionConverter {
 
 			if (outOfScopeLoggingEnabled) {
 
-				Logger logger = Logger.SINGLETON;
+				WarningLogger logger = WarningLogger.SINGLETON;
 
 				if (owlAxiom != null) {
 
@@ -398,7 +398,7 @@ class ExpressionConverter {
 
 		ConvertedNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-			super(owlAxiom, noValueConstructResolver.resolve(owlAxiom, owlExpr));
+			super(owlAxiom, noValueSubstitutions.resolve(owlAxiom, owlExpr));
 
 			if (owlExpr instanceof OWLObjectOneOf) {
 
@@ -533,7 +533,7 @@ class ExpressionConverter {
 		this.names = names;
 
 		owlNothing = factory.getOWLNothing();
-		noValueConstructResolver = new NoValueConstructResolver(factory);
+		noValueSubstitutions = new NoValueSubstitutions(factory);
 	}
 
 	InputNode toNode(OWLClassExpression owlExpr) {
@@ -553,7 +553,7 @@ class ExpressionConverter {
 
 	InputRelation toRelation(OWLAxiom owlAxiom, OWLRestriction owlExpr) {
 
-		owlExpr = noValueConstructResolver.resolve(owlAxiom, owlExpr);
+		owlExpr = noValueSubstitutions.resolve(owlAxiom, owlExpr);
 
 		return new ConvertedRelation(owlAxiom, owlExpr);
 	}

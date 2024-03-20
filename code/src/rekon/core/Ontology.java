@@ -56,11 +56,11 @@ public class Ontology {
 		processAllNamesPostAdditions();
 	}
 
-	public void classify() {
+	public void classify(OntologyClassifyListener classifyListener) {
 
 		NodeMatchers nodeMatchers = new NodeMatchers(allNodes);
 
-		new OntologyClassifier(allNames, allNodes, nodeMatchers);
+		new OntologyClassifier(allNames, allNodes, nodeMatchers, classifyListener);
 
 		dynamicSubsumers = new DynamicSubsumers(nodeMatchers);
 		dynamicSubsumeds = new DynamicSubsumeds(nodeMatchers);

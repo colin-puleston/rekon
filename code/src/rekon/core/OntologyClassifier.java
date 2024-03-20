@@ -114,11 +114,11 @@ class OntologyClassifier {
 			findDisjunctionClassifyCandidates();
 		}
 
-		boolean potentialInferences() {
+		int candidateCount() {
 
-			return !patternMatchCandidates.isEmpty()
-					|| !disjunctionClassifyCandidates.isEmpty()
-					|| allRelationTargetSubsumptions.potentialInferences();
+			return patternMatchCandidates.size()
+					+ disjunctionClassifyCandidates.size()
+					+ allRelationTargetSubsumptions.candidateCount();
 		}
 
 		void checkSubsumptions() {
@@ -232,7 +232,8 @@ class OntologyClassifier {
 	OntologyClassifier(
 		Iterable<Name> allNames,
 		Iterable<NodeX> allNodes,
-		NodeMatchers nodeMatchers) {
+		NodeMatchers nodeMatchers,
+		OntologyClassifyListener classifyListener) {
 
 		this.allNames = allNames;
 		this.allNodes = allNodes;
@@ -242,16 +243,30 @@ class OntologyClassifier {
 		allDisjunctions = nodeMatchers.getAllDisjunctions();
 		definitionDisjunctions = nodeMatchers.getDefinitionDisjunctions();
 
-		classify();
+		classify(classifyListener);
 	}
 
-	private void classify() {
+	private void classify(OntologyClassifyListener classifyListener) {
 
-		while (initialiseNextPhase()) {
+		while (initialPhase || initialiseNextPhase()) {
 
 			PassConfig config = new InitialPassConfig();
 
-			while (config.potentialInferences()) {
+			while (true) {
+
+				int candidates = config.candidateCount();
+
+				if (candidates == 0) {
+
+					break;
+				}
+
+				if (config.initialPass()) {
+
+					classifyListener.onPhaseStart();
+				}
+
+				classifyListener.onPassStart(candidates);
 
 				config = perfomPass(config);
 			}
@@ -259,19 +274,18 @@ class OntologyClassifier {
 			initialPhase &= false;
 		}
 
+		classifyListener.onCompletionStart();
+
 		NameClassification.completeAllClassifications(allNames);
 	}
 
 	private boolean initialiseNextPhase() {
 
-		if (initialPhase || expansionsInCurrentPhase) {
+		if (expansionsInCurrentPhase && resetAllPhaseInferredSubsumers()) {
 
-			if (initialPhase || resetAllPhaseInferredSubsumers()) {
+			expansionsInCurrentPhase = false;
 
-				expansionsInCurrentPhase = false;
-
-				return true;
-			}
+			return true;
 		}
 
 		return false;
@@ -305,3 +319,4 @@ class OntologyClassifier {
 		return nextConfig;
 	}
 }
+

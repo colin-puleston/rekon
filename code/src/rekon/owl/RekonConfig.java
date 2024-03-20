@@ -31,15 +31,16 @@ import rekon.util.*;
  */
 public class RekonConfig {
 
-	static public final RekonConfig SINGLETON = new RekonConfig();
+	public final Option multiThread = MultiThreadProcessor.OPTION;
+	public final Option noValueSubstitutions = NoValueSubstitutions.OPTION;
+	public final Option warningLogger = WarningLogger.OPTION;
+	public final Option progressLogging = ProgressLogger.OPTION;
 
-	static void ensureInitialised() {
+	public void setLogOutput(LogOutput output) {
+
+		Logger.SINGLETON.setOutput(output);
 	}
 
-	public final Enabler multiThread = MultiThreadProcessor.ENABLER;
-	public final Enabler noValueSubstitutions = NoValueConstructResolver.ENABLER;
-	public final Enabler logging = Logger.ENABLER;
-
-	private RekonConfig() {
+	RekonConfig() {
 	}
 }

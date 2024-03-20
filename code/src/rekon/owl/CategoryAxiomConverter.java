@@ -281,11 +281,11 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
 
-		Logger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExpr);
+		WarningLogger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExpr);
 	}
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
 
-		Logger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExprs);
+		WarningLogger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExprs);
 	}
 }

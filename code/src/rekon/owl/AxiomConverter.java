@@ -195,7 +195,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 		if (!outOfScopeTypes.isEmpty()) {
 
-			Logger.SINGLETON.logOutOfScopeAxiomTypes(outOfScopeTypes);
+			WarningLogger.SINGLETON.logOutOfScopeAxiomTypes(outOfScopeTypes);
 		}
 	}
 

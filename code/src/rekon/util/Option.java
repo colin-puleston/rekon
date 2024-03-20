@@ -22,54 +22,46 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import java.util.*;
-
-import org.semanticweb.owlapi.model.*;
-import org.semanticweb.owlapi.reasoner.*;
+package rekon.util;
 
 /**
  * @author Colin Puleston
  */
-public class RekonReasonerFactory implements OWLReasonerFactory {
+public class Option {
 
-	private List<RekonStartupListener> reasonerStartupListeners
-								= new ArrayList<RekonStartupListener>();
+	static private final String SYSTEM_PROPERTY_NAME_PREFIX = "rekon.";
 
-	public void addReasonerStartupListener(RekonStartupListener listener) {
+	private boolean enabled;
 
-		reasonerStartupListeners.add(listener);
+	public Option(boolean initAsEnabled, String systemPropertyId) {
+
+		enabled = initAsEnabled;
+
+		checkInitFromSystemProperty(systemPropertyId);
 	}
 
-	public String getReasonerName() {
+	public void setEnabled(boolean enabled) {
 
-		return RekonReasoner.REASONER_NAME;
+		this.enabled = enabled;
 	}
 
-	public OWLReasoner createReasoner(OWLOntology ontology) {
+	public boolean enabled() {
 
-		RekonReasoner reasoner = new RekonReasoner(ontology);
-
-		reasoner.addStartupListeners(reasonerStartupListeners);
-
-		return reasoner;
+		return enabled;
 	}
 
- 	public OWLReasoner createReasoner(OWLOntology ontology, OWLReasonerConfiguration config) {
+	private void checkInitFromSystemProperty(String propId) {
 
- 		return createReasoner(ontology);
- 	}
+		String value = System.getProperty(getSystemPropertyName(propId));
 
-	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
+		if (value != null) {
 
-		return createReasoner(ontology);
+			setEnabled(Boolean.valueOf(value));
+		}
 	}
 
-	public OWLReasoner createNonBufferingReasoner(
-							OWLOntology ontology,
-							OWLReasonerConfiguration config) {
+	private String getSystemPropertyName(String propId) {
 
-		return createReasoner(ontology);
+		return SYSTEM_PROPERTY_NAME_PREFIX + propId;
 	}
 }

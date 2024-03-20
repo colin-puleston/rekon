@@ -96,6 +96,6 @@ class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 
 	boolean insertedEntity(OWLClass entity) {
 
-		return NoValueConstructResolver.isNoValueClass(entity);
+		return NoValueSubstitutions.isNoValueClass(entity);
 	}
 }

@@ -184,9 +184,9 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	boolean potentialInferences() {
+	int candidateCount() {
 
-		return !sourceIndividualProfiles.isEmpty();
+		return sourceIndividualProfiles.size();
 	}
 
 	void inferNewSubsumptions() {

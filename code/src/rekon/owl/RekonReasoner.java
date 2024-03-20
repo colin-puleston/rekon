@@ -35,6 +35,8 @@ import org.semanticweb.owlapi.util.Version;
  */
 public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
+	static public final RekonConfig CONFIG = new RekonConfig();
+
 	static final String REASONER_NAME = "REKON";
 	static final Version REASONER_VERSION = new Version(1, 0, 0, 0);
 
@@ -45,7 +47,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 	private UpdateHandler updateHandler;
 
 	private Classification classification = null;
-	private ClassificationMonitor classificationMonitor = new ClassificationMonitor();
+	private StartupMonitor startupMonitor = new StartupMonitor();
 
 	public RekonReasoner(OWLOntology rootOntology) {
 
@@ -56,7 +58,6 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 		updateHandler = new UpdateHandler(this, manager);
 
-		RekonConfig.ensureInitialised();
 		NameRenderer.SINGLETON.setDefaultLabel(manager);
 	}
 
@@ -67,14 +68,14 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		return ensureClassification().createInstanceBox();
 	}
 
-	public void addListener(RekonListener listener) {
+	public void addStartupListener(RekonStartupListener listener) {
 
-		classificationMonitor.addListener(listener);
+		startupMonitor.addListener(listener);
 	}
 
-	public void addListeners(Collection<RekonListener> listeners) {
+	public void addStartupListeners(Collection<RekonStartupListener> listeners) {
 
-		classificationMonitor.addListeners(listeners);
+		startupMonitor.addListeners(listeners);
 	}
 
 	public String getReasonerName() {
@@ -359,7 +360,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 
 		if (classification == null) {
 
-			classification = new Classification(manager, classificationMonitor);
+			classification = new Classification(manager, startupMonitor);
 
 			updateHandler.reset();
 		}

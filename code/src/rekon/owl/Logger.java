@@ -24,124 +24,54 @@
 
 package rekon.owl;
 
-import java.util.*;
-
-import org.semanticweb.owlapi.model.*;
-
-import rekon.util.*;
-
 /**
  * @author Colin Puleston
  */
 class Logger {
 
 	static final Logger SINGLETON = new Logger();
-	static final Enabler ENABLER = new Enabler(false, "logging");
 
-	static private boolean firstLogLine = true;
+	static private class DefaultOutput implements LogOutput {
 
-	void logExecutionPoint(String text) {
-
-		logLine("REKON: " + text);
-		logSeparatorLine();
-	}
-
-	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
-
-		logWarningLine("Ignoring out-of-scope axiom types");
-
-		for (AxiomType<?> axType : outOfScopeTypes) {
-
-			logLine("Axiom-type: " + axType);
-		}
-
-		logSeparatorLine();
-	}
-
-	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
-
-		logOutOfScopeAxiom(axiom, Collections.singleton(outOfScopeExpr));
-	}
-
-	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
-
-		logWarningLine("Ignoring axiom containing out-of-scope expression(s)");
-		logLine("Axiom: " + axiom);
-
-		for (OWLObject e : outOfScopeExprs) {
-
-			logLine("Expression: " + e);
-		}
-
-		logSeparatorLine();
-	}
-
-	void logOutOfScopeQueryExpression(OWLObject expr) {
-
-		logWarningLine("Cannot handle out-of-scope query");
-		logLine("Expression: " + expr);
-		logLine("No results returned!");
-
-		logSeparatorLine();
-	}
-
-	void logNoValueAxiomExpressionReplacement(
-				OWLAxiom axiom,
-				OWLClassExpression replaced,
-				OWLClassExpression replacement) {
-
-		logNoValueExpressionReplacement(axiom, replaced, replacement, "axiom/expression");
-	}
-
-	void logNoValueQueryExpressionReplacement(
-				OWLClassExpression replaced,
-				OWLClassExpression replacement) {
-
-		logNoValueExpressionReplacement(null, replaced, replacement, "query");
-	}
-
-	private void logNoValueExpressionReplacement(
-					OWLAxiom axiom,
-					OWLClassExpression replaced,
-					OWLClassExpression replacement,
-					String description) {
-
-		logWarningLine("Replacing out-of-scope \"No Value\" " + description);
-
-		if (axiom != null) {
-
-			logLine("Axiom: " + axiom);
-		}
-
-		logLine("Replacing: " + replaced);
-		logLine("Replacement: " + replacement);
-		logLine("CAUTION!!! Weaker constraint. No contradiction checking.");
-
-		logSeparatorLine();
-	}
-
-	private void logWarningLine(String warning) {
-
-		logLine("REKON WARNING: " + warning + "...");
-	}
-
-	private void logSeparatorLine() {
-
-		logLine("");
-	}
-
-	private void logLine(String line) {
-
-		if (ENABLER.enabled()) {
-
-			if (firstLogLine) {
-
-				firstLogLine = false;
-
-				logSeparatorLine();
-			}
+		public void writeLine(String line) {
 
 			System.out.println(line);
 		}
+	}
+
+	private LogOutput output = new DefaultOutput();
+
+	private boolean currentSeparatorLine = false;
+
+	void setOutput(LogOutput output) {
+
+		this.output = output;
+	}
+
+	void logLine(String line) {
+
+		if (!checkMultipleSeparatorLines(line)) {
+
+			output.writeLine(line);
+		}
+	}
+
+	private boolean checkMultipleSeparatorLines(String line) {
+
+		if (line.length() == 0) {
+
+			if (currentSeparatorLine) {
+
+				return true;
+			}
+
+			currentSeparatorLine = true;
+		}
+		else {
+
+			currentSeparatorLine = false;
+		}
+
+		return false;
 	}
 }
