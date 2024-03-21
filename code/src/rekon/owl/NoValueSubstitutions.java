@@ -59,7 +59,7 @@ class NoValueSubstitutions {
 
 	private abstract class Resolver<E extends OWLClassExpression> {
 
-		E resolve(OWLAxiom axiom, E expr) {
+		E resolve(OwlContainer container, E expr) {
 
 			if (OPTION.enabled()) {
 
@@ -67,7 +67,7 @@ class NoValueSubstitutions {
 
 				if (newExpr != null) {
 
-					logReplacement(axiom, expr, newExpr);
+					container.logNoValueExprReplacement(expr, newExpr);
 
 					return toTypeExpression(newExpr);
 				}
@@ -79,23 +79,6 @@ class NoValueSubstitutions {
 		abstract OWLRestriction checkResolveToRestriction(E expr);
 
 		abstract E toTypeExpression(OWLRestriction expr);
-
-		private void logReplacement(
-						OWLAxiom axiom,
-						OWLClassExpression replaced,
-						OWLRestriction replacement) {
-
-			WarningLogger logger = WarningLogger.SINGLETON;
-
-			if (axiom != null) {
-
-				logger.logNoValueAxiomExpressionReplacement(axiom, replaced, replacement);
-			}
-			else {
-
-				logger.logNoValueQueryExpressionReplacement(replaced, replacement);
-			}
-		}
 	}
 
 	private class ExpressionResolver extends Resolver<OWLClassExpression> {
@@ -149,14 +132,14 @@ class NoValueSubstitutions {
 		rekonNoValue = getNoValueClass(factory);
 	}
 
-	OWLClassExpression resolve(OWLAxiom axiom, OWLClassExpression expr) {
+	OWLClassExpression resolve(OwlContainer container, OWLClassExpression expr) {
 
-		return expressionResolver.resolve(axiom, expr);
+		return expressionResolver.resolve(container, expr);
 	}
 
-	OWLRestriction resolve(OWLAxiom axiom, OWLRestriction expr) {
+	OWLRestriction resolve(OwlContainer container, OWLRestriction expr) {
 
-		return restrictionResolver.resolve(axiom, expr);
+		return restrictionResolver.resolve(container, expr);
 	}
 
 	private OWLRestriction checkCreateForNoValue(OWLObjectComplementOf expr) {

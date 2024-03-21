@@ -58,7 +58,7 @@ class StartupMonitor {
 
 		public void onCompletionStart() {
 
-			logClassifyStartPoint("Hierarchy Completion");
+			logClassifyStartPoint("Building hierarchy");
 		}
 
 		private void logClassifyStartPoint(String text) {
@@ -94,7 +94,7 @@ class StartupMonitor {
 
 	void onLoadingComplete() {
 
-		onMajorProcessComplete("Loading");
+		onMajorProcessComplete("Loading", false);
 	}
 
 	void onClassificationStart() {
@@ -104,7 +104,7 @@ class StartupMonitor {
 
 	void onClassificationComplete() {
 
-		onMajorProcessComplete("Classification");
+		onMajorProcessComplete("Classification", true);
 
 		for (RekonStartupListener listener : listeners) {
 
@@ -119,9 +119,11 @@ class StartupMonitor {
 		logMajorStartupStartPoint(text + "...");
 	}
 
-	private void onMajorProcessComplete(String text) {
+	private void onMajorProcessComplete(String text, boolean startupComplete) {
 
-		logMajorStartupEndPoint(text + " Complete (" + getProcessTime() + " seconds)");
+		String timeText = "(" + getProcessTime() + " seconds)";
+
+		logMajorStartupEndPoint(text + " Complete " + timeText, startupComplete);
 	}
 
 	private void logMajorStartupStartPoint(String text) {
@@ -129,9 +131,9 @@ class StartupMonitor {
 		ProgressLogger.SINGLETON.logMajorStartupStartPoint(text);
 	}
 
-	private void logMajorStartupEndPoint(String text) {
+	private void logMajorStartupEndPoint(String text, boolean startupComplete) {
 
-		ProgressLogger.SINGLETON.logMajorStartupEndPoint(text);
+		ProgressLogger.SINGLETON.logMajorStartupEndPoint(text, startupComplete);
 	}
 
 	private void logMinorStartupPoint(String text) {

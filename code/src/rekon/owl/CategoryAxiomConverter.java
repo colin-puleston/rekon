@@ -58,8 +58,8 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 	}
 
 	abstract class ConvertedEquivalence<F, S>
-								extends ConvertedAxiom
-								implements InputEquivalence<F, S> {
+						extends ConvertedAxiom
+						implements InputEquivalence<F, S> {
 
 		private F first;
 		private S second;
@@ -84,8 +84,8 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 	}
 
 	abstract class ConvertedSubSuper<SB, SP>
-								extends ConvertedAxiom
-								implements InputSubSuper<SB, SP> {
+						extends ConvertedAxiom
+						implements InputSubSuper<SB, SP> {
 
 		private SB sub;
 		private SP sup;

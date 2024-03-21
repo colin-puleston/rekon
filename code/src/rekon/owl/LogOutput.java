@@ -29,5 +29,5 @@ package rekon.owl;
  */
 public interface LogOutput {
 
-	public void writeLine(String line);
+	public void write(String line);
 }

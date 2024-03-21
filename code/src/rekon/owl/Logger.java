@@ -33,45 +33,31 @@ class Logger {
 
 	static private class DefaultOutput implements LogOutput {
 
-		public void writeLine(String line) {
+		public void write(String text) {
 
-			System.out.println(line);
+			System.out.print(text);
 		}
 	}
 
 	private LogOutput output = new DefaultOutput();
-
-	private boolean currentSeparatorLine = false;
 
 	void setOutput(LogOutput output) {
 
 		this.output = output;
 	}
 
-	void logLine(String line) {
+	void writeBlock(LogBlock block) {
 
-		if (!checkMultipleSeparatorLines(line)) {
-
-			output.writeLine(line);
-		}
+		writeToOutput("\n" + block.getText());
 	}
 
-	private boolean checkMultipleSeparatorLines(String line) {
+	void writeLine(String line) {
 
-		if (line.length() == 0) {
+		writeToOutput(line + "\n");
+	}
 
-			if (currentSeparatorLine) {
+	private synchronized void writeToOutput(String text) {
 
-				return true;
-			}
-
-			currentSeparatorLine = true;
-		}
-		else {
-
-			currentSeparatorLine = false;
-		}
-
-		return false;
+		output.write(text);
 	}
 }

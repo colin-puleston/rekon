@@ -40,12 +40,14 @@ class WarningLogger {
 
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 
-		logWarningHeader("Ignoring out-of-scope axiom types");
+		LogBlock b = createBlock("Ignoring out-of-scope axiom types");
 
 		for (AxiomType<?> axType : outOfScopeTypes) {
 
-			logLine("Axiom-type: " + axType);
+			b.addLine("Axiom-type: " + axType);
 		}
+
+		writeBlock(b);
 	}
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
@@ -55,66 +57,80 @@ class WarningLogger {
 
 	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
 
-		logWarningHeader("Ignoring axiom containing out-of-scope expression(s)");
-		logLine("Axiom: " + axiom);
+		LogBlock b = createBlock("Ignoring axiom containing out-of-scope component(s)");
+
+		b.addLine(describeAxiom(axiom));
 
 		for (OWLObject e : outOfScopeExprs) {
 
-			logLine("Expression: " + e);
+			b.addLine("Component: " + e);
 		}
+
+		writeBlock(b);
 	}
 
-	void logOutOfScopeQueryExpression(OWLObject expr) {
+	void logOutOfScopeQueryExpr(OWLClassExpression query, OWLClassExpression outOfScopeExpr) {
 
-		logWarningHeader("Cannot handle out-of-scope query");
-		logLine("Expression: " + expr);
-		logLine("No results returned!");
+		LogBlock b = createBlock("Cannot handle out-of-scope query component");
+
+		b.addLine(describeQuery(query));
+		b.addLine("Component: " + outOfScopeExpr);
+		b.addLine("No results returned!");
+
+		writeBlock(b);
 	}
 
-	void logNoValueAxiomExpressionReplacement(
+	void logNoValueAxiomExprReplacement(
 				OWLAxiom axiom,
 				OWLClassExpression replaced,
 				OWLClassExpression replacement) {
 
-		logNoValueExpressionReplacement(axiom, replaced, replacement, "axiom/expression");
+		logNoValueExprReplacement(describeAxiom(axiom), replaced, replacement);
 	}
 
-	void logNoValueQueryExpressionReplacement(
+	void logNoValueQueryExprReplacement(
+				OWLClassExpression query,
 				OWLClassExpression replaced,
 				OWLClassExpression replacement) {
 
-		logNoValueExpressionReplacement(null, replaced, replacement, "query");
+		logNoValueExprReplacement(describeQuery(query), replaced, replacement);
 	}
 
-	private void logNoValueExpressionReplacement(
-					OWLAxiom axiom,
+	private void logNoValueExprReplacement(
+					String containerDescription,
 					OWLClassExpression replaced,
-					OWLClassExpression replacement,
-					String description) {
+					OWLClassExpression replacement) {
 
-		logWarningHeader("Replacing out-of-scope \"No Value\" " + description);
+		LogBlock b = createBlock("Replacing out-of-scope \"No Value\" component");
 
-		if (axiom != null) {
+		b.addLine(containerDescription);
+		b.addLine("Component: " + replaced);
+		b.addLine("Replacement: " + replacement);
+		b.addLine("CAUTION!!! Weaker constraint. No contradiction checking.");
 
-			logLine("Axiom: " + axiom);
-		}
-
-		logLine("Replacing: " + replaced);
-		logLine("Replacement: " + replacement);
-		logLine("CAUTION!!! Weaker constraint. No contradiction checking.");
+		writeBlock(b);
 	}
 
-	private void logWarningHeader(String warning) {
+	private LogBlock createBlock(String warning) {
 
-		logLine("");
-		logLine("REKON WARNING: " + warning + "...");
+		return new LogBlock("REKON WARNING: " + warning + "...");
 	}
 
-	private void logLine(String line) {
+	private String describeAxiom(OWLAxiom axiom) {
+
+		return "Axiom: " + axiom;
+	}
+
+	private String describeQuery(OWLClassExpression query) {
+
+		return "Query: " + query;
+	}
+
+	private void writeBlock(LogBlock block) {
 
 		if (OPTION.enabled()) {
 
-			Logger.SINGLETON.logLine(line);
+			Logger.SINGLETON.writeBlock(block);
 		}
 	}
 }

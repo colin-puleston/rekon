@@ -24,58 +24,29 @@
 
 package rekon.owl;
 
-import rekon.util.*;
-
 /**
  * @author Colin Puleston
  */
-class ProgressLogger {
+class LogBlock {
 
-	static final ProgressLogger SINGLETON = new ProgressLogger();
-	static final Option OPTION = new Option(false, "logging.progress");
+	private StringBuilder text = new StringBuilder();
 
-	void logMajorStartupStartPoint(String text) {
-
-		logMajorStartupPoint(text);
+	LogBlock() {
 	}
 
-	void logMajorStartupEndPoint(String text, boolean startupComplete) {
+	LogBlock(String firstLine) {
 
-		logMajorStartupPoint(text);
-
-		if (startupComplete) {
-
-			writeLine("");
-		}
+		addLine(firstLine);
 	}
 
-	void logMinorStartupPoint(String text) {
+	void addLine(String line) {
 
-		writeLine("  " + text);
+		text.append(line);
+		text.append("\n");
 	}
 
-	private void logMajorStartupPoint(String text) {
+	String getText() {
 
-		LogBlock block = new LogBlock();
-
-		block.addLine("REKON: " + text);
-
-		writeBlock(block);
-	}
-
-	private void writeBlock(LogBlock block) {
-
-		if (OPTION.enabled()) {
-
-			Logger.SINGLETON.writeBlock(block);
-		}
-	}
-
-	private void writeLine(String line) {
-
-		if (OPTION.enabled()) {
-
-			Logger.SINGLETON.writeLine(line);
-		}
+		return text.toString();
 	}
 }
