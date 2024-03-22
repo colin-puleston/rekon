@@ -29,11 +29,13 @@ package rekon.core;
  */
 public class Queriables {
 
+	static public final Queriable INVALID_INPUT = new InvalidInputQueriable();
+
 	private Ontology ontology;
 
-	public Queriable create(NodeX nodes) {
+	public Queriable create(NodeX node) {
 
-		return new QueriableNode(nodes);
+		return new QueriableNode(node);
 	}
 
 	public Queriable create(MultiPatternSource disjunctsBuilder) {
@@ -52,7 +54,7 @@ public class Queriables {
 			return new QueriableExpression(ontology, expr);
 		}
 
-		return InvalidInputQueriable.SINGLETON;
+		return INVALID_INPUT;
 	}
 
 	Queriables(Ontology ontology) {

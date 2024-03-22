@@ -65,12 +65,17 @@ class QueriablesAccessor {
 
 	Queriable create(OWLClass cls) {
 
-		return queriables.create(names.get(cls));
+		return create(names.get(cls));
 	}
 
 	Queriable create(OWLNamedIndividual ind) {
 
-		return queriables.create(names.get(ind));
+		return create(names.get(ind));
+	}
+
+	private Queriable create(NodeX node) {
+
+		return node != null ? queriables.create(node) : Queriables.INVALID_INPUT;
 	}
 
 	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {

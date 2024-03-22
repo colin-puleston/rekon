@@ -154,7 +154,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 		IndividualNode asName(OWLIndividual expr) {
 
-			return names.get((OWLNamedIndividual)expr);
+			return names.resolve((OWLNamedIndividual)expr);
 		}
 	}
 
@@ -315,7 +315,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 										OWLClassExpression typeExpr,
 										OWLClassAssertionAxiom source) {
 
-			ClassNode type = names.get((OWLClass)typeExpr);
+			ClassNode type = names.resolve((OWLClass)typeExpr);
 
 			return new ConvertedIndividualClassType(source, node, type);
 		}
@@ -441,6 +441,6 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 	private IndividualNode toIndividualNode(OWLIndividual e) {
 
-		return e instanceof OWLNamedIndividual ? names.get((OWLNamedIndividual)e) : null;
+		return e instanceof OWLNamedIndividual ? names.resolve((OWLNamedIndividual)e) : null;
 	}
 }

@@ -159,7 +159,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 		ClassNode asName(OWLClassExpression expr) {
 
-			return names.get((OWLClass)expr);
+			return names.resolve((OWLClass)expr);
 		}
 	}
 

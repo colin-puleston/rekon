@@ -40,27 +40,57 @@ abstract class PropertyOps<P extends OWLProperty> extends HierarchyEntityOps<P, 
 
 	boolean equivalent(P inObject1, P inObject2) {
 
-		return getPropertyName(inObject1).hasEquivalent(getPropertyName(inObject2));
+		PropertyX p1 = getPropertyName(inObject1);
+
+		if (p1 != null) {
+
+			PropertyX p2 = getPropertyName(inObject2);
+
+			if (p2 != null) {
+
+				return p1.hasEquivalent(p2);
+			}
+		}
+
+		return false;
 	}
 
 	boolean subsumption(P inSup, P inSub) {
 
-		return getPropertyName(inSup).subsumes(getPropertyName(inSub));
+		PropertyX pSup = getPropertyName(inSup);
+
+		if (pSup != null) {
+
+			PropertyX pSub = getPropertyName(inSub);
+
+			if (pSub != null) {
+
+				return pSup.subsumes(pSub);
+			}
+		}
+
+		return false;
 	}
 
 	Names getEquivalentNames(P inObject) {
 
-		return getPropertyName(inObject).getEquivalents();
+		PropertyX p = getPropertyName(inObject);
+
+		return p != null ? p.getEquivalents() : Names.NO_NAMES;
 	}
 
 	Names getSuperNames(P inObject, boolean direct) {
 
-		return getPropertyName(inObject).getSupers(direct);
+		PropertyX p = getPropertyName(inObject);
+
+		return p != null ? p.getSupers(direct) : Names.NO_NAMES;
 	}
 
 	Names getSubNames(P inObject, boolean direct) {
 
-		return getPropertyName(inObject).getSubs(direct);
+		PropertyX p = getPropertyName(inObject);
+
+		return p != null ? p.getSubs(direct) : Names.NO_NAMES;
 	}
 
 	Names getDirectEntitySubs(Name name) {

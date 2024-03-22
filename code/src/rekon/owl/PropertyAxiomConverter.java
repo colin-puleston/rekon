@@ -168,7 +168,7 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 		NodeProperty asName(OWLObjectPropertyExpression expr) {
 
-			return names.get((OWLObjectProperty)expr);
+			return names.resolve((OWLObjectProperty)expr);
 		}
 	}
 
@@ -196,7 +196,7 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 		DataProperty asName(OWLDataPropertyExpression expr) {
 
-			return names.get((OWLDataProperty)expr);
+			return names.resolve((OWLDataProperty)expr);
 		}
 	}
 
@@ -513,6 +513,6 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 	private NodeProperty toNodeProperty(OWLObjectPropertyExpression e) {
 
-		return e instanceof OWLObjectProperty ? names.get((OWLObjectProperty)e) : null;
+		return e instanceof OWLObjectProperty ? names.resolve((OWLObjectProperty)e) : null;
 	}
 }

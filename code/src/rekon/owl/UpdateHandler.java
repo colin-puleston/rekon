@@ -33,8 +33,6 @@ import org.semanticweb.owlapi.model.*;
  */
 class UpdateHandler implements OWLOntologyChangeListener {
 
-	private RekonReasoner reasoner;
-
 	private boolean instanceBoxPresent = false;
 	private List<OWLOntologyChange> pendingChanges = new ArrayList<OWLOntologyChange>();
 
@@ -42,14 +40,10 @@ class UpdateHandler implements OWLOntologyChangeListener {
 
 		checkLegalUpdate();
 
-		reasoner.flush();
-
 		pendingChanges.addAll(changes);
 	}
 
-	UpdateHandler(RekonReasoner reasoner, OWLOntologyManager manager) {
-
-		this.reasoner = reasoner;
+	UpdateHandler(OWLOntologyManager manager) {
 
 		manager.addOntologyChangeListener(this);
 	}

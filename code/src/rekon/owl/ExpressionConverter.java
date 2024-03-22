@@ -141,12 +141,12 @@ class ExpressionConverter {
 
 		public NodeProperty getNodeProperty() {
 
-			return names.get(owlPropertyAs(OWLObjectProperty.class));
+			return names.resolve(owlPropertyAs(OWLObjectProperty.class));
 		}
 
 		public DataProperty getDataProperty() {
 
-			return names.get(owlPropertyAs(OWLDataProperty.class));
+			return names.resolve(owlPropertyAs(OWLDataProperty.class));
 		}
 
 		public InputNode getNodeValue() {
@@ -357,12 +357,12 @@ class ExpressionConverter {
 
 		public ClassNode asClassNode() {
 
-			return names.get(owlExprAs(OWLClass.class));
+			return names.resolve(owlExprAs(OWLClass.class));
 		}
 
 		public IndividualNode asIndividualNode() {
 
-			return names.get(asOwlIndividuals().asSingleOwlIndividual());
+			return names.resolve(asOwlIndividuals().asSingleOwlIndividual());
 		}
 
 		public Collection<InputNode> asConjuncts() {

@@ -29,8 +29,6 @@ package rekon.core;
  */
 class InvalidInputQueriable implements Queriable {
 
-	static final InvalidInputQueriable SINGLETON = new InvalidInputQueriable();
-
 	public Names getEquivalents() {
 
 		return Names.NO_NAMES;
@@ -61,6 +59,6 @@ class InvalidInputQueriable implements Queriable {
 		return false;
 	}
 
-	private InvalidInputQueriable() {
+	InvalidInputQueriable() {
 	}
 }

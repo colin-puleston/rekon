@@ -156,6 +156,11 @@ class MappedNames extends OntologyNames {
 			return n != null ? n : addName(entity);
 		}
 
+		N getName(E entity) {
+
+			return names.get(entity);
+		}
+
 		boolean mappingSource(E entity) {
 
 			return true;
@@ -378,23 +383,43 @@ class MappedNames extends OntologyNames {
 		dataProperties = new DataProperties(manager);
 	}
 
-	ClassNode get(OWLClass entity) {
+	ClassNode resolve(OWLClass entity) {
 
 		return classes.resolveName(entity);
 	}
 
-	IndividualNode get(OWLNamedIndividual entity) {
+	IndividualNode resolve(OWLNamedIndividual entity) {
 
 		return individuals.resolveName(entity);
 	}
 
-	NodeProperty get(OWLObjectProperty entity) {
+	NodeProperty resolve(OWLObjectProperty entity) {
 
 		return nodeProperties.resolveName(entity);
 	}
 
-	DataProperty get(OWLDataProperty entity) {
+	DataProperty resolve(OWLDataProperty entity) {
 
 		return dataProperties.resolveName(entity);
+	}
+
+	ClassNode get(OWLClass entity) {
+
+		return classes.getName(entity);
+	}
+
+	IndividualNode get(OWLNamedIndividual entity) {
+
+		return individuals.getName(entity);
+	}
+
+	NodeProperty get(OWLObjectProperty entity) {
+
+		return nodeProperties.getName(entity);
+	}
+
+	DataProperty get(OWLDataProperty entity) {
+
+		return dataProperties.getName(entity);
 	}
 }

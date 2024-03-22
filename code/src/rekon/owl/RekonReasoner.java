@@ -56,7 +56,7 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		manager = rootOntology.getOWLOntologyManager();
 		factory = manager.getOWLDataFactory();
 
-		updateHandler = new UpdateHandler(this, manager);
+		updateHandler = new UpdateHandler(manager);
 
 		NameRenderer.SINGLETON.setDefaultLabel(manager);
 	}

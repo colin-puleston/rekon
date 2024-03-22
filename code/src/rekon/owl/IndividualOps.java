@@ -57,7 +57,19 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 	Set<Set<OWLNamedIndividual>> getObjectValues(OWLNamedIndividual ind, OWLObjectProperty prop) {
 
-		return toEquivGroups(names.get(ind).getIndividualValues(names.get(prop)));
+		IndividualNode i = names.get(ind);
+
+		if (i != null) {
+
+			PropertyX p = names.get(prop);
+
+			if (p != null) {
+
+				return toEquivGroups(i.getIndividualValues(p));
+			}
+		}
+
+		return Collections.emptySet();
 	}
 
 	Set<OWLLiteral> getDataValues(OWLNamedIndividual ind, OWLDataProperty prop) {
