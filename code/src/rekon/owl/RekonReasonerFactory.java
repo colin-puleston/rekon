@@ -63,13 +63,13 @@ public class RekonReasonerFactory implements OWLReasonerFactory {
 
 	public OWLReasoner createNonBufferingReasoner(OWLOntology ontology) {
 
-		return createReasoner(ontology);
+		throw new UnsupportedOperationException();
 	}
 
 	public OWLReasoner createNonBufferingReasoner(
 							OWLOntology ontology,
 							OWLReasonerConfiguration config) {
 
-		return createReasoner(ontology);
+		throw new UnsupportedOperationException();
 	}
 }
