@@ -72,7 +72,7 @@ class TestConfig {
 		if (ar.more()) {
 
 			String testDir = ar.next();
-			String testFile = ar.more() ? ar.next() : testDir;
+			String testFile = ar.more() ? ar.next() : getLeafDir(testDir);
 
 			ontologyFile = new File(TEST_ONTOLOGIES_DIR + testDir, testFile + OWL_EXTN);
 		}
@@ -80,5 +80,10 @@ class TestConfig {
 
 			ontologyFile = null;
 		}
+	}
+
+	private String getLeafDir(String dir) {
+
+		return dir.substring(dir.lastIndexOf(File.separatorChar) + 1);
 	}
 }
