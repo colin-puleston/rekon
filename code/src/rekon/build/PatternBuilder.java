@@ -178,12 +178,7 @@ class PatternBuilder {
 
 					case CONJUNCTION:
 
-						if (processConjuncts(conjunct.asConjuncts())) {
-
-							return true;
-						}
-
-						return false;
+						throw new RuntimeException("Unexpected conjunction node: " + conjunct);
 
 					case DISJUNCTION:
 
@@ -261,7 +256,7 @@ class PatternBuilder {
 
 				case DISJUNCTION:
 
-					throw new Error("Unexpected disjunction node: " + source);
+					throw new RuntimeException("Unexpected disjunction node: " + source);
 
 				case RELATION:
 

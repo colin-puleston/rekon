@@ -284,9 +284,19 @@ class ExpressionConverter {
 
 		private abstract class NaryBooleanHandler<E extends OWLNaryBooleanClassExpression> {
 
+			private Class<E> owlExprType;
+			private E owlExpr;
+
+			NaryBooleanHandler(Class<E> owlExprType) {
+
+				this.owlExprType = owlExprType;
+
+				owlExpr = owlExprAs(owlExprType);
+			}
+
 			boolean owlNothingInOperands() {
 
-				for (OWLClassExpression e : getOperands()) {
+				for (OWLClassExpression e : owlExpr.getOperands()) {
 
 					if (e.equals(owlNothing)) {
 
@@ -301,35 +311,40 @@ class ExpressionConverter {
 
 				List<InputNode> nodes = new ArrayList<InputNode>();
 
-				for (OWLClassExpression e : getOperands()) {
-
-					nodes.add(new ConvertedNode(getOwlContainer(), e));
-				}
+				collectOperandsAsNodes(owlExpr, nodes);
 
 				return nodes;
 			}
 
-			abstract Class<E> getOwlExprType();
+			private void collectOperandsAsNodes(E currentOwlExpr, List<InputNode> nodes) {
 
-			private Collection<OWLClassExpression> getOperands() {
+				for (OWLClassExpression e : currentOwlExpr.getOperands()) {
 
-				return owlExprAs(getOwlExprType()).getOperands();
+					if (owlExprType.isAssignableFrom(e.getClass())) {
+
+						collectOperandsAsNodes(owlExprType.cast(e), nodes);
+					}
+					else {
+
+						nodes.add(new ConvertedNode(getOwlContainer(), e));
+					}
+				}
 			}
 		}
 
 		private class ConjunctionHandler extends NaryBooleanHandler<OWLObjectIntersectionOf> {
 
-			Class<OWLObjectIntersectionOf> getOwlExprType() {
+			ConjunctionHandler() {
 
-				return OWLObjectIntersectionOf.class;
+				super(OWLObjectIntersectionOf.class);
 			}
 		}
 
 		private class DisjunctionHandler extends NaryBooleanHandler<OWLObjectUnionOf> {
 
-			Class<OWLObjectUnionOf> getOwlExprType() {
+			DisjunctionHandler() {
 
-				return OWLObjectUnionOf.class;
+				super(OWLObjectUnionOf.class);
 			}
 		}
 

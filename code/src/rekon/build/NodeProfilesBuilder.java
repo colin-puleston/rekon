@@ -89,14 +89,14 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 			ProfilePatternsBuilder ppBuilder = new ProfilePatternsBuilder();
 
-			addRelations(ppBuilder);
+			processSourceAxioms(ppBuilder);
 
 			ppBuilder.createAllProfiles(getTypeNodes());
 		}
 
-		void addRelations(ProfilePatternsBuilder ppBuilder) {
+		void processSourceAxioms(ProfilePatternsBuilder ppBuilder) {
 
-			for (A ax : getAxioms()) {
+			for (A ax : getSourceAxioms()) {
 
 				NodeX sub = getSub(ax);
 				InputComplexSuper sup = getSuper(ax);
@@ -120,7 +120,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		abstract Iterable<A> getAxioms();
+		abstract Iterable<A> getSourceAxioms();
 
 		abstract NodeX getSub(A axiom);
 
@@ -145,7 +145,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 						extends
 							TypeNodesProfileCreator<InputClassSubComplexSuper> {
 
-		Iterable<InputClassSubComplexSuper> getAxioms() {
+		Iterable<InputClassSubComplexSuper> getSourceAxioms() {
 
 			return axioms.getClassSubComplexSupers();
 		}
@@ -170,9 +170,9 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 						extends
 							TypeNodesProfileCreator<InputIndividualComplexType> {
 
-		void addRelations(ProfilePatternsBuilder ppBuilder) {
+		void processSourceAxioms(ProfilePatternsBuilder ppBuilder) {
 
-			super.addRelations(ppBuilder);
+			super.processSourceAxioms(ppBuilder);
 
 			for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
 
@@ -180,7 +180,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		Iterable<InputIndividualComplexType> getAxioms() {
+		Iterable<InputIndividualComplexType> getSourceAxioms() {
 
 			return axioms.getIndividualComplexTypes();
 		}
