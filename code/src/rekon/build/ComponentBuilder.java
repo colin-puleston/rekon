@@ -53,7 +53,7 @@ class ComponentBuilder {
 		this.customiser = customiser;
 
 		patternBuilder = new PatternBuilder(this, names, dynamic);
-		relationBuilder = new RelationBuilder(this, names, dynamic);
+		relationBuilder = new RelationBuilder(this, dynamic);
 		disjunctionBuilder = new DisjunctionBuilder(this, dynamic);
 	}
 

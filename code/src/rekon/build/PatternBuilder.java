@@ -174,7 +174,7 @@ class PatternBuilder {
 
 						nodes.absorb(conjunct.asIndividualNode());
 
-						return false;
+						return true;
 
 					case CONJUNCTION:
 

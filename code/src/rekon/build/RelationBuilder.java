@@ -36,8 +36,6 @@ class RelationBuilder {
 
 	private ComponentBuilder componentBuilder;
 
-	private ClassNode rootClassNode;
-
 	private SomeRelations someRelations;
 	private AllRelations allRelations;
 	private DataRelations dataRelations;
@@ -107,15 +105,13 @@ class RelationBuilder {
 		}
 	}
 
-	RelationBuilder(ComponentBuilder componentBuilder, OntologyNames names, boolean dynamic) {
+	RelationBuilder(ComponentBuilder componentBuilder, boolean dynamic) {
 
 		this.componentBuilder = componentBuilder;
 
 		someRelations = new SomeRelations(dynamic);
 		allRelations = new AllRelations(dynamic);
 		dataRelations = new DataRelations(dynamic);
-
-		rootClassNode = names.getRootClassNode();
 	}
 
 	Relation toRelation(InputRelation source) {
