@@ -43,11 +43,6 @@ abstract class FreeClassNode extends ClassNode {
 		return false;
 	}
 
-	public boolean rootName() {
-
-		return false;
-	}
-
 	FreeClassNode(int index) {
 
 		this.index = index;

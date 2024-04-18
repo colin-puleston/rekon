@@ -30,7 +30,7 @@ package rekon.core;
 class SubsumptionChecker {
 
 	private GeneralChecker generalChecker = new GeneralChecker();
-	private AllPatternChecker allPatternChecker = new AllPatternChecker();
+	private PatternsChecker patternsChecker = new PatternsChecker();
 
 	private abstract class NodeMatcherChecker<D extends NodeMatcher, C extends NodeMatcher> {
 
@@ -67,7 +67,7 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class AllPatternChecker
+	private class PatternsChecker
 					extends
 						NodeMatcherChecker<PatternMatcher, PatternMatcher> {
 
@@ -84,7 +84,7 @@ class SubsumptionChecker {
 
 	boolean check(PatternMatcher defn, PatternMatcher candidate) {
 
-		return allPatternChecker.check(defn, candidate);
+		return patternsChecker.check(defn, candidate);
 	}
 
 	boolean patternSubsumption(Pattern defn, Pattern candidate) {

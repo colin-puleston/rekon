@@ -34,52 +34,93 @@ import rekon.build.input.*;
  */
 class BasicStructureBuilder {
 
+	private OntologyNames names;
 	private InputAxioms axioms;
 
-	private abstract class TypeNameConverter<N extends Name> {
+	private abstract class TypeNameHandler<N extends Name> {
 
-		TypeNameConverter() {
+		TypeNameHandler() {
 
-			for (InputNameEquivalence<N> ax : getEquivalences()) {
+			addInterNameLinks();
+			addOrphansAsRootSubs();
+		}
+
+		abstract Name getHierarchyRootName();
+
+		abstract Iterable<N> getAllTypeNames();
+
+		abstract Iterable<? extends InputNameEquivalence<N>> getTypeEquivalences();
+
+		void addInterNameLinks() {
+
+			for (InputNameEquivalence<N> ax : getTypeEquivalences()) {
 
 				ax.getFirst().addEquivalent(ax.getSecond());
 			}
 		}
 
-		abstract Iterable<? extends InputNameEquivalence<N>> getEquivalences();
+		private void addOrphansAsRootSubs() {
+
+			Name root = getHierarchyRootName();
+
+			for (N n : getAllTypeNames()) {
+
+				if (n != root && n.getSubsumers().isEmpty()) {
+
+					n.addSubsumer(root);
+				}
+			}
+		}
 	}
 
-	private abstract class HierarchyNameConverter
+	private abstract class HierarchyNameHandler
 								<N extends Name>
-								extends TypeNameConverter<N> {
+								extends TypeNameHandler<N> {
 
-		HierarchyNameConverter() {
+		HierarchyNameHandler() {
 
-			for (InputNameSubSuper<N> ax : getSubSupers()) {
+			getHierarchyRootName().setAsRoot();
+		}
+
+		void addInterNameLinks() {
+
+			super.addInterNameLinks();
+
+			for (InputNameSubSuper<N> ax : getTypeSubSupers()) {
 
 				ax.getSub().addSubsumer(ax.getSuper());
 			}
 		}
 
-		abstract Iterable<? extends InputNameSubSuper<N>> getSubSupers();
+		abstract Iterable<? extends InputNameSubSuper<N>> getTypeSubSupers();
 	}
 
-	private class ClassNodeConverter extends HierarchyNameConverter<ClassNode> {
+	private class ClassNodeHandler extends HierarchyNameHandler<ClassNode> {
 
-		Iterable<InputClassEquivalence> getEquivalences() {
+		ClassNode getHierarchyRootName() {
+
+			return names.getRootClassNode();
+		}
+
+		Iterable<ClassNode> getAllTypeNames() {
+
+			return names.getClassNodes();
+		}
+
+		Iterable<InputClassEquivalence> getTypeEquivalences() {
 
 			return axioms.getClassEquivalences();
 		}
 
-		Iterable<InputClassSubSuper> getSubSupers() {
+		Iterable<InputClassSubSuper> getTypeSubSupers() {
 
 			return axioms.getClassSubSupers();
 		}
 	}
 
-	private class IndividualNodeConverter extends TypeNameConverter<IndividualNode> {
+	private class IndividualNodeHandler extends TypeNameHandler<IndividualNode> {
 
-		IndividualNodeConverter() {
+		IndividualNodeHandler() {
 
 			for (InputIndividualClassType ax : axioms.getIndividualClassTypes()) {
 
@@ -87,15 +128,25 @@ class BasicStructureBuilder {
 			}
 		}
 
-		Iterable<InputIndividualEquivalence> getEquivalences() {
+		ClassNode getHierarchyRootName() {
+
+			return names.getRootClassNode();
+		}
+
+		Iterable<IndividualNode> getAllTypeNames() {
+
+			return names.getIndividualNodes();
+		}
+
+		Iterable<InputIndividualEquivalence> getTypeEquivalences() {
 
 			return axioms.getIndividualEquivalences();
 		}
 	}
 
-	private class NodePropertyConverter extends HierarchyNameConverter<NodeProperty> {
+	private class NodePropertyHandler extends HierarchyNameHandler<NodeProperty> {
 
-		NodePropertyConverter() {
+		NodePropertyHandler() {
 
 			for (InputNodePropertyChain ax : axioms.getNodePropertyChains()) {
 
@@ -108,37 +159,58 @@ class BasicStructureBuilder {
 			}
 		}
 
-		Iterable<InputNodePropertyEquivalence> getEquivalences() {
+		NodeProperty getHierarchyRootName() {
+
+			return names.getRootNodeProperty();
+		}
+
+		Iterable<NodeProperty> getAllTypeNames() {
+
+			return names.getNodeProperties();
+		}
+
+		Iterable<InputNodePropertyEquivalence> getTypeEquivalences() {
 
 			return axioms.getNodePropertyEquivalences();
 		}
 
-		Iterable<InputNodePropertySubSuper> getSubSupers() {
+		Iterable<InputNodePropertySubSuper> getTypeSubSupers() {
 
 			return axioms.getNodePropertySubSupers();
 		}
 	}
 
-	private class DataPropertyConverter extends HierarchyNameConverter<DataProperty> {
+	private class DataPropertyHandler extends HierarchyNameHandler<DataProperty> {
 
-		Iterable<InputDataPropertyEquivalence> getEquivalences() {
+		DataProperty getHierarchyRootName() {
+
+			return names.getRootDataProperty();
+		}
+
+		Iterable<DataProperty> getAllTypeNames() {
+
+			return names.getDataProperties();
+		}
+
+		Iterable<InputDataPropertyEquivalence> getTypeEquivalences() {
 
 			return axioms.getDataPropertyEquivalences();
 		}
 
-		Iterable<InputDataPropertySubSuper> getSubSupers() {
+		Iterable<InputDataPropertySubSuper> getTypeSubSupers() {
 
 			return axioms.getDataPropertySubSupers();
 		}
 	}
 
-	BasicStructureBuilder(InputAxioms axioms) {
+	BasicStructureBuilder(OntologyNames names, InputAxioms axioms) {
 
+		this.names = names;
 		this.axioms = axioms;
 
-		new ClassNodeConverter();
-		new IndividualNodeConverter();
-		new NodePropertyConverter();
-		new DataPropertyConverter();
+		new ClassNodeHandler();
+		new IndividualNodeHandler();
+		new NodePropertyHandler();
+		new DataPropertyHandler();
 	}
 }

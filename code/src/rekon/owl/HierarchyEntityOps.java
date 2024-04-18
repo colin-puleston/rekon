@@ -34,14 +34,11 @@ import rekon.core.*;
  * @author Colin Puleston
  */
 abstract class HierarchyEntityOps
-				<E extends OWLEntity, I extends OWLObject>
-				extends EntityOps<E, I> {
+				<I extends OWLObject, E extends I>
+				extends EntityOps<I, E> {
 
-	final E topEntity;
-	final E bottomEntity;
-
-	final Set<E> topEntityGroup;
-	final Set<E> bottomEntityGroup;
+	private Set<E> topEntityGroup;
+	private Set<E> bottomEntityGroup;
 
 	private Set<Set<E>> emptyGroups = Collections.emptySet();
 
@@ -81,23 +78,15 @@ abstract class HierarchyEntityOps
 		}
 	}
 
-	HierarchyEntityOps(E topEntity, E bottomEntity) {
+	void initialise(E topEntity, E bottomEntity) {
 
-		this.topEntity = topEntity;
-		this.bottomEntity = bottomEntity;
-
-		topEntityGroup = Collections.singleton(topEntity);
+		topEntityGroup = super.getEquivalents(topEntity);
 		bottomEntityGroup = Collections.singleton(bottomEntity);
 	}
 
 	Set<E> getEquivalents(I inObject) {
 
-		if (inObject.equals(topEntity)) {
-
-			return topEntityGroup;
-		}
-
-		if (inObject.equals(bottomEntity)) {
+		if (bottomEntityGroup.contains(inObject)) {
 
 			return bottomEntityGroup;
 		}
@@ -107,12 +96,12 @@ abstract class HierarchyEntityOps
 
 	Set<Set<E>> getSupers(I inObject, boolean direct) {
 
-		if (inObject.equals(topEntity)) {
+		if (topEntityGroup.contains(inObject)) {
 
 			return emptyGroups;
 		}
 
-		if (inObject.equals(bottomEntity)) {
+		if (bottomEntityGroup.contains(inObject)) {
 
 			return toEquivGroups(getBottomNameSupers(direct));
 		}
@@ -124,7 +113,7 @@ abstract class HierarchyEntityOps
 
 	Set<Set<E>> getSubs(I inObject, boolean direct) {
 
-		if (inObject.equals(bottomEntity)) {
+		if (bottomEntityGroup.contains(inObject)) {
 
 			return emptyGroups;
 		}

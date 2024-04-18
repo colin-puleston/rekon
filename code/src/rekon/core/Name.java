@@ -31,8 +31,14 @@ import java.util.*;
  */
 public abstract class Name {
 
+	private boolean rootName = false;
 	private NameLinksHandler linksHandler;
 	private Set<MatchRole> definitionRoles = new HashSet<MatchRole>();
+
+	public void setAsRoot() {
+
+		rootName = true;
+	}
 
 	public void addSubsumer(Name subsumer) {
 
@@ -51,14 +57,14 @@ public abstract class Name {
 
 	public abstract String getLabel();
 
-	public boolean rootName() {
-
-		return false;
-	}
-
 	public boolean mapped() {
 
 		return true;
+	}
+
+	public Names getSubsumers() {
+
+		return linksHandler.getSubsumers();
 	}
 
 	public Names getEquivalents() {
@@ -93,7 +99,7 @@ public abstract class Name {
 
 	Name() {
 
-		linksHandler = createInitialLinksHandler();
+		linksHandler = createClassifier();
 	}
 
 	void setClassification() {
@@ -103,12 +109,15 @@ public abstract class Name {
 
 	void resetClassifier() {
 
-		linksHandler = createInitialLinksHandler();
+		linksHandler = createClassifier();
 	}
 
-	void configureAsRootName(Iterable<? extends Name> allSubs) {
+	void addSubsumers(Names subsumers) {
 
-		getRootLinksHandler().configure(allSubs);
+		for (Name s : subsumers) {
+
+			addSubsumer(s);
+		}
 	}
 
 	void registerAsDefinitionRefed(MatchRole role) {
@@ -131,6 +140,11 @@ public abstract class Name {
 		return getLinksHandler(NameClassification.class);
 	}
 
+	boolean rootName() {
+
+		return rootName;
+	}
+
 	boolean local() {
 
 		return false;
@@ -144,11 +158,6 @@ public abstract class Name {
 	boolean definitionRefed(MatchRole role) {
 
 		return definitionRoles.contains(role);
-	}
-
-	Names getSubsumers() {
-
-		return linksHandler.getSubsumers();
 	}
 
 	boolean anyNewSubsumers() {
@@ -166,19 +175,9 @@ public abstract class Name {
 		return new NameClassifier(this);
 	}
 
-	private NameLinksHandler createInitialLinksHandler() {
-
-		return rootName() ? new RootNameLinksHandler() : createClassifier();
-	}
-
 	private boolean hasSubsumer(Name name) {
 
 		return linksHandler.hasSubsumer(name);
-	}
-
-	private RootNameLinksHandler getRootLinksHandler() {
-
-		return getLinksHandler(RootNameLinksHandler.class);
 	}
 
 	private <T extends NameLinksHandler>T getLinksHandler(Class<T> type) {
@@ -189,7 +188,7 @@ public abstract class Name {
 		}
 
 		throw new Error(
-					"Unexpected classification-handler type: "
+					"Unexpected links-handler type: "
 					+ linksHandler.getClass()
 					+ ", for: " + this);
 	}

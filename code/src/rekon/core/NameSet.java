@@ -91,6 +91,14 @@ public class NameSet extends Names {
 		add(name);
 	}
 
+	public void absorbAll(Names allNames) {
+
+		for (Name name : allNames) {
+
+			absorb(name);
+		}
+	}
+
 	public void clear() {
 
 		names.clear();
@@ -113,7 +121,7 @@ public class NameSet extends Names {
 
 	public boolean containsAny(Names allNames) {
 
-		for (Name name : allNames.getNames()) {
+		for (Name name : allNames) {
 
 			if (names.contains(name)) {
 

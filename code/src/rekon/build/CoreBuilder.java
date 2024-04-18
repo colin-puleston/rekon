@@ -53,7 +53,7 @@ public class CoreBuilder {
 
 			ComponentBuilder components = createComponentBuilder(matchStructures, false);
 
-			new BasicStructureBuilder(axioms);
+			new BasicStructureBuilder(names, axioms);
 			new NodeProfilesBuilder(matchStructures, names, axioms, components);
 			new ClassDefinitionsBuilder(matchStructures, axioms, components);
 		}

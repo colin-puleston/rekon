@@ -97,9 +97,9 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 		return queriables.create(inObject).getEquivalents();
 	}
 
-	Class<OWLNamedIndividual> getEntityType() {
+	OWLNamedIndividual toMappedEntity(Name name) {
 
-		return OWLNamedIndividual.class;
+		return MappedNames.toMappedEntity(name, OWLNamedIndividual.class);
 	}
 
 	private Set<OWLLiteral> toLiterals(List<DataValue> values) {

@@ -24,70 +24,16 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
 public abstract class OntologyNames {
 
-	static private final String ROOT_NAMES_LABEL = "ROOT";
-
-	private class RootClassNode extends ClassNode {
-
-		public String getLabel() {
-
-			return ROOT_NAMES_LABEL;
-		}
-
-		public boolean rootName() {
-
-			return true;
-		}
-
-		RootClassNode(Iterable<ClassNode> allSubs) {
-
-			configureAsRootName(allSubs);
-		}
-	}
-
-	private class RootNodeProperty extends NodeProperty {
-
-		public String getLabel() {
-
-			return ROOT_NAMES_LABEL;
-		}
-
-		public boolean rootName() {
-
-			return true;
-		}
-
-		RootNodeProperty(Iterable<NodeProperty> allSubs) {
-
-			configureAsRootName(allSubs);
-		}
-	}
-
-	private class RootDataProperty extends DataProperty {
-
-		public String getLabel() {
-
-			return ROOT_NAMES_LABEL;
-		}
-
-		public boolean rootName() {
-
-			return true;
-		}
-
-		RootDataProperty(Iterable<DataProperty> allSubs) {
-
-			configureAsRootName(allSubs);
-		}
-	}
-
 	public abstract ClassNode getRootClassNode();
+
+	public abstract NodeProperty getRootNodeProperty();
+
+	public abstract DataProperty getRootDataProperty();
 
 	public abstract Iterable<ClassNode> getClassNodes();
 
@@ -96,19 +42,4 @@ public abstract class OntologyNames {
 	public abstract Iterable<NodeProperty> getNodeProperties();
 
 	public abstract Iterable<DataProperty> getDataProperties();
-
-	protected ClassNode createRootClassNode(Iterable<ClassNode> allSubs) {
-
-		return new RootClassNode(allSubs);
-	}
-
-	protected NodeProperty createRootNodeProperty(Iterable<NodeProperty> allSubs) {
-
-		return new RootNodeProperty(allSubs);
-	}
-
-	protected DataProperty createRootDataProperty(Iterable<DataProperty> allSubs) {
-
-		return new RootDataProperty(allSubs);
-	}
 }

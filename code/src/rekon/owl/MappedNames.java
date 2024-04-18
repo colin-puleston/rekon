@@ -135,13 +135,13 @@ class MappedNames extends OntologyNames {
 
 		private Map<E, N> names = new HashMap<E, N>();
 
-		void initialise(OWLOntologyManager manager) {
+		void addDomainNames(OWLOntologyManager manager) {
 
 			for (OWLOntology o : manager.getOntologies()) {
 
 				for (E e : getEntitiesInSignature(o)) {
 
-					if (mappingSource(e)) {
+					if (domainEntity(e)) {
 
 						addName(e);
 					}
@@ -161,7 +161,7 @@ class MappedNames extends OntologyNames {
 			return names.get(entity);
 		}
 
-		boolean mappingSource(E entity) {
+		boolean domainEntity(E entity) {
 
 			return true;
 		}
@@ -189,7 +189,7 @@ class MappedNames extends OntologyNames {
 								<E extends OWLEntity, N extends Name>
 								extends TypeNames<E, N> {
 
-		final N rootName = createRootName();
+		final N rootName;
 
 		private E topEntity;
 		private E bottomEntity;
@@ -201,7 +201,9 @@ class MappedNames extends OntologyNames {
 			topEntity = getTopEntity(factory);
 			bottomEntity = getBottomEntity(factory);
 
-			initialise(manager);
+			rootName = addName(topEntity);
+
+			addDomainNames(manager);
 		}
 
 		N resolveName(E entity) {
@@ -214,12 +216,10 @@ class MappedNames extends OntologyNames {
 			return entity.equals(topEntity) ? rootName : super.resolveName(entity);
 		}
 
-		boolean mappingSource(E entity) {
+		boolean domainEntity(E entity) {
 
 			return !entity.equals(topEntity) && !entity.equals(bottomEntity);
 		}
-
-		abstract N createRootName();
 
 		abstract E getTopEntity(OWLDataFactory factory);
 
@@ -238,11 +238,6 @@ class MappedNames extends OntologyNames {
 		ClassNode createName(OWLClass entity) {
 
 			return new MappedClassNode(entity);
-		}
-
-		ClassNode createRootName() {
-
-			return createRootClassNode(getAllNames());
 		}
 
 		Iterable<OWLClass> getEntitiesInSignature(OWLOntology o) {
@@ -270,7 +265,7 @@ class MappedNames extends OntologyNames {
 
 		IndividualNodes(OWLOntologyManager manager) {
 
-			initialise(manager);
+			addDomainNames(manager);
 		}
 
 		IndividualNode createName(OWLNamedIndividual entity) {
@@ -294,11 +289,6 @@ class MappedNames extends OntologyNames {
 		NodeProperty createName(OWLObjectProperty entity) {
 
 			return new MappedNodeProperty(entity);
-		}
-
-		NodeProperty createRootName() {
-
-			return createRootNodeProperty(getAllNames());
 		}
 
 		Iterable<OWLObjectProperty> getEntitiesInSignature(OWLOntology o) {
@@ -329,11 +319,6 @@ class MappedNames extends OntologyNames {
 			return new MappedDataProperty(entity);
 		}
 
-		DataProperty createRootName() {
-
-			return createRootDataProperty(getAllNames());
-		}
-
 		Iterable<OWLDataProperty> getEntitiesInSignature(OWLOntology o) {
 
 			return o.getDataPropertiesInSignature();
@@ -353,6 +338,16 @@ class MappedNames extends OntologyNames {
 	public ClassNode getRootClassNode() {
 
 		return classes.rootName;
+	}
+
+	public NodeProperty getRootNodeProperty() {
+
+		return nodeProperties.rootName;
+	}
+
+	public DataProperty getRootDataProperty() {
+
+		return dataProperties.rootName;
 	}
 
 	public Iterable<ClassNode> getClassNodes() {

@@ -33,11 +33,6 @@ import rekon.core.*;
  */
 abstract class PropertyOps<P extends OWLProperty> extends HierarchyEntityOps<P, P> {
 
-	PropertyOps(P topEntity, P bottomEntity) {
-
-		super(topEntity, bottomEntity);
-	}
-
 	boolean equivalent(P inObject1, P inObject2) {
 
 		PropertyX p1 = getPropertyName(inObject1);

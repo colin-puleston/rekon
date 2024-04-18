@@ -71,7 +71,7 @@ public class MatchStructures {
 
 	public PatternMatcher addProfilePattern(NodeX node, Pattern profile) {
 
-		ensureNonRootNodesAreSubsumers(node, profile);
+		ensurePatternNodesAreSubsumers(node, profile);
 
 		PatternMatcher m = node.addProfilePatternMatcher(profile);
 
@@ -82,7 +82,7 @@ public class MatchStructures {
 
 	public PatternMatcher addDefinitionPattern(NodeX node, Pattern defn) {
 
-		ensureNonRootNodesAreSubsumers(node, defn);
+		ensurePatternNodesAreSubsumers(node, defn);
 		ensureProfilePatternMatcher(node).absorbDefinitionIntoProfile(defn);
 
 		PatternMatcher m = node.addDefinitionPatternMatcher(defn);
@@ -143,14 +143,8 @@ public class MatchStructures {
 		return p;
 	}
 
-	private void ensureNonRootNodesAreSubsumers(NodeX node, Pattern pattern) {
+	private void ensurePatternNodesAreSubsumers(NodeX node, Pattern pattern) {
 
-		for (Name s : pattern.getNodes()) {
-
-			if (!s.rootName()) {
-
-				node.addSubsumer(s);
-			}
-		}
+		node.addSubsumers(pattern.getNodes());
 	}
 }

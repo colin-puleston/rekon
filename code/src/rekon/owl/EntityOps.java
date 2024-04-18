@@ -33,7 +33,7 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
+abstract class EntityOps<I extends OWLObject, E extends I> {
 
 	private EntityRetriever defaultRetriever = new EntityRetriever();
 	private EquivalenceChecker equivalenceChecker = new EquivalenceChecker();
@@ -83,11 +83,6 @@ abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 
 			return entities;
 		}
-
-		private E toMappedEntity(Name name) {
-
-			return MappedNames.toMappedEntity(name, getEntityType());
-		}
 	}
 
 	private class EquivalenceChecker {
@@ -134,7 +129,7 @@ abstract class EntityOps<E extends OWLEntity, I extends OWLObject> {
 
 	abstract boolean equivalent(I inObject1, I inObject2);
 
-	abstract Class<E> getEntityType();
+	abstract E toMappedEntity(Name name);
 
 	boolean insertedEntity(E entity) {
 

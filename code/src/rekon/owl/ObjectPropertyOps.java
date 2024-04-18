@@ -37,9 +37,9 @@ class ObjectPropertyOps extends PropertyOps<OWLObjectProperty> {
 
 	ObjectPropertyOps(OWLDataFactory factory, MappedNames names) {
 
-		super(factory.getOWLTopObjectProperty(), factory.getOWLBottomObjectProperty());
-
 		this.names = names;
+
+		initialise(factory.getOWLTopObjectProperty(), factory.getOWLBottomObjectProperty());
 	}
 
 	Iterable<? extends Name> getAllEntityNames() {
@@ -47,9 +47,9 @@ class ObjectPropertyOps extends PropertyOps<OWLObjectProperty> {
 		return names.getNodeProperties();
 	}
 
-	Class<OWLObjectProperty> getEntityType() {
+	OWLObjectProperty toMappedEntity(Name name) {
 
-		return OWLObjectProperty.class;
+		return MappedNames.toMappedEntity(name, OWLObjectProperty.class);
 	}
 
 	PropertyX getPropertyName(OWLObjectProperty prop) {

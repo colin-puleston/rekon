@@ -33,20 +33,17 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
+class ClassOps extends HierarchyEntityOps<OWLClassExpression, OWLClass> {
 
 	private MappedNames names;
 	private QueriablesAccessor queriables;
 
-	ClassOps(
-		OWLDataFactory factory,
-		MappedNames names,
-		QueriablesAccessor queriables) {
-
-		super(factory.getOWLThing(), factory.getOWLNothing());
+	ClassOps(OWLDataFactory factory, MappedNames names, QueriablesAccessor queriables) {
 
 		this.names = names;
 		this.queriables = queriables;
+
+		initialise(factory.getOWLThing(), factory.getOWLNothing());
 	}
 
 	Set<Set<OWLClass>> getTypes(OWLNamedIndividual ind, boolean direct) {
@@ -89,9 +86,9 @@ class ClassOps extends HierarchyEntityOps<OWLClass, OWLClassExpression> {
 		return name.getSubs(ClassNode.class, true);
 	}
 
-	Class<OWLClass> getEntityType() {
+	OWLClass toMappedEntity(Name name) {
 
-		return OWLClass.class;
+		return MappedNames.toMappedEntity(name, OWLClass.class);
 	}
 
 	boolean insertedEntity(OWLClass entity) {

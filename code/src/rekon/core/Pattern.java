@@ -82,16 +82,8 @@ public class Pattern extends PatternComponent {
 		NameSet newNodes = new NameSet(nodes);
 		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
-		newNodes.addAll(other.nodes);
+		newNodes.absorbAll(other.nodes);
 		newRelations.addAll(other.directRelations);
-
-		if (newNodes.size() > 1) {
-
-			checkRemoveRoot(newNodes);
-		}
-
-		purgeSubsumers(newNodes, nodes);
-		purgeSubsumers(newNodes, other.nodes);
 
 		return new Pattern(newNodes, newRelations);
 	}
@@ -270,27 +262,6 @@ public class Pattern extends PatternComponent {
 		}
 
 		return false;
-	}
-
-	private void checkRemoveRoot(NameSet target) {
-
-		for (Name n : target.copyNames()) {
-
-			if (n.rootName()) {
-
-				target.remove(n);
-
-				break;
-			}
-		}
-	}
-
-	private void purgeSubsumers(NameSet target, Names purger) {
-
-		for (Name n : purger) {
-
-			target.removeAll(n.getSubsumers());
-		}
 	}
 
 	private Collection<Relation> getRelations(boolean profile) {
