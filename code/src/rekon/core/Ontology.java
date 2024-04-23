@@ -53,7 +53,7 @@ public class Ontology {
 		allNames.addComponent(names.getNodeProperties());
 		allNames.addComponent(names.getDataProperties());
 
-		processAllNamesPostAdditions();
+		expandAllNameSubsumers();
 	}
 
 	public void classify(OntologyClassifyListener classifyListener) {
@@ -91,11 +91,11 @@ public class Ontology {
 		return dynamicSubsumeds;
 	}
 
-	private void processAllNamesPostAdditions() {
+	private void expandAllNameSubsumers() {
 
 		for (Name n : allNames) {
 
-			n.getClassifier().onPostAssertionAdditions();
+			n.getClassifier().expandSubsumers();
 		}
 	}
 

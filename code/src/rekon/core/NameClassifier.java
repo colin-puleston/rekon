@@ -59,11 +59,11 @@ class NameClassifier extends NameLinksHandler {
 		equiv.getClassifier().addAssertedSubsumer(name);
 	}
 
-	void onPostAssertionAdditions() {
+	void expandSubsumers() {
 
 		for (Name s : subsumers.copyNames()) {
 
-			addAndExpandPreInferredSubsumers(s.getSubsumers());
+			addSubsumerExpansions(s.getSubsumers());
 		}
 	}
 
@@ -102,19 +102,19 @@ class NameClassifier extends NameLinksHandler {
 		return multipleAssertedSubsumers;
 	}
 
-	private void addAndExpandPreInferredSubsumers(Names subsumers) {
+	private void addSubsumerExpansions(Names currentSubsumers) {
 
-		for (Name s : subsumers) {
+		for (Name s : currentSubsumers) {
 
-			checkAddAndExpandPreInferredSubsumer(s);
+			checkAddSubsumerAndExpansions(s);
 		}
 	}
 
-	private void checkAddAndExpandPreInferredSubsumer(Name subsumer) {
+	private void checkAddSubsumerAndExpansions(Name currentSubsumer) {
 
-		if (checkAddSubsumer(subsumer)) {
+		if (checkAddSubsumer(currentSubsumer)) {
 
-			addAndExpandPreInferredSubsumers(subsumer.getSubsumers());
+			addSubsumerExpansions(currentSubsumer.getSubsumers());
 		}
 	}
 

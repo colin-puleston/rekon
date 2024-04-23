@@ -33,12 +33,12 @@ enum MatchRole {
 
 	static MatchRole rankToPatternRole(int rank) {
 
-		MatchRole role = values()[rank];
+		if (rank > 2) {
 
-		if (role == DISJUNCT) {
-
-			throw new Error("Cannot be applied to role: " + DISJUNCT);
+			throw new Error("Rank does not specify a pattern role: " + rank);
 		}
+
+		MatchRole role = values()[rank];
 
 		return role;
 	}

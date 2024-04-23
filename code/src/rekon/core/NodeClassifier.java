@@ -93,7 +93,7 @@ class NodeClassifier extends NameClassifier {
 		return (ActiveInferredSubsumers)getInferredSubsumers(n);
 	}
 
-	private InferredSubsumers inferredSubsumers = new InertInferredSubsumers();
+	private InferredSubsumers inferredSubsumers = new InactiveInferredSubsumers();
 
 	private boolean anyPhaseInferredSubsumers = false;
 	private boolean anyLastPhaseInferredSubsumers = true;
@@ -207,7 +207,7 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
-	private class InertInferredSubsumers extends InferredSubsumers {
+	private class InactiveInferredSubsumers extends InferredSubsumers {
 
 		void addDirectlyInferred(Name subsumer) {
 
@@ -249,7 +249,7 @@ class NodeClassifier extends NameClassifier {
 
 	void setClassifiableNode() {
 
-		if (inferredSubsumers instanceof InertInferredSubsumers) {
+		if (inferredSubsumers instanceof InactiveInferredSubsumers) {
 
 			inferredSubsumers = new ActiveInferredSubsumers();
 		}

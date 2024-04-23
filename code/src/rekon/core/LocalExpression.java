@@ -86,7 +86,7 @@ abstract class LocalExpression {
 
 		if (expressionNode != null) {
 
-			processAllLocalNamesPostAdditions();
+			expandAllLocalNameSubsumers();
 		}
 	}
 
@@ -109,11 +109,11 @@ abstract class LocalExpression {
 		return orderedProfileMatchers;
 	}
 
-	private void processAllLocalNamesPostAdditions() {
+	private void expandAllLocalNameSubsumers() {
 
 		for (NodeMatcher m : orderedProfileMatchers) {
 
-			m.getNode().getClassifier().onPostAssertionAdditions();
+			m.getNode().getClassifier().expandSubsumers();
 		}
 	}
 }
