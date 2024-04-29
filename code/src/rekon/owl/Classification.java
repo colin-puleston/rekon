@@ -77,7 +77,7 @@ class Classification {
 		private CoreBuilder coreBuilder;
 
 		private Ontology ontology;
-		private QueriablesAccessor queriables;
+		private QueryablesAccessor queryables;
 
 		Initialiser(OWLOntologyManager manager, StartupMonitor monitor) {
 
@@ -93,17 +93,17 @@ class Classification {
 			performClassification(monitor);
 			monitor.onClassificationComplete();
 
-			queriables = createQueriables();
+			queryables = createQueryables();
 		}
 
 		ClassOps createClassOps() {
 
-			return new ClassOps(factory, names, queriables);
+			return new ClassOps(factory, names, queryables);
 		}
 
 		IndividualOps createIndividualOps() {
 
-			return new IndividualOps(factory, names, queriables);
+			return new IndividualOps(factory, names, queryables);
 		}
 
 		ObjectPropertyOps createObjectPropertyOps() {
@@ -144,9 +144,9 @@ class Classification {
 			return new AxiomConverter(manager, names, exprConverter);
 		}
 
-		private QueriablesAccessor createQueriables() {
+		private QueryablesAccessor createQueryables() {
 
-			return new QueriablesAccessor(ontology, names, coreBuilder, exprConverter);
+			return new QueryablesAccessor(ontology, names, coreBuilder, exprConverter);
 		}
 	}
 

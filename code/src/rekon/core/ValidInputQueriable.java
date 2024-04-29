@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class ValidInputQueriable implements Queriable {
+abstract class ValidInputQueryable implements Queryable {
 
 	private SupersResolver supersResolver = new SupersResolver();
 	private SubsResolver subsResolver = new SubsResolver();
@@ -115,21 +115,21 @@ abstract class ValidInputQueriable implements Queriable {
 		return checkPurgeAllFreeNames(getRawIndividuals(direct));
 	}
 
-	public boolean equivalentTo(Queriable other) {
+	public boolean equivalentTo(Queryable other) {
 
-		if (other instanceof ValidInputQueriable) {
+		if (other instanceof ValidInputQueryable) {
 
-			return equivalentTo((ValidInputQueriable)other);
+			return equivalentTo((ValidInputQueryable)other);
 		}
 
 		return false;
 	}
 
-	public boolean subsumes(Queriable other) {
+	public boolean subsumes(Queryable other) {
 
-		if (other instanceof ValidInputQueriable) {
+		if (other instanceof ValidInputQueryable) {
 
-			return subsumes((ValidInputQueriable)other);
+			return subsumes((ValidInputQueryable)other);
 		}
 
 		return false;
@@ -147,12 +147,12 @@ abstract class ValidInputQueriable implements Queriable {
 
 	abstract Names getRawIndividuals(boolean direct);
 
-	private boolean equivalentTo(ValidInputQueriable other) {
+	private boolean equivalentTo(ValidInputQueryable other) {
 
 		return subsumes(other) && other.subsumes(this);
 	}
 
-	private boolean subsumes(ValidInputQueriable other) {
+	private boolean subsumes(ValidInputQueryable other) {
 
 		other.configureAsPotentialSubsumed();
 

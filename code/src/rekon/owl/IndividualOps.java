@@ -38,21 +38,21 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 	private OWLDataFactory factory;
 
 	private MappedNames names;
-	private QueriablesAccessor queriables;
+	private QueryablesAccessor queryables;
 
 	IndividualOps(
 		OWLDataFactory factory,
 		MappedNames names,
-		QueriablesAccessor queriables) {
+		QueryablesAccessor queryables) {
 
 		this.factory = factory;
 		this.names = names;
-		this.queriables = queriables;
+		this.queryables = queryables;
 	}
 
 	Set<Set<OWLNamedIndividual>> getIndividuals(OWLClassExpression expr, boolean direct) {
 
-		return toEquivGroups(queriables.create(expr).getIndividuals(direct));
+		return toEquivGroups(queryables.create(expr).getIndividuals(direct));
 	}
 
 	Set<Set<OWLNamedIndividual>> getObjectValues(OWLNamedIndividual ind, OWLObjectProperty prop) {
@@ -79,22 +79,22 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 	boolean equivalent(OWLNamedIndividual inObject1, OWLNamedIndividual inObject2) {
 
-		return queriables.create(inObject1).equivalentTo(queriables.create(inObject2));
+		return queryables.create(inObject1).equivalentTo(queryables.create(inObject2));
 	}
 
 	boolean subsumption(OWLNamedIndividual inSup, OWLNamedIndividual inSub) {
 
-		return queriables.create(inSup).subsumes(queriables.create(inSub));
+		return queryables.create(inSup).subsumes(queryables.create(inSub));
 	}
 
 	boolean hasType(OWLNamedIndividual ind, OWLClassExpression type) {
 
-		return queriables.create(type).subsumes(queriables.create(ind));
+		return queryables.create(type).subsumes(queryables.create(ind));
 	}
 
 	Names getEquivalentNames(OWLNamedIndividual inObject) {
 
-		return queriables.create(inObject).getEquivalents();
+		return queryables.create(inObject).getEquivalents();
 	}
 
 	OWLNamedIndividual toMappedEntity(Name name) {

@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class InvalidInputQueriable implements Queriable {
+class InvalidInputQueryable implements Queryable {
 
 	public Names getEquivalents() {
 
@@ -49,16 +49,16 @@ class InvalidInputQueriable implements Queriable {
 		return Names.NO_NAMES;
 	}
 
-	public boolean equivalentTo(Queriable other) {
+	public boolean equivalentTo(Queryable other) {
 
 		return false;
 	}
 
-	public boolean subsumes(Queriable other) {
+	public boolean subsumes(Queryable other) {
 
 		return false;
 	}
 
-	InvalidInputQueriable() {
+	InvalidInputQueryable() {
 	}
 }

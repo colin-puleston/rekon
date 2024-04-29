@@ -36,44 +36,44 @@ import rekon.core.*;
 class ClassOps extends HierarchyEntityOps<OWLClassExpression, OWLClass> {
 
 	private MappedNames names;
-	private QueriablesAccessor queriables;
+	private QueryablesAccessor queryables;
 
-	ClassOps(OWLDataFactory factory, MappedNames names, QueriablesAccessor queriables) {
+	ClassOps(OWLDataFactory factory, MappedNames names, QueryablesAccessor queryables) {
 
 		this.names = names;
-		this.queriables = queriables;
+		this.queryables = queryables;
 
 		initialise(factory.getOWLThing(), factory.getOWLNothing());
 	}
 
 	Set<Set<OWLClass>> getTypes(OWLNamedIndividual ind, boolean direct) {
 
-		return toEquivGroups(queriables.create(ind).getSupers(direct));
+		return toEquivGroups(queryables.create(ind).getSupers(direct));
 	}
 
 	boolean equivalent(OWLClassExpression inObject1, OWLClassExpression inObject2) {
 
-		return queriables.create(inObject1).equivalentTo(queriables.create(inObject2));
+		return queryables.create(inObject1).equivalentTo(queryables.create(inObject2));
 	}
 
 	boolean subsumption(OWLClassExpression inSup, OWLClassExpression inSub) {
 
-		return queriables.create(inSup).subsumes(queriables.create(inSub));
+		return queryables.create(inSup).subsumes(queryables.create(inSub));
 	}
 
 	Names getEquivalentNames(OWLClassExpression inObject) {
 
-		return queriables.create(inObject).getEquivalents();
+		return queryables.create(inObject).getEquivalents();
 	}
 
 	Names getSuperNames(OWLClassExpression inObject, boolean direct) {
 
-		return queriables.create(inObject).getSupers(direct);
+		return queryables.create(inObject).getSupers(direct);
 	}
 
 	Names getSubNames(OWLClassExpression inObject, boolean direct) {
 
-		return queriables.create(inObject).getSubs(direct);
+		return queryables.create(inObject).getSubs(direct);
 	}
 
 	Iterable<? extends Name> getAllEntityNames() {

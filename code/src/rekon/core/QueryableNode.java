@@ -27,17 +27,44 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public interface Queriable {
+class QueryableNode extends ValidInputQueryable {
 
-	public Names getEquivalents();
+	private NodeX node;
 
-	public Names getSupers(boolean direct);
+	QueryableNode(NodeX node) {
 
-	public Names getSubs(boolean direct);
+		this.node = node;
+	}
 
-	public Names getIndividuals(boolean direct);
+	void configureAsPotentialSubsumed() {
+	}
 
-	public boolean equivalentTo(Queriable other);
+	NodeX getNode() {
 
-	public boolean subsumes(Queriable other);
+		return node;
+	}
+
+	Names getRawEquivalents() {
+
+		NameList equivs = new NameList(node);
+
+		equivs.addAll(node.getEquivalents());
+
+		return equivs;
+	}
+
+	Names getRawSupers(boolean direct) {
+
+		return node.getSupers(direct);
+	}
+
+	Names getRawSubs(boolean direct) {
+
+		return node.getSubs(ClassNode.class, direct);
+	}
+
+	Names getRawIndividuals(boolean direct) {
+
+		return node.getSubs(IndividualNode.class, direct);
+	}
 }

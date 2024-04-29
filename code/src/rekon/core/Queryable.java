@@ -22,64 +22,22 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import org.semanticweb.owlapi.model.*;
-
-import rekon.core.*;
-import rekon.build.*;
+package rekon.core;
 
 /**
  * @author Colin Puleston
  */
-class QueriablesAccessor {
+public interface Queryable {
 
-	private MappedNames names;
-	private CoreBuilder coreBuilder;
-	private ExpressionConverter exprConverter;
+	public Names getEquivalents();
 
-	private Queriables queriables;
+	public Names getSupers(boolean direct);
 
-	QueriablesAccessor(
-		Ontology ontology,
-		MappedNames names,
-		CoreBuilder coreBuilder,
-		ExpressionConverter exprConverter) {
+	public Names getSubs(boolean direct);
 
-		this.names = names;
-		this.coreBuilder = coreBuilder;
-		this.exprConverter = exprConverter;
+	public Names getIndividuals(boolean direct);
 
-		queriables = ontology.createQueriables();
-	}
+	public boolean equivalentTo(Queryable other);
 
-	Queriable create(OWLClassExpression expr) {
-
-		if (expr instanceof OWLClass) {
-
-			return create((OWLClass)expr);
-		}
-
-		return queriables.create(toDynamicPatternSource(expr));
-	}
-
-	Queriable create(OWLClass cls) {
-
-		return create(names.get(cls));
-	}
-
-	Queriable create(OWLNamedIndividual ind) {
-
-		return create(names.get(ind));
-	}
-
-	private Queriable create(NodeX node) {
-
-		return node != null ? queriables.create(node) : Queriables.INVALID_INPUT;
-	}
-
-	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
-
-		return coreBuilder.createMultiPatternSource(exprConverter.toNode(expr));
-	}
+	public boolean subsumes(Queryable other);
 }

@@ -22,43 +22,64 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.owl;
+
+import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
  */
-public class Queriables {
+class QueryablesAccessor {
 
-	static public final Queriable INVALID_INPUT = new InvalidInputQueriable();
+	private MappedNames names;
+	private CoreBuilder coreBuilder;
+	private ExpressionConverter exprConverter;
 
-	private Ontology ontology;
+	private Queryables queryables;
 
-	public Queriable create(NodeX node) {
+	QueryablesAccessor(
+		Ontology ontology,
+		MappedNames names,
+		CoreBuilder coreBuilder,
+		ExpressionConverter exprConverter) {
 
-		return new QueriableNode(node);
+		this.names = names;
+		this.coreBuilder = coreBuilder;
+		this.exprConverter = exprConverter;
+
+		queryables = ontology.createQueryables();
 	}
 
-	public Queriable create(MultiPatternSource disjunctsBuilder) {
+	Queryable create(OWLClassExpression expr) {
 
-		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
+		if (expr instanceof OWLClass) {
 
-		if (expr.expressionCreated()) {
-
-			NodeX node = expr.toSingleNode();
-
-			if (node != null) {
-
-				return new QueriableNode(node);
-			}
-
-			return new QueriableExpression(ontology, expr);
+			return create((OWLClass)expr);
 		}
 
-		return INVALID_INPUT;
+		return queryables.create(toDynamicPatternSource(expr));
 	}
 
-	Queriables(Ontology ontology) {
+	Queryable create(OWLClass cls) {
 
-		this.ontology = ontology;
+		return create(names.get(cls));
+	}
+
+	Queryable create(OWLNamedIndividual ind) {
+
+		return create(names.get(ind));
+	}
+
+	private Queryable create(NodeX node) {
+
+		return node != null ? queryables.create(node) : Queryables.INVALID_INPUT;
+	}
+
+	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
+
+		return coreBuilder.createMultiPatternSource(exprConverter.toNode(expr));
 	}
 }

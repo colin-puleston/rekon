@@ -27,44 +27,38 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class QueriableNode extends ValidInputQueriable {
+public class Queryables {
 
-	private NodeX node;
+	static public final Queryable INVALID_INPUT = new InvalidInputQueryable();
 
-	QueriableNode(NodeX node) {
+	private Ontology ontology;
 
-		this.node = node;
+	public Queryable create(NodeX node) {
+
+		return new QueryableNode(node);
 	}
 
-	void configureAsPotentialSubsumed() {
+	public Queryable create(MultiPatternSource disjunctsBuilder) {
+
+		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
+
+		if (expr.expressionCreated()) {
+
+			NodeX node = expr.toSingleNode();
+
+			if (node != null) {
+
+				return new QueryableNode(node);
+			}
+
+			return new QueryableExpression(ontology, expr);
+		}
+
+		return INVALID_INPUT;
 	}
 
-	NodeX getNode() {
+	Queryables(Ontology ontology) {
 
-		return node;
-	}
-
-	Names getRawEquivalents() {
-
-		NameList equivs = new NameList(node);
-
-		equivs.addAll(node.getEquivalents());
-
-		return equivs;
-	}
-
-	Names getRawSupers(boolean direct) {
-
-		return node.getSupers(direct);
-	}
-
-	Names getRawSubs(boolean direct) {
-
-		return node.getSubs(ClassNode.class, direct);
-	}
-
-	Names getRawIndividuals(boolean direct) {
-
-		return node.getSubs(IndividualNode.class, direct);
+		this.ontology = ontology;
 	}
 }
