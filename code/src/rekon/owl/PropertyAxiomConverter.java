@@ -84,6 +84,50 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
+	private class ConvertedNodePropertyDomain
+						extends ConvertedNodePropertyAttribute
+						implements InputNodePropertyDomain {
+
+		private ClassNode domain;
+
+		public ClassNode getDomain() {
+
+			return domain;
+		}
+
+		ConvertedNodePropertyDomain(
+			OWLAxiom source,
+			NodeProperty property,
+			ClassNode domain) {
+
+			super(source, property);
+
+			this.domain = domain;
+		}
+	}
+
+	private class ConvertedNodePropertyRange
+						extends ConvertedNodePropertyAttribute
+						implements InputNodePropertyRange {
+
+		private ClassNode range;
+
+		public ClassNode getRange() {
+
+			return range;
+		}
+
+		ConvertedNodePropertyRange(
+			OWLAxiom source,
+			NodeProperty property,
+			ClassNode range) {
+
+			super(source, property);
+
+			this.range = range;
+		}
+	}
+
 	private class ConvertedNodePropertyChain
 						extends ConvertedNodePropertyAttribute
 						implements InputNodePropertyChain {
@@ -339,6 +383,58 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		abstract I createInputAxiom(NodeProperty prop, S source);
 	}
 
+	private class NodePropertyDomainConverter
+					extends
+						NodePropertyAttributeConverter
+							<OWLObjectPropertyDomainAxiom,
+							InputNodePropertyDomain> {
+
+		Class<OWLObjectPropertyDomainAxiom> getSourceAxiomType() {
+
+			return OWLObjectPropertyDomainAxiom.class;
+		}
+
+		InputNodePropertyDomain createInputAxiom(
+									NodeProperty prop,
+									OWLObjectPropertyDomainAxiom source) {
+
+			ClassNode d = toClassNode(source.getDomain());
+
+			return d != null ? new ConvertedNodePropertyDomain(source, prop, d) : null;
+		}
+
+		OWLObjectPropertyExpression getPropertyExpr(OWLObjectPropertyDomainAxiom source) {
+
+			return source.getProperty();
+		}
+	}
+
+	private class NodePropertyRangeConverter
+					extends
+						NodePropertyAttributeConverter
+							<OWLObjectPropertyRangeAxiom,
+							InputNodePropertyRange> {
+
+		Class<OWLObjectPropertyRangeAxiom> getSourceAxiomType() {
+
+			return OWLObjectPropertyRangeAxiom.class;
+		}
+
+		InputNodePropertyRange createInputAxiom(
+									NodeProperty prop,
+									OWLObjectPropertyRangeAxiom source) {
+
+			ClassNode r = toClassNode(source.getRange());
+
+			return r != null ? new ConvertedNodePropertyRange(source, prop, r) : null;
+		}
+
+		OWLObjectPropertyExpression getPropertyExpr(OWLObjectPropertyRangeAxiom source) {
+
+			return source.getProperty();
+		}
+	}
+
 	private class NodePropertyChainConverter
 					extends
 						NodePropertyAttributeConverter
@@ -354,9 +450,9 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 									NodeProperty prop,
 									OWLSubPropertyChainOfAxiom source) {
 
-			List<NodeProperty> chain = toNodeProperties(source.getPropertyChain());
+			List<NodeProperty> c = toNodeProperties(source.getPropertyChain());
 
-			return chain != null ? new ConvertedNodePropertyChain(source, prop, chain) : null;
+			return c != null ? new ConvertedNodePropertyChain(source, prop, c) : null;
 		}
 
 		OWLObjectPropertyExpression getPropertyExpr(OWLSubPropertyChainOfAxiom source) {
@@ -456,6 +552,8 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 
 		new NodePropertyEquivalenceConverter();
 		new NodePropertySubSuperConverter();
+		new NodePropertyDomainConverter();
+		new NodePropertyRangeConverter();
 		new NodePropertyChainConverter();
 		new NodePropertyTransitiveConverter();
 		new DataPropertyEquivalenceConverter();
@@ -470,6 +568,16 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 	Iterable<InputNodePropertySubSuper> getNodePropertySubSupers() {
 
 		return getInputAxioms(NodePropertySubSuperConverter.class);
+	}
+
+	Iterable<InputNodePropertyDomain> getNodePropertyDomains() {
+
+		return getInputAxioms(NodePropertyDomainConverter.class);
+	}
+
+	Iterable<InputNodePropertyRange> getNodePropertyRanges() {
+
+		return getInputAxioms(NodePropertyRangeConverter.class);
 	}
 
 	Iterable<InputNodePropertyChain> getNodePropertyChains() {
@@ -514,5 +622,10 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 	private NodeProperty toNodeProperty(OWLObjectPropertyExpression e) {
 
 		return e instanceof OWLObjectProperty ? names.resolve((OWLObjectProperty)e) : null;
+	}
+
+	private ClassNode toClassNode(OWLClassExpression e) {
+
+		return e instanceof OWLClass ? names.resolve((OWLClass)e) : null;
 	}
 }

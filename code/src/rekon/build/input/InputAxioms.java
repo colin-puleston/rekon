@@ -57,6 +57,10 @@ public interface InputAxioms {
 
 	public Iterable<InputNodePropertySubSuper> getNodePropertySubSupers();
 
+	public Iterable<InputNodePropertyDomain> getNodePropertyDomains();
+
+	public Iterable<InputNodePropertyRange> getNodePropertyRanges();
+
 	public Iterable<InputNodePropertyChain> getNodePropertyChains();
 
 	public Iterable<InputNodePropertyTransitive> getNodePropertyTransitives();

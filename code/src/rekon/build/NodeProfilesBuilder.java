@@ -49,8 +49,13 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 			if (rel != null) {
 
-				resolveRelations(node).add(rel);
+				addRelation(node, rel);
 			}
+		}
+
+		void addRelation(NodeX node, Relation relation) {
+
+			resolveRelations(node).add(relation);
 		}
 
 		void createAllProfiles(Iterable<? extends NodeX> nodes) {
@@ -145,6 +150,18 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 						extends
 							TypeNodesProfileCreator<InputClassSubComplexSuper> {
 
+		void processSourceAxioms(ProfilePatternsBuilder ppBuilder) {
+
+			super.processSourceAxioms(ppBuilder);
+
+			ClassNode root = names.getRootClassNode();
+
+			for (InputNodePropertyRange ax : axioms.getNodePropertyRanges()) {
+
+				ppBuilder.addRelation(root, toAllRelation(ax));
+			}
+		}
+
 		Iterable<InputClassSubComplexSuper> getSourceAxioms() {
 
 			return axioms.getClassSubComplexSupers();
@@ -163,6 +180,11 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		Iterable<? extends NodeX> getTypeNodes() {
 
 			return names.getClassNodes();
+		}
+
+		private AllRelation toAllRelation(InputNodePropertyRange ax) {
+
+			return new AllRelation(ax.getProperty(), new NodeValue(ax.getRange()));
 		}
 	}
 

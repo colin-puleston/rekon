@@ -93,6 +93,16 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return propertyAxioms.getNodePropertySubSupers();
 	}
 
+	public Iterable<InputNodePropertyDomain> getNodePropertyDomains() {
+
+		return propertyAxioms.getNodePropertyDomains();
+	}
+
+	public Iterable<InputNodePropertyRange> getNodePropertyRanges() {
+
+		return propertyAxioms.getNodePropertyRanges();
+	}
+
 	public Iterable<InputNodePropertyChain> getNodePropertyChains() {
 
 		return propertyAxioms.getNodePropertyChains();
