@@ -90,9 +90,9 @@ class PatternMatcher extends NodeMatcher {
 		pattern.setProfileExpansionStatus(checkRequired);
 	}
 
-	boolean checkProfileExpansion() {
+	boolean processProfileExpansion() {
 
-		return pattern.checkProfileExpansion();
+		return pattern.processProfileExpansion();
 	}
 
 	Pattern getPattern() {

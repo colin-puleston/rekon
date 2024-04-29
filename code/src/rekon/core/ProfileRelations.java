@@ -47,9 +47,11 @@ class ProfileRelations {
 
 		Set<Relation> ensureCollectorSetUpdatable() {
 
-			if (profileRelations == getDirectRelations()) {
+			Set<Relation> dirRels = getDirectRelations();
 
-				profileRelations = new HashSet<Relation>(getDirectRelations());
+			if (profileRelations == dirRels) {
+
+				profileRelations = new HashSet<Relation>(dirRels);
 			}
 
 			return profileRelations;
@@ -67,21 +69,21 @@ class ProfileRelations {
 
 		expansionStatus = ExpansionStatus.CHECK;
 
-		checkExpansion();
+		processExpansion();
 
 		expansionStatus = ExpansionStatus.NONE;
 	}
 
-	void setProfileExpansionStatus(boolean checkRequired) {
+	void setExpansionStatus(boolean checkRequired) {
 
 		expansionStatus = checkRequired ? ExpansionStatus.CHECK : ExpansionStatus.NONE;
 	}
 
-	boolean checkExpansion() {
+	boolean processExpansion() {
 
 		if (expansionStatus == ExpansionStatus.CHECK) {
 
-			expansionStatus = expanded(null)
+			expansionStatus = checkExpand(null)
 								? ExpansionStatus.EXPANDED
 								: ExpansionStatus.NONE;
 		}
@@ -100,7 +102,7 @@ class ProfileRelations {
 
 			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
 
-			if (expanded(visitMonitor)) {
+			if (checkExpand(visitMonitor)) {
 
 				if (visitMonitor.incompleteTraversal()) {
 
@@ -131,7 +133,7 @@ class ProfileRelations {
 		return false;
 	}
 
-	private boolean expanded(NodeVisitMonitor visitMonitor) {
+	private boolean checkExpand(NodeVisitMonitor visitMonitor) {
 
 		boolean newSubsumers = anyLastPhaseInferredSubsumers();
 		boolean expandableRels = anyExpandableRelations();

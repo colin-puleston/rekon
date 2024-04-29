@@ -128,7 +128,7 @@ class QueriableExpression extends ValidInputQueriable {
 
 		m.setProfileExpansionStatus(true);
 		inferSubsumers();
-		m.checkProfileExpansion();
+		m.processProfileExpansion();
 	}
 
 	NodeX getNode() {

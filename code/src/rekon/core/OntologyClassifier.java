@@ -200,7 +200,7 @@ class OntologyClassifier {
 
 		boolean potentialPatternMatchCandidate(Pattern p) {
 
-			boolean expanded = p.checkProfileExpansion();
+			boolean expanded = p.processProfileExpansion();
 
 			expansionsInCurrentPhase |= expanded;
 

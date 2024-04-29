@@ -125,12 +125,12 @@ public class Pattern extends PatternComponent {
 
 	void setProfileExpansionStatus(boolean checkRequired) {
 
-		getProfileRelations().setProfileExpansionStatus(checkRequired);
+		getProfileRelations().setExpansionStatus(checkRequired);
 	}
 
-	boolean checkProfileExpansion() {
+	boolean processProfileExpansion() {
 
-		return getProfileRelations().checkExpansion();
+		return getProfileRelations().processExpansion();
 	}
 
 	void collectNames(NameCollector collector) {
