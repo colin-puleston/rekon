@@ -42,9 +42,7 @@ class OntologyClassifier {
 	private List<DisjunctionMatcher> definitionDisjunctions;
 
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
-
-	private boolean initialPhase = true;
-	private boolean expansionsInCurrentPhase = false;
+	private OntologyClassifyListener classifyListener;
 
 	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
 
@@ -94,7 +92,7 @@ class OntologyClassifier {
 		}
 	}
 
-	private abstract class PassConfig {
+	private abstract class Pass {
 
 		private List<PatternMatcher> patternMatchCandidates = new ArrayList<PatternMatcher>();
 		private List<DisjunctionMatcher> disjunctionMatchCandidates = new ArrayList<DisjunctionMatcher>();
@@ -103,15 +101,24 @@ class OntologyClassifier {
 		private AllRelationTargetSubsumptions allRelationTargetSubsumptions
 												= new AllRelationTargetSubsumptions();
 
-		PassConfig() {
+		boolean initialisePass() {
 
-			findClassifyCandidates();
+			ensureCandidatesFound();
+
+			return candidateCount() != 0;
 		}
 
-		void findClassifyCandidates() {
+		Pass perfomPass() {
 
-			findPatternMatchCandidates();
-			findDisjunctionClassifyCandidates();
+			checkSubsumptions();
+
+			NodeClassifier.expandAllNewInferredSubsumers(allNodes);
+
+			Pass next = new DefaultPass();
+
+			NodeClassifier.absorbAllNewInferredSubsumers(allNodes);
+
+			return next;
 		}
 
 		int candidateCount() {
@@ -121,45 +128,40 @@ class OntologyClassifier {
 					+ allRelationTargetSubsumptions.candidateCount();
 		}
 
-		void checkSubsumptions() {
-
-			new PatternSubsumedsChecker(patternMatchCandidates);
-			new DisjunctionSubsumedsChecker(disjunctionMatchCandidates);
-
-			inferNewCommonDisjunctSubsumers();
-			allRelationTargetSubsumptions.inferNewSubsumptions();
-		}
-
 		abstract boolean initialPass();
 
-		abstract boolean potentialPatternMatchCandidate(Pattern p);
+		abstract void ensureCandidatesFound();
 
-		private void findPatternMatchCandidates() {
+		void findAllCandidates() {
 
 			boolean initPass = initialPass();
 
-			for (PatternMatcher pp : profilePatterns) {
+			findPatternClassifyCandidates(initPass);
+			findDisjunctionClassifyCandidates(initPass);
+		}
 
-				Pattern p = pp.getPattern();
+		boolean patternMatchCandidate(Pattern pattern) {
 
-				if (potentialPatternMatchCandidate(p)) {
+			return pattern.matchable(initialPass());
+		}
 
-					if (p.matchable(initPass)) {
+		private void findPatternClassifyCandidates(boolean initPass) {
 
-						patternMatchCandidates.add(pp);
-					}
+			for (PatternMatcher m : profilePatterns) {
 
-					if (pp.getNode() instanceof IndividualNode) {
+				if (patternMatchCandidate(m.getPattern())) {
 
-						allRelationTargetSubsumptions.checkAddSourceIndividual(pp, initPass);
-					}
+					patternMatchCandidates.add(m);
+				}
+
+				if (m.getNode() instanceof IndividualNode) {
+
+					allRelationTargetSubsumptions.checkAddSourceIndividual(m, initPass);
 				}
 			}
 		}
 
-		private void findDisjunctionClassifyCandidates() {
-
-			boolean initPass = initialPass();
+		private void findDisjunctionClassifyCandidates(boolean initPass) {
 
 			for (DisjunctionMatcher d : allDisjunctions) {
 
@@ -175,6 +177,15 @@ class OntologyClassifier {
 			}
 		}
 
+		private void checkSubsumptions() {
+
+			new PatternSubsumedsChecker(patternMatchCandidates);
+			new DisjunctionSubsumedsChecker(disjunctionMatchCandidates);
+
+			inferNewCommonDisjunctSubsumers();
+			allRelationTargetSubsumptions.inferNewSubsumptions();
+		}
+
 		private void inferNewCommonDisjunctSubsumers() {
 
 			for (DisjunctionMatcher d : disjunctionClassifyCandidates) {
@@ -184,27 +195,47 @@ class OntologyClassifier {
 		}
 	}
 
-	private class InitialPassConfig extends PassConfig {
+	private class DefaultPass extends Pass {
 
-		void findClassifyCandidates() {
+		DefaultPass() {
 
-			setAllProfileExpansionStatuses(true);
-			super.findClassifyCandidates();
-			setAllProfileExpansionStatuses(false);
+			findAllCandidates();
 		}
+
+		boolean initialPass() {
+
+			return false;
+		}
+
+		void ensureCandidatesFound() {
+		}
+	}
+
+	private class InitialPhaseInitialPass extends DefaultPass {
+
+		boolean initialPass() {
+
+			return true;
+		}
+	}
+
+	private class ExpansionPhaseInitialPass extends Pass {
 
 		boolean initialPass() {
 
 			return true;
 		}
 
-		boolean potentialPatternMatchCandidate(Pattern p) {
+		void ensureCandidatesFound() {
 
-			boolean expanded = p.processProfileExpansion();
+			setAllProfileExpansionStatuses(true);
+			findAllCandidates();
+			setAllProfileExpansionStatuses(false);
+		}
 
-			expansionsInCurrentPhase |= expanded;
+		boolean patternMatchCandidate(Pattern pattern) {
 
-			return initialPhase || expanded;
+			return pattern.processProfileExpansion();
 		}
 
 		private void setAllProfileExpansionStatuses(boolean checkRequired) {
@@ -216,16 +247,54 @@ class OntologyClassifier {
 		}
 	}
 
-	private class DefaultPassConfig extends PassConfig {
+	private class Phase {
 
-		boolean initialPass() {
+		private boolean initialPhase;
+		private Pass initialPass;
 
-			return false;
+		Phase() {
+
+			this(true, new InitialPhaseInitialPass());
 		}
 
-		boolean potentialPatternMatchCandidate(Pattern p) {
+		boolean performPhase() {
 
-			return true;
+			Pass pass = initialPass;
+
+			while (pass.initialisePass()) {
+
+				if (pass.initialPass()) {
+
+					classifyListener.onPhaseStart();
+				}
+
+				classifyListener.onPassStart(pass.candidateCount());
+
+				pass = pass.perfomPass();
+			}
+
+			if (initialPhase) {
+
+				return true;
+			}
+
+			if (pass.initialPass()) {
+
+				return false;
+			}
+
+			return NodeClassifier.resetAllPhaseInferredSubsumers(allNodes);
+		}
+
+		Phase createNextPhase() {
+
+			return new Phase(false, new ExpansionPhaseInitialPass());
+		}
+
+		private Phase(boolean initialPhase, Pass initialPass) {
+
+			this.initialPhase = initialPhase;
+			this.initialPass = initialPass;
 		}
 	}
 
@@ -237,86 +306,33 @@ class OntologyClassifier {
 
 		this.allNames = allNames;
 		this.allNodes = allNodes;
+		this.classifyListener = classifyListener;
 
 		profilePatterns = nodeMatchers.getProfilePatterns();
 		definitionPatterns = nodeMatchers.getDefinitionPatterns();
 		allDisjunctions = nodeMatchers.getAllDisjunctions();
 		definitionDisjunctions = nodeMatchers.getDefinitionDisjunctions();
 
-		classify(classifyListener);
+		classify();
 	}
 
-	private void classify(OntologyClassifyListener classifyListener) {
+	private void classify() {
 
-		while (initialPhase || initialiseNextPhase()) {
+		Phase phase = new Phase();
 
-			PassConfig config = new InitialPassConfig();
+		while (phase.performPhase()) {
 
-			while (true) {
-
-				int candidates = config.candidateCount();
-
-				if (candidates == 0) {
-
-					break;
-				}
-
-				if (config.initialPass()) {
-
-					classifyListener.onPhaseStart();
-				}
-
-				classifyListener.onPassStart(candidates);
-
-				config = perfomPass(config);
-			}
-
-			initialPhase &= false;
+			phase = phase.createNextPhase();
 		}
+
+		completeClassification();
+	}
+
+	private void completeClassification() {
 
 		classifyListener.onCompletionStart();
 
 		NameClassification.completeAllClassifications(allNames);
-	}
-
-	private boolean initialiseNextPhase() {
-
-		if (expansionsInCurrentPhase && resetAllPhaseInferredSubsumers()) {
-
-			expansionsInCurrentPhase = false;
-
-			return true;
-		}
-
-		return false;
-	}
-
-	private boolean resetAllPhaseInferredSubsumers() {
-
-		boolean anyInfs = false;
-
-		for (NodeX n : allNodes) {
-
-			if (n.getNodeClassifier().resetPhaseInferredSubsumers()) {
-
-				anyInfs |= true;
-			}
-		}
-
-		return anyInfs;
-	}
-
-	private PassConfig perfomPass(PassConfig config) {
-
-		config.checkSubsumptions();
-
-		NodeClassifier.expandAllNewInferredSubsumers(allNodes);
-
-		PassConfig nextConfig = new DefaultPassConfig();
-
-		NodeClassifier.absorbAllNewInferredSubsumers(allNodes);
-
-		return nextConfig;
 	}
 }
 

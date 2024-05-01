@@ -91,6 +91,11 @@ class ProfileRelations {
 		return expansionStatus == ExpansionStatus.EXPANDED;
 	}
 
+	boolean anyRelations() {
+
+		return !profileRelations.isEmpty();
+	}
+
 	Collection<Relation> getAll() {
 
 		return profileRelations;

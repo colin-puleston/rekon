@@ -170,7 +170,7 @@ class AllRelationTargetSubsumptions {
 
 				for (NodeX s : targetSubsumers) {
 
-					target.getNodeClassifier().addNewInferredSubsumer(s);
+					target.getNodeClassifier().checkAddInferredSubsumer(s);
 				}
 			}
 		}

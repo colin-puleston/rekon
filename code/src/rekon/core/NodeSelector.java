@@ -24,8 +24,6 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
@@ -72,43 +70,18 @@ abstract class NodeSelector {
 
 			PatternMatcher p = node.getProfilePatternMatcher();
 
-			return p != null && select(p.getPattern().getProfileRelations().getAll());
-		}
-
-		boolean select(Collection<Relation> rels) {
-
-			return !rels.isEmpty();
+			return p != null && p.getPattern().getProfileRelations().anyRelations();
 		}
 	}
 
-	static private abstract class MatchablePatternNode extends StructuredNode {
+	static private abstract class MatchablePatternNode extends SelectiveSelector {
 
 		boolean select(NodeX node) {
 
-			return node.definitionRefed(getMatchRole()) || super.select(node);
-		}
-
-		boolean select(Collection<Relation> rels) {
-
-			for (Relation r : rels) {
-
-				if (r instanceof NodeRelation && targetFor((NodeRelation)r)) {
-
-					return true;
-				}
-			}
-
-			return false;
+			return node.definitionRefed(getMatchRole());
 		}
 
 		abstract MatchRole getMatchRole();
-
-		private boolean targetFor(NodeRelation rel) {
-
-			NodeProperty p = rel.getNodeProperty();
-
-			return p.definitionRefed() && p.anyChains();
-		}
 	}
 
 	static private class MatchablePatternRoot extends MatchablePatternNode {

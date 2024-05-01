@@ -71,6 +71,21 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
+	static boolean resetAllPhaseInferredSubsumers(Iterable<NodeX> all) {
+
+		boolean anyInfs = false;
+
+		for (NodeX n : all) {
+
+			if (n.getNodeClassifier().resetPhaseInferredSubsumers()) {
+
+				anyInfs |= true;
+			}
+		}
+
+		return anyInfs;
+	}
+
 	static private boolean configureForNextInferenceExpansion(Iterable<NodeX> all) {
 
 		boolean expansions = false;
@@ -255,15 +270,6 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
-	boolean resetPhaseInferredSubsumers() {
-
-		anyLastPhaseInferredSubsumers = anyPhaseInferredSubsumers;
-
-		anyPhaseInferredSubsumers = false;
-
-		return anyLastPhaseInferredSubsumers;
-	}
-
 	boolean anyLastPhaseInferredSubsumers() {
 
 		return anyLastPhaseInferredSubsumers;
@@ -273,10 +279,15 @@ class NodeClassifier extends NameClassifier {
 
 		for (NodeX s : subsumers.asNodes()) {
 
-			if (newSubsumer(s)) {
+			checkAddInferredSubsumer(s);
+		}
+	}
 
-				addNewInferredSubsumer(s);
-			}
+	void checkAddInferredSubsumer(NodeX subsumer) {
+
+		if (newSubsumer(subsumer)) {
+
+			addNewInferredSubsumer(subsumer);
 		}
 	}
 
@@ -295,6 +306,15 @@ class NodeClassifier extends NameClassifier {
 	boolean anyNewSubsumers(NodeSelector selector) {
 
 		return inferredSubsumers.anyNewInferences(selector);
+	}
+
+	private boolean resetPhaseInferredSubsumers() {
+
+		anyLastPhaseInferredSubsumers = anyPhaseInferredSubsumers;
+
+		anyPhaseInferredSubsumers = false;
+
+		return anyLastPhaseInferredSubsumers;
 	}
 
 	private NodeX getNode() {
