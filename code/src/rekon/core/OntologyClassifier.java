@@ -132,11 +132,11 @@ class OntologyClassifier {
 					+ allRelationTargetSubsumptions.candidateCount();
 		}
 
-		abstract boolean initialPhasePass();
+		abstract ClassifyPassType getPassType();
 
-		boolean expansionPass() {
+		boolean initialPhasePass() {
 
-			return false;
+			return getPassType().initialPhasePass();
 		}
 
 		abstract void ensureCandidatesFound();
@@ -154,7 +154,7 @@ class OntologyClassifier {
 
 		private AllRelationTargetSubsumptions createAllRelationTargetSubsumptions() {
 
-			return new AllRelationTargetSubsumptions(initialPhasePass(), expansionPass());
+			return new AllRelationTargetSubsumptions(getPassType());
 		}
 
 		private void findPatternClassifyCandidates() {
@@ -216,28 +216,36 @@ class OntologyClassifier {
 			findAllCandidates();
 		}
 
-		boolean initialPhasePass() {
+		ClassifyPassType getPassType() {
 
-			return false;
+			return ClassifyPassType.DEFAULT;
 		}
 
 		void ensureCandidatesFound() {
 		}
 	}
 
-	private class InitialPhaseInitialPass extends DefaultPass {
+	private class InitialPhaseInitialPass extends Pass {
 
-		boolean initialPhasePass() {
+		InitialPhaseInitialPass() {
 
-			return true;
+			findAllCandidates();
+		}
+
+		ClassifyPassType getPassType() {
+
+			return ClassifyPassType.INITIAL;
+		}
+
+		void ensureCandidatesFound() {
 		}
 	}
 
 	private class ExpansionPhaseInitialPass extends Pass {
 
-		boolean initialPhasePass() {
+		ClassifyPassType getPassType() {
 
-			return true;
+			return ClassifyPassType.EXPANSION;
 		}
 
 		void ensureCandidatesFound() {

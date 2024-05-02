@@ -31,8 +31,7 @@ import java.util.*;
  */
 class AllRelationTargetSubsumptions {
 
-	private boolean initialPhasePass;
-	private boolean expansionPass;
+	private ClassifyPassType passType;
 
 	private List<PatternMatcher> sourceIndividualProfiles = new ArrayList<PatternMatcher>();
 
@@ -76,15 +75,27 @@ class AllRelationTargetSubsumptions {
 
 		boolean test(PatternMatcher indProfile) {
 
-			if (expansionPass) {
+			switch (passType) {
 
-				return indProfile.getPattern().expanded();
+				case INITIAL:
+					return true;
+
+				case EXPANSION:
+					return indProfile.getPattern().expanded();
+
+				case DEFAULT:
+					return testDefaultPass(indProfile);
 			}
 
-			if (initialPhasePass) {
+			throw new Error("Unrecognised ClassifyPassType!");
+		}
 
-				return true;
-			}
+		boolean process(AllRelation rel) {
+
+			return rel.getTarget().anyNewSubsumers(NodeSelector.ANY);
+		}
+
+		private boolean testDefaultPass(PatternMatcher indProfile) {
 
 			IndividualNode indNode = (IndividualNode)indProfile.getNode();
 
@@ -94,11 +105,6 @@ class AllRelationTargetSubsumptions {
 			}
 
 			return processForAllSubsumers(indNode);
-		}
-
-		boolean process(AllRelation rel) {
-
-			return rel.getTarget().anyNewSubsumers(NodeSelector.ANY);
 		}
 	}
 
@@ -184,10 +190,9 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	AllRelationTargetSubsumptions(boolean initialPhasePass, boolean expansionPass) {
+	AllRelationTargetSubsumptions(ClassifyPassType passType) {
 
-		this.initialPhasePass = initialPhasePass;
-		this.expansionPass = expansionPass;
+		this.passType = passType;
 	}
 
 	void checkAddSourceIndividual(PatternMatcher indProfile) {
