@@ -149,15 +149,7 @@ class DisjunctionMatcher extends NodeMatcher {
 		getClassifier().checkAddInferredSubsumers(findCommonDisjunctSubsumers());
 	}
 
-	void checkExpandProfile() {
-	}
-
-	void setProfileExpansionStatus(boolean checkRequired) {
-	}
-
-	boolean processProfileExpansion() {
-
-		return false;
+	void checkExpandLocalProfile() {
 	}
 
 	Names getDirectDisjuncts() {

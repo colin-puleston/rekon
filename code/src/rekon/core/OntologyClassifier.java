@@ -94,12 +94,16 @@ class OntologyClassifier {
 
 	private abstract class Pass {
 
-		private List<PatternMatcher> patternMatchCandidates = new ArrayList<PatternMatcher>();
-		private List<DisjunctionMatcher> disjunctionMatchCandidates = new ArrayList<DisjunctionMatcher>();
-		private List<DisjunctionMatcher> disjunctionClassifyCandidates = new ArrayList<DisjunctionMatcher>();
+		private List<PatternMatcher> patternMatchCandidates
+										= new ArrayList<PatternMatcher>();
+
+		private List<DisjunctionMatcher> disjunctionMatchCandidates
+											= new ArrayList<DisjunctionMatcher>();
+		private List<DisjunctionMatcher> disjunctionClassifyCandidates
+											= new ArrayList<DisjunctionMatcher>();
 
 		private AllRelationTargetSubsumptions allRelationTargetSubsumptions
-												= new AllRelationTargetSubsumptions();
+												= createAllRelationTargetSubsumptions();
 
 		boolean initialisePass() {
 
@@ -128,24 +132,32 @@ class OntologyClassifier {
 					+ allRelationTargetSubsumptions.candidateCount();
 		}
 
-		abstract boolean initialPass();
+		abstract boolean initialPhasePass();
+
+		boolean expansionPass() {
+
+			return false;
+		}
 
 		abstract void ensureCandidatesFound();
 
 		void findAllCandidates() {
 
-			boolean initPass = initialPass();
-
-			findPatternClassifyCandidates(initPass);
-			findDisjunctionClassifyCandidates(initPass);
+			findPatternClassifyCandidates();
+			findDisjunctionClassifyCandidates();
 		}
 
 		boolean patternMatchCandidate(Pattern pattern) {
 
-			return pattern.matchable(initialPass());
+			return pattern.matchable(initialPhasePass());
 		}
 
-		private void findPatternClassifyCandidates(boolean initPass) {
+		private AllRelationTargetSubsumptions createAllRelationTargetSubsumptions() {
+
+			return new AllRelationTargetSubsumptions(initialPhasePass(), expansionPass());
+		}
+
+		private void findPatternClassifyCandidates() {
 
 			for (PatternMatcher m : profilePatterns) {
 
@@ -156,12 +168,14 @@ class OntologyClassifier {
 
 				if (m.getNode() instanceof IndividualNode) {
 
-					allRelationTargetSubsumptions.checkAddSourceIndividual(m, initPass);
+					allRelationTargetSubsumptions.checkAddSourceIndividual(m);
 				}
 			}
 		}
 
-		private void findDisjunctionClassifyCandidates(boolean initPass) {
+		private void findDisjunctionClassifyCandidates() {
+
+			boolean initPass = initialPhasePass();
 
 			for (DisjunctionMatcher d : allDisjunctions) {
 
@@ -202,7 +216,7 @@ class OntologyClassifier {
 			findAllCandidates();
 		}
 
-		boolean initialPass() {
+		boolean initialPhasePass() {
 
 			return false;
 		}
@@ -213,7 +227,7 @@ class OntologyClassifier {
 
 	private class InitialPhaseInitialPass extends DefaultPass {
 
-		boolean initialPass() {
+		boolean initialPhasePass() {
 
 			return true;
 		}
@@ -221,29 +235,23 @@ class OntologyClassifier {
 
 	private class ExpansionPhaseInitialPass extends Pass {
 
-		boolean initialPass() {
+		boolean initialPhasePass() {
 
 			return true;
 		}
 
 		void ensureCandidatesFound() {
 
-			setAllProfileExpansionStatuses(true);
+			PatternMatcher.setAllProfileExpansions(profilePatterns);
+
 			findAllCandidates();
-			setAllProfileExpansionStatuses(false);
+
+			PatternMatcher.clearAllProfileExpansions(profilePatterns);
 		}
 
 		boolean patternMatchCandidate(Pattern pattern) {
 
-			return pattern.processProfileExpansion();
-		}
-
-		private void setAllProfileExpansionStatuses(boolean checkRequired) {
-
-			for (PatternMatcher p : profilePatterns) {
-
-				p.getPattern().setProfileExpansionStatus(checkRequired);
-			}
+			return pattern.expanded();
 		}
 	}
 
@@ -263,7 +271,7 @@ class OntologyClassifier {
 
 			while (pass.initialisePass()) {
 
-				if (pass.initialPass()) {
+				if (pass.initialPhasePass()) {
 
 					classifyListener.onPhaseStart();
 				}
@@ -278,7 +286,7 @@ class OntologyClassifier {
 				return true;
 			}
 
-			if (pass.initialPass()) {
+			if (pass.initialPhasePass()) {
 
 				return false;
 			}
@@ -335,4 +343,3 @@ class OntologyClassifier {
 		NameClassification.completeAllClassifications(allNames);
 	}
 }
-

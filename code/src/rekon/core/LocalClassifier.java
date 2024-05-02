@@ -68,7 +68,7 @@ class LocalClassifier {
 
 			do {
 
-				candidate.checkExpandProfile();
+				candidate.checkExpandLocalProfile();
 
 				classify(candidate);
 			}

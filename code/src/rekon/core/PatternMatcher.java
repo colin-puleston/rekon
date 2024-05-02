@@ -31,6 +31,27 @@ import java.util.*;
  */
 class PatternMatcher extends NodeMatcher {
 
+	static void setAllProfileExpansions(List<PatternMatcher> allProfilePatterns) {
+
+		for (PatternMatcher p : allProfilePatterns) {
+
+			p.pattern.getProfileRelations().initExpansion();
+		}
+
+		for (PatternMatcher p : allProfilePatterns) {
+
+			p.pattern.getProfileRelations().processExpansion();
+		}
+	}
+
+	static void clearAllProfileExpansions(List<PatternMatcher> allProfilePatterns) {
+
+		for (PatternMatcher p : allProfilePatterns) {
+
+			p.pattern.getProfileRelations().clearExpansion();
+		}
+	}
+
 	private Pattern pattern;
 
 	private class SubsumedTester extends NodeMatcherVisitor {
@@ -80,19 +101,9 @@ class PatternMatcher extends NodeMatcher {
 		pattern = pattern.extend(relation);
 	}
 
-	void checkExpandProfile() {
+	void checkExpandLocalProfile() {
 
-		pattern.checkExpandProfile();
-	}
-
-	void setProfileExpansionStatus(boolean checkRequired) {
-
-		pattern.setProfileExpansionStatus(checkRequired);
-	}
-
-	boolean processProfileExpansion() {
-
-		return pattern.processProfileExpansion();
+		pattern.getProfileRelations().checkExpandLocal();
 	}
 
 	Pattern getPattern() {

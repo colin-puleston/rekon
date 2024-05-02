@@ -124,16 +124,12 @@ class QueryableExpression extends ValidInputQueryable {
 
 	void configureAsPotentialSubsumed() {
 
-		NodeMatcher m = getExpressionMatcher();
-
-		m.setProfileExpansionStatus(true);
 		inferSubsumers();
-		m.processProfileExpansion();
 	}
 
 	NodeX getNode() {
 
-		return getExpressionMatcher().getNode();
+		return expression.getExpressionMatcher().getNode();
 	}
 
 	Names getRawEquivalents() {
@@ -237,10 +233,5 @@ class QueryableExpression extends ValidInputQueryable {
 	private NameSet inferAllSubsumedNodes() {
 
 		return dynamicSubsumeds.inferAllSubsumedNodes(expression);
-	}
-
-	private NodeMatcher getExpressionMatcher() {
-
-		return expression.getExpressionMatcher();
 	}
 }

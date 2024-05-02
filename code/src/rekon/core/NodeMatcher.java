@@ -41,11 +41,7 @@ abstract class NodeMatcher {
 		return node;
 	}
 
-	abstract void checkExpandProfile();
-
-	abstract void setProfileExpansionStatus(boolean checkRequired);
-
-	abstract boolean processProfileExpansion();
+	abstract void checkExpandLocalProfile();
 
 	abstract Names getDirectlyImpliedSubNodes();
 

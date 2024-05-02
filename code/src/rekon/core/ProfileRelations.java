@@ -65,21 +65,12 @@ class ProfileRelations {
 		profileRelations = getDirectRelations();
 	}
 
-	void checkExpand() {
+	void initExpansion() {
 
 		expansionStatus = ExpansionStatus.CHECK;
-
-		processExpansion();
-
-		expansionStatus = ExpansionStatus.NONE;
 	}
 
-	void setExpansionStatus(boolean checkRequired) {
-
-		expansionStatus = checkRequired ? ExpansionStatus.CHECK : ExpansionStatus.NONE;
-	}
-
-	boolean processExpansion() {
+	void processExpansion() {
 
 		if (expansionStatus == ExpansionStatus.CHECK) {
 
@@ -87,13 +78,28 @@ class ProfileRelations {
 								? ExpansionStatus.EXPANDED
 								: ExpansionStatus.NONE;
 		}
+	}
 
-		return expansionStatus == ExpansionStatus.EXPANDED;
+	void clearExpansion() {
+
+		expansionStatus = ExpansionStatus.NONE;
+	}
+
+	void checkExpandLocal() {
+
+		initExpansion();
+		processExpansion();
+		clearExpansion();
 	}
 
 	boolean anyRelations() {
 
 		return !profileRelations.isEmpty();
+	}
+
+	boolean expanded() {
+
+		return expansionStatus == ExpansionStatus.EXPANDED;
 	}
 
 	Collection<Relation> getAll() {

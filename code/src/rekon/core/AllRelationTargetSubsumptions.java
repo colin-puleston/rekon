@@ -31,6 +31,9 @@ import java.util.*;
  */
 class AllRelationTargetSubsumptions {
 
+	private boolean initialPhasePass;
+	private boolean expansionPass;
+
 	private List<PatternMatcher> sourceIndividualProfiles = new ArrayList<PatternMatcher>();
 
 	private PotentialSourceIndividualTester potentialSourceIndividualTester
@@ -71,16 +74,21 @@ class AllRelationTargetSubsumptions {
 
 	private class PotentialSourceIndividualTester extends SubsumerAllRelationProcessor {
 
-		boolean test(PatternMatcher indProfile, boolean initialPass) {
+		boolean test(PatternMatcher indProfile) {
 
-			if (initialPass) {
+			if (expansionPass) {
+
+				return indProfile.getPattern().expanded();
+			}
+
+			if (initialPhasePass) {
 
 				return true;
 			}
 
 			IndividualNode indNode = (IndividualNode)indProfile.getNode();
 
-			if (indNode.anyNewSubsumers()) {
+			if (indNode.anyNewSubsumers(NodeSelector.ANY)) {
 
 				return true;
 			}
@@ -176,9 +184,15 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	void checkAddSourceIndividual(PatternMatcher indProfile, boolean initialPass) {
+	AllRelationTargetSubsumptions(boolean initialPhasePass, boolean expansionPass) {
 
-		if (potentialSourceIndividualTester.test(indProfile, initialPass)) {
+		this.initialPhasePass = initialPhasePass;
+		this.expansionPass = expansionPass;
+	}
+
+	void checkAddSourceIndividual(PatternMatcher indProfile) {
+
+		if (potentialSourceIndividualTester.test(indProfile)) {
 
 			sourceIndividualProfiles.add(indProfile);
 		}

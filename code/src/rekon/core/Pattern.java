@@ -118,21 +118,6 @@ public class Pattern extends PatternComponent {
 		}
 	}
 
-	void checkExpandProfile() {
-
-		getProfileRelations().checkExpand();
-	}
-
-	void setProfileExpansionStatus(boolean checkRequired) {
-
-		getProfileRelations().setExpansionStatus(checkRequired);
-	}
-
-	boolean processProfileExpansion() {
-
-		return getProfileRelations().processExpansion();
-	}
-
 	void collectNames(NameCollector collector) {
 
 		collector.collectNames(nodes);
@@ -146,6 +131,11 @@ public class Pattern extends PatternComponent {
 				r.collectNames(collector);
 			}
 		}
+	}
+
+	boolean expanded() {
+
+		return profileRelations.expanded();
 	}
 
 	boolean subsumes(Pattern p) {
