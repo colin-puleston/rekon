@@ -134,9 +134,9 @@ class OntologyClassifier {
 
 		abstract ClassifyPassType getPassType();
 
-		boolean initialPhasePass() {
+		boolean phaseInitialPass() {
 
-			return getPassType().initialPhasePass();
+			return getPassType().phaseInitialPass();
 		}
 
 		abstract void ensureCandidatesFound();
@@ -149,7 +149,7 @@ class OntologyClassifier {
 
 		boolean patternMatchCandidate(Pattern pattern) {
 
-			return pattern.matchable(initialPhasePass());
+			return pattern.matchable(phaseInitialPass());
 		}
 
 		private AllRelationTargetSubsumptions createAllRelationTargetSubsumptions() {
@@ -175,7 +175,7 @@ class OntologyClassifier {
 
 		private void findDisjunctionClassifyCandidates() {
 
-			boolean initPass = initialPhasePass();
+			boolean initPass = phaseInitialPass();
 
 			for (DisjunctionMatcher d : allDisjunctions) {
 
@@ -279,7 +279,7 @@ class OntologyClassifier {
 
 			while (pass.initialisePass()) {
 
-				if (pass.initialPhasePass()) {
+				if (pass.phaseInitialPass()) {
 
 					classifyListener.onPhaseStart();
 				}
@@ -294,7 +294,7 @@ class OntologyClassifier {
 				return true;
 			}
 
-			if (pass.initialPhasePass()) {
+			if (pass.phaseInitialPass()) {
 
 				return false;
 			}

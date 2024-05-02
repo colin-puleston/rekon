@@ -33,7 +33,7 @@ enum ClassifyPassType {
 	EXPANSION,
 	DEFAULT;
 
-	boolean initialPhasePass() {
+	boolean phaseInitialPass() {
 
 		return this != DEFAULT;
 	}
