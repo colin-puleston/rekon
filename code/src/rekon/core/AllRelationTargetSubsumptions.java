@@ -31,14 +31,10 @@ import java.util.*;
  */
 class AllRelationTargetSubsumptions {
 
-	private ClassifyPassType passType;
-
+	private SourceIndividualTester sourceIndividualTester;
 	private List<PatternMatcher> sourceIndividualProfiles = new ArrayList<PatternMatcher>();
 
-	private PotentialSourceIndividualTester potentialSourceIndividualTester
-												= new PotentialSourceIndividualTester();
-
-	private abstract class SubsumerAllRelationProcessor {
+	private abstract class AllRelationProcessor {
 
 		boolean processForAllSubsumers(IndividualNode indNode) {
 
@@ -71,40 +67,79 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	private class PotentialSourceIndividualTester extends SubsumerAllRelationProcessor {
+	private class AllRelationExistanceTester extends AllRelationProcessor {
 
-		boolean test(PatternMatcher indProfile) {
+		boolean process(AllRelation rel) {
 
-			switch (passType) {
-
-				case INITIAL:
-					return true;
-
-				case EXPANSION:
-					return indProfile.getPattern().expanded();
-
-				case DEFAULT:
-					return testDefaultPass(indProfile);
-			}
-
-			throw new Error("Unrecognised ClassifyPassType!");
+			return true;
 		}
+	}
+
+	private class AllRelationTargetNewSubsumersTester extends AllRelationProcessor {
 
 		boolean process(AllRelation rel) {
 
 			return rel.getTarget().anyNewSubsumers(NodeSelector.ANY);
 		}
+	}
 
-		private boolean testDefaultPass(PatternMatcher indProfile) {
+	private abstract class SourceIndividualTester {
 
-			IndividualNode indNode = (IndividualNode)indProfile.getNode();
+		private AllRelationExistanceTester allRelationExistanceTester
+										= new AllRelationExistanceTester();
+
+		boolean test(PatternMatcher indProfile) {
+
+			return test(indProfile, (IndividualNode)indProfile.getNode());
+		}
+
+		abstract boolean test(PatternMatcher indProfile, IndividualNode indNode);
+
+		boolean anyAllRelations(IndividualNode indNode) {
+
+			return allRelationExistanceTester.processForAllSubsumers(indNode);
+		}
+	}
+
+	private class InitialPassSourceIndividualTester extends SourceIndividualTester {
+
+		boolean test(PatternMatcher indProfile, IndividualNode indNode) {
+
+			return anyAllRelations(indNode);
+		}
+	}
+
+	private class ExpansionPassSourceIndividualTester extends SourceIndividualTester {
+
+		boolean test(PatternMatcher indProfile, IndividualNode indNode) {
+
+			if (indProfile.getPattern().expanded()) {
+
+				return anyAllRelations(indNode);
+			}
+
+			return false;
+		}
+	}
+
+	private class DefaultPassSourceIndividualTester extends SourceIndividualTester {
+
+		private AllRelationTargetNewSubsumersTester allRelationTargetNewSubsumersTester
+												= new AllRelationTargetNewSubsumersTester();
+
+		boolean test(PatternMatcher indProfile, IndividualNode indNode) {
 
 			if (indNode.anyNewSubsumers(NodeSelector.ANY)) {
 
-				return true;
+				return anyAllRelations(indNode);
 			}
 
-			return processForAllSubsumers(indNode);
+			return anyAllRelationTargetNewSubsumers(indNode);
+		}
+
+		private boolean anyAllRelationTargetNewSubsumers(IndividualNode indNode) {
+
+			return allRelationTargetNewSubsumersTester.processForAllSubsumers(indNode);
 		}
 	}
 
@@ -113,9 +148,9 @@ class AllRelationTargetSubsumptions {
 		private Map<NodeProperty, Set<NodeX>> subsumerAllRelations
 								= new HashMap<NodeProperty, Set<NodeX>>();
 
-		private class SubsumerAllRelationCollector extends SubsumerAllRelationProcessor {
+		private class AllRelationCollector extends AllRelationProcessor {
 
-			SubsumerAllRelationCollector(PatternMatcher indProfile) {
+			AllRelationCollector(PatternMatcher indProfile) {
 
 				processForAllSubsumers((IndividualNode)indProfile.getNode());
 			}
@@ -145,7 +180,7 @@ class AllRelationTargetSubsumptions {
 
 		TargetSubsumptionsFinder(PatternMatcher indProfile) {
 
-			new SubsumerAllRelationCollector(indProfile);
+			new AllRelationCollector(indProfile);
 
 			for (Relation r : indProfile.getPattern().getDirectRelations()) {
 
@@ -192,12 +227,12 @@ class AllRelationTargetSubsumptions {
 
 	AllRelationTargetSubsumptions(ClassifyPassType passType) {
 
-		this.passType = passType;
+		sourceIndividualTester = createSourceIndividualTester(passType);
 	}
 
 	void checkAddSourceIndividual(PatternMatcher indProfile) {
 
-		if (potentialSourceIndividualTester.test(indProfile)) {
+		if (sourceIndividualTester.test(indProfile)) {
 
 			sourceIndividualProfiles.add(indProfile);
 		}
@@ -214,5 +249,22 @@ class AllRelationTargetSubsumptions {
 
 			new TargetSubsumptionsFinder(p);
 		}
+	}
+
+	private SourceIndividualTester createSourceIndividualTester(ClassifyPassType passType) {
+
+		switch (passType) {
+
+			case INITIAL:
+				return new InitialPassSourceIndividualTester();
+
+			case EXPANSION:
+				return new ExpansionPassSourceIndividualTester();
+
+			case DEFAULT:
+				return new DefaultPassSourceIndividualTester();
+		}
+
+		throw new Error("Unrecognised pass-type: " + passType);
 	}
 }

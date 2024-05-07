@@ -92,7 +92,9 @@ class OntologyClassifier {
 		}
 	}
 
-	private abstract class Pass {
+	private class Pass {
+
+		private ClassifyPassType passType;
 
 		private List<PatternMatcher> patternMatchCandidates
 										= new ArrayList<PatternMatcher>();
@@ -102,12 +104,30 @@ class OntologyClassifier {
 		private List<DisjunctionMatcher> disjunctionClassifyCandidates
 											= new ArrayList<DisjunctionMatcher>();
 
-		private AllRelationTargetSubsumptions allRelationTargetSubsumptions
-												= createAllRelationTargetSubsumptions();
+		private AllRelationTargetSubsumptions allRelationTargetSubsumptions;
+
+		Pass(ClassifyPassType passType) {
+
+			this.passType = passType;
+
+			allRelationTargetSubsumptions = createAllRelationTargetSubsumptions();
+
+			if (!expansionPass()) {
+
+				findAllCandidates();
+			}
+		}
 
 		boolean initialisePass() {
 
-			ensureCandidatesFound();
+			if (expansionPass()) {
+
+				PatternMatcher.setAllProfileExpansions(profilePatterns);
+
+				findAllCandidates();
+
+				PatternMatcher.clearAllProfileExpansions(profilePatterns);
+			}
 
 			return candidateCount() != 0;
 		}
@@ -118,7 +138,7 @@ class OntologyClassifier {
 
 			NodeClassifier.expandAllNewInferredSubsumers(allNodes);
 
-			Pass next = new DefaultPass();
+			Pass next = new Pass(ClassifyPassType.DEFAULT);
 
 			NodeClassifier.absorbAllNewInferredSubsumers(allNodes);
 
@@ -132,29 +152,32 @@ class OntologyClassifier {
 					+ allRelationTargetSubsumptions.candidateCount();
 		}
 
-		abstract ClassifyPassType getPassType();
-
 		boolean phaseInitialPass() {
 
-			return getPassType().phaseInitialPass();
+			return passType != ClassifyPassType.DEFAULT;
 		}
 
-		abstract void ensureCandidatesFound();
+		boolean patternMatchCandidate(Pattern pattern) {
 
-		void findAllCandidates() {
+			return expansionPass()
+					? pattern.expanded()
+					: pattern.matchable(phaseInitialPass());
+		}
+
+		private boolean expansionPass() {
+
+			return passType == ClassifyPassType.EXPANSION;
+		}
+
+		private void findAllCandidates() {
 
 			findPatternClassifyCandidates();
 			findDisjunctionClassifyCandidates();
 		}
 
-		boolean patternMatchCandidate(Pattern pattern) {
-
-			return pattern.matchable(phaseInitialPass());
-		}
-
 		private AllRelationTargetSubsumptions createAllRelationTargetSubsumptions() {
 
-			return new AllRelationTargetSubsumptions(getPassType());
+			return new AllRelationTargetSubsumptions(passType);
 		}
 
 		private void findPatternClassifyCandidates() {
@@ -209,60 +232,6 @@ class OntologyClassifier {
 		}
 	}
 
-	private class DefaultPass extends Pass {
-
-		DefaultPass() {
-
-			findAllCandidates();
-		}
-
-		ClassifyPassType getPassType() {
-
-			return ClassifyPassType.DEFAULT;
-		}
-
-		void ensureCandidatesFound() {
-		}
-	}
-
-	private class InitialPhaseInitialPass extends Pass {
-
-		InitialPhaseInitialPass() {
-
-			findAllCandidates();
-		}
-
-		ClassifyPassType getPassType() {
-
-			return ClassifyPassType.INITIAL;
-		}
-
-		void ensureCandidatesFound() {
-		}
-	}
-
-	private class ExpansionPhaseInitialPass extends Pass {
-
-		ClassifyPassType getPassType() {
-
-			return ClassifyPassType.EXPANSION;
-		}
-
-		void ensureCandidatesFound() {
-
-			PatternMatcher.setAllProfileExpansions(profilePatterns);
-
-			findAllCandidates();
-
-			PatternMatcher.clearAllProfileExpansions(profilePatterns);
-		}
-
-		boolean patternMatchCandidate(Pattern pattern) {
-
-			return pattern.expanded();
-		}
-	}
-
 	private class Phase {
 
 		private boolean initialPhase;
@@ -270,7 +239,7 @@ class OntologyClassifier {
 
 		Phase() {
 
-			this(true, new InitialPhaseInitialPass());
+			this(true, ClassifyPassType.INITIAL);
 		}
 
 		boolean performPhase() {
@@ -304,13 +273,14 @@ class OntologyClassifier {
 
 		Phase createNextPhase() {
 
-			return new Phase(false, new ExpansionPhaseInitialPass());
+			return new Phase(false, ClassifyPassType.EXPANSION);
 		}
 
-		private Phase(boolean initialPhase, Pass initialPass) {
+		private Phase(boolean initialPhase, ClassifyPassType initialPassType) {
 
 			this.initialPhase = initialPhase;
-			this.initialPass = initialPass;
+
+			initialPass = new Pass(initialPassType);
 		}
 	}
 
