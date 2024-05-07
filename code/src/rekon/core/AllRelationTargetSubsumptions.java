@@ -31,31 +31,23 @@ import java.util.*;
  */
 class AllRelationTargetSubsumptions {
 
-	private SourceIndividualTester sourceIndividualTester;
+	private SourceIndividualsTester sourceIndividualsTester;
 	private List<PatternMatcher> sourceIndividualProfiles = new ArrayList<PatternMatcher>();
 
 	private abstract class AllRelationProcessor {
 
-		boolean processForAllSubsumers(IndividualNode indNode) {
+		boolean processAll(IndividualNode indNode) {
 
-			for (NodeX s : indNode.getSubsumers().asNodes()) {
+			PatternMatcher p = indNode.getProfilePatternMatcher();
 
-				PatternMatcher p = s.getProfilePatternMatcher();
-
-				if (p != null && processForSubsumer(p)) {
-
-					return true;
-				}
-			}
-
-			return false;
+			return p != null && processAll(p);
 		}
 
 		abstract boolean process(AllRelation rel);
 
-		private boolean processForSubsumer(PatternMatcher profile) {
+		private boolean processAll(PatternMatcher indProfile) {
 
-			for (Relation r : profile.getPattern().getDirectRelations()) {
+			for (Relation r : indProfile.getPattern().getProfileRelations().getAll()) {
 
 				if (r instanceof AllRelation && process((AllRelation)r)) {
 
@@ -83,7 +75,7 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	private abstract class SourceIndividualTester {
+	private abstract class SourceIndividualsTester {
 
 		private AllRelationExistanceTester allRelationExistanceTester
 										= new AllRelationExistanceTester();
@@ -97,11 +89,11 @@ class AllRelationTargetSubsumptions {
 
 		boolean anyAllRelations(IndividualNode indNode) {
 
-			return allRelationExistanceTester.processForAllSubsumers(indNode);
+			return allRelationExistanceTester.processAll(indNode);
 		}
 	}
 
-	private class InitialPassSourceIndividualTester extends SourceIndividualTester {
+	private class InitialPassSourceIndividualsTester extends SourceIndividualsTester {
 
 		boolean test(PatternMatcher indProfile, IndividualNode indNode) {
 
@@ -109,7 +101,7 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	private class ExpansionPassSourceIndividualTester extends SourceIndividualTester {
+	private class ExpansionPassSourceIndividualsTester extends SourceIndividualsTester {
 
 		boolean test(PatternMatcher indProfile, IndividualNode indNode) {
 
@@ -122,7 +114,7 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	private class DefaultPassSourceIndividualTester extends SourceIndividualTester {
+	private class DefaultPassSourceIndividualsTester extends SourceIndividualsTester {
 
 		private AllRelationTargetNewSubsumersTester allRelationTargetNewSubsumersTester
 												= new AllRelationTargetNewSubsumersTester();
@@ -139,7 +131,7 @@ class AllRelationTargetSubsumptions {
 
 		private boolean anyAllRelationTargetNewSubsumers(IndividualNode indNode) {
 
-			return allRelationTargetNewSubsumersTester.processForAllSubsumers(indNode);
+			return allRelationTargetNewSubsumersTester.processAll(indNode);
 		}
 	}
 
@@ -152,7 +144,7 @@ class AllRelationTargetSubsumptions {
 
 			AllRelationCollector(PatternMatcher indProfile) {
 
-				processForAllSubsumers((IndividualNode)indProfile.getNode());
+				processAll((IndividualNode)indProfile.getNode());
 			}
 
 			boolean process(AllRelation rel) {
@@ -227,12 +219,12 @@ class AllRelationTargetSubsumptions {
 
 	AllRelationTargetSubsumptions(ClassifyPassType passType) {
 
-		sourceIndividualTester = createSourceIndividualTester(passType);
+		sourceIndividualsTester = createSourceIndividualsTester(passType);
 	}
 
 	void checkAddSourceIndividual(PatternMatcher indProfile) {
 
-		if (sourceIndividualTester.test(indProfile)) {
+		if (sourceIndividualsTester.test(indProfile)) {
 
 			sourceIndividualProfiles.add(indProfile);
 		}
@@ -251,18 +243,18 @@ class AllRelationTargetSubsumptions {
 		}
 	}
 
-	private SourceIndividualTester createSourceIndividualTester(ClassifyPassType passType) {
+	private SourceIndividualsTester createSourceIndividualsTester(ClassifyPassType passType) {
 
 		switch (passType) {
 
 			case INITIAL:
-				return new InitialPassSourceIndividualTester();
+				return new InitialPassSourceIndividualsTester();
 
 			case EXPANSION:
-				return new ExpansionPassSourceIndividualTester();
+				return new ExpansionPassSourceIndividualsTester();
 
 			case DEFAULT:
-				return new DefaultPassSourceIndividualTester();
+				return new DefaultPassSourceIndividualsTester();
 		}
 
 		throw new Error("Unrecognised pass-type: " + passType);
