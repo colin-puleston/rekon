@@ -31,7 +31,13 @@ import java.util.*;
  */
 public abstract class NodeProperty extends PropertyX {
 
+	private ClassNode domain = null;
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+
+	public void setDomain(ClassNode domain) {
+
+		this.domain = domain;
+	}
 
 	public void addChain(PropertyChain chain) {
 
@@ -54,6 +60,16 @@ public abstract class NodeProperty extends PropertyX {
 		}
 
 		return false;
+	}
+
+	boolean hasDomain() {
+
+		return domain != null;
+	}
+
+	ClassNode getDomain() {
+
+		return domain;
 	}
 
 	Collection<PropertyChain> getAllChains() {

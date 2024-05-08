@@ -148,6 +148,11 @@ class BasicStructureBuilder {
 
 		NodePropertyHandler() {
 
+			for (InputNodePropertyDomain ax : axioms.getNodePropertyDomains()) {
+
+				ax.getProperty().setDomain(ax.getDomain());
+			}
+
 			for (InputNodePropertyChain ax : axioms.getNodePropertyChains()) {
 
 				new PropertyChain(ax.getProperty(), ax.getChain());
