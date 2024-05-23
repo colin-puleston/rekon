@@ -69,12 +69,7 @@ public class Pattern extends PatternComponent {
 
 	public NodeX toSingleNode() {
 
-		if (nodes.size() == 1 && directRelations.isEmpty()) {
-
-			return (NodeX)nodes.getFirstName();
-		}
-
-		return null;
+		return nodes.size() == 1 && directRelations.isEmpty() ? getSingleNode() : null;
 	}
 
 	Pattern combineWith(Pattern other) {
@@ -133,7 +128,7 @@ public class Pattern extends PatternComponent {
 		}
 	}
 
-	boolean expanded() {
+	boolean expandedProfile() {
 
 		return profileRelations.expanded();
 	}
@@ -186,6 +181,16 @@ public class Pattern extends PatternComponent {
 	Names getNodes() {
 
 		return nodes;
+	}
+
+	NodeX getSingleNode() {
+
+		if (nodes.size() == 1) {
+
+			return (NodeX)nodes.getFirstName();
+		}
+
+		throw new Error("Not a single-node pattern!");
 	}
 
 	Set<Relation> getDirectRelations() {
@@ -263,7 +268,7 @@ public class Pattern extends PatternComponent {
 
 		if (nodes.size() == 1) {
 
-			return nodes.getFirstName().getLabel();
+			return getSingleNode().getLabel();
 		}
 
 		List<String> l = new ArrayList<String>();

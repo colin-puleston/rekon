@@ -409,7 +409,7 @@ class RelationBasedSubsumptions {
 
 	private boolean expandedProfile(NodeX node) {
 
-		return getProfilePattern(node).expanded();
+		return getProfilePattern(node).expandedProfile();
 	}
 
 	private Set<Relation> getIndirectRelations(NodeX node) {

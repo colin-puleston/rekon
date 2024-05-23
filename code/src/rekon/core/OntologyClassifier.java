@@ -36,10 +36,7 @@ class OntologyClassifier {
 	private Iterable<Name> allNames;
 	private Iterable<NodeX> allNodes;
 
-	private List<PatternMatcher> profilePatterns;
-	private List<PatternMatcher> definitionPatterns;
-	private List<DisjunctionMatcher> allDisjunctions;
-	private List<DisjunctionMatcher> definitionDisjunctions;
+	private NodeMatchers nodeMatchers;
 
 	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
 	private OntologyClassifyListener classifyListener;
@@ -68,7 +65,7 @@ class OntologyClassifier {
 
 			candidatesFilter = new PotentialCorePatternSubsumeds(candidates);
 
-			invokeListProcesses(definitionPatterns);
+			invokeListProcesses(nodeMatchers.getDefinitionPatterns());
 		}
 	}
 
@@ -88,7 +85,7 @@ class OntologyClassifier {
 
 			candidatesFilter = new PotentialDisjunctionSubsumeds(candidates);
 
-			invokeListProcesses(definitionDisjunctions);
+			invokeListProcesses(nodeMatchers.getDefinitionDisjunctions());
 		}
 	}
 
@@ -122,11 +119,9 @@ class OntologyClassifier {
 
 			if (expansionPass()) {
 
-				PatternMatcher.setAllProfileExpansions(profilePatterns);
-
+				nodeMatchers.expandProfilePatterns();
 				findAllCandidates();
-
-				PatternMatcher.clearAllProfileExpansions(profilePatterns);
+				nodeMatchers.clearProfilePatternExpansions();
 			}
 
 			return candidateCount() != 0;
@@ -160,7 +155,7 @@ class OntologyClassifier {
 		boolean patternMatchCandidate(Pattern pattern) {
 
 			return expansionPass()
-					? pattern.expanded()
+					? pattern.expandedProfile()
 					: pattern.matchable(phaseInitialPass());
 		}
 
@@ -182,7 +177,7 @@ class OntologyClassifier {
 
 		private void findPatternClassifyCandidates() {
 
-			for (PatternMatcher m : profilePatterns) {
+			for (PatternMatcher m : nodeMatchers.getProfilePatterns()) {
 
 				if (patternMatchCandidate(m.getPattern())) {
 
@@ -197,7 +192,7 @@ class OntologyClassifier {
 
 			boolean initPass = phaseInitialPass();
 
-			for (DisjunctionMatcher d : allDisjunctions) {
+			for (DisjunctionMatcher d : nodeMatchers.getAllDisjunctions()) {
 
 				if (d.unprocessedSubsumers(initPass)) {
 
@@ -289,12 +284,8 @@ class OntologyClassifier {
 
 		this.allNames = allNames;
 		this.allNodes = allNodes;
+		this.nodeMatchers = nodeMatchers;
 		this.classifyListener = classifyListener;
-
-		profilePatterns = nodeMatchers.getProfilePatterns();
-		definitionPatterns = nodeMatchers.getDefinitionPatterns();
-		allDisjunctions = nodeMatchers.getAllDisjunctions();
-		definitionDisjunctions = nodeMatchers.getDefinitionDisjunctions();
 
 		classify();
 	}

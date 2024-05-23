@@ -131,6 +131,11 @@ public abstract class Names implements Iterable<Name> {
 		return getNames().iterator().next();
 	}
 
+	NodeX getFirstNode() {
+
+		return (NodeX)getFirstName();
+	}
+
 	boolean anySubsumes(Name test) {
 
 		for (Name n : getNames()) {

@@ -60,11 +60,11 @@ class ProfileRelationCollector {
 		return collectorSet;
 	}
 
-	void collectFromSubsumers(Names nodes) {
+	void collectFromSubsumers(NodeX node) {
 
-		for (NodeX n : nodes.asNodes()) {
+		for (NodeX s : node.getSubsumers().asNodes()) {
 
-			collectFromSubsumers(n);
+			collectFromRelations(s);
 		}
 	}
 
@@ -76,6 +76,14 @@ class ProfileRelationCollector {
 
 				checkAdd(sr);
 			}
+		}
+	}
+
+	void collectDisjunctionDerivedRelations(Set<Relation> relations) {
+
+		for (Relation r : relations) {
+
+			checkAdd(r);
 		}
 	}
 
@@ -94,25 +102,15 @@ class ProfileRelationCollector {
 		return collectorSet;
 	}
 
-	private void collectFromSubsumers(NodeX node) {
-
-		for (NodeX s : node.getSubsumers().asNodes()) {
-
-			collectFromRelations(s);
-		}
-	}
-
 	private boolean collectFromRelations(NodeX node) {
 
 		if (visitMonitor.startVisit(node)) {
 
-			PatternMatcher pp = node.getProfilePatternMatcher();
+			PatternMatcher p = node.getProfilePatternMatcher();
 
-			if (pp != null) {
+			if (p != null) {
 
-				Pattern p = pp.getPattern();
-
-				for (Relation r : p.getProfileRelations().ensureExpansions(visitMonitor)) {
+				for (Relation r : getExpandedProfileRelations(p)) {
 
 					checkAdd(r);
 				}
@@ -153,5 +151,10 @@ class ProfileRelationCollector {
 		collectorSet = ensureCollectorSetUpdatable();
 
 		return collectorSet;
+	}
+
+	private Collection<Relation> getExpandedProfileRelations(PatternMatcher p) {
+
+		return p.getPattern().getProfileRelations().ensureExpansions(visitMonitor);
 	}
 }

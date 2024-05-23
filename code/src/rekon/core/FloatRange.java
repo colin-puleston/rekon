@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public class FloatRange extends NumberRange {
+public class FloatRange extends NumberRange<FloatRange> {
 
 	static public final FloatRange UNCONSTRAINED = new FloatRange(null, null);
 
@@ -51,12 +51,22 @@ public class FloatRange extends NumberRange {
 		return this;
 	}
 
-	NumberRange asTypeRange(Value v) {
+	FloatRange asTypeRange(Value v) {
 
 		return v.asFloatRange();
 	}
 
-	boolean notMoreThan(Number test, Number limit) {
+	FloatRange createTypeRange(Number min, Number max) {
+
+		return new FloatRange(min.floatValue(), max.floatValue());
+	}
+
+	boolean moreThanFinite(Number test, Number limit) {
+
+		return test.floatValue() > limit.floatValue();
+	}
+
+	boolean notMoreThanFinite(Number test, Number limit) {
 
 		return test.floatValue() <= limit.floatValue();
 	}

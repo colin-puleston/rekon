@@ -34,9 +34,9 @@ class NodeVisitMonitor {
 	private NameSet visited = new NameSet();
 	private boolean incompleteTraversal = false;
 
-	NodeVisitMonitor(Names initialNodes) {
+	NodeVisitMonitor(NodeX initialNode) {
 
-		visited.addAll(initialNodes);
+		visited.add(initialNode);
 	}
 
 	boolean startVisit(NodeX node) {

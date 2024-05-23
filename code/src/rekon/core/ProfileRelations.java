@@ -38,23 +38,137 @@ class ProfileRelations {
 
 	private enum ExpansionStatus {NONE, CHECK, EXPANDED}
 
-	private class Expander extends ProfileRelationCollector {
+	private class ExpansionChecker {
 
-		Expander(NodeVisitMonitor visitMonitor) {
+		private NodeVisitMonitor visitMonitor;
 
-			super(visitMonitor, profileRelations);
+		private Set<Relation> inputRelations;
+		private Set<Relation> disjunctionDeivedRelations = new HashSet<Relation>();
+
+		private class Expander extends ProfileRelationCollector {
+
+			Expander() {
+
+				super(resolveVisitMonitor(), profileRelations);
+
+				collectDisjunctionDerivedRelations(disjunctionDeivedRelations);
+			}
+
+			Set<Relation> ensureCollectorSetUpdatable() {
+
+				Set<Relation> dirRels = getDirectRelations();
+
+				if (profileRelations == dirRels) {
+
+					profileRelations = new HashSet<Relation>(dirRels);
+				}
+
+				return profileRelations;
+			}
 		}
 
-		Set<Relation> ensureCollectorSetUpdatable() {
+		ExpansionChecker() {
+
+			this(null);
+		}
+
+		ExpansionChecker(NodeVisitMonitor visitMonitor) {
+
+			this.visitMonitor = visitMonitor;
+
+			findDisjunctionDerivedRelations();
+
+			inputRelations = resolveInputRelations();
+		}
+
+		boolean checkExpand() {
+
+			if (inputRelations.isEmpty()) {
+
+				return false;
+			}
+
+			boolean newSubsumers = anyLastPhaseInferredSubsumers();
+			boolean expandableInputRels = anyExpandableInputRelations();
+
+			if (newSubsumers || expandableInputRels || anyDisjunctionDeivedRelations()) {
+
+				Expander e = new Expander();
+
+				if (newSubsumers) {
+
+					e.collectFromSubsumers(getNode());
+				}
+
+				if (expandableInputRels) {
+
+					e.collectFromRelationExpansions(inputRelations);
+				}
+
+				return e.anyAdditions();
+			}
+
+			return false;
+		}
+
+		private void findDisjunctionDerivedRelations() {
+
+			for (DisjunctionMatcher d : getNode().getAllDisjunctionMatchers()) {
+
+				disjunctionDeivedRelations.addAll(deriveDisjunctionRelations(d));
+			}
+		}
+
+		private Collection<Relation> deriveDisjunctionRelations(DisjunctionMatcher d) {
+
+			return new DisjunctionDerivedRelations(d).getAll();
+		}
+
+		private Set<Relation> resolveInputRelations() {
 
 			Set<Relation> dirRels = getDirectRelations();
 
-			if (profileRelations == dirRels) {
+			if (disjunctionDeivedRelations.isEmpty()) {
 
-				profileRelations = new HashSet<Relation>(dirRels);
+				return dirRels;
 			}
 
-			return profileRelations;
+			Set<Relation> inputRels = new HashSet<Relation>();
+
+			inputRels.addAll(dirRels);
+			inputRels.addAll(disjunctionDeivedRelations);
+
+			return inputRels;
+		}
+
+		private NodeVisitMonitor resolveVisitMonitor() {
+
+			return visitMonitor != null ? visitMonitor : new NodeVisitMonitor(getNode());
+		}
+
+		private boolean anyLastPhaseInferredSubsumers() {
+
+			NodeX n = getNode();
+
+			return !n.classified() && n.getNodeClassifier().anyLastPhaseInferredSubsumers();
+		}
+
+		private boolean anyExpandableInputRelations() {
+
+			for (Relation r : inputRelations) {
+
+				if (r.expandableRelation()) {
+
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private boolean anyDisjunctionDeivedRelations() {
+
+			return !disjunctionDeivedRelations.isEmpty();
 		}
 	}
 
@@ -74,9 +188,9 @@ class ProfileRelations {
 
 		if (expansionStatus == ExpansionStatus.CHECK) {
 
-			expansionStatus = checkExpand(null)
-								? ExpansionStatus.EXPANDED
-								: ExpansionStatus.NONE;
+			boolean exp = new ExpansionChecker().checkExpand();
+
+			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.NONE;
 		}
 	}
 
@@ -113,7 +227,7 @@ class ProfileRelations {
 
 			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
 
-			if (checkExpand(visitMonitor)) {
+			if (new ExpansionChecker(visitMonitor).checkExpand()) {
 
 				if (visitMonitor.incompleteTraversal()) {
 
@@ -144,65 +258,9 @@ class ProfileRelations {
 		return false;
 	}
 
-	private boolean checkExpand(NodeVisitMonitor visitMonitor) {
+	private NodeX getNode() {
 
-		boolean newSubsumers = anyLastPhaseInferredSubsumers();
-		boolean expandableRels = anyExpandableRelations();
-
-		if (newSubsumers || expandableRels) {
-
-			if (visitMonitor == null) {
-
-				visitMonitor = new NodeVisitMonitor(getNodes());
-			}
-
-			Expander e = new Expander(visitMonitor);
-
-			if (newSubsumers) {
-
-				e.collectFromSubsumers(getNodes());
-			}
-
-			if (expandableRels) {
-
-				e.collectFromRelationExpansions(getDirectRelations());
-			}
-
-			return e.anyAdditions();
-		}
-
-		return false;
-	}
-
-	private boolean anyLastPhaseInferredSubsumers() {
-
-		for (NodeX n : getNodes().asNodes()) {
-
-			if (!n.classified() && n.getNodeClassifier().anyLastPhaseInferredSubsumers()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private boolean anyExpandableRelations() {
-
-		for (Relation r : getDirectRelations()) {
-
-			if (r.expandableRelation()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private Names getNodes() {
-
-		return pattern.getNodes();
+		return pattern.getSingleNode();
 	}
 
 	private Set<Relation> getDirectRelations() {
@@ -210,4 +268,3 @@ class ProfileRelations {
 		return pattern.getDirectRelations();
 	}
 }
-

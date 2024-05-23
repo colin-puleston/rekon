@@ -62,28 +62,56 @@ public abstract class NodeX extends Name {
 
 	PatternMatcher addProfilePatternMatcher(Pattern profile) {
 
-		return addPatternMatcher(profile, true);
+		int pmCount = patternMatcherCount();
+
+		if (pmCount != 0) {
+
+			throw new Error("Profile pattern-matcher already exists for node: " + this);
+		}
+
+		return addPatternMatcher(profile, pmCount);
+	}
+
+	void removeProfilePatternMatcher() {
+
+		if (patternMatcherCount() == 0) {
+
+			throw new Error("No profile pattern-matcher for node: " + this);
+		}
+
+		matchers.remove(0);
 	}
 
 	PatternMatcher addDefinitionPatternMatcher(Pattern defn) {
 
 		defn.registerDefinitionRefedNames();
 
-		return addPatternMatcher(defn, false);
+		int pmCount = patternMatcherCount();
+
+		if (pmCount == 0) {
+
+			throw new Error("No profile pattern-matcher for node: " + this);
+		}
+
+		return addPatternMatcher(defn, pmCount);
 	}
 
 	DisjunctionMatcher addDisjunctionMatcher(Collection<? extends NodeX> disjuncts) {
 
-		return addMatcher(new DisjunctionMatcher(this, disjuncts));
+		int pmCount = patternMatcherCount();
+
+		return addMatcher(new DisjunctionMatcher(this, disjuncts), pmCount);
 	}
 
 	boolean ensurePatternProfiledImpliesPatternDefined() {
 
-		PatternMatcher prof = getProfilePatternMatcher();
+		int pmCount = patternMatcherCount();
 
-		if (prof != null && getDefinitionPatternMatchers().isEmpty()) {
+		if (pmCount == 1) {
 
-			matchers.add(prof);
+			PatternMatcher prof = getProfilePatternMatcher();
+
+			addMatcher(prof, 1);
 
 			prof.getPattern().registerDefinitionRefedNames();
 
@@ -105,35 +133,40 @@ public abstract class NodeX extends Name {
 
 	List<PatternMatcher> getAllPatternMatchers() {
 
-		return selectMatchers(PatternMatcher.class);
+		int pmCount = patternMatcherCount();
+
+		return pmCount != 0 ? getPatternMatchers(0, pmCount) : Collections.emptyList();
 	}
 
 	PatternMatcher getProfilePatternMatcher() {
 
-		List<PatternMatcher> ps = getAllPatternMatchers();
+		int pmCount = patternMatcherCount();
 
-		return ps.isEmpty() ? null : ps.get(0);
+		return pmCount == 0 ? null : (PatternMatcher)matchers.get(0);
 	}
 
 	List<PatternMatcher> getProfilePatternMatcherAsList() {
 
-		List<PatternMatcher> ps = getAllPatternMatchers();
+		PatternMatcher pm = getProfilePatternMatcher();
 
-		return ps.isEmpty()
-				? Collections.emptyList()
-				: Collections.singletonList(ps.get(0));
+		return pm != null ? Collections.singletonList(pm) : Collections.emptyList();
 	}
 
 	List<PatternMatcher> getDefinitionPatternMatchers() {
 
-		List<PatternMatcher> ps = getAllPatternMatchers();
+		int pmCount = patternMatcherCount();
 
-		return ps.size() > 1 ? ps.subList(1, ps.size()) : Collections.emptyList();
+		return pmCount > 1 ? getPatternMatchers(1, pmCount) : Collections.emptyList();
 	}
 
 	List<DisjunctionMatcher> getAllDisjunctionMatchers() {
 
-		return selectMatchers(DisjunctionMatcher.class);
+		int mCount = matchers.size();
+		int pmCount = patternMatcherCount();
+
+		return pmCount != mCount
+				? getDisjunctionMatchers(pmCount, mCount)
+				: Collections.emptyList();
 	}
 
 	List<DisjunctionMatcher> getDefinitionDisjunctionMatchers() {
@@ -227,17 +260,12 @@ public abstract class NodeX extends Name {
 		return new NodeClassifier(this);
 	}
 
-	private PatternMatcher addPatternMatcher(Pattern pattern, boolean isProfile) {
+	private PatternMatcher addPatternMatcher(Pattern pattern, int index) {
 
-		if (isProfile != selectMatchers(PatternMatcher.class).isEmpty()) {
-
-			throw new Error("Pattern-matcher order-error for node: " + this);
-		}
-
-		return addMatcher(new PatternMatcher(this, pattern));
+		return addMatcher(new PatternMatcher(this, pattern), index);
 	}
 
-	private <M extends NodeMatcher>M addMatcher(M matcher) {
+	private <M extends NodeMatcher>M addMatcher(M matcher, int index) {
 
 		if (matchers == NO_MATCHERS) {
 
@@ -246,21 +274,45 @@ public abstract class NodeX extends Name {
 			getNodeClassifier().setClassifiableNode();
 		}
 
-		matchers.add(matcher);
+		matchers.add(index, matcher);
 
 		return matcher;
 	}
 
-	private <T extends NodeMatcher>List<T> selectMatchers(Class<T> type) {
+	private int patternMatcherCount() {
 
-		List<T> selecteds = new ArrayList<T>();
+		int i = 0;
 
 		for (NodeMatcher m : matchers) {
 
-			if (type.isAssignableFrom(m.getClass())) {
+			if (m instanceof DisjunctionMatcher) {
 
-				selecteds.add(type.cast(m));
+				break;
 			}
+
+			i++;
+		}
+
+		return i;
+	}
+
+	private List<PatternMatcher> getPatternMatchers(int start, int end) {
+
+		return getMatchers(PatternMatcher.class, start, end);
+	}
+
+	private List<DisjunctionMatcher> getDisjunctionMatchers(int start, int end) {
+
+		return getMatchers(DisjunctionMatcher.class, start, end);
+	}
+
+	private <T extends NodeMatcher>List<T> getMatchers(Class<T> type, int start, int end) {
+
+		List<T> selecteds = new ArrayList<T>();
+
+		for (int i = start ; i < end ; i++) {
+
+			selecteds.add(type.cast(matchers.get(i)));
 		}
 
 		return selecteds;
@@ -293,11 +345,11 @@ public abstract class NodeX extends Name {
 				return true;
 			}
 
-			for (NodeMatcher op : currentTarget.getAllProfileMatchers()) {
+			for (NodeMatcher p : currentTarget.getAllProfileMatchers()) {
 
-				if (currentTarget == baseTarget || !op.hasExpandedDisjunct(baseTarget)) {
+				if (currentTarget == baseTarget || !p.hasExpandedDisjunct(baseTarget)) {
 
-					if (d.subsumes(op)) {
+					if (d.subsumes(p)) {
 
 						return true;
 					}

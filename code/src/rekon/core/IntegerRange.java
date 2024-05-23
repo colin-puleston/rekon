@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public class IntegerRange extends NumberRange {
+public class IntegerRange extends NumberRange<IntegerRange> {
 
 	static public final IntegerRange UNCONSTRAINED = new IntegerRange(null, null);
 
@@ -51,12 +51,22 @@ public class IntegerRange extends NumberRange {
 		return this;
 	}
 
-	NumberRange asTypeRange(Value v) {
+	IntegerRange asTypeRange(Value v) {
 
 		return v.asIntegerRange();
 	}
 
-	boolean notMoreThan(Number test, Number limit) {
+	IntegerRange createTypeRange(Number min, Number max) {
+
+		return new IntegerRange(min.intValue(), max.intValue());
+	}
+
+	boolean moreThanFinite(Number test, Number limit) {
+
+		return test.intValue() > limit.intValue();
+	}
+
+	boolean notMoreThanFinite(Number test, Number limit) {
 
 		return test.intValue() <= limit.intValue();
 	}

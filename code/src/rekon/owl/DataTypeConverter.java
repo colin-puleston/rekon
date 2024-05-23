@@ -104,21 +104,21 @@ class DataTypeConverter {
 
 	private abstract class NumberRangeHandler<N extends Number> extends TypeHandler {
 
-		private Map<OWLDatatypeRestriction, NumberRange> cache
-					= new HashMap<OWLDatatypeRestriction, NumberRange>();
+		private Map<OWLDatatypeRestriction, NumberRange<?>> cache
+					= new HashMap<OWLDatatypeRestriction, NumberRange<?>>();
 
 		DataValue get(OWLDatatypeRestriction source) {
 
 			return dynamic ? create(source) : getViaCache(source);
 		}
 
-		abstract NumberRange create(N min, N max);
+		abstract NumberRange<?> create(N min, N max);
 
 		abstract N parseValue(String value);
 
 		private DataValue getViaCache(OWLDatatypeRestriction source) {
 
-			NumberRange r = cache.get(source);
+			NumberRange<?> r = cache.get(source);
 
 			if (r == null) {
 
@@ -130,7 +130,7 @@ class DataTypeConverter {
 			return r;
 		}
 
-		private NumberRange create(OWLDatatypeRestriction source) {
+		private NumberRange<?> create(OWLDatatypeRestriction source) {
 
 			N min = getLimit(source, OWLFacet.MIN_INCLUSIVE);
 			N max = getLimit(source, OWLFacet.MAX_INCLUSIVE);
@@ -159,12 +159,12 @@ class DataTypeConverter {
 			return Arrays.asList(OWL2Datatype.XSD_INTEGER, OWL2Datatype.XSD_INT);
 		}
 
-		NumberRange getUnconstrained() {
+		NumberRange<?> getUnconstrained() {
 
 			return IntegerRange.UNCONSTRAINED;
 		}
 
-		NumberRange create(Integer min, Integer max) {
+		NumberRange<?> create(Integer min, Integer max) {
 
 			return new IntegerRange(min, max);
 		}
@@ -182,12 +182,12 @@ class DataTypeConverter {
 			return Arrays.asList(OWL2Datatype.XSD_FLOAT);
 		}
 
-		NumberRange getUnconstrained() {
+		NumberRange<?> getUnconstrained() {
 
 			return FloatRange.UNCONSTRAINED;
 		}
 
-		NumberRange create(Float min, Float max) {
+		NumberRange<?> create(Float min, Float max) {
 
 			return new FloatRange(min, max);
 		}
@@ -205,12 +205,12 @@ class DataTypeConverter {
 			return Arrays.asList(OWL2Datatype.XSD_DOUBLE);
 		}
 
-		NumberRange getUnconstrained() {
+		NumberRange<?> getUnconstrained() {
 
 			return DoubleRange.UNCONSTRAINED;
 		}
 
-		NumberRange create(Double min, Double max) {
+		NumberRange<?> create(Double min, Double max) {
 
 			return new DoubleRange(min, max);
 		}

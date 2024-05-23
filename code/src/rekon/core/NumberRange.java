@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class NumberRange extends DataValue {
+public abstract class NumberRange<R extends NumberRange<?>> extends DataValue {
 
 	private Number min;
 	private Number max;
@@ -48,9 +48,21 @@ public abstract class NumberRange extends DataValue {
 		throw new RuntimeException("Does not represent exact value: " + this);
 	}
 
+	R unionWith(R r) {
+
+		NumberRange<?> n = r;
+
+		if (moreThan(min, n.max) || moreThan(n.min, max)) {
+
+			return null;
+		}
+
+		return createTypeRange(smallerOf(min, n.min), largerOf(max, n.max));
+	}
+
 	boolean subsumesOther(Value v) {
 
-		NumberRange r = asTypeRange(v);
+		R r = asTypeRange(v);
 
 		return r != null && subsumesRange(r);
 	}
@@ -60,43 +72,72 @@ public abstract class NumberRange extends DataValue {
 		r.addLine("[" + renderLimit(min) + ", " + renderLimit(max) + "]");
 	}
 
-	abstract NumberRange asTypeRange(Value v);
+	abstract R asTypeRange(Value v);
 
-	abstract boolean notMoreThan(Number test, Number limit);
+	abstract R createTypeRange(Number min, Number max);
 
-	private boolean subsumesRange(NumberRange n) {
+	abstract boolean moreThanFinite(Number test, Number limit);
 
-		return subsumesMin(n) && subsumesMax(n);
+	abstract boolean notMoreThanFinite(Number test, Number limit);
+
+	private boolean subsumesRange(NumberRange<?> n) {
+
+		return notMoreThan(min, n.min) && notLessThan(max, n.max);
 	}
 
-	private boolean subsumesMin(NumberRange n) {
+	private Number smallerOf(Number n1, Number n2) {
 
-		if (min == null) {
+		return notMoreThan(n1, n2) ? n1 : n2;
+	}
 
-			return true;
-		}
+	private Number largerOf(Number n1, Number n2) {
 
-		if (n.min == null) {
+		return notLessThan(n1, n2) ? n1 : n2;
+	}
+
+	private boolean moreThan(Number test, Number limit) {
+
+		if (limit == null) {
 
 			return false;
 		}
 
-		return notMoreThan(min, n.min);
-	}
-
-	private boolean subsumesMax(NumberRange n) {
-
-		if (max == null) {
+		if (test == null) {
 
 			return true;
 		}
 
-		if (n.max == null) {
+		return moreThanFinite(test, limit);
+	}
+
+	private boolean notMoreThan(Number test, Number limit) {
+
+		if (test == null) {
+
+			return true;
+		}
+
+		if (limit == null) {
 
 			return false;
 		}
 
-		return notMoreThan(n.max, max);
+		return notMoreThanFinite(test, limit);
+	}
+
+	private boolean notLessThan(Number test, Number limit) {
+
+		if (test == null) {
+
+			return true;
+		}
+
+		if (limit == null) {
+
+			return false;
+		}
+
+		return notMoreThanFinite(limit, test);
 	}
 
 	private String renderLimit(Number limit) {

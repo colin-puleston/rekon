@@ -31,27 +31,6 @@ import java.util.*;
  */
 class PatternMatcher extends NodeMatcher {
 
-	static void setAllProfileExpansions(List<PatternMatcher> allProfilePatterns) {
-
-		for (PatternMatcher p : allProfilePatterns) {
-
-			p.pattern.getProfileRelations().initExpansion();
-		}
-
-		for (PatternMatcher p : allProfilePatterns) {
-
-			p.pattern.getProfileRelations().processExpansion();
-		}
-	}
-
-	static void clearAllProfileExpansions(List<PatternMatcher> allProfilePatterns) {
-
-		for (PatternMatcher p : allProfilePatterns) {
-
-			p.pattern.getProfileRelations().clearExpansion();
-		}
-	}
-
 	private Pattern pattern;
 
 	private class SubsumedTester extends NodeMatcherVisitor {
