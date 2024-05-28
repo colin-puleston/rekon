@@ -29,7 +29,9 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DisjunctionDerivedRelations {
+class DisjunctionDerivedRelationsFinder {
+
+	private NodeVisitMonitor visitMonitor;
 
 	private List<Relation> derivedRelations = new ArrayList<Relation>();
 	private List<RelationDeriver<?>> derivers = new ArrayList<RelationDeriver<?>>();
@@ -279,7 +281,9 @@ class DisjunctionDerivedRelations {
 		}
 	}
 
-	DisjunctionDerivedRelations() {
+	DisjunctionDerivedRelationsFinder(NodeVisitMonitor visitMonitor) {
+
+		this.visitMonitor = visitMonitor;
 
 		new SomeRelationDeriver();
 		new AllRelationDeriver();
@@ -371,13 +375,13 @@ class DisjunctionDerivedRelations {
 
 	private Collection<Relation> getProfileRelations(NodeX n) {
 
-		PatternMatcher pm = n.getProfilePatternMatcher();
+		PatternMatcher p = n.getProfilePatternMatcher();
 
-		if (pm != null) {
+		return p != null ? getExpandedProfileRelations(p) : Collections.emptySet();
+	}
 
-			return pm.getPattern().getProfileRelations().getAll();
-		}
+	private Collection<Relation> getExpandedProfileRelations(PatternMatcher p) {
 
-		return Collections.emptySet();
+		return p.getPattern().getProfileRelations().ensureExpansions(visitMonitor);
 	}
 }

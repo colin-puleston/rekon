@@ -49,7 +49,7 @@ class ProfileRelations {
 
 			Expander() {
 
-				super(resolveVisitMonitor(), profileRelations);
+				super(visitMonitor, profileRelations);
 
 				collectDisjunctionDerivedRelations(disjunctionDeivedRelations);
 			}
@@ -69,7 +69,7 @@ class ProfileRelations {
 
 		ExpansionChecker() {
 
-			this(null);
+			this(new NodeVisitMonitor(getNode()));
 		}
 
 		ExpansionChecker(NodeVisitMonitor visitMonitor) {
@@ -107,14 +107,15 @@ class ProfileRelations {
 
 		private Collection<Relation> findDisjunctionDerivedRelations() {
 
-			DisjunctionDerivedRelations ddRels = new DisjunctionDerivedRelations();
+			DisjunctionDerivedRelationsFinder finder
+				= new DisjunctionDerivedRelationsFinder(visitMonitor);
 
 			for (DisjunctionMatcher d : getNode().getAllDisjunctionMatchers()) {
 
-				ddRels.deriveFor(d);
+				finder.deriveFor(d);
 			}
 
-			return ddRels.getAll();
+			return finder.getAll();
 		}
 
 		private Collection<Relation> resolveInputRelations() {
@@ -132,11 +133,6 @@ class ProfileRelations {
 			inputRels.addAll(disjunctionDeivedRelations);
 
 			return inputRels;
-		}
-
-		private NodeVisitMonitor resolveVisitMonitor() {
-
-			return visitMonitor != null ? visitMonitor : new NodeVisitMonitor(getNode());
 		}
 
 		private boolean anyLastPhaseInferredSubsumers() {

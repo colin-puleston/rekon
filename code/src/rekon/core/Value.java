@@ -56,11 +56,6 @@ abstract class Value extends PatternComponent {
 		return null;
 	}
 
-	Collection<Relation> getProfileRelations(NodeVisitMonitor visitMonitor) {
-
-		return Collections.emptySet();
-	}
-
 	boolean subsumes(Value v) {
 
 		return v == this || subsumesOther(v);

@@ -104,22 +104,22 @@ class ProfileRelationCollector {
 
 	private boolean collectFromRelations(NodeX node) {
 
-		if (visitMonitor.startVisit(node)) {
+		PatternMatcher p = node.getProfilePatternMatcher();
 
-			PatternMatcher p = node.getProfilePatternMatcher();
+		if (p != null) {
 
-			if (p != null) {
+			if (!visitMonitor.startVisit(node)) {
 
-				for (Relation r : getExpandedProfileRelations(p)) {
-
-					checkAdd(r);
-				}
+				return false;
 			}
 
-			return true;
+			for (Relation r : getExpandedProfileRelations(p)) {
+
+				checkAdd(r);
+			}
 		}
 
-		return false;
+		return true;
 	}
 
 	private void checkAdd(Relation r) {
