@@ -101,13 +101,13 @@ class OntologyClassifier {
 		private List<DisjunctionMatcher> disjunctionClassifyCandidates
 											= new ArrayList<DisjunctionMatcher>();
 
-		private RelationBasedSubsumptions relationBasedSubsumptions;
+		private RelationEndPointSubsumptions relationEndPointSubsumptions;
 
 		Pass(ClassifyPassType passType) {
 
 			this.passType = passType;
 
-			relationBasedSubsumptions = createRelationBasedSubsumptions();
+			relationEndPointSubsumptions = new RelationEndPointSubsumptions(passType);
 
 			if (!expansionPass()) {
 
@@ -144,7 +144,7 @@ class OntologyClassifier {
 
 			return patternMatchCandidates.size()
 					+ disjunctionClassifyCandidates.size()
-					+ relationBasedSubsumptions.candidateCount();
+					+ relationEndPointSubsumptions.candidateCount();
 		}
 
 		boolean phaseInitialPass() {
@@ -170,11 +170,6 @@ class OntologyClassifier {
 			findDisjunctionClassifyCandidates();
 		}
 
-		private RelationBasedSubsumptions createRelationBasedSubsumptions() {
-
-			return new RelationBasedSubsumptions(passType);
-		}
-
 		private void findPatternClassifyCandidates() {
 
 			for (PatternMatcher m : nodeMatchers.getProfilePatterns()) {
@@ -184,7 +179,7 @@ class OntologyClassifier {
 					patternMatchCandidates.add(m);
 				}
 
-				relationBasedSubsumptions.checkAddInferenceSource(m);
+				relationEndPointSubsumptions.checkAddInferenceSource(m);
 			}
 		}
 
@@ -212,7 +207,7 @@ class OntologyClassifier {
 			new DisjunctionSubsumedsChecker(disjunctionMatchCandidates);
 
 			inferNewCommonDisjunctSubsumers();
-			relationBasedSubsumptions.inferNewSubsumptions();
+			relationEndPointSubsumptions.inferNewSubsumptions();
 		}
 
 		private void inferNewCommonDisjunctSubsumers() {

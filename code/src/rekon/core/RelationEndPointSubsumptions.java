@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class RelationBasedSubsumptions {
+class RelationEndPointSubsumptions {
 
 	private ClassifyPassType passType;
 
@@ -371,7 +371,7 @@ class RelationBasedSubsumptions {
 		}
 	}
 
-	RelationBasedSubsumptions(ClassifyPassType passType) {
+	RelationEndPointSubsumptions(ClassifyPassType passType) {
 
 		this.passType = passType;
 
