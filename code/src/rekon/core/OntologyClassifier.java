@@ -120,8 +120,8 @@ class OntologyClassifier {
 			if (expansionPass()) {
 
 				nodeMatchers.expandProfilePatterns();
+
 				findAllCandidates();
-				nodeMatchers.clearProfilePatternExpansions();
 			}
 
 			return candidateCount() != 0;

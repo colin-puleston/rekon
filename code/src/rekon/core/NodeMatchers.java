@@ -37,7 +37,72 @@ class NodeMatchers {
 	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
 	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
 
-	private List<PatternMatcher> potentialExpansionProfilePatterns = new ArrayList<PatternMatcher>();
+	private class ProfilePatternExpander {
+
+		private List<PatternMatcher> potentialProfiles = new ArrayList<PatternMatcher>();
+
+		ProfilePatternExpander() {
+
+			initCurrentProfiles();
+			initPotentialProfiles();
+
+			processProfiles(profilePatterns);
+			processProfiles(potentialProfiles);
+
+			resolvePotentialProfiles();
+		}
+
+		private void initCurrentProfiles() {
+
+			for (PatternMatcher p : profilePatterns) {
+
+				getProfileRelations(p).initExpansion();
+			}
+		}
+
+		private void initPotentialProfiles() {
+
+			for (DisjunctionMatcher d : allDisjunctions) {
+
+				NodeX n = d.getNode();
+
+				if (n.getProfilePatternMatcher() == null) {
+
+					PatternMatcher p = n.addProfilePatternMatcher();
+
+					potentialProfiles.add(p);
+					getProfileRelations(p).initExpansion();
+				}
+			}
+		}
+
+		private void processProfiles(List<PatternMatcher> patterns) {
+
+			for (PatternMatcher p : patterns) {
+
+				getProfileRelations(p).processExpansion();
+			}
+		}
+
+		private void resolvePotentialProfiles() {
+
+			for (PatternMatcher p : potentialProfiles) {
+
+				ProfileRelations prs = getProfileRelations(p);
+
+				if (prs.anyRelations()) {
+
+					profilePatterns.add(p);
+				}
+				else {
+
+					p.getNode().removeProfilePatternMatcher();
+				}
+			}
+
+			potentialProfiles.clear();
+		}
+	}
 
 	NodeMatchers(Iterable<NodeX> nodes) {
 
@@ -53,17 +118,7 @@ class NodeMatchers {
 
 	void expandProfilePatterns() {
 
-		initPotentialExpansionProfilePatterns();
-		initCurrentProfilePatternExpansions();
-
-		processProfilePatternExpansions(profilePatterns);
-		processProfilePatternExpansions(potentialExpansionProfilePatterns);
-	}
-
-	void clearProfilePatternExpansions() {
-
-		clearCurrentProfilePatternExpansions();
-		clearPotentialExpansionProfilePatterns();
+		new ProfilePatternExpander();
 	}
 
 	List<PatternMatcher> getProfilePatterns() {
@@ -84,66 +139,6 @@ class NodeMatchers {
 	List<DisjunctionMatcher> getDefinitionDisjunctions() {
 
 		return definitionDisjunctions;
-	}
-
-	private void initCurrentProfilePatternExpansions() {
-
-		for (PatternMatcher p : profilePatterns) {
-
-			getProfileRelations(p).initExpansion();
-		}
-	}
-
-	private void initPotentialExpansionProfilePatterns() {
-
-		for (DisjunctionMatcher d : allDisjunctions) {
-
-			NodeX n = d.getNode();
-
-			if (n.getProfilePatternMatcher() == null) {
-
-				PatternMatcher p = n.addProfilePatternMatcher();
-
-				potentialExpansionProfilePatterns.add(p);
-				getProfileRelations(p).initExpansion();
-			}
-		}
-	}
-
-	private void processProfilePatternExpansions(List<PatternMatcher> patterns) {
-
-		for (PatternMatcher p : patterns) {
-
-			getProfileRelations(p).processExpansion();
-		}
-	}
-
-	private void clearCurrentProfilePatternExpansions() {
-
-		for (PatternMatcher p : profilePatterns) {
-
-			getProfileRelations(p).clearExpansion();
-		}
-	}
-
-	private void clearPotentialExpansionProfilePatterns() {
-
-		for (PatternMatcher p : potentialExpansionProfilePatterns) {
-
-			ProfileRelations prs = getProfileRelations(p);
-
-			if (prs.anyRelations()) {
-
-				prs.clearExpansion();
-				profilePatterns.add(p);
-			}
-			else {
-
-				p.getNode().removeProfilePatternMatcher();
-			}
-		}
-
-		potentialExpansionProfilePatterns.clear();
 	}
 
 	private void addDefinitionDisjunctions() {

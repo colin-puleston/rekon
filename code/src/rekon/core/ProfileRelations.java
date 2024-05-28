@@ -34,9 +34,9 @@ class ProfileRelations {
 	private Pattern pattern;
 	private Set<Relation> profileRelations;
 
-	private ExpansionStatus expansionStatus = ExpansionStatus.NONE;
+	private ExpansionStatus expansionStatus = ExpansionStatus.UNEXPANDED;
 
-	private enum ExpansionStatus {NONE, CHECK, EXPANDED}
+	private enum ExpansionStatus {UNEXPANDED, EXPANDED, CHECK}
 
 	private class ExpansionChecker {
 
@@ -190,20 +190,14 @@ class ProfileRelations {
 
 			boolean exp = new ExpansionChecker().checkExpand();
 
-			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.NONE;
+			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
 		}
-	}
-
-	void clearExpansion() {
-
-		expansionStatus = ExpansionStatus.NONE;
 	}
 
 	void checkExpandLocal() {
 
 		initExpansion();
 		processExpansion();
-		clearExpansion();
 	}
 
 	boolean anyRelations() {
