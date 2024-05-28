@@ -27,12 +27,12 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class SubsumptionChecker {
+abstract class NodeMatcherClassifier {
 
-	private GeneralChecker generalChecker = new GeneralChecker();
-	private PatternsChecker patternsChecker = new PatternsChecker();
+	private GeneralSubsumptionChecker generalSubsumptions = new GeneralSubsumptionChecker();
+	private PatternSubsumptionChecker patternSubsumptions = new PatternSubsumptionChecker();
 
-	private abstract class NodeMatcherChecker<D extends NodeMatcher, C extends NodeMatcher> {
+	private abstract class SubsumptionChecker<D extends NodeMatcher, C extends NodeMatcher> {
 
 		boolean check(D defn, C candidate) {
 
@@ -57,9 +57,9 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class GeneralChecker
+	private class GeneralSubsumptionChecker
 					extends
-						NodeMatcherChecker<NodeMatcher, NodeMatcher> {
+						SubsumptionChecker<NodeMatcher, NodeMatcher> {
 
 		boolean subsumption(NodeMatcher defn, NodeMatcher candidate) {
 
@@ -67,9 +67,9 @@ class SubsumptionChecker {
 		}
 	}
 
-	private class PatternsChecker
+	private class PatternSubsumptionChecker
 					extends
-						NodeMatcherChecker<PatternMatcher, PatternMatcher> {
+						SubsumptionChecker<PatternMatcher, PatternMatcher> {
 
 		boolean subsumption(PatternMatcher defn, PatternMatcher candidate) {
 
@@ -77,14 +77,14 @@ class SubsumptionChecker {
 		}
 	}
 
-	boolean check(NodeMatcher defn, NodeMatcher candidate) {
+	boolean checkMatcherSubsumption(NodeMatcher defn, NodeMatcher candidate) {
 
-		return generalChecker.check(defn, candidate);
+		return generalSubsumptions.check(defn, candidate);
 	}
 
-	boolean check(PatternMatcher defn, PatternMatcher candidate) {
+	boolean checkMatcherSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-		return patternsChecker.check(defn, candidate);
+		return patternSubsumptions.check(defn, candidate);
 	}
 
 	boolean patternSubsumption(Pattern defn, Pattern candidate) {

@@ -29,13 +29,12 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class LocalClassifier {
+class LocalClassifier extends NodeMatcherClassifier {
 
 	private PotentialLocalPatternSubsumers defnPatternsFilter;
 	private PotentialDisjunctionSubsumers defnDisjunctionsFilter;
 
 	private DefaultClassifier defaultClassifier = new DefaultClassifier();
-	private SubsumptionChecker subsumptionChecker = new SubsumptionChecker();
 
 	private abstract class ClassifierOption {
 
@@ -48,12 +47,12 @@ class LocalClassifier {
 
 		void checkSubsumption(NodeMatcher defn, NodeMatcher candidate) {
 
-			subsumptionChecker.check(defn, candidate);
+			checkMatcherSubsumption(defn, candidate);
 		}
 
 		void checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-			subsumptionChecker.check(defn, candidate);
+			checkMatcherSubsumption(defn, candidate);
 		}
 
 		private void classifyProfiles(LocalExpression expr) {

@@ -31,23 +31,14 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-class OntologyClassifier {
+class OntologyClassifier extends NodeMatcherClassifier {
 
 	private Iterable<Name> allNames;
 	private Iterable<NodeX> allNodes;
 
 	private NodeMatchers nodeMatchers;
 
-	private SubsumptionChecker subsumptionChecker = new PostFilteringSubsumptionChecker();
 	private OntologyClassifyListener classifyListener;
-
-	private class PostFilteringSubsumptionChecker extends SubsumptionChecker {
-
-		boolean patternSubsumption(Pattern defn, Pattern candidate) {
-
-			return defn.subsumesRelations(candidate);
-		}
-	}
 
 	private class PatternSubsumedsChecker extends MultiThreadListProcessor<PatternMatcher> {
 
@@ -57,7 +48,7 @@ class OntologyClassifier {
 
 			for (PatternMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
-				subsumptionChecker.check(defn, c);
+				checkMatcherSubsumption(defn, c);
 			}
 		}
 
@@ -77,7 +68,7 @@ class OntologyClassifier {
 
 			for (DisjunctionMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
-				subsumptionChecker.check(defn, c);
+				checkMatcherSubsumption(defn, c);
 			}
 		}
 
@@ -283,6 +274,11 @@ class OntologyClassifier {
 		this.classifyListener = classifyListener;
 
 		classify();
+	}
+
+	boolean patternSubsumption(Pattern defn, Pattern candidate) {
+
+		return defn.subsumesRelations(candidate);
 	}
 
 	private void classify() {
