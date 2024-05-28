@@ -279,7 +279,7 @@ class DisjunctionDerivedRelations {
 		}
 	}
 
-	DisjunctionDerivedRelations(DisjunctionMatcher disjunction) {
+	DisjunctionDerivedRelations() {
 
 		new SomeRelationDeriver();
 		new AllRelationDeriver();
@@ -287,6 +287,9 @@ class DisjunctionDerivedRelations {
 		new FloatRelationDeriver();
 		new DoubleRelationDeriver();
 		new BooleanRelationDeriver();
+	}
+
+	void deriveFor(DisjunctionMatcher disjunction) {
 
 		if (processDisjuncts(disjunction)) {
 

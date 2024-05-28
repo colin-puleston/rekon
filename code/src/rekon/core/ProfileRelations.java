@@ -42,8 +42,8 @@ class ProfileRelations {
 
 		private NodeVisitMonitor visitMonitor;
 
-		private Set<Relation> inputRelations;
-		private Set<Relation> disjunctionDeivedRelations = new HashSet<Relation>();
+		private Collection<Relation> inputRelations;
+		private Collection<Relation> disjunctionDeivedRelations;
 
 		private class Expander extends ProfileRelationCollector {
 
@@ -76,17 +76,11 @@ class ProfileRelations {
 
 			this.visitMonitor = visitMonitor;
 
-			findDisjunctionDerivedRelations();
-
+			disjunctionDeivedRelations = findDisjunctionDerivedRelations();
 			inputRelations = resolveInputRelations();
 		}
 
 		boolean checkExpand() {
-
-			if (inputRelations.isEmpty()) {
-
-				return false;
-			}
 
 			boolean newSubsumers = anyLastPhaseInferredSubsumers();
 			boolean expandableInputRels = anyExpandableInputRelations();
@@ -111,20 +105,19 @@ class ProfileRelations {
 			return false;
 		}
 
-		private void findDisjunctionDerivedRelations() {
+		private Collection<Relation> findDisjunctionDerivedRelations() {
+
+			DisjunctionDerivedRelations ddRels = new DisjunctionDerivedRelations();
 
 			for (DisjunctionMatcher d : getNode().getAllDisjunctionMatchers()) {
 
-				disjunctionDeivedRelations.addAll(deriveDisjunctionRelations(d));
+				ddRels.deriveFor(d);
 			}
+
+			return ddRels.getAll();
 		}
 
-		private Collection<Relation> deriveDisjunctionRelations(DisjunctionMatcher d) {
-
-			return new DisjunctionDerivedRelations(d).getAll();
-		}
-
-		private Set<Relation> resolveInputRelations() {
+		private Collection<Relation> resolveInputRelations() {
 
 			Set<Relation> dirRels = getDirectRelations();
 

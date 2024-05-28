@@ -68,7 +68,7 @@ class ProfileRelationCollector {
 		}
 	}
 
-	void collectFromRelationExpansions(Set<Relation> relations) {
+	void collectFromRelationExpansions(Collection<Relation> relations) {
 
 		for (Relation r : relations) {
 
@@ -79,7 +79,7 @@ class ProfileRelationCollector {
 		}
 	}
 
-	void collectDisjunctionDerivedRelations(Set<Relation> relations) {
+	void collectDisjunctionDerivedRelations(Collection<Relation> relations) {
 
 		for (Relation r : relations) {
 
