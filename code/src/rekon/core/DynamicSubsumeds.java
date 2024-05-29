@@ -143,10 +143,10 @@ class DynamicSubsumeds {
 		}
 	}
 
-	DynamicSubsumeds(NodeMatchers nodeMatchers) {
+	DynamicSubsumeds(Ontology ontology) {
 
-		patternPotentials = createPatternPotentials(nodeMatchers);
-		disjunctionPotentials = createDisjunctionPotentials(nodeMatchers);
+		patternPotentials = createPatternPotentials(ontology);
+		disjunctionPotentials = createDisjunctionPotentials(ontology);
 	}
 
 	void checkAddInstanceOption(InstanceNode node) {
@@ -174,18 +174,18 @@ class DynamicSubsumeds {
 		return new AllNodeSubsumptions(expr).subsumeds;
 	}
 
-	private PotentialLocalPatternSubsumeds createPatternPotentials(NodeMatchers nodeMatchers) {
+	private PotentialLocalPatternSubsumeds createPatternPotentials(Ontology ontology) {
 
 		return new PotentialLocalPatternSubsumeds(
 						filterMatchersForMappedNodes(
-							nodeMatchers.getProfilePatterns()));
+							ontology.getProfilePatterns()));
 	}
 
-	private PotentialDisjunctionSubsumeds createDisjunctionPotentials(NodeMatchers nodeMatchers) {
+	private PotentialDisjunctionSubsumeds createDisjunctionPotentials(Ontology ontology) {
 
 		return new PotentialDisjunctionSubsumeds(
 						filterMatchersForMappedNodes(
-							nodeMatchers.getAllDisjunctions()));
+							ontology.getAllDisjunctions()));
 	}
 
 	private <M extends NodeMatcher>List<M> filterMatchersForMappedNodes(List<M> all) {

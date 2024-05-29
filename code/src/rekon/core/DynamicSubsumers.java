@@ -84,9 +84,9 @@ class DynamicSubsumers {
 
 	private LocalClassifier localClassifier;
 
-	DynamicSubsumers(NodeMatchers nodeMatchers) {
+	DynamicSubsumers(Ontology ontology) {
 
-		localClassifier = new LocalClassifier(nodeMatchers);
+		localClassifier = new LocalClassifier(ontology);
 	}
 
 	NameSet inferSubsumers(LocalExpression expr) {

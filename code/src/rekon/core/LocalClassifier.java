@@ -218,10 +218,10 @@ class LocalClassifier extends NodeMatcherClassifier {
 		}
 	}
 
-	LocalClassifier(NodeMatchers nodeMatchers) {
+	LocalClassifier(Ontology ontology) {
 
-		defnPatternsFilter = createDefnPatternsFilter(nodeMatchers);
-		defnDisjunctionsFilter = createDefnDisjunctionsFilter(nodeMatchers);
+		defnPatternsFilter = createDefnPatternsFilter(ontology);
+		defnDisjunctionsFilter = createDefnDisjunctionsFilter(ontology);
 	}
 
 	NameSet classify(LocalExpression expr) {
@@ -234,13 +234,13 @@ class LocalClassifier extends NodeMatcherClassifier {
 		return new PreFilteredDefnsClassifier(preFilteredDefns).classify(expr);
 	}
 
-	private PotentialLocalPatternSubsumers createDefnPatternsFilter(NodeMatchers nodeMatchers) {
+	private PotentialLocalPatternSubsumers createDefnPatternsFilter(Ontology ontology) {
 
-		return new PotentialLocalPatternSubsumers(nodeMatchers.getDefinitionPatterns());
+		return new PotentialLocalPatternSubsumers(ontology.getDefinitionPatterns());
 	}
 
-	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(NodeMatchers nodeMatchers) {
+	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(Ontology ontology) {
 
-		return new PotentialDisjunctionSubsumers(nodeMatchers.getDefinitionDisjunctions());
+		return new PotentialDisjunctionSubsumers(ontology.getDefinitionDisjunctions());
 	}
 }

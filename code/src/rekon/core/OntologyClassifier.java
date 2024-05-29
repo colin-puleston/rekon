@@ -33,11 +33,7 @@ import rekon.util.*;
  */
 class OntologyClassifier extends NodeMatcherClassifier {
 
-	private Iterable<Name> allNames;
-	private Iterable<NodeX> allNodes;
-
-	private NodeMatchers nodeMatchers;
-
+	private Ontology ontology;
 	private OntologyClassifyListener classifyListener;
 
 	private class PatternSubsumedsChecker extends MultiThreadListProcessor<PatternMatcher> {
@@ -56,7 +52,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			candidatesFilter = new PotentialCorePatternSubsumeds(candidates);
 
-			invokeListProcesses(nodeMatchers.getDefinitionPatterns());
+			invokeListProcesses(ontology.getDefinitionPatterns());
 		}
 	}
 
@@ -76,7 +72,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			candidatesFilter = new PotentialDisjunctionSubsumeds(candidates);
 
-			invokeListProcesses(nodeMatchers.getDefinitionDisjunctions());
+			invokeListProcesses(ontology.getDefinitionDisjunctions());
 		}
 	}
 
@@ -110,7 +106,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			if (expansionPass()) {
 
-				nodeMatchers.expandProfilePatterns();
+				new ProfilePatternExpander(ontology);
 
 				findAllCandidates();
 			}
@@ -122,11 +118,13 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			checkSubsumptions();
 
-			NodeClassifier.expandAllNewInferredSubsumers(allNodes);
+			Iterable<NodeX> allNodes = ontology.getAllNodes();
+
+			NodeClassifier.expandAllNewInferredSubsumers(getAllNodes());
 
 			Pass next = new Pass(ClassifyPassType.DEFAULT);
 
-			NodeClassifier.absorbAllNewInferredSubsumers(allNodes);
+			NodeClassifier.absorbAllNewInferredSubsumers(getAllNodes());
 
 			return next;
 		}
@@ -163,7 +161,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 		private void findPatternClassifyCandidates() {
 
-			for (PatternMatcher m : nodeMatchers.getProfilePatterns()) {
+			for (PatternMatcher m : ontology.getProfilePatterns()) {
 
 				if (patternMatchCandidate(m.getPattern())) {
 
@@ -178,7 +176,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			boolean initPass = phaseInitialPass();
 
-			for (DisjunctionMatcher d : nodeMatchers.getAllDisjunctions()) {
+			for (DisjunctionMatcher d : ontology.getAllDisjunctions()) {
 
 				if (d.unprocessedSubsumers(initPass)) {
 
@@ -246,7 +244,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 				return false;
 			}
 
-			return NodeClassifier.resetAllPhaseInferredSubsumers(allNodes);
+			return NodeClassifier.resetAllPhaseInferredSubsumers(getAllNodes());
 		}
 
 		Phase createNextPhase() {
@@ -262,15 +260,9 @@ class OntologyClassifier extends NodeMatcherClassifier {
 		}
 	}
 
-	OntologyClassifier(
-		Iterable<Name> allNames,
-		Iterable<NodeX> allNodes,
-		NodeMatchers nodeMatchers,
-		OntologyClassifyListener classifyListener) {
+	OntologyClassifier(Ontology ontology, OntologyClassifyListener classifyListener) {
 
-		this.allNames = allNames;
-		this.allNodes = allNodes;
-		this.nodeMatchers = nodeMatchers;
+		this.ontology = ontology;
 		this.classifyListener = classifyListener;
 
 		classify();
@@ -297,6 +289,16 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 		classifyListener.onCompletionStart();
 
-		NameClassification.completeAllClassifications(allNames);
+		NameClassification.completeAllClassifications(getAllNames());
+	}
+
+	private Iterable<Name> getAllNames() {
+
+		return ontology.getAllNames();
+	}
+
+	private Iterable<NodeX> getAllNodes() {
+
+		return ontology.getAllNodes();
 	}
 }

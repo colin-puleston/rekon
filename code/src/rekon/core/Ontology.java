@@ -36,6 +36,12 @@ public class Ontology {
 	private MultiIterable<Name> allNames = new MultiIterable<Name>();
 	private MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
 
+	private List<PatternMatcher> profilePatterns = new ArrayList<PatternMatcher>();
+	private List<PatternMatcher> definitionPatterns = new ArrayList<PatternMatcher>();
+
+	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
+	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
+
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
@@ -54,16 +60,16 @@ public class Ontology {
 		allNames.addComponent(names.getDataProperties());
 
 		expandAllNameSubsumers();
+
+		addAllNodeMatchers();
 	}
 
 	public void classify(OntologyClassifyListener classifyListener) {
 
-		NodeMatchers nodeMatchers = new NodeMatchers(allNodes);
+		new OntologyClassifier(this, classifyListener);
 
-		new OntologyClassifier(allNames, allNodes, nodeMatchers, classifyListener);
-
-		dynamicSubsumers = new DynamicSubsumers(nodeMatchers);
-		dynamicSubsumeds = new DynamicSubsumeds(nodeMatchers);
+		dynamicSubsumers = new DynamicSubsumers(this);
+		dynamicSubsumeds = new DynamicSubsumeds(this);
 	}
 
 	public Queryables createQueryables() {
@@ -81,6 +87,41 @@ public class Ontology {
 		freeClassNodes.add(cn);
 	}
 
+	void addDerivedProfilePattern(PatternMatcher p) {
+
+		profilePatterns.add(p);
+	}
+
+	Iterable<Name> getAllNames() {
+
+		return allNames;
+	}
+
+	Iterable<NodeX> getAllNodes() {
+
+		return allNodes;
+	}
+
+	List<PatternMatcher> getProfilePatterns() {
+
+		return profilePatterns;
+	}
+
+	List<PatternMatcher> getDefinitionPatterns() {
+
+		return definitionPatterns;
+	}
+
+	List<DisjunctionMatcher> getAllDisjunctions() {
+
+		return allDisjunctions;
+	}
+
+	List<DisjunctionMatcher> getDefinitionDisjunctions() {
+
+		return definitionDisjunctions;
+	}
+
 	DynamicSubsumers getDynamicSubsumers() {
 
 		return dynamicSubsumers;
@@ -96,6 +137,29 @@ public class Ontology {
 		for (Name n : allNames) {
 
 			n.getClassifier().expandSubsumers();
+		}
+	}
+
+	private void addAllNodeMatchers() {
+
+		for (NodeX n : allNodes) {
+
+			profilePatterns.addAll(n.getProfilePatternMatcherAsList());
+			definitionPatterns.addAll(n.getDefinitionPatternMatchers());
+			allDisjunctions.addAll(n.getAllDisjunctionMatchers());
+		}
+
+		addDefinitionDisjunctions();
+	}
+
+	private void addDefinitionDisjunctions() {
+
+		for (DisjunctionMatcher d : allDisjunctions) {
+
+			if (d.definition()) {
+
+				definitionDisjunctions.add(d);
+			}
 		}
 	}
 
