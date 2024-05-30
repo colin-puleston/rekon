@@ -31,86 +31,6 @@ import java.util.*;
  */
 class ProfileRelationsExpander {
 
-	static private class AllExpander {
-
-		private Ontology ontology;
-		private List<PatternMatcher> potentialProfiles = new ArrayList<PatternMatcher>();
-
-		AllExpander(Ontology ontology) {
-
-			this.ontology = ontology;
-
-			initCurrentProfiles();
-			initPotentialProfiles();
-
-			processProfiles(ontology.getProfilePatterns());
-			processProfiles(potentialProfiles);
-
-			resolvePotentialProfiles();
-		}
-
-		private void initCurrentProfiles() {
-
-			for (PatternMatcher p : ontology.getProfilePatterns()) {
-
-				getProfileRelations(p).initExpansion();
-			}
-		}
-
-		private void initPotentialProfiles() {
-
-			for (DisjunctionMatcher d : ontology.getAllDisjunctions()) {
-
-				NodeX n = d.getNode();
-
-				if (n.getProfilePatternMatcher() == null) {
-
-					PatternMatcher p = n.addProfilePatternMatcher();
-
-					potentialProfiles.add(p);
-					getProfileRelations(p).initExpansion();
-				}
-			}
-		}
-
-		private void processProfiles(List<PatternMatcher> patterns) {
-
-			for (PatternMatcher p : patterns) {
-
-				getProfileRelations(p).processExpansion(ontology);
-			}
-		}
-
-		private void resolvePotentialProfiles() {
-
-			for (PatternMatcher p : potentialProfiles) {
-
-				ProfileRelations prs = getProfileRelations(p);
-
-				if (prs.anyRelations()) {
-
-					ontology.addDerivedProfilePattern(p);
-				}
-				else {
-
-					p.getNode().removeProfilePatternMatcher();
-				}
-			}
-
-			potentialProfiles.clear();
-		}
-
-		private ProfileRelations getProfileRelations(PatternMatcher p) {
-
-			return p.getPattern().getProfileRelations();
-		}
-	}
-
-	static void expandAll(Ontology ontology) {
-
-		new AllExpander(ontology);
-	}
-
 	private Ontology ontology;
 
 	private NameSet visited = new NameSet();
@@ -136,6 +56,28 @@ class ProfileRelationsExpander {
 		private Collection<Relation> ensureExpansions(ProfileRelations profRels) {
 
 			return profRels.ensureExpansions(ProfileRelationsExpander.this);
+		}
+	}
+
+	private class ChainBasedExpander extends ChainBasedProfileRelationsExpander {
+
+		ChainBasedExpander(SomeRelation relation) {
+
+			super(relation);
+		}
+
+		Set<Relation> getAllRelationsFromNode(NodeX node) {
+
+			ProfileRelationCollector c = createCollector();
+
+			c.collectFromName(node);
+
+			return c.getCollectorSet();
+		}
+
+		private ProfileRelationCollector createCollector() {
+
+			return new ProfileRelationCollector(ProfileRelationsExpander.this);
 		}
 	}
 
@@ -254,21 +196,46 @@ class ProfileRelationsExpander {
 		}
 	}
 
-	ProfileRelationsExpander(NodeX initialNode) {
+	boolean incompleteTraversal() {
 
-		this(null, initialNode);
+		return incompleteTraversal;
 	}
 
-	ProfileRelationsExpander(Ontology ontology, NodeX initialNode) {
+	ProfileRelationsExpander() {
+
+		this(null);
+	}
+
+	ProfileRelationsExpander(Ontology ontology) {
 
 		this.ontology = ontology;
+	}
 
-		visited.add(initialNode);
+	void processExpansion(ProfileRelations profileRelations) {
+
+		visited.add(profileRelations.getNode());
+
+		profileRelations.processExpansion(this);
 	}
 
 	boolean checkExpand(ProfileRelations profileRelations) {
 
 		return new ExpansionChecker(profileRelations).checkExpand();
+	}
+
+	Collection<Relation> getAllExpansions(Relation relation) {
+
+		if (relation instanceof SomeRelation) {
+
+			SomeRelation sr = (SomeRelation)relation;
+
+			if (sr.anyChains()) {
+
+				return new ChainBasedExpander(sr).getAllExpansions();
+			}
+		}
+
+		return Collections.emptySet();
 	}
 
 	boolean startVisit(NodeX node) {
@@ -283,14 +250,8 @@ class ProfileRelationsExpander {
 		return false;
 	}
 
-	boolean incompleteTraversal() {
-
-		return incompleteTraversal;
-	}
-
 	private boolean localExpansion() {
 
 		return ontology == null;
 	}
 }
-

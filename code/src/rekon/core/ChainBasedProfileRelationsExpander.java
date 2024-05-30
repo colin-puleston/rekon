@@ -29,9 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class ChainBasedProfileRelationsExpander {
-
-	private ProfileRelationsExpander expander;
+abstract class ChainBasedProfileRelationsExpander {
 
 	private List<Relation> allExpansions = new ArrayList<Relation>();
 
@@ -60,7 +58,7 @@ class ChainBasedProfileRelationsExpander {
 
 		private void collectFromTarget(NodeX target) {
 
-			for (Relation r : getAllFromTarget(target)) {
+			for (Relation r : getAllRelationsFromNode(target)) {
 
 				if (r instanceof SomeRelation) {
 
@@ -86,26 +84,13 @@ class ChainBasedProfileRelationsExpander {
 			}
 		}
 
-		private Set<Relation> getAllFromTarget(NodeX target) {
-
-			ProfileRelationCollector c = new ProfileRelationCollector(expander);
-
-			c.collectFromName(target);
-
-			return c.getCollectorSet();
-		}
-
 		private SomeRelation createLinkRelation(SomeRelation endSub) {
 
 			return chain.createLinkRelation(endSub.getNodeValueTarget());
 		}
 	}
 
-	ChainBasedProfileRelationsExpander(
-		SomeRelation relation,
-		ProfileRelationsExpander expander) {
-
-		this.expander = expander;
+	ChainBasedProfileRelationsExpander(SomeRelation relation) {
 
 		nextPassExpanders = Collections.singletonList(relation);
 
@@ -116,6 +101,8 @@ class ChainBasedProfileRelationsExpander {
 
 		return allExpansions;
 	}
+
+	abstract Set<Relation> getAllRelationsFromNode(NodeX node);
 
 	private void collectExpansions(List<ExpansionCollector> collectors) {
 

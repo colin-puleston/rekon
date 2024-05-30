@@ -82,7 +82,7 @@ class PatternMatcher extends NodeMatcher {
 
 	void checkExpandLocalProfile() {
 
-		pattern.getProfileRelations().checkExpandLocal();
+		ProfilePatternsExpander.checkExpandLocal(pattern);
 	}
 
 	Pattern getPattern() {

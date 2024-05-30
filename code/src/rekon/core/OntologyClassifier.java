@@ -106,7 +106,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			if (expansionPass()) {
 
-				ProfileRelationsExpander.expandAll(ontology);
+				ProfilePatternsExpander.expandAll(ontology);
 
 				findAllCandidates();
 			}

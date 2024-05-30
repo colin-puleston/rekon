@@ -70,16 +70,14 @@ class ProfileRelations {
 		expansionStatus = ExpansionStatus.CHECK;
 	}
 
-	void processExpansion(Ontology ontology) {
+	void processExpansion(ProfileRelationsExpander expander) {
 
-		processExpansion(new ProfileRelationsExpander(ontology, getNode()));
-	}
+		if (expansionStatus == ExpansionStatus.CHECK) {
 
-	void checkExpandLocal() {
+			boolean exp = expander.checkExpand(this);
 
-		initExpansion();
-
-		processExpansion(new ProfileRelationsExpander(getNode()));
+			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
+		}
 	}
 
 	boolean anyRelations() {
@@ -147,15 +145,5 @@ class ProfileRelations {
 	ProfileRelationCollector createExpansionCollector(ProfileRelationsExpander expander) {
 
 		return new ExpansionCollector(expander);
-	}
-
-	private void processExpansion(ProfileRelationsExpander expander) {
-
-		if (expansionStatus == ExpansionStatus.CHECK) {
-
-			boolean exp = expander.checkExpand(this);
-
-			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
-		}
 	}
 }

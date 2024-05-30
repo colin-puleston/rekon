@@ -46,14 +46,9 @@ public class SomeRelation extends NodeRelation {
 		return (NodeValue)getTarget();
 	}
 
-	Collection<Relation> getExpansions(ProfileRelationsExpander expander) {
+	boolean anyChains() {
 
-		if (getAllChains().isEmpty()) {
-
-			return Collections.emptySet();
-		}
-
-		return new ChainBasedProfileRelationsExpander(this, expander).getAllExpansions();
+		return getNodeProperty().anyChains();
 	}
 
 	Collection<PropertyChain> getAllChains() {

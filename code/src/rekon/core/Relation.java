@@ -72,11 +72,6 @@ public abstract class Relation extends PatternComponent {
 		return Names.NO_NAMES;
 	}
 
-	Collection<Relation> getExpansions(ProfileRelationsExpander expander) {
-
-		return Collections.emptySet();
-	}
-
 	void render(PatternRenderer r) {
 
 		r.addLine(property.getLabel() + " (" + renderRelationType() + ")");

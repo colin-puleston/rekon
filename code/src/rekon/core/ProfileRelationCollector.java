@@ -72,7 +72,7 @@ class ProfileRelationCollector {
 
 		for (Relation r : relations) {
 
-			for (Relation sr : r.getExpansions(expander)) {
+			for (Relation sr : expander.getAllExpansions(r)) {
 
 				checkAdd(sr);
 			}
@@ -113,7 +113,7 @@ class ProfileRelationCollector {
 				return false;
 			}
 
-			for (Relation r : eusureExpandedProfileRelations(p)) {
+			for (Relation r : ensureExpandedProfileRelations(p)) {
 
 				checkAdd(r);
 			}
@@ -153,7 +153,7 @@ class ProfileRelationCollector {
 		return collectorSet;
 	}
 
-	private Collection<Relation> eusureExpandedProfileRelations(PatternMatcher p) {
+	private Collection<Relation> ensureExpandedProfileRelations(PatternMatcher p) {
 
 		return p.getPattern().getProfileRelations().ensureExpansions(expander);
 	}
