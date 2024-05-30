@@ -31,138 +31,6 @@ import java.util.*;
  */
 public class SomeRelation extends NodeRelation {
 
-	static private class ChainBasedExpander {
-
-		private PatternExpansionManager expansionManager;
-
-		private List<Relation> allExpansions = new ArrayList<Relation>();
-
-		private List<SomeRelation> passExpansions = new ArrayList<SomeRelation>();
-		private List<SomeRelation> nextPassExpanders;
-
-		private class ExpansionCollector {
-
-			private PropertyChain chain;
-			private int tailSubsIndex = 0;
-
-			ExpansionCollector(PropertyChain chain) {
-
-				this.chain = chain;
-			}
-
-			void collectFromTargets(SomeRelation current) {
-
-				Value tv = current.getTarget();
-
-				if (tv instanceof NodeValue) {
-
-					collectFromTarget(((NodeValue)tv).getValueNode());
-				}
-			}
-
-			private void collectFromTarget(NodeX target) {
-
-				for (Relation r : getAllFromTarget(target)) {
-
-					if (r instanceof SomeRelation) {
-
-						collectFromRelation((SomeRelation)r);
-					}
-				}
-			}
-
-			private void collectFromRelation(SomeRelation current) {
-
-				if (chain.hasTailSub(current.getProperty(), tailSubsIndex)) {
-
-					if (chain.lastTailSub(tailSubsIndex)) {
-
-						addExpansion(createLinkRelation(current));
-					}
-					else {
-
-						tailSubsIndex++;
-						collectFromTargets(current);
-						tailSubsIndex--;
-					}
-				}
-			}
-
-			private Set<Relation> getAllFromTarget(NodeX target) {
-
-				ProfileRelationCollector c = new ProfileRelationCollector(expansionManager);
-
-				c.collectFromName(target);
-
-				return c.getCollectorSet();
-			}
-
-			private SomeRelation createLinkRelation(SomeRelation endSub) {
-
-				return chain.createLinkRelation(endSub.getNodeValueTarget());
-			}
-		}
-
-		ChainBasedExpander(SomeRelation relation, PatternExpansionManager expansionManager) {
-
-			this.expansionManager = expansionManager;
-
-			nextPassExpanders = Collections.singletonList(relation);
-
-			List<ExpansionCollector> collectors = getExpansionCollectors(relation);
-
-			if (!collectors.isEmpty()) {
-
-				collectExpansions(collectors);
-			}
-		}
-
-		Collection<Relation> getAllExpansions() {
-
-			return allExpansions;
-		}
-
-		private void collectExpansions(List<ExpansionCollector> collectors) {
-
-			while (true) {
-
-				for (ExpansionCollector c : collectors) {
-
-					for (SomeRelation r : nextPassExpanders) {
-
-						c.collectFromTargets(r);
-					}
-				}
-
-				if (passExpansions.isEmpty()) {
-
-					break;
-				}
-
-				nextPassExpanders = passExpansions;
-				passExpansions = new ArrayList<SomeRelation>();
-			}
-		}
-
-		private List<ExpansionCollector> getExpansionCollectors(SomeRelation relation) {
-
-			List<ExpansionCollector> collectors = new ArrayList<ExpansionCollector>();
-
-			for (PropertyChain chain : relation.getAllChains()) {
-
-				collectors.add(new ExpansionCollector(chain));
-			}
-
-			return collectors;
-		}
-
-		private void addExpansion(SomeRelation relation) {
-
-			allExpansions.add(relation);
-			passExpansions.add(relation);
-		}
-	}
-
 	public SomeRelation(NodeProperty property, NodeValue target) {
 
 		super(property, target);
@@ -178,12 +46,17 @@ public class SomeRelation extends NodeRelation {
 		return (NodeValue)getTarget();
 	}
 
-	Collection<Relation> getExpansions(PatternExpansionManager expansionManager) {
+	Collection<Relation> getExpansions(ProfileRelationsExpander expander) {
 
-		return new ChainBasedExpander(this, expansionManager).getAllExpansions();
+		if (getAllChains().isEmpty()) {
+
+			return Collections.emptySet();
+		}
+
+		return new ChainBasedProfileRelationsExpander(this, expander).getAllExpansions();
 	}
 
-	private Collection<PropertyChain> getAllChains() {
+	Collection<PropertyChain> getAllChains() {
 
 		return getNodeProperty().getAllChains();
 	}

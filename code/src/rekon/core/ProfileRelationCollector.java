@@ -31,21 +31,21 @@ import java.util.*;
  */
 class ProfileRelationCollector {
 
-	private PatternExpansionManager expansionManager;
+	private ProfileRelationsExpander expander;
 
 	private Set<Relation> collectorSet;
 	private boolean anyAdditions = false;
 
-	ProfileRelationCollector(PatternExpansionManager expansionManager) {
+	ProfileRelationCollector(ProfileRelationsExpander expander) {
 
-		this(expansionManager, new HashSet<Relation>());
+		this(expander, new HashSet<Relation>());
 	}
 
 	ProfileRelationCollector(
-		PatternExpansionManager expansionManager,
+		ProfileRelationsExpander expander,
 		Set<Relation> initialCollectorSet) {
 
-		this.expansionManager = expansionManager;
+		this.expander = expander;
 
 		collectorSet = initialCollectorSet;
 	}
@@ -72,14 +72,14 @@ class ProfileRelationCollector {
 
 		for (Relation r : relations) {
 
-			for (Relation sr : r.getExpansions(expansionManager)) {
+			for (Relation sr : r.getExpansions(expander)) {
 
 				checkAdd(sr);
 			}
 		}
 	}
 
-	void collectDisjunctionDerivedRelations(Collection<Relation> relations) {
+	void collectAll(Collection<Relation> relations) {
 
 		for (Relation r : relations) {
 
@@ -97,7 +97,7 @@ class ProfileRelationCollector {
 		return collectorSet;
 	}
 
-	Set<Relation> ensureCollectorSetUpdatable() {
+	Set<Relation> ensureUpdatableCollectorSet() {
 
 		return collectorSet;
 	}
@@ -108,7 +108,7 @@ class ProfileRelationCollector {
 
 		if (p != null) {
 
-			if (!expansionManager.startVisit(node)) {
+			if (!expander.startVisit(node)) {
 
 				return false;
 			}
@@ -148,13 +148,13 @@ class ProfileRelationCollector {
 
 	private Set<Relation> resolveCollectorSet() {
 
-		collectorSet = ensureCollectorSetUpdatable();
+		collectorSet = ensureUpdatableCollectorSet();
 
 		return collectorSet;
 	}
 
 	private Collection<Relation> eusureExpandedProfileRelations(PatternMatcher p) {
 
-		return p.getPattern().getProfileRelations().ensureExpansions(expansionManager);
+		return p.getPattern().getProfileRelations().ensureExpansions(expander);
 	}
 }

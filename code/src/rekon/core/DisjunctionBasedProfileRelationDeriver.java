@@ -29,9 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class DisjunctionDerivedRelationsFinder {
-
-	private PatternExpansionManager expansionManager;
+abstract class DisjunctionBasedProfileRelationDeriver {
 
 	private List<Relation> derivedRelations = new ArrayList<Relation>();
 	private List<RelationDeriver<?>> derivers = new ArrayList<RelationDeriver<?>>();
@@ -176,7 +174,7 @@ class DisjunctionDerivedRelationsFinder {
 				return nodes.getFirstNode();
 			}
 
-			return expansionManager.addDerivedValueDisjunction(nodes.copyNodes());
+			return addDerivedValueDisjunction(nodes.copyNodes());
 		}
 	}
 
@@ -289,9 +287,7 @@ class DisjunctionDerivedRelationsFinder {
 		}
 	}
 
-	DisjunctionDerivedRelationsFinder(PatternExpansionManager expansionManager) {
-
-		this.expansionManager = expansionManager;
+	DisjunctionBasedProfileRelationDeriver() {
 
 		new SomeRelationDeriver();
 		new AllRelationDeriver();
@@ -313,6 +309,10 @@ class DisjunctionDerivedRelationsFinder {
 
 		return derivedRelations;
 	}
+
+	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
+
+	abstract Collection<Relation> ensureExpandedProfileRelations(PatternMatcher p);
 
 	private boolean processDisjuncts(DisjunctionMatcher disjunction) {
 
@@ -385,11 +385,6 @@ class DisjunctionDerivedRelationsFinder {
 
 		PatternMatcher p = n.getProfilePatternMatcher();
 
-		return p != null ? eusureExpandedProfileRelations(p) : Collections.emptySet();
-	}
-
-	private Collection<Relation> eusureExpandedProfileRelations(PatternMatcher p) {
-
-		return p.getPattern().getProfileRelations().ensureExpansions(expansionManager);
+		return p != null ? ensureExpandedProfileRelations(p) : Collections.emptySet();
 	}
 }

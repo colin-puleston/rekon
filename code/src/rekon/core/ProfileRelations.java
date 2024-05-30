@@ -38,131 +38,23 @@ class ProfileRelations {
 
 	private enum ExpansionStatus {UNEXPANDED, EXPANDED, CHECK}
 
-	private class ExpansionChecker {
+	private class ExpansionCollector extends ProfileRelationCollector {
 
-		private PatternExpansionManager expansionManager;
+		ExpansionCollector(ProfileRelationsExpander expander) {
 
-		private Collection<Relation> inputRelations;
-		private Collection<Relation> disjunctionDeivedRelations;
-
-		private class Expander extends ProfileRelationCollector {
-
-			Expander() {
-
-				super(expansionManager, profileRelations);
-
-				if (!disjunctionDeivedRelations.isEmpty()) {
-
-					collectDisjunctionDerivedRelations(disjunctionDeivedRelations);
-				}
-			}
-
-			Set<Relation> ensureCollectorSetUpdatable() {
-
-				Set<Relation> dirRels = getDirectRelations();
-
-				if (profileRelations == dirRels) {
-
-					profileRelations = new HashSet<Relation>(dirRels);
-				}
-
-				return profileRelations;
-			}
+			super(expander, profileRelations);
 		}
 
-		ExpansionChecker(PatternExpansionManager expansionManager) {
-
-			this.expansionManager = expansionManager;
-
-			disjunctionDeivedRelations = findDisjunctionDerivedRelations();
-			inputRelations = resolveInputRelations();
-		}
-
-		boolean checkExpand() {
-
-			boolean newSubsumers = anyLastPhaseInferredSubsumers();
-			boolean expandableInputRels = anyExpandableInputRelations();
-
-			if (newSubsumers || expandableInputRels || anyDisjunctionDeivedRelations()) {
-
-				Expander e = new Expander();
-
-				if (newSubsumers) {
-
-					e.collectFromSubsumers(getNode());
-				}
-
-				if (expandableInputRels) {
-
-					e.collectFromRelationExpansions(inputRelations);
-				}
-
-				return e.anyAdditions();
-			}
-
-			return false;
-		}
-
-		private Collection<Relation> getDisjunctionDerivedRelations() {
-
-			return expansionManager.localExpansion()
-					? Collections.emptyList()
-					: findDisjunctionDerivedRelations();
-		}
-
-		private Collection<Relation> findDisjunctionDerivedRelations() {
-
-			DisjunctionDerivedRelationsFinder finder
-				= new DisjunctionDerivedRelationsFinder(expansionManager);
-
-			for (DisjunctionMatcher d : getNode().getAllDisjunctionMatchers()) {
-
-				finder.deriveFor(d);
-			}
-
-			return finder.getAll();
-		}
-
-		private Collection<Relation> resolveInputRelations() {
+		Set<Relation> ensureUpdatableCollectorSet() {
 
 			Set<Relation> dirRels = getDirectRelations();
 
-			if (disjunctionDeivedRelations.isEmpty()) {
+			if (profileRelations == dirRels) {
 
-				return dirRels;
+				profileRelations = new HashSet<Relation>(dirRels);
 			}
 
-			Set<Relation> inputRels = new HashSet<Relation>();
-
-			inputRels.addAll(dirRels);
-			inputRels.addAll(disjunctionDeivedRelations);
-
-			return inputRels;
-		}
-
-		private boolean anyLastPhaseInferredSubsumers() {
-
-			NodeX n = getNode();
-
-			return !n.classified() && n.getNodeClassifier().anyLastPhaseInferredSubsumers();
-		}
-
-		private boolean anyExpandableInputRelations() {
-
-			for (Relation r : inputRelations) {
-
-				if (r.expandableRelation()) {
-
-					return true;
-				}
-			}
-
-			return false;
-		}
-
-		private boolean anyDisjunctionDeivedRelations() {
-
-			return !disjunctionDeivedRelations.isEmpty();
+			return profileRelations;
 		}
 	}
 
@@ -180,14 +72,14 @@ class ProfileRelations {
 
 	void processExpansion(Ontology ontology) {
 
-		processExpansion(new PatternExpansionManager(ontology, getNode()));
+		processExpansion(new ProfileRelationsExpander(ontology, getNode()));
 	}
 
 	void checkExpandLocal() {
 
 		initExpansion();
 
-		processExpansion(new PatternExpansionManager(getNode()));
+		processExpansion(new ProfileRelationsExpander(getNode()));
 	}
 
 	boolean anyRelations() {
@@ -205,28 +97,14 @@ class ProfileRelations {
 		return profileRelations;
 	}
 
-	Collection<Relation> ensureExpansions(PatternExpansionManager expansionManager) {
+	NodeX getNode() {
 
-		if (expansionStatus == ExpansionStatus.CHECK) {
+		return pattern.getSingleNode();
+	}
 
-			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
+	Set<Relation> getDirectRelations() {
 
-			if (new ExpansionChecker(expansionManager).checkExpand()) {
-
-				if (expansionManager.incompleteTraversal()) {
-
-					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
-
-					profileRelations = preProfileRels;
-
-					return postProfileRels;
-				}
-
-				expansionStatus = ExpansionStatus.EXPANDED;
-			}
-		}
-
-		return profileRelations;
+		return pattern.getDirectRelations();
 	}
 
 	boolean anySubsumedBy(Relation r) {
@@ -242,23 +120,42 @@ class ProfileRelations {
 		return false;
 	}
 
-	private void processExpansion(PatternExpansionManager expansionManager) {
+	Collection<Relation> ensureExpansions(ProfileRelationsExpander expander) {
 
 		if (expansionStatus == ExpansionStatus.CHECK) {
 
-			boolean exp = new ExpansionChecker(expansionManager).checkExpand();
+			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
+
+			if (expander.checkExpand(this)) {
+
+				if (expander.incompleteTraversal()) {
+
+					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
+
+					profileRelations = preProfileRels;
+
+					return postProfileRels;
+				}
+
+				expansionStatus = ExpansionStatus.EXPANDED;
+			}
+		}
+
+		return profileRelations;
+	}
+
+	ProfileRelationCollector createExpansionCollector(ProfileRelationsExpander expander) {
+
+		return new ExpansionCollector(expander);
+	}
+
+	private void processExpansion(ProfileRelationsExpander expander) {
+
+		if (expansionStatus == ExpansionStatus.CHECK) {
+
+			boolean exp = expander.checkExpand(this);
 
 			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
 		}
-	}
-
-	private NodeX getNode() {
-
-		return pattern.getSingleNode();
-	}
-
-	private Set<Relation> getDirectRelations() {
-
-		return pattern.getDirectRelations();
 	}
 }
