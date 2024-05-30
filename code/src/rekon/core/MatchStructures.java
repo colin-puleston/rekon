@@ -111,12 +111,12 @@ public class MatchStructures {
 		return m;
 	}
 
-	public ClassNode addPatternClass() {
+	public ClassNode createPatternClass() {
 
 		return freeClasses.createPatternClass();
 	}
 
-	public ClassNode addDefinitionClass() {
+	public ClassNode createDefinitionClass() {
 
 		return freeClasses.createDefinitionClass();
 	}

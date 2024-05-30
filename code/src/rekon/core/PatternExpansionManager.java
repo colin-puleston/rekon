@@ -29,12 +29,21 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class NodeVisitMonitor {
+class PatternExpansionManager {
+
+	private Ontology ontology;
 
 	private NameSet visited = new NameSet();
 	private boolean incompleteTraversal = false;
 
-	NodeVisitMonitor(NodeX initialNode) {
+	PatternExpansionManager(NodeX initialNode) {
+
+		this(null, initialNode);
+	}
+
+	PatternExpansionManager(Ontology ontology, NodeX initialNode) {
+
+		this.ontology = ontology;
 
 		visited.add(initialNode);
 	}
@@ -49,6 +58,21 @@ class NodeVisitMonitor {
 		incompleteTraversal = true;
 
 		return false;
+	}
+
+	ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts) {
+
+		if (localExpansion()) {
+
+			throw new Error("Unexpected disjunction-value derivation!");
+		}
+
+		return ontology.addDerivedProfileValueDisjunction(disjuncts);
+	}
+
+	boolean localExpansion() {
+
+		return ontology == null;
 	}
 
 	boolean incompleteTraversal() {

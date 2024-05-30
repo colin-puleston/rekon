@@ -75,7 +75,7 @@ class ProfilePatternExpander {
 
 		for (PatternMatcher p : patterns) {
 
-			getProfileRelations(p).processExpansion();
+			getProfileRelations(p).processExpansion(ontology);
 		}
 	}
 

@@ -36,20 +36,24 @@ public class Ontology {
 	private MultiIterable<Name> allNames = new MultiIterable<Name>();
 	private MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
 
+	private List<FreeClassNode> freeClassNodes = new ArrayList<FreeClassNode>();
+
 	private List<PatternMatcher> profilePatterns = new ArrayList<PatternMatcher>();
 	private List<PatternMatcher> definitionPatterns = new ArrayList<PatternMatcher>();
 
 	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
 	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
 
+	private MatchStructures matchStructures;
+
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
-	private List<FreeClassNode> freeClassNodes = new ArrayList<FreeClassNode>();
-
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		structureBuilder.build(createMatchStructures());
+		matchStructures = createMatchStructures();
+
+		structureBuilder.build(matchStructures);
 
 		allNodes.addComponent(names.getClassNodes());
 		allNodes.addComponent(names.getIndividualNodes());
@@ -90,6 +94,15 @@ public class Ontology {
 	void addDerivedProfilePattern(PatternMatcher p) {
 
 		profilePatterns.add(p);
+	}
+
+	ClassNode addDerivedProfileValueDisjunction(Collection<NodeX> disjuncts) {
+
+		ClassNode cn = matchStructures.createPatternClass();
+
+		matchStructures.addDisjunction(cn, disjuncts, false);
+
+		return cn;
 	}
 
 	Iterable<Name> getAllNames() {

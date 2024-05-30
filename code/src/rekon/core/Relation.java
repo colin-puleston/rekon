@@ -72,7 +72,7 @@ public abstract class Relation extends PatternComponent {
 		return Names.NO_NAMES;
 	}
 
-	Collection<Relation> getExpansions(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getExpansions(PatternExpansionManager expansionManager) {
 
 		return Collections.emptySet();
 	}

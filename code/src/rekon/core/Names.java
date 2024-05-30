@@ -121,6 +121,18 @@ public abstract class Names implements Iterable<Name> {
 		return new AsNodes();
 	}
 
+	public Collection<NodeX> copyNodes() {
+
+		List<NodeX> nodes = new ArrayList<NodeX>();
+
+		for (NodeX n : asNodes()) {
+
+			nodes.add(n);
+		}
+
+		return nodes;
+	}
+
 	Names filterForType(Class<? extends Name> type) {
 
 		return allOfType(type) ? this : deriveForTypeOnly(type);

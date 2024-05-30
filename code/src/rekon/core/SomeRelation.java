@@ -33,7 +33,7 @@ public class SomeRelation extends NodeRelation {
 
 	static private class ChainBasedExpander {
 
-		private NodeVisitMonitor visitMonitor;
+		private PatternExpansionManager expansionManager;
 
 		private List<Relation> allExpansions = new ArrayList<Relation>();
 
@@ -90,7 +90,7 @@ public class SomeRelation extends NodeRelation {
 
 			private Set<Relation> getAllFromTarget(NodeX target) {
 
-				ProfileRelationCollector c = new ProfileRelationCollector(visitMonitor);
+				ProfileRelationCollector c = new ProfileRelationCollector(expansionManager);
 
 				c.collectFromName(target);
 
@@ -103,9 +103,9 @@ public class SomeRelation extends NodeRelation {
 			}
 		}
 
-		ChainBasedExpander(SomeRelation relation, NodeVisitMonitor visitMonitor) {
+		ChainBasedExpander(SomeRelation relation, PatternExpansionManager expansionManager) {
 
-			this.visitMonitor = visitMonitor;
+			this.expansionManager = expansionManager;
 
 			nextPassExpanders = Collections.singletonList(relation);
 
@@ -178,9 +178,9 @@ public class SomeRelation extends NodeRelation {
 		return (NodeValue)getTarget();
 	}
 
-	Collection<Relation> getExpansions(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> getExpansions(PatternExpansionManager expansionManager) {
 
-		return new ChainBasedExpander(this, visitMonitor).getAllExpansions();
+		return new ChainBasedExpander(this, expansionManager).getAllExpansions();
 	}
 
 	private Collection<PropertyChain> getAllChains() {

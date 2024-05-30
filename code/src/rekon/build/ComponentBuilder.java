@@ -132,7 +132,7 @@ class ComponentBuilder {
 			return disjuncts.iterator().next();
 		}
 
-		ClassNode c = structures.addPatternClass();
+		ClassNode c = structures.createPatternClass();
 
 		structures.addDisjunction(c, disjuncts, false);
 
@@ -149,7 +149,7 @@ class ComponentBuilder {
 
 			if (p != null) {
 
-				pCls = structures.addPatternClass();
+				pCls = structures.createPatternClass();
 
 				structures.addProfilePattern(pCls, p);
 

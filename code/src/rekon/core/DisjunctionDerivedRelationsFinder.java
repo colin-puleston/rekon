@@ -31,7 +31,7 @@ import java.util.*;
  */
 class DisjunctionDerivedRelationsFinder {
 
-	private NodeVisitMonitor visitMonitor;
+	private PatternExpansionManager expansionManager;
 
 	private List<Relation> derivedRelations = new ArrayList<Relation>();
 	private List<RelationDeriver<?>> derivers = new ArrayList<RelationDeriver<?>>();
@@ -139,14 +139,7 @@ class DisjunctionDerivedRelationsFinder {
 
 		Relation checkCreateRelation(PropertyX prop, NameSet targetSource) {
 
-			NodeX n = toSingleNonSubsumerNode(targetSource);
-
-			if (n == null) {
-
-				return null;
-			}
-
-			return createRelation((NodeProperty)prop, new NodeValue(n));
+			return createRelation((NodeProperty)prop, toNodeValue(targetSource));
 		}
 
 		abstract Relation createRelation(NodeProperty prop, NodeValue target);
@@ -161,14 +154,29 @@ class DisjunctionDerivedRelationsFinder {
 			return nodes;
 		}
 
-		private NodeX toSingleNonSubsumerNode(NameSet nodes) {
+		private NodeValue toNodeValue(NameSet nodes) {
+
+			removeSubsumers(nodes);
+
+			return new NodeValue(toSingleNode(nodes));
+		}
+
+		private void removeSubsumers(NameSet nodes) {
 
 			for (Name v : nodes.copyNames()) {
 
 				nodes.removeAll(v.getSubsumers());
 			}
+		}
 
-			return nodes.size() == 1 ? nodes.getFirstNode() : null;
+		private NodeX toSingleNode(NameSet nodes) {
+
+			if (nodes.size() == 1) {
+
+				return nodes.getFirstNode();
+			}
+
+			return expansionManager.addDerivedValueDisjunction(nodes.copyNodes());
 		}
 	}
 
@@ -281,9 +289,9 @@ class DisjunctionDerivedRelationsFinder {
 		}
 	}
 
-	DisjunctionDerivedRelationsFinder(NodeVisitMonitor visitMonitor) {
+	DisjunctionDerivedRelationsFinder(PatternExpansionManager expansionManager) {
 
-		this.visitMonitor = visitMonitor;
+		this.expansionManager = expansionManager;
 
 		new SomeRelationDeriver();
 		new AllRelationDeriver();
@@ -377,11 +385,11 @@ class DisjunctionDerivedRelationsFinder {
 
 		PatternMatcher p = n.getProfilePatternMatcher();
 
-		return p != null ? getExpandedProfileRelations(p) : Collections.emptySet();
+		return p != null ? eusureExpandedProfileRelations(p) : Collections.emptySet();
 	}
 
-	private Collection<Relation> getExpandedProfileRelations(PatternMatcher p) {
+	private Collection<Relation> eusureExpandedProfileRelations(PatternMatcher p) {
 
-		return p.getPattern().getProfileRelations().ensureExpansions(visitMonitor);
+		return p.getPattern().getProfileRelations().ensureExpansions(expansionManager);
 	}
 }

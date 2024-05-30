@@ -127,7 +127,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		ClassNode resolveDefinedClass() {
 
-			return addDefinitionClass();
+			return createDefinitionClass();
 		}
 	}
 
@@ -184,7 +184,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 			Pattern p = components.toPattern(sup.toNode());
 
-			return p != null ? addDefinitionClass(p) : null;
+			return p != null ? createDefinitionClass(p) : null;
 		}
 
 		private ClassNode checkCreateDisjunctionSuperClass(Collection<InputNode> disjuncts) {
@@ -196,7 +196,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 				return null;
 			}
 
-			ClassNode c = addDefinitionClass();
+			ClassNode c = createDefinitionClass();
 
 			addProfileDisjunction(c, djs);
 

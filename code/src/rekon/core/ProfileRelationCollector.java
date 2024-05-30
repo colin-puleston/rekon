@@ -31,21 +31,21 @@ import java.util.*;
  */
 class ProfileRelationCollector {
 
-	private NodeVisitMonitor visitMonitor;
+	private PatternExpansionManager expansionManager;
 
 	private Set<Relation> collectorSet;
 	private boolean anyAdditions = false;
 
-	ProfileRelationCollector(NodeVisitMonitor visitMonitor) {
+	ProfileRelationCollector(PatternExpansionManager expansionManager) {
 
-		this(visitMonitor, new HashSet<Relation>());
+		this(expansionManager, new HashSet<Relation>());
 	}
 
 	ProfileRelationCollector(
-		NodeVisitMonitor visitMonitor,
+		PatternExpansionManager expansionManager,
 		Set<Relation> initialCollectorSet) {
 
-		this.visitMonitor = visitMonitor;
+		this.expansionManager = expansionManager;
 
 		collectorSet = initialCollectorSet;
 	}
@@ -72,7 +72,7 @@ class ProfileRelationCollector {
 
 		for (Relation r : relations) {
 
-			for (Relation sr : r.getExpansions(visitMonitor)) {
+			for (Relation sr : r.getExpansions(expansionManager)) {
 
 				checkAdd(sr);
 			}
@@ -108,12 +108,12 @@ class ProfileRelationCollector {
 
 		if (p != null) {
 
-			if (!visitMonitor.startVisit(node)) {
+			if (!expansionManager.startVisit(node)) {
 
 				return false;
 			}
 
-			for (Relation r : getExpandedProfileRelations(p)) {
+			for (Relation r : eusureExpandedProfileRelations(p)) {
 
 				checkAdd(r);
 			}
@@ -153,8 +153,8 @@ class ProfileRelationCollector {
 		return collectorSet;
 	}
 
-	private Collection<Relation> getExpandedProfileRelations(PatternMatcher p) {
+	private Collection<Relation> eusureExpandedProfileRelations(PatternMatcher p) {
 
-		return p.getPattern().getProfileRelations().ensureExpansions(visitMonitor);
+		return p.getPattern().getProfileRelations().ensureExpansions(expansionManager);
 	}
 }

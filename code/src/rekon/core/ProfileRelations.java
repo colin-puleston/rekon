@@ -40,7 +40,7 @@ class ProfileRelations {
 
 	private class ExpansionChecker {
 
-		private NodeVisitMonitor visitMonitor;
+		private PatternExpansionManager expansionManager;
 
 		private Collection<Relation> inputRelations;
 		private Collection<Relation> disjunctionDeivedRelations;
@@ -49,9 +49,12 @@ class ProfileRelations {
 
 			Expander() {
 
-				super(visitMonitor, profileRelations);
+				super(expansionManager, profileRelations);
 
-				collectDisjunctionDerivedRelations(disjunctionDeivedRelations);
+				if (!disjunctionDeivedRelations.isEmpty()) {
+
+					collectDisjunctionDerivedRelations(disjunctionDeivedRelations);
+				}
 			}
 
 			Set<Relation> ensureCollectorSetUpdatable() {
@@ -67,14 +70,9 @@ class ProfileRelations {
 			}
 		}
 
-		ExpansionChecker() {
+		ExpansionChecker(PatternExpansionManager expansionManager) {
 
-			this(new NodeVisitMonitor(getNode()));
-		}
-
-		ExpansionChecker(NodeVisitMonitor visitMonitor) {
-
-			this.visitMonitor = visitMonitor;
+			this.expansionManager = expansionManager;
 
 			disjunctionDeivedRelations = findDisjunctionDerivedRelations();
 			inputRelations = resolveInputRelations();
@@ -105,10 +103,17 @@ class ProfileRelations {
 			return false;
 		}
 
+		private Collection<Relation> getDisjunctionDerivedRelations() {
+
+			return expansionManager.localExpansion()
+					? Collections.emptyList()
+					: findDisjunctionDerivedRelations();
+		}
+
 		private Collection<Relation> findDisjunctionDerivedRelations() {
 
 			DisjunctionDerivedRelationsFinder finder
-				= new DisjunctionDerivedRelationsFinder(visitMonitor);
+				= new DisjunctionDerivedRelationsFinder(expansionManager);
 
 			for (DisjunctionMatcher d : getNode().getAllDisjunctionMatchers()) {
 
@@ -173,20 +178,16 @@ class ProfileRelations {
 		expansionStatus = ExpansionStatus.CHECK;
 	}
 
-	void processExpansion() {
+	void processExpansion(Ontology ontology) {
 
-		if (expansionStatus == ExpansionStatus.CHECK) {
-
-			boolean exp = new ExpansionChecker().checkExpand();
-
-			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
-		}
+		processExpansion(new PatternExpansionManager(ontology, getNode()));
 	}
 
 	void checkExpandLocal() {
 
 		initExpansion();
-		processExpansion();
+
+		processExpansion(new PatternExpansionManager(getNode()));
 	}
 
 	boolean anyRelations() {
@@ -204,15 +205,15 @@ class ProfileRelations {
 		return profileRelations;
 	}
 
-	Collection<Relation> ensureExpansions(NodeVisitMonitor visitMonitor) {
+	Collection<Relation> ensureExpansions(PatternExpansionManager expansionManager) {
 
 		if (expansionStatus == ExpansionStatus.CHECK) {
 
 			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
 
-			if (new ExpansionChecker(visitMonitor).checkExpand()) {
+			if (new ExpansionChecker(expansionManager).checkExpand()) {
 
-				if (visitMonitor.incompleteTraversal()) {
+				if (expansionManager.incompleteTraversal()) {
 
 					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
 
@@ -239,6 +240,16 @@ class ProfileRelations {
 		}
 
 		return false;
+	}
+
+	private void processExpansion(PatternExpansionManager expansionManager) {
+
+		if (expansionStatus == ExpansionStatus.CHECK) {
+
+			boolean exp = new ExpansionChecker(expansionManager).checkExpand();
+
+			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
+		}
 	}
 
 	private NodeX getNode() {

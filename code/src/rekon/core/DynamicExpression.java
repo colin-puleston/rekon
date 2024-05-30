@@ -92,7 +92,7 @@ class DynamicExpression extends LocalExpression {
 				return asSingleNode;
 			}
 
-			ClassNode defnCls = matchStructures.addDefinitionClass();
+			ClassNode defnCls = matchStructures.createDefinitionClass();
 
 			expressionMatcher = matchStructures.addDefinitionPattern(defnCls, pattern);
 
@@ -109,7 +109,7 @@ class DynamicExpression extends LocalExpression {
 
 				if (djNode == null) {
 
-					djNode = matchStructures.addDefinitionClass();
+					djNode = matchStructures.createDefinitionClass();
 
 					matchStructures.addDefinitionPattern(djNode, dj);
 				}
@@ -117,7 +117,7 @@ class DynamicExpression extends LocalExpression {
 				djNodes.add(djNode);
 			}
 
-			ClassNode defnCls = matchStructures.addDefinitionClass();
+			ClassNode defnCls = matchStructures.createDefinitionClass();
 
 			expressionMatcher = matchStructures.addDisjunction(defnCls, djNodes, true);
 

@@ -51,14 +51,14 @@ class MatchStuctureBuilder {
 		addDisjunction(node, disjuncts, false);
 	}
 
-	ClassNode addDefinitionClass() {
+	ClassNode createDefinitionClass() {
 
-		return matchStructures.addDefinitionClass();
+		return matchStructures.createDefinitionClass();
 	}
 
-	ClassNode addDefinitionClass(Pattern defn) {
+	ClassNode createDefinitionClass(Pattern defn) {
 
-		ClassNode c = addDefinitionClass();
+		ClassNode c = createDefinitionClass();
 
 		matchStructures.addDefinitionPattern(c, defn);
 
@@ -98,6 +98,6 @@ class MatchStuctureBuilder {
 
 		NodeX n = disjunct.toSingleNode();
 
-		return n != null ? n : addDefinitionClass(disjunct);
+		return n != null ? n : createDefinitionClass(disjunct);
 	}
 }
