@@ -38,16 +38,6 @@ public abstract class NumberRange<R extends NumberRange<?>> extends DataValue {
 		this.max = max;
 	}
 
-	<N extends Number>N toNumber(Class<N> type) {
-
-		if (min.equals(max)) {
-
-			return type.cast(min);
-		}
-
-		throw new RuntimeException("Does not represent exact value: " + this);
-	}
-
 	R unionWith(R r) {
 
 		NumberRange<?> n = r;

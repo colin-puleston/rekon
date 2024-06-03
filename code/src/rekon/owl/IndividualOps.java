@@ -101,41 +101,4 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 		return MappedNames.toMappedEntity(name, OWLNamedIndividual.class);
 	}
-
-	private Set<OWLLiteral> toLiterals(List<DataValue> values) {
-
-		Set<OWLLiteral> literals = new HashSet<OWLLiteral>();
-
-		for (DataValue v : values) {
-
-			literals.add(toLiteral(v));
-		}
-
-		return literals;
-	}
-
-	private OWLLiteral toLiteral(DataValue value) {
-
-		if (value instanceof BooleanValue) {
-
-			return factory.getOWLLiteral(value.toBoolean());
-		}
-
-		if (value instanceof IntegerRange) {
-
-			return factory.getOWLLiteral(value.toInteger());
-		}
-
-		if (value instanceof FloatRange) {
-
-			return factory.getOWLLiteral(value.toFloat());
-		}
-
-		if (value instanceof DoubleRange) {
-
-			return factory.getOWLLiteral(value.toDouble());
-		}
-
-		throw new Error("Unrecognised DataValue type: " + value.getClass());
-	}
 }
