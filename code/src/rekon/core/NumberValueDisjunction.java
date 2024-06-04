@@ -31,12 +31,15 @@ import java.util.*;
  */
 class NumberValueDisjunction  {
 
-	static private LimitComparator limitComparator = new LimitComparator();
-
-	static private abstract class Limit {
+	static private abstract class Limit implements Comparable<Limit> {
 
 		final NumberValue value;
 		final NumberRange range;
+
+		public int compareTo(Limit other) {
+
+			return Double.compare(compareValue(), other.compareValue());
+		}
 
 		Limit(NumberValue value, NumberRange range) {
 
@@ -51,11 +54,6 @@ class NumberValueDisjunction  {
 		boolean maxValue() {
 
 			return !minValue();
-		}
-
-		int compareTo(Limit l) {
-
-			return Double.compare(compareValue(), l.compareValue());
 		}
 
 		private double compareValue() {
@@ -100,15 +98,7 @@ class NumberValueDisjunction  {
 		}
 	}
 
-	static private class LimitComparator implements Comparator<Limit> {
-
-		public int compare(Limit first, Limit second) {
-
-			return first.compareTo(second);
-		}
-	}
-
-	private SortedSet<Limit> limits = new TreeSet<Limit>(limitComparator);
+	private SortedSet<Limit> limits = new TreeSet<Limit>();
 	private List<NumberRange> disjunctRanges = new ArrayList<NumberRange>();
 
 	private Set<NumberValue> disjunctRangeSources = new HashSet<NumberValue>();
