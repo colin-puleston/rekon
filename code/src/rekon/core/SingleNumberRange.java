@@ -24,45 +24,29 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-public class IntegerRange extends NumberRange<IntegerRange> {
+class SingleNumberRange extends NumberValue {
 
-	static public final IntegerRange UNCONSTRAINED = new IntegerRange(null, null);
+	private Number min;
+	private Number max;
 
-	public IntegerRange(Integer exact) {
+	SingleNumberRange(Number exact) {
 
 		this(exact, exact);
 	}
 
-	public IntegerRange(Integer min, Integer max) {
+	SingleNumberRange(Number min, Number max) {
 
-		super(min, max);
+		this.min = min;
+		this.max = max;
 	}
 
-	IntegerRange asIntegerRange() {
+	Collection<NumberRange> getDisjunctRanges() {
 
-		return this;
-	}
-
-	IntegerRange asTypeRange(Value v) {
-
-		return v.asIntegerRange();
-	}
-
-	IntegerRange createTypeRange(Number min, Number max) {
-
-		return new IntegerRange(min.intValue(), max.intValue());
-	}
-
-	boolean moreThanFinite(Number test, Number limit) {
-
-		return test.intValue() > limit.intValue();
-	}
-
-	boolean notMoreThanFinite(Number test, Number limit) {
-
-		return test.intValue() <= limit.intValue();
+		return Collections.singleton(new NumberRange(min, max));
 	}
 }

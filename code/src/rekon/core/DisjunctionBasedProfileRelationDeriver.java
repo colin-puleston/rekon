@@ -34,21 +34,18 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 	private List<Relation> derivedRelations = new ArrayList<Relation>();
 	private List<RelationDeriver<?>> derivers = new ArrayList<RelationDeriver<?>>();
 
-	private abstract class RelationDeriver<TS> {
+	private abstract class RelationDeriver<T extends Value> {
 
-		private Class<? extends Relation> relationType;
-		private Map<PropertyX, TS> propertiesToTargetSources = new HashMap<PropertyX, TS>();
+		private Map<PropertyX, Set<T>> propertiesToTargets = new HashMap<PropertyX, Set<T>>();
 
-		RelationDeriver(Class<? extends Relation> relationType) {
-
-			this.relationType = relationType;
+		RelationDeriver() {
 
 			derivers.add(this);
 		}
 
 		boolean checkProcessDisjunctRelation(Relation rel) {
 
-			if (relationType.isAssignableFrom(rel.getClass())) {
+			if (getRelationType().isAssignableFrom(rel.getClass())) {
 
 				processDisjunctRelation(rel);
 
@@ -60,15 +57,15 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		boolean anyPotentialRelations() {
 
-			return !propertiesToTargetSources.isEmpty();
+			return !propertiesToTargets.isEmpty();
 		}
 
 		void deriveRelations()  {
 
-			for (PropertyX p : propertiesToTargetSources.keySet()) {
+			for (PropertyX p : propertiesToTargets.keySet()) {
 
-				TS ts = propertiesToTargetSources.get(p);
-				Relation rel = checkCreateRelation(p, ts);
+				Set<T> targets = propertiesToTargets.get(p);
+				Relation rel = checkCreateRelation(p, targets);
 
 				if (rel != null) {
 
@@ -77,112 +74,92 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			}
 		}
 
+		abstract Class<? extends Relation> getRelationType();
+
+		abstract Class<T> getTargetType();
+
+		abstract Relation checkCreateRelation(PropertyX prop, Set<T> targets);
+
 		private void processDisjunctRelation(Relation rel) {
 
 			PropertyX prop = rel.getProperty();
-			Value target = rel.getTarget();
+			Set<T> targets = propertiesToTargets.get(prop);
 
-			if (propertiesToTargetSources.isEmpty()) {
+			if (targets == null) {
 
-				propertiesToTargetSources.put(prop, getInitialTargetSource(target));
+				targets = new HashSet<T>();
+
+				propertiesToTargets.put(prop, targets);
 			}
-			else {
 
-				TS ts = propertiesToTargetSources.get(prop);
-
-				if (ts != null) {
-
-					TS uts = updateTargetSource(ts, target);
-
-					if (uts == null) {
-
-						propertiesToTargetSources.remove(prop);
-					}
-					else {
-
-						if (uts != ts) {
-
-							propertiesToTargetSources.put(prop, uts);
-						}
-					}
-				}
-			}
+			targets.add(getTargetType().cast(rel.getTarget()));
 		}
-
-		abstract TS getInitialTargetSource(Value target);
-
-		abstract TS updateTargetSource(TS source, Value target);
-
-		abstract Relation checkCreateRelation(PropertyX prop, TS targetSource);
 	}
 
-	private abstract class NodeRelationDeriver extends RelationDeriver<NameSet> {
+	private abstract class NodeRelationDeriver extends RelationDeriver<NodeValue> {
 
-		NodeRelationDeriver(Class<? extends Relation> relationType) {
+		Class<NodeValue> getTargetType() {
 
-			super(relationType);
+			return NodeValue.class;
 		}
 
-		NameSet getInitialTargetSource(Value target) {
+		Relation checkCreateRelation(PropertyX prop, Set<NodeValue> targets) {
 
-			return toValueNodePlusSubsumersSet((NodeValue)target);
-		}
+			NodeX n = toSingleNode(toNodeDisjuncts(targets));
 
-		NameSet updateTargetSource(NameSet source, Value target) {
-
-			source.retainAll(toValueNodePlusSubsumersSet((NodeValue)target));
-
-			return source.isEmpty() ? null : source;
-		}
-
-		Relation checkCreateRelation(PropertyX prop, NameSet targetSource) {
-
-			return createRelation((NodeProperty)prop, toNodeValue(targetSource));
+			return createRelation((NodeProperty)prop, new NodeValue(n));
 		}
 
 		abstract Relation createRelation(NodeProperty prop, NodeValue target);
 
-		private NameSet toValueNodePlusSubsumersSet(NodeValue target) {
+		private Set<NodeX> toNodeDisjuncts(Set<NodeValue> targets) {
 
-			NodeX n = target.getValueNode();
-			NameSet nodes = new NameSet(n);
+			Set<NodeX> disjuncts = getValuesPlusSubsumerNodes(targets);
 
-			nodes.addAll(n.getSubsumers());
+			removeAllSubsumers(disjuncts);
+
+			return disjuncts;
+		}
+
+		private Set<NodeX> getValuesPlusSubsumerNodes(Set<NodeValue> targets) {
+
+			Set<NodeX> nodes = new HashSet<NodeX>();
+
+			for (NodeValue t : targets) {
+
+				NodeX n = t.getValueNode();
+
+				nodes.add(n);
+				nodes.addAll(n.getSubsumers().copyNodes());
+			}
 
 			return nodes;
 		}
 
-		private NodeValue toNodeValue(NameSet nodes) {
+		private void removeAllSubsumers(Set<NodeX> nodes) {
 
-			removeSubsumers(nodes);
+			for (NodeX n : new ArrayList<NodeX>(nodes)) {
 
-			return new NodeValue(toSingleNode(nodes));
-		}
-
-		private void removeSubsumers(NameSet nodes) {
-
-			for (Name v : nodes.copyNames()) {
-
-				nodes.removeAll(v.getSubsumers());
+				nodes.removeAll(n.getSubsumers().copyNodes());
 			}
 		}
 
-		private NodeX toSingleNode(NameSet nodes) {
+		private NodeX toSingleNode(Set<NodeX> nodes) {
 
 			if (nodes.size() == 1) {
 
-				return nodes.getFirstNode();
+				return nodes.iterator().next();
 			}
 
-			return addDerivedValueDisjunction(nodes.copyNodes());
+			return addDerivedValueDisjunction(nodes);
 		}
 	}
 
 	private class SomeRelationDeriver extends NodeRelationDeriver {
 
-		SomeRelationDeriver() {
+		Class<SomeRelation> getRelationType() {
 
-			super(SomeRelation.class);
+			return SomeRelation.class;
 		}
 
 		Relation createRelation(NodeProperty prop, NodeValue target) {
@@ -193,9 +170,9 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	private class AllRelationDeriver extends NodeRelationDeriver {
 
-		AllRelationDeriver() {
+		Class<AllRelation> getRelationType() {
 
-			super(AllRelation.class);
+			return AllRelation.class;
 		}
 
 		Relation createRelation(NodeProperty prop, NodeValue target) {
@@ -208,82 +185,44 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 								<T extends DataValue>
 								extends RelationDeriver<T> {
 
-		private Class<T> targetType;
+		Class<DataRelation> getRelationType() {
 
-		DataRelationDeriver(Class<T> targetType) {
-
-			super(DataRelation.class);
-
-			this.targetType = targetType;
+			return DataRelation.class;
 		}
 
-		T getInitialTargetSource(Value target) {
+		Relation checkCreateRelation(PropertyX prop, Set<T> targets) {
 
-			return targetType.cast(target);
+			T t = unionOf(targets);
+
+			return t != null ? new DataRelation((DataProperty)prop, t) : null;
 		}
 
-		T updateTargetSource(T source, Value target) {
-
-			return unionWith(source, targetType.cast(target));
-		}
-
-		Relation checkCreateRelation(PropertyX prop, T targetSource) {
-
-			return new DataRelation((DataProperty)prop, targetSource);
-		}
-
-		abstract T unionWith(T target1, T target2);
+		abstract T unionOf(Set<T> targets);
 	}
 
-	private abstract class NumberRelationDeriver
-								<T extends NumberRange<T>>
-								extends DataRelationDeriver<T> {
+	private class NumberRelationDeriver extends DataRelationDeriver<NumberValue> {
 
-		NumberRelationDeriver(Class<T> targetType) {
+		Class<NumberValue> getTargetType() {
 
-			super(targetType);
+			return NumberValue.class;
 		}
 
-		T unionWith(T target1, T target2) {
+		NumberValue unionOf(Set<NumberValue> targets) {
 
-			return target1.unionWith(target2);
-		}
-	}
-
-	private class IntegerRelationDeriver extends NumberRelationDeriver<IntegerRange> {
-
-		IntegerRelationDeriver() {
-
-			super(IntegerRange.class);
-		}
-	}
-
-	private class FloatRelationDeriver extends NumberRelationDeriver<FloatRange> {
-
-		FloatRelationDeriver() {
-
-			super(FloatRange.class);
-		}
-	}
-
-	private class DoubleRelationDeriver extends NumberRelationDeriver<DoubleRange> {
-
-		DoubleRelationDeriver() {
-
-			super(DoubleRange.class);
+			return NumberValue.create(targets);
 		}
 	}
 
 	private class BooleanRelationDeriver extends DataRelationDeriver<BooleanValue> {
 
-		BooleanRelationDeriver() {
+		Class<BooleanValue> getTargetType() {
 
-			super(BooleanValue.class);
+			return BooleanValue.class;
 		}
 
-		BooleanValue unionWith(BooleanValue target1, BooleanValue target2) {
+		BooleanValue unionOf(Set<BooleanValue> targets) {
 
-			return target1.equals(target2) ? target1 : null;
+			return targets.size() == 1 ? targets.iterator().next() : null;
 		}
 	}
 
@@ -291,9 +230,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		new SomeRelationDeriver();
 		new AllRelationDeriver();
-		new IntegerRelationDeriver();
-		new FloatRelationDeriver();
-		new DoubleRelationDeriver();
+		new NumberRelationDeriver();
 		new BooleanRelationDeriver();
 	}
 

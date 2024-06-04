@@ -24,45 +24,22 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-public class DoubleRange extends NumberRange<DoubleRange> {
+class NumberRangeDisjunction extends NumberValue {
 
-	static public final DoubleRange UNCONSTRAINED = new DoubleRange(null, null);
+	private Collection<NumberRange> disjuncts;
 
-	public DoubleRange(Double exact) {
+	NumberRangeDisjunction(Collection<NumberRange> disjuncts) {
 
-		this(exact, exact);
+		this.disjuncts = disjuncts;
 	}
 
-	public DoubleRange(Double min, Double max) {
+	Collection<NumberRange> getDisjunctRanges() {
 
-		super(min, max);
-	}
-
-	DoubleRange asDoubleRange() {
-
-		return this;
-	}
-
-	DoubleRange asTypeRange(Value v) {
-
-		return v.asDoubleRange();
-	}
-
-	DoubleRange createTypeRange(Number min, Number max) {
-
-		return new DoubleRange(min.doubleValue(), max.doubleValue());
-	}
-
-	boolean moreThanFinite(Number test, Number limit) {
-
-		return test.doubleValue() > limit.doubleValue();
-	}
-
-	boolean notMoreThanFinite(Number test, Number limit) {
-
-		return test.doubleValue() <= limit.doubleValue();
+		return disjuncts;
 	}
 }

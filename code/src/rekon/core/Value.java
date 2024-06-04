@@ -24,34 +24,12 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
 abstract class Value extends PatternComponent {
 
 	NodeValue asNodeValue() {
-
-		return null;
-	}
-
-	BooleanValue asBooleanValue() {
-
-		return null;
-	}
-
-	IntegerRange asIntegerRange() {
-
-		return null;
-	}
-
-	FloatRange asFloatRange() {
-
-		return null;
-	}
-
-	DoubleRange asDoubleRange() {
 
 		return null;
 	}

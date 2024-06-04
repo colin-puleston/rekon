@@ -307,19 +307,24 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	private String getDisjunctLabelsList() {
 
-		String s = new String();
+		StringBuilder s = new StringBuilder();
+		boolean first = true;
 
 		for (Name d : directDisjuncts) {
 
-			if (!s.isEmpty()) {
+			if (first) {
 
-				s += ',';
+				first = false;
+			}
+			else {
+
+				s.append(',');
 			}
 
-			s += d.getLabel();
+			s.append(d.getLabel());
 		}
 
-		return s;
+		return s.toString();
 	}
 
 	private NodeClassifier getClassifier() {

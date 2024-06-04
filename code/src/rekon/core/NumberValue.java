@@ -29,77 +29,85 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PatternCrawler {
+public abstract class NumberValue extends DataValue {
 
-	private Set<NodeX> visitedNodes = new HashSet<NodeX>();
+	static public NumberValue create(Number exact) {
 
-	void crawlFrom(Pattern p) {
-
-		crawlFromNodes(p.getNodes());
-		crawlFromRelations(p);
+		return new SingleNumberRange(exact);
 	}
 
-	void crawlFrom(PatternMatcher m) {
+	static public NumberValue create(Number min, Number max) {
 
-		crawlFrom(m.getPattern());
+		return new SingleNumberRange(min, max);
 	}
 
-	void crawlFrom(DisjunctionMatcher m) {
+	static public NumberValue create(Collection<NumberValue> disjuncts) {
 
-		crawlFromNodes(m.getDirectDisjuncts());
+		return new NumberValueDisjunction(disjuncts).asNumberValue();
 	}
 
-	void crawlFromRelations(Pattern p) {
+	public String toString() {
 
-		for (Relation r : p.getDirectRelations()) {
-
-			NodeValue n = r.getTarget().asNodeValue();
-
-			if (n != null) {
-
-				crawlFromNode(n.getValueNode());
-			}
-		}
+		return renderRanges();
 	}
 
-	abstract boolean visit(NodeX n);
+	boolean subsumesOther(Value v) {
 
-	abstract boolean visit(PatternMatcher m);
-
-	abstract boolean visit(DisjunctionMatcher m);
-
-	private void crawlFromNodes(Names nodes) {
-
-		for (NodeX n : nodes.asNodes()) {
-
-			crawlFromNode(n);
-		}
+		return v instanceof NumberValue && subsumesAllRanges((NumberValue)v);
 	}
 
-	private void crawlFromNode(NodeX n) {
+	void render(PatternRenderer r) {
 
-		if (visitedNodes.add(n) && visit(n)) {
-
-			crawlFromMatchers(n);
-		}
+		r.addLine(renderRanges());
 	}
 
-	private void crawlFromMatchers(NodeX c) {
+	abstract Collection<NumberRange> getDisjunctRanges();
 
-		for (PatternMatcher m : c.getAllPatternMatchers()) {
+	private boolean subsumesAllRanges(NumberValue v) {
 
-			if (visit(m)) {
+		for (NumberRange r : v.getDisjunctRanges()) {
 
-				crawlFrom(m);
+			if (!subsumesRange(r)) {
+
+				return false;
 			}
 		}
 
-		for (DisjunctionMatcher m : c.getAllDisjunctionMatchers()) {
+		return true;
+	}
 
-			if (visit(m)) {
+	private boolean subsumesRange(NumberRange r) {
 
-				crawlFrom(m);
+		for (NumberRange tr : getDisjunctRanges()) {
+
+			if (tr.subsumesRange(r)) {
+
+				return true;
 			}
 		}
+
+		return false;
+	}
+
+	private String renderRanges() {
+
+		StringBuilder s = new StringBuilder();
+		boolean first = true;
+
+		for (NumberRange r : getDisjunctRanges()) {
+
+			if (first) {
+
+				first = false;
+			}
+			else {
+
+				s.append(',');
+			}
+
+			s.append(r.renderRange());
+		}
+
+		return s.toString();
 	}
 }

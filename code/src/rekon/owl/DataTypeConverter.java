@@ -82,19 +82,26 @@ class DataTypeConverter {
 			return BooleanValue.valueFor(value.parseBoolean());
 		}
 
+		Number n = toNumber(value);
+
+		return n != null ? NumberValue.create(n) : null;
+	}
+
+	static private Number toNumber(OWLLiteral value) {
+
 		if (value.isInteger()) {
 
-			return new IntegerRange(value.parseInteger());
+			return value.parseInteger();
 		}
 
 		if (value.isFloat()) {
 
-			return new FloatRange(value.parseFloat());
+			return value.parseFloat();
 		}
 
 		if (value.isDouble()) {
 
-			return new DoubleRange(value.parseDouble());
+			return value.parseDouble();
 		}
 
 		return null;
@@ -104,21 +111,28 @@ class DataTypeConverter {
 
 	private abstract class NumberRangeHandler<N extends Number> extends TypeHandler {
 
-		private Map<OWLDatatypeRestriction, NumberRange<?>> cache
-					= new HashMap<OWLDatatypeRestriction, NumberRange<?>>();
+		private Map<OWLDatatypeRestriction, NumberValue> cache
+					= new HashMap<OWLDatatypeRestriction, NumberValue>();
+
+		NumberValue getUnconstrained() {
+
+			return NumberValue.create(getAbsoluteMin(), getAbsoluteMax());
+		}
 
 		DataValue get(OWLDatatypeRestriction source) {
 
 			return dynamic ? create(source) : getViaCache(source);
 		}
 
-		abstract NumberRange<?> create(N min, N max);
-
 		abstract N parseValue(String value);
+
+		abstract N getAbsoluteMin();
+
+		abstract N getAbsoluteMax();
 
 		private DataValue getViaCache(OWLDatatypeRestriction source) {
 
-			NumberRange<?> r = cache.get(source);
+			NumberValue r = cache.get(source);
 
 			if (r == null) {
 
@@ -130,15 +144,18 @@ class DataTypeConverter {
 			return r;
 		}
 
-		private NumberRange<?> create(OWLDatatypeRestriction source) {
+		private NumberValue create(OWLDatatypeRestriction source) {
 
-			N min = getLimit(source, OWLFacet.MIN_INCLUSIVE);
-			N max = getLimit(source, OWLFacet.MAX_INCLUSIVE);
+			N min = getLimit(source, OWLFacet.MIN_INCLUSIVE, getAbsoluteMin());
+			N max = getLimit(source, OWLFacet.MAX_INCLUSIVE, getAbsoluteMax());
 
-			return create(min, max);
+			return NumberValue.create(min, max);
 		}
 
-		private N getLimit(OWLDatatypeRestriction source, OWLFacet facet) {
+		private N getLimit(
+					OWLDatatypeRestriction source,
+					OWLFacet facet,
+					N defaultLimit) {
 
 			for (OWLFacetRestriction fr : source.getFacetRestrictions()) {
 
@@ -148,7 +165,7 @@ class DataTypeConverter {
 				}
 			}
 
-			return null;
+			return defaultLimit;
 		}
 	}
 
@@ -159,19 +176,19 @@ class DataTypeConverter {
 			return Arrays.asList(OWL2Datatype.XSD_INTEGER, OWL2Datatype.XSD_INT);
 		}
 
-		NumberRange<?> getUnconstrained() {
-
-			return IntegerRange.UNCONSTRAINED;
-		}
-
-		NumberRange<?> create(Integer min, Integer max) {
-
-			return new IntegerRange(min, max);
-		}
-
 		Integer parseValue(String value) {
 
 			return Integer.parseInt(value);
+		}
+
+		Integer getAbsoluteMin() {
+
+			return Integer.MIN_VALUE;
+		}
+
+		Integer getAbsoluteMax() {
+
+			return Integer.MAX_VALUE;
 		}
 	}
 
@@ -182,19 +199,19 @@ class DataTypeConverter {
 			return Arrays.asList(OWL2Datatype.XSD_FLOAT);
 		}
 
-		NumberRange<?> getUnconstrained() {
-
-			return FloatRange.UNCONSTRAINED;
-		}
-
-		NumberRange<?> create(Float min, Float max) {
-
-			return new FloatRange(min, max);
-		}
-
 		Float parseValue(String value) {
 
 			return Float.parseFloat(value);
+		}
+
+		Float getAbsoluteMin() {
+
+			return Float.MIN_VALUE;
+		}
+
+		Float getAbsoluteMax() {
+
+			return Float.MAX_VALUE;
 		}
 	}
 
@@ -205,19 +222,19 @@ class DataTypeConverter {
 			return Arrays.asList(OWL2Datatype.XSD_DOUBLE);
 		}
 
-		NumberRange<?> getUnconstrained() {
-
-			return DoubleRange.UNCONSTRAINED;
-		}
-
-		NumberRange<?> create(Double min, Double max) {
-
-			return new DoubleRange(min, max);
-		}
-
 		Double parseValue(String value) {
 
 			return Double.parseDouble(value);
+		}
+
+		Double getAbsoluteMin() {
+
+			return Double.MIN_VALUE;
+		}
+
+		Double getAbsoluteMax() {
+
+			return Double.MAX_VALUE;
 		}
 	}
 
@@ -243,6 +260,11 @@ class DataTypeConverter {
 			return get((OWLDatatypeRestriction)source);
 		}
 
+		if (source instanceof OWLDataUnionOf) {
+
+			return get((OWLDataUnionOf)source);
+		}
+
 		return null;
 	}
 
@@ -259,6 +281,27 @@ class DataTypeConverter {
 		TypeHandler handler = lookForHandler(source);
 
 		return handler != null ? handler.getUnconstrained() : null;
+	}
+
+	private DataValue get(OWLDataUnionOf source) {
+
+		List<NumberValue> disjuncts = new ArrayList<NumberValue>();
+
+		for (OWLDataRange r : source.getOperands()) {
+
+			DataValue d = get(r);
+
+			if (d instanceof NumberValue) {
+
+				disjuncts.add((NumberValue)d);
+			}
+			else {
+
+				return null;
+			}
+		}
+
+		return NumberValue.create(disjuncts);
 	}
 
 	private TypeHandler lookForHandler(OWLDatatype type) {
