@@ -36,45 +36,6 @@ import rekon.core.*;
  */
 class DataTypeConverter {
 
-	static private Set<TypeHandler> typeHandlers = new HashSet<TypeHandler>();
-
-	static private abstract class TypeHandler {
-
-		TypeHandler() {
-
-			typeHandlers.add(this);
-		}
-
-		boolean handlesType(OWLDatatype type) {
-
-			return getBuiltInTypes().contains(type.getBuiltInDatatype());
-		}
-
-		abstract List<OWL2Datatype> getBuiltInTypes();
-
-		abstract DataValue getUnconstrained();
-
-		abstract DataValue get(OWLDatatypeRestriction source);
-	}
-
-	static private class Booleans extends TypeHandler {
-
-		List<OWL2Datatype> getBuiltInTypes() {
-
-			return Arrays.asList(OWL2Datatype.XSD_BOOLEAN);
-		}
-
-		DataValue getUnconstrained() {
-
-			return BooleanValue.BOOLEAN;
-		}
-
-		DataValue get(OWLDatatypeRestriction source) {
-
-			return null;
-		}
-	}
-
 	static DataValue toDataValue(OWLLiteral value) {
 
 		if (value.isBoolean()) {
@@ -108,6 +69,26 @@ class DataTypeConverter {
 	}
 
 	private boolean dynamic;
+	private Set<TypeHandler> typeHandlers = new HashSet<TypeHandler>();
+
+	private abstract class TypeHandler {
+
+		TypeHandler() {
+
+			typeHandlers.add(this);
+		}
+
+		boolean handlesType(OWLDatatype type) {
+
+			return getBuiltInTypes().contains(type.getBuiltInDatatype());
+		}
+
+		abstract List<OWL2Datatype> getBuiltInTypes();
+
+		abstract DataValue getUnconstrained();
+
+		abstract DataValue get(OWLDatatypeRestriction source);
+	}
 
 	private abstract class NumberRangeHandler<N extends Number> extends TypeHandler {
 
@@ -235,6 +216,24 @@ class DataTypeConverter {
 		Double getAbsoluteMax() {
 
 			return Double.MAX_VALUE;
+		}
+	}
+
+	private class Booleans extends TypeHandler {
+
+		List<OWL2Datatype> getBuiltInTypes() {
+
+			return Arrays.asList(OWL2Datatype.XSD_BOOLEAN);
+		}
+
+		DataValue getUnconstrained() {
+
+			return BooleanValue.BOOLEAN;
+		}
+
+		DataValue get(OWLDatatypeRestriction source) {
+
+			return null;
 		}
 	}
 
