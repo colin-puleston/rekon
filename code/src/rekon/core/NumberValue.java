@@ -51,6 +51,11 @@ public abstract class NumberValue extends DataValue {
 		return renderRanges();
 	}
 
+	NumberValue asNumberValue() {
+
+		return this;
+	}
+
 	boolean subsumesOther(Value v) {
 
 		return v instanceof NumberValue && subsumesAllRanges((NumberValue)v);

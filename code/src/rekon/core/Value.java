@@ -34,6 +34,16 @@ abstract class Value extends PatternComponent {
 		return null;
 	}
 
+	NumberValue asNumberValue() {
+
+		return null;
+	}
+
+	BooleanValue asBooleanValue() {
+
+		return null;
+	}
+
 	boolean subsumes(Value v) {
 
 		return v == this || subsumesOther(v);
