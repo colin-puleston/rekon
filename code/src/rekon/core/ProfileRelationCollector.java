@@ -29,57 +29,17 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class ProfileRelationCollector {
-
-	private ProfileRelationsExpander expander;
+abstract class ProfileRelationCollector {
 
 	private Set<Relation> collectorSet;
 	private boolean anyAdditions = false;
 
-	ProfileRelationCollector(ProfileRelationsExpander expander) {
-
-		this(expander, new HashSet<Relation>());
-	}
-
-	ProfileRelationCollector(
-		ProfileRelationsExpander expander,
-		Set<Relation> initialCollectorSet) {
-
-		this.expander = expander;
+	ProfileRelationCollector(Set<Relation> initialCollectorSet) {
 
 		collectorSet = initialCollectorSet;
 	}
 
-	Set<Relation> collectFromName(NodeX node) {
-
-		if (collectFromRelations(node)) {
-
-			collectFromSubsumers(node);
-		}
-
-		return collectorSet;
-	}
-
-	void collectFromSubsumers(NodeX node) {
-
-		for (NodeX s : node.getSubsumers().asNodes()) {
-
-			collectFromRelations(s);
-		}
-	}
-
-	void collectFromRelationExpansions(Collection<Relation> relations) {
-
-		for (Relation r : relations) {
-
-			for (Relation sr : expander.getAllExpansions(r)) {
-
-				checkAdd(sr);
-			}
-		}
-	}
-
-	void collectAll(Collection<Relation> relations) {
+	void checkAddAll(Collection<Relation> relations) {
 
 		for (Relation r : relations) {
 
@@ -92,37 +52,7 @@ class ProfileRelationCollector {
 		return anyAdditions;
 	}
 
-	Set<Relation> getCollectorSet() {
-
-		return collectorSet;
-	}
-
-	Set<Relation> ensureUpdatableCollectorSet() {
-
-		return collectorSet;
-	}
-
-	private boolean collectFromRelations(NodeX node) {
-
-		PatternMatcher p = node.getProfilePatternMatcher();
-
-		if (p != null) {
-
-			if (!expander.startVisit(node)) {
-
-				return false;
-			}
-
-			for (Relation r : ensureExpandedProfileRelations(p)) {
-
-				checkAdd(r);
-			}
-		}
-
-		return true;
-	}
-
-	private void checkAdd(Relation r) {
+	void checkAdd(Relation r) {
 
 		if (collectorSet.contains(r)) {
 
@@ -143,18 +73,16 @@ class ProfileRelationCollector {
 		}
 
 		resolveCollectorSet().add(r);
+
 		anyAdditions |= true;
 	}
+
+	abstract Set<Relation> ensureUpdatableCollectorSet();
 
 	private Set<Relation> resolveCollectorSet() {
 
 		collectorSet = ensureUpdatableCollectorSet();
 
 		return collectorSet;
-	}
-
-	private Collection<Relation> ensureExpandedProfileRelations(PatternMatcher p) {
-
-		return p.getPattern().getProfileRelations().ensureExpansions(expander);
 	}
 }

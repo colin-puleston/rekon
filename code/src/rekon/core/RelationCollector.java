@@ -29,63 +29,73 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class Relation extends PatternComponent {
+class RelationCollector {
 
-	private PropertyX property;
-	private Value target;
+	private Set<Relation> collectorSet;
+	private boolean anyAdditions = false;
 
-	Relation(PropertyX property, Value target) {
+	RelationCollector() {
 
-		this.property = property;
-		this.target = target;
+		this(new HashSet<Relation>());
 	}
 
-	boolean chainExpandable() {
+	RelationCollector(Set<Relation> initialCollectorSet) {
 
-		return false;
+		collectorSet = initialCollectorSet;
 	}
 
-	PropertyX getProperty() {
+	void checkAddAll(Collection<Relation> relations) {
 
-		return property;
+		for (Relation r : relations) {
+
+			checkAdd(r);
+		}
 	}
 
-	Value getTarget() {
+	boolean anyAdditions() {
 
-		return target;
+		return anyAdditions;
 	}
 
-	boolean subsumes(Relation r) {
+	Set<Relation> getCollected() {
 
-		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
+		return collectorSet;
 	}
 
-	void collectNames(NameCollector collector) {
+	void checkAdd(Relation r) {
 
-		collector.collectName(property);
+		if (collectorSet.contains(r)) {
 
-		target.collectNames(collector.forNextRank());
+			return;
+		}
+
+		for (Relation cr : new ArrayList<Relation>(collectorSet)) {
+
+			if (r.subsumes(cr)) {
+
+				return;
+			}
+
+			if (cr.subsumes(r)) {
+
+				resolveCollectorSet().remove(cr);
+			}
+		}
+
+		resolveCollectorSet().add(r);
+
+		anyAdditions |= true;
 	}
 
-	Names getTargetNodes() {
+	Set<Relation> ensureUpdatableCollectorSet() {
 
-		return Names.NO_NAMES;
+		return collectorSet;
 	}
 
-	void render(PatternRenderer r) {
+	private Set<Relation> resolveCollectorSet() {
 
-		r.addLine(property.getLabel() + " (" + renderRelationType() + ")");
+		collectorSet = ensureUpdatableCollectorSet();
 
-		target.render(r.nextLevel());
-	}
-
-	String renderRelationType() {
-
-		return "some";
-	}
-
-	private boolean subsumesOtherOfType(Relation r) {
-
-		return property.subsumes(r.property) && target.subsumes(r.target);
+		return collectorSet;
 	}
 }

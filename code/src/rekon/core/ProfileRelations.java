@@ -38,11 +38,11 @@ class ProfileRelations {
 
 	private enum ExpansionStatus {UNEXPANDED, EXPANDED, CHECK}
 
-	private class ExpansionCollector extends ProfileRelationCollector {
+	private class Collector extends RelationCollector {
 
-		ExpansionCollector(ProfileRelationsExpander expander) {
+		Collector() {
 
-			super(expander, profileRelations);
+			super(profileRelations);
 		}
 
 		Set<Relation> ensureUpdatableCollectorSet() {
@@ -90,14 +90,14 @@ class ProfileRelations {
 		return expansionStatus == ExpansionStatus.EXPANDED;
 	}
 
-	Collection<Relation> getAll() {
-
-		return profileRelations;
-	}
-
 	NodeX getNode() {
 
 		return pattern.getSingleNode();
+	}
+
+	Collection<Relation> getAll() {
+
+		return profileRelations;
 	}
 
 	Set<Relation> getDirectRelations() {
@@ -126,7 +126,7 @@ class ProfileRelations {
 
 			if (expander.checkExpand(this)) {
 
-				if (expander.incompleteTraversal()) {
+				if (expander.incompleteExpansion()) {
 
 					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
 
@@ -142,8 +142,8 @@ class ProfileRelations {
 		return profileRelations;
 	}
 
-	ProfileRelationCollector createExpansionCollector(ProfileRelationsExpander expander) {
+	RelationCollector createCollector() {
 
-		return new ExpansionCollector(expander);
+		return new Collector();
 	}
 }

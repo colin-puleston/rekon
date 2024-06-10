@@ -79,7 +79,7 @@ class ProfilePatternsExpander {
 
 				ProfileRelations prs = getProfileRelations(p);
 
-				new ProfileRelationsExpander(ontology).processExpansion(prs);
+				prs.processExpansion(new ProfileRelationsExpander(ontology));
 			}
 		}
 
@@ -123,7 +123,6 @@ class ProfilePatternsExpander {
 		ProfileRelations prs = pattern.getProfileRelations();
 
 		prs.initExpansion();
-
-		new ProfileRelationsExpander().processExpansion(prs);
+		prs.processExpansion(new ProfileRelationsExpander());
 	}
 }

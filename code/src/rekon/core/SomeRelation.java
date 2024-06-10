@@ -36,7 +36,7 @@ public class SomeRelation extends NodeRelation {
 		super(property, target);
 	}
 
-	boolean expandableRelation() {
+	boolean chainExpandable() {
 
 		return getNodeProperty().anyChains();
 	}

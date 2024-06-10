@@ -249,7 +249,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
 
-	abstract Collection<Relation> ensureExpandedProfileRelations(PatternMatcher p);
+	abstract Collection<Relation> resolveRelationExpansions(NodeX node);
 
 	private boolean processDisjuncts(DisjunctionMatcher disjunction) {
 
@@ -266,7 +266,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	private boolean processDisjunct(NodeX disjunct) {
 
-		Collection<Relation> rels = getProfileRelations(disjunct);
+		Collection<Relation> rels = resolveRelationExpansions(disjunct);
 
 		if (rels.isEmpty()) {
 
@@ -316,12 +316,5 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		}
 
 		return false;
-	}
-
-	private Collection<Relation> getProfileRelations(NodeX n) {
-
-		PatternMatcher p = n.getProfilePatternMatcher();
-
-		return p != null ? ensureExpandedProfileRelations(p) : Collections.emptySet();
 	}
 }

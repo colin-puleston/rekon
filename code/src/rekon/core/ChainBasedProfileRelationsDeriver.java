@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class ChainBasedProfileRelationsExpander {
+abstract class ChainBasedProfileRelationsDeriver {
 
 	private List<Relation> allExpansions = new ArrayList<Relation>();
 
@@ -41,6 +41,8 @@ abstract class ChainBasedProfileRelationsExpander {
 		private PropertyChain chain;
 		private int tailSubsIndex = 0;
 
+		private Set<NodeX> visitedTargets = new HashSet<NodeX>();
+
 		ExpansionCollector(PropertyChain chain) {
 
 			this.chain = chain;
@@ -48,17 +50,22 @@ abstract class ChainBasedProfileRelationsExpander {
 
 		void collectFromTargets(SomeRelation current) {
 
-			Value tv = current.getTarget();
+			NodeValue v = current.getTarget().asNodeValue();
 
-			if (tv instanceof NodeValue) {
+			if (v != null) {
 
-				collectFromTarget(((NodeValue)tv).getValueNode());
+				NodeX t = v.getValueNode();
+
+				if (visitedTargets.add(t)) {
+
+					collectFromTarget(t);
+				}
 			}
 		}
 
 		private void collectFromTarget(NodeX target) {
 
-			for (Relation r : getAllRelationsFromNode(target)) {
+			for (Relation r : resolveRelationExpansions(target)) {
 
 				if (r instanceof SomeRelation) {
 
@@ -90,7 +97,7 @@ abstract class ChainBasedProfileRelationsExpander {
 		}
 	}
 
-	ChainBasedProfileRelationsExpander(SomeRelation relation) {
+	ChainBasedProfileRelationsDeriver(SomeRelation relation) {
 
 		nextPassExpanders = Collections.singletonList(relation);
 
@@ -102,7 +109,7 @@ abstract class ChainBasedProfileRelationsExpander {
 		return allExpansions;
 	}
 
-	abstract Set<Relation> getAllRelationsFromNode(NodeX node);
+	abstract Collection<Relation> resolveRelationExpansions(NodeX node);
 
 	private void collectExpansions(List<ExpansionCollector> collectors) {
 
