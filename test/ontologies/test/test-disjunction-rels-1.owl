@@ -27,6 +27,14 @@
     
 
 
+    <!-- urn:test#q -->
+
+    <owl:ObjectProperty rdf:about="urn:test#q">
+        <rdfs:subPropertyOf rdf:resource="urn:test#p"/>
+    </owl:ObjectProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -56,7 +64,7 @@
     <owl:Class rdf:about="urn:test#B">
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
+                <owl:onProperty rdf:resource="urn:test#q"/>
                 <owl:someValuesFrom rdf:resource="urn:test#Q"/>
             </owl:Restriction>
         </rdfs:subClassOf>
