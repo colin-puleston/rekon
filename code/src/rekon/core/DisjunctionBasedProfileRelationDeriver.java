@@ -32,16 +32,10 @@ import java.util.*;
 abstract class DisjunctionBasedProfileRelationDeriver {
 
 	private List<Relation> derivedRelations = new ArrayList<Relation>();
-	private List<RelationDeriver<?>> derivers = new ArrayList<RelationDeriver<?>>();
 
-	private abstract class RelationDeriver<T extends Value> {
+	private abstract class TypeRelationDeriver<T extends Value> {
 
-		private Map<PropertyX, Set<T>> propertiesToTargets = new HashMap<PropertyX, Set<T>>();
-
-		RelationDeriver() {
-
-			derivers.add(this);
-		}
+		private Map<PropertyX, List<T>> propertyInputTargets = new HashMap<PropertyX, List<T>>();
 
 		boolean checkProcessDisjunctRelation(Relation rel) {
 
@@ -55,21 +49,20 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			return false;
 		}
 
-		boolean anyPotentialRelations() {
+		void deriveRelations(int disjunctCount)  {
 
-			return !propertiesToTargets.isEmpty();
-		}
+			for (PropertyX p : propertyInputTargets.keySet()) {
 
-		void deriveRelations()  {
+				List<T> inputTargets = propertyInputTargets.get(p);
 
-			for (PropertyX p : propertiesToTargets.keySet()) {
+				if (inputTargets.size() == disjunctCount) {
 
-				Set<T> targets = propertiesToTargets.get(p);
-				Relation rel = checkCreateRelation(p, targets);
+					Relation rel = checkCreateRelation(p, inputTargets);
 
-				if (rel != null) {
+					if (rel != null) {
 
-					derivedRelations.add(rel);
+						derivedRelations.add(rel);
+					}
 				}
 			}
 		}
@@ -78,73 +71,78 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		abstract Class<T> getTargetType();
 
-		abstract Relation checkCreateRelation(PropertyX prop, Set<T> targets);
+		abstract Relation checkCreateRelation(PropertyX prop, Collection<T> inputTargets);
 
 		private void processDisjunctRelation(Relation rel) {
 
-			PropertyX prop = rel.getProperty();
-			Set<T> targets = propertiesToTargets.get(prop);
+			PropertyX p = rel.getProperty();
+			T t = getTarget(rel);
 
-			if (targets == null) {
+			addInputTarget(p, t);
 
-				targets = new HashSet<T>();
+			for (Name s : p.getSubsumers()) {
 
-				propertiesToTargets.put(prop, targets);
+				addInputTarget((PropertyX)s, t);
+			}
+		}
+
+		private void addInputTarget(PropertyX prop, T target) {
+
+			List<T> inputTargets = propertyInputTargets.get(prop);
+
+			if (inputTargets == null) {
+
+				inputTargets = new ArrayList<T>();
+
+				propertyInputTargets.put(prop, inputTargets);
 			}
 
-			targets.add(getTargetType().cast(rel.getTarget()));
+			inputTargets.add(target);
+		}
+
+		private T getTarget(Relation rel) {
+
+			return getTargetType().cast(rel.getTarget());
 		}
 	}
 
-	private abstract class NodeRelationDeriver extends RelationDeriver<NodeValue> {
+	private abstract class NodeRelationDeriver extends TypeRelationDeriver<NodeValue> {
 
 		Class<NodeValue> getTargetType() {
 
 			return NodeValue.class;
 		}
 
-		Relation checkCreateRelation(PropertyX prop, Set<NodeValue> targets) {
+		Relation checkCreateRelation(PropertyX prop, Collection<NodeValue> inputTargets) {
 
-			NodeX n = toSingleNode(toNodeDisjuncts(targets));
-
-			return createRelation((NodeProperty)prop, new NodeValue(n));
+			return createRelation((NodeProperty)prop, toSingleTargetValue(inputTargets));
 		}
 
 		abstract Relation createRelation(NodeProperty prop, NodeValue target);
 
-		private Set<NodeX> toNodeDisjuncts(Set<NodeValue> targets) {
+		private NodeValue toSingleTargetValue(Collection<NodeValue> inputTargets) {
 
-			Set<NodeX> disjuncts = getValuesPlusSubsumerNodes(targets);
-
-			removeAllSubsumers(disjuncts);
-
-			return disjuncts;
+			return new NodeValue(toSingleTargetNode(toExpandedValueNodes(inputTargets)));
 		}
 
-		private Set<NodeX> getValuesPlusSubsumerNodes(Set<NodeValue> targets) {
+		private Set<NodeX> toExpandedValueNodes(Collection<NodeValue> inputTargets) {
 
-			Set<NodeX> nodes = new HashSet<NodeX>();
+			Set<NodeX> expNodes = new HashSet<NodeX>();
 
-			for (NodeValue t : targets) {
+			for (NodeValue t : inputTargets) {
 
 				NodeX n = t.getValueNode();
 
-				nodes.add(n);
-				nodes.addAll(n.getSubsumers().copyNodes());
+				expNodes.add(n);
+				expNodes.addAll(n.getSubsumers().copyNodes());
 			}
 
-			return nodes;
+			return expNodes;
 		}
 
-		private void removeAllSubsumers(Set<NodeX> nodes) {
+		private NodeX toSingleTargetNode(Collection<NodeX> nodes) {
 
-			for (NodeX n : new ArrayList<NodeX>(nodes)) {
-
-				nodes.removeAll(n.getSubsumers().copyNodes());
-			}
-		}
-
-		private NodeX toSingleNode(Set<NodeX> nodes) {
+			removeAllSubsumers(nodes);
 
 			if (nodes.size() == 1) {
 
@@ -152,6 +150,14 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			}
 
 			return addDerivedValueDisjunction(nodes);
+		}
+
+		private void removeAllSubsumers(Collection<NodeX> nodes) {
+
+			for (NodeX n : new ArrayList<NodeX>(nodes)) {
+
+				nodes.removeAll(n.getSubsumers().copyNodes());
+			}
 		}
 	}
 
@@ -183,21 +189,21 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	private abstract class DataRelationDeriver
 								<T extends DataValue>
-								extends RelationDeriver<T> {
+								extends TypeRelationDeriver<T> {
 
 		Class<DataRelation> getRelationType() {
 
 			return DataRelation.class;
 		}
 
-		Relation checkCreateRelation(PropertyX prop, Set<T> targets) {
+		Relation checkCreateRelation(PropertyX prop, Collection<T> inputTargets) {
 
-			T t = unionOf(targets);
+			T t = unionOf(inputTargets);
 
 			return t != null ? new DataRelation((DataProperty)prop, t) : null;
 		}
 
-		abstract T unionOf(Set<T> targets);
+		abstract T unionOf(Collection<T> inputTargets);
 	}
 
 	private class NumberRelationDeriver extends DataRelationDeriver<NumberValue> {
@@ -207,9 +213,9 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			return NumberValue.class;
 		}
 
-		NumberValue unionOf(Set<NumberValue> targets) {
+		NumberValue unionOf(Collection<NumberValue> inputTargets) {
 
-			return NumberValue.create(targets);
+			return NumberValue.create(inputTargets);
 		}
 	}
 
@@ -220,25 +226,71 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			return BooleanValue.class;
 		}
 
-		BooleanValue unionOf(Set<BooleanValue> targets) {
+		BooleanValue unionOf(Collection<BooleanValue> inputTargets) {
 
-			return targets.size() == 1 ? targets.iterator().next() : null;
+			return inputTargets.size() == 1 ? inputTargets.iterator().next() : null;
 		}
 	}
 
-	DisjunctionBasedProfileRelationDeriver() {
+	private class DisjunctionRelationsDeriver {
 
-		new SomeRelationDeriver();
-		new AllRelationDeriver();
-		new NumberRelationDeriver();
-		new BooleanRelationDeriver();
+		private List<TypeRelationDeriver<?>> typeDerivers
+					= new ArrayList<TypeRelationDeriver<?>>();
+
+		DisjunctionRelationsDeriver(DisjunctionMatcher disjunction) {
+
+			typeDerivers.add(new SomeRelationDeriver());
+			typeDerivers.add(new AllRelationDeriver());
+			typeDerivers.add(new NumberRelationDeriver());
+			typeDerivers.add(new BooleanRelationDeriver());
+
+			Names disjuncts = disjunction.getDirectDisjuncts();
+
+			processDisjuncts(disjuncts);
+			deriveRelations(disjuncts.size());
+		}
+
+		private void processDisjuncts(Names disjuncts) {
+
+			for (NodeX d : disjuncts.asNodes()) {
+
+				processDisjunct(d);
+			}
+		}
+
+		private void processDisjunct(NodeX disjunct) {
+
+			for (Relation r : resolveRelationExpansions(disjunct)) {
+
+				processDisjunctRelation(r);
+			}
+		}
+
+		private void processDisjunctRelation(Relation rel) {
+
+			for (TypeRelationDeriver<?> d : typeDerivers) {
+
+				if (d.checkProcessDisjunctRelation(rel)) {
+
+					break;
+				}
+			}
+		}
+
+		private void deriveRelations(int disjunctCount)  {
+
+			for (TypeRelationDeriver<?> d : typeDerivers) {
+
+				d.deriveRelations(disjunctCount);
+			}
+		}
 	}
 
-	void deriveFor(DisjunctionMatcher disjunction) {
+	DisjunctionBasedProfileRelationDeriver(NodeX node) {
 
-		if (processDisjuncts(disjunction)) {
+		for (DisjunctionMatcher d : node.getAllDisjunctionMatchers()) {
 
-			deriveRelations();
+			new DisjunctionRelationsDeriver(d);
 		}
 	}
 
@@ -250,71 +302,4 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
 
 	abstract Collection<Relation> resolveRelationExpansions(NodeX node);
-
-	private boolean processDisjuncts(DisjunctionMatcher disjunction) {
-
-		for (NodeX d : disjunction.getDirectDisjuncts().asNodes()) {
-
-			if (!processDisjunct(d)) {
-
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private boolean processDisjunct(NodeX disjunct) {
-
-		Collection<Relation> rels = resolveRelationExpansions(disjunct);
-
-		if (rels.isEmpty()) {
-
-			return false;
-		}
-
-		for (Relation r : rels) {
-
-			processDisjunctRelation(r);
-
-			if (!anyPotentialRelations()) {
-
-				return false;
-			}
-		}
-
-		return true;
-	}
-
-	private void processDisjunctRelation(Relation rel) {
-
-		for (RelationDeriver<?> d : derivers) {
-
-			if (d.checkProcessDisjunctRelation(rel)) {
-
-				break;
-			}
-		}
-	}
-
-	private void deriveRelations()  {
-
-		for (RelationDeriver<?> d : derivers) {
-
-			d.deriveRelations();
-		}
-	}
-
-	private boolean anyPotentialRelations() {
-
-		for (RelationDeriver<?> d : derivers) {
-
-			if (d.anyPotentialRelations()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
 }

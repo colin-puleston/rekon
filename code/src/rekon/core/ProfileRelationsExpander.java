@@ -38,6 +38,11 @@ class ProfileRelationsExpander {
 
 	private class DisjunctionBasedDeriver extends DisjunctionBasedProfileRelationDeriver {
 
+		DisjunctionBasedDeriver(NodeX node) {
+
+			super(node);
+		}
+
 		ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts) {
 
 			if (localExpansion()) {
@@ -54,9 +59,9 @@ class ProfileRelationsExpander {
 		}
 	}
 
-	private class ChainBasedDeriver extends ChainBasedProfileRelationsDeriver {
+	private class ChainBasedExpander extends ChainBasedProfileRelationsExpander {
 
-		ChainBasedDeriver(SomeRelation relation) {
+		ChainBasedExpander(SomeRelation relation) {
 
 			super(relation);
 		}
@@ -123,7 +128,7 @@ class ProfileRelationsExpander {
 			this.node = node;
 			this.relationCollector = relationCollector;
 
-			disjunctionBasedRelations = deriveDisjunctionBasedRelations();
+			disjunctionBasedRelations = resolveDisjunctionBasedRelations();
 			inputRelations = resolveInputRelations(directRelations);
 		}
 
@@ -154,21 +159,14 @@ class ProfileRelationsExpander {
 			}
 		}
 
-		private Collection<Relation> deriveDisjunctionBasedRelations() {
+		private Collection<Relation> resolveDisjunctionBasedRelations() {
 
-			return localExpansion() ? Collections.emptyList() : deriveRelations();
-		}
+			if (localExpansion()) {
 
-		private Collection<Relation> deriveRelations() {
-
-			DisjunctionBasedDeriver deriver = new DisjunctionBasedDeriver();
-
-			for (DisjunctionMatcher d : node.getAllDisjunctionMatchers()) {
-
-				deriver.deriveFor(d);
+				return Collections.emptyList();
 			}
 
-			return deriver.getAll();
+			return new DisjunctionBasedDeriver(node).getAll();
 		}
 
 		private Collection<Relation> resolveInputRelations(
@@ -253,7 +251,7 @@ class ProfileRelationsExpander {
 
 			if (sr.anyChains()) {
 
-				return new ChainBasedDeriver(sr).getAllExpansions();
+				return new ChainBasedExpander(sr).getAllExpansions();
 			}
 		}
 

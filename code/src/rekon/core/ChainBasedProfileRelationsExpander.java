@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class ChainBasedProfileRelationsDeriver {
+abstract class ChainBasedProfileRelationsExpander {
 
 	private List<Relation> allExpansions = new ArrayList<Relation>();
 
@@ -97,7 +97,7 @@ abstract class ChainBasedProfileRelationsDeriver {
 		}
 	}
 
-	ChainBasedProfileRelationsDeriver(SomeRelation relation) {
+	ChainBasedProfileRelationsExpander(SomeRelation relation) {
 
 		nextPassExpanders = Collections.singletonList(relation);
 
