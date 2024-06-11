@@ -35,13 +35,88 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	private abstract class TypeRelationDeriver<T extends Value> {
 
-		private Map<PropertyX, List<T>> propertyInputTargets = new HashMap<PropertyX, List<T>>();
+		private List<RelationSpec> relationSpecs = new ArrayList<RelationSpec>();
 
-		boolean checkProcessDisjunctRelation(Relation rel) {
+		private class RelationSpec {
+
+			private PropertyX property;
+			private List<T> inputTargets;
+
+			private int absorbedDisjuncts;
+
+			RelationSpec(PropertyX property, T target) {
+
+				this(property, new ArrayList<T>(), target);
+			}
+
+			void checkAbsorbRelation(PropertyX property, T target, int disjunctIndex) {
+
+				if (property == this.property) {
+
+					if (!checkPurge(disjunctIndex) && !inputTargets.contains(target)) {
+
+						if (disjunctIndex == absorbedDisjuncts) {
+
+							inputTargets.add(target);
+
+							absorbedDisjuncts++;
+						}
+						else {
+
+							new RelationSpec(property, inputTargetsMinusLast(), target);
+						}
+					}
+				}
+			}
+
+			boolean checkPurge(int minAbsorbedDisjuncts) {
+
+				if (absorbedDisjuncts < minAbsorbedDisjuncts) {
+
+					relationSpecs.remove(this);
+
+					return true;
+				}
+
+				return false;
+			}
+
+			void checkAddRelation() {
+
+				Relation rel = checkCreateRelation(property, inputTargets);
+
+				if (rel != null) {
+
+					derivedRelations.add(rel);
+				}
+			}
+
+			private RelationSpec(PropertyX property, List<T> inputTargets, T newTarget) {
+
+				this.property = property;
+				this.inputTargets = inputTargets;
+
+				inputTargets.add(newTarget);
+				absorbedDisjuncts = inputTargets.size();
+
+				relationSpecs.add(this);
+			}
+
+			private List<T> inputTargetsMinusLast() {
+
+				List<T> minusLast = new ArrayList<T>(inputTargets);
+
+				minusLast.remove(minusLast.size() - 1);
+
+				return minusLast;
+			}
+		}
+
+		boolean checkProcessDisjunctRelation(Relation rel, int disjunctIndex) {
 
 			if (getRelationType().isAssignableFrom(rel.getClass())) {
 
-				processDisjunctRelation(rel);
+				processDisjunctRelation(rel, disjunctIndex);
 
 				return true;
 			}
@@ -49,21 +124,16 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			return false;
 		}
 
-		void deriveRelations(int disjunctCount)  {
+		void deriveRelations(int totalDisjuncts)  {
 
-			for (PropertyX p : propertyInputTargets.keySet()) {
+			for (RelationSpec s : copyRelationSpecs()) {
 
-				List<T> inputTargets = propertyInputTargets.get(p);
+				s.checkPurge(totalDisjuncts);
+			}
 
-				if (inputTargets.size() == disjunctCount) {
+			for (RelationSpec s : relationSpecs) {
 
-					Relation rel = checkCreateRelation(p, inputTargets);
-
-					if (rel != null) {
-
-						derivedRelations.add(rel);
-					}
-				}
+				s.checkAddRelation();
 			}
 		}
 
@@ -73,31 +143,37 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		abstract Relation checkCreateRelation(PropertyX prop, Collection<T> inputTargets);
 
-		private void processDisjunctRelation(Relation rel) {
+		private void processDisjunctRelation(Relation rel, int disjunctIndex) {
 
 			PropertyX p = rel.getProperty();
 			T t = getTarget(rel);
 
-			addInputTarget(p, t);
+			addInputTarget(p, t, disjunctIndex);
 
 			for (Name s : p.getSubsumers()) {
 
-				addInputTarget((PropertyX)s, t);
+				addInputTarget((PropertyX)s, t, disjunctIndex);
 			}
 		}
 
-		private void addInputTarget(PropertyX prop, T target) {
+		private void addInputTarget(PropertyX prop, T target, int disjunctIndex) {
 
-			List<T> inputTargets = propertyInputTargets.get(prop);
+			if (disjunctIndex == 0) {
 
-			if (inputTargets == null) {
-
-				inputTargets = new ArrayList<T>();
-
-				propertyInputTargets.put(prop, inputTargets);
+				new RelationSpec(prop, target);
 			}
+			else {
 
-			inputTargets.add(target);
+				for (RelationSpec s : copyRelationSpecs()) {
+
+					s.checkAbsorbRelation(prop, target, disjunctIndex);
+				}
+			}
+		}
+
+		private List<RelationSpec> copyRelationSpecs() {
+
+			return new ArrayList<RelationSpec>(relationSpecs);
 		}
 
 		private T getTarget(Relation rel) {
@@ -252,36 +328,38 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		private void processDisjuncts(Names disjuncts) {
 
+			int disjunctIndex = 0;
+
 			for (NodeX d : disjuncts.asNodes()) {
 
-				processDisjunct(d);
+				processDisjunct(d, disjunctIndex++);
 			}
 		}
 
-		private void processDisjunct(NodeX disjunct) {
+		private void processDisjunct(NodeX disjunct, int disjunctIndex) {
 
 			for (Relation r : resolveRelationExpansions(disjunct)) {
 
-				processDisjunctRelation(r);
+				processDisjunctRelation(r, disjunctIndex);
 			}
 		}
 
-		private void processDisjunctRelation(Relation rel) {
+		private void processDisjunctRelation(Relation rel, int disjunctIndex) {
 
 			for (TypeRelationDeriver<?> d : typeDerivers) {
 
-				if (d.checkProcessDisjunctRelation(rel)) {
+				if (d.checkProcessDisjunctRelation(rel, disjunctIndex)) {
 
 					break;
 				}
 			}
 		}
 
-		private void deriveRelations(int disjunctCount)  {
+		private void deriveRelations(int totalDisjuncts)  {
 
 			for (TypeRelationDeriver<?> d : typeDerivers) {
 
-				d.deriveRelations(disjunctCount);
+				d.deriveRelations(totalDisjuncts);
 			}
 		}
 	}
