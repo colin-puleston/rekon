@@ -53,41 +53,33 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 				if (property == this.property) {
 
-					if (!checkPurge(disjunctIndex) && !inputTargets.contains(target)) {
+					if (disjunctIndex > absorbedDisjuncts) {
 
-						if (disjunctIndex == absorbedDisjuncts) {
+						relationSpecs.remove(this);
+					}
+					else if (disjunctIndex == absorbedDisjuncts) {
 
-							inputTargets.add(target);
+						inputTargets.add(target);
 
-							absorbedDisjuncts++;
-						}
-						else {
+						absorbedDisjuncts++;
+					}
+					else {
 
-							new RelationSpec(property, inputTargetsMinusLast(), target);
-						}
+						new RelationSpec(property, inputTargetsMinusLast(), target);
 					}
 				}
 			}
 
-			boolean checkPurge(int minAbsorbedDisjuncts) {
+			void checkAddRelation(int totalDisjuncts) {
 
-				if (absorbedDisjuncts < minAbsorbedDisjuncts) {
+				if (totalDisjuncts == absorbedDisjuncts) {
 
-					relationSpecs.remove(this);
+					Relation rel = checkCreateRelation(property, inputTargets);
 
-					return true;
-				}
+					if (rel != null) {
 
-				return false;
-			}
-
-			void checkAddRelation() {
-
-				Relation rel = checkCreateRelation(property, inputTargets);
-
-				if (rel != null) {
-
-					derivedRelations.add(rel);
+						derivedRelations.add(rel);
+					}
 				}
 			}
 
@@ -124,16 +116,11 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			return false;
 		}
 
-		void deriveRelations(int totalDisjuncts)  {
-
-			for (RelationSpec s : copyRelationSpecs()) {
-
-				s.checkPurge(totalDisjuncts);
-			}
+		void addDerivedRelations(int totalDisjuncts)  {
 
 			for (RelationSpec s : relationSpecs) {
 
-				s.checkAddRelation();
+				s.checkAddRelation(totalDisjuncts);
 			}
 		}
 
@@ -359,7 +346,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 			for (TypeRelationDeriver<?> d : typeDerivers) {
 
-				d.deriveRelations(totalDisjuncts);
+				d.addDerivedRelations(totalDisjuncts);
 			}
 		}
 	}
