@@ -45,8 +45,8 @@ class SingleNumberRange extends NumberValue {
 		this.max = max;
 	}
 
-	Collection<NumberRange> getDisjunctRanges() {
+	List<NumberRange> getDisjunctRanges() {
 
-		return Collections.singleton(new NumberRange(min, max));
+		return Collections.singletonList(new NumberRange(min, max));
 	}
 }

@@ -46,6 +46,23 @@ public abstract class NumberValue extends DataValue {
 		return new NumberValueDisjunction(disjuncts).asNumberValue();
 	}
 
+	public boolean equals(Object other) {
+
+		return other instanceof NumberValue && equalsNumberValue((NumberValue)other);
+	}
+
+	public int hashCode() {
+
+		int hash = 0;
+
+		for (NumberRange r : getDisjunctRanges()) {
+
+			hash += r.hashCode();
+		}
+
+		return hash;
+	}
+
 	public String toString() {
 
 		return renderRanges();
@@ -66,7 +83,30 @@ public abstract class NumberValue extends DataValue {
 		r.addLine(renderRanges());
 	}
 
-	abstract Collection<NumberRange> getDisjunctRanges();
+	abstract List<NumberRange> getDisjunctRanges();
+
+	private boolean equalsNumberValue(NumberValue other) {
+
+		List<NumberRange> rs = getDisjunctRanges();
+		List<NumberRange> ors = other.getDisjunctRanges();
+
+		if (rs.size() != ors.size()) {
+
+			return false;
+		}
+
+		int i = 0;
+
+		for (NumberRange r : rs) {
+
+			if (!r.equals(ors.get(i++))) {
+
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	private boolean subsumesAllRanges(NumberValue v) {
 

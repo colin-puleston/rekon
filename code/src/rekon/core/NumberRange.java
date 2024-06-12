@@ -32,6 +32,16 @@ class NumberRange {
 	private Number min;
 	private Number max;
 
+	public boolean equals(Object other) {
+
+		return other instanceof NumberRange && equalsNumberRange((NumberRange)other);
+	}
+
+	public int hashCode() {
+
+		return min.hashCode() + max.hashCode();
+	}
+
 	public String toString() {
 
 		return renderRange();
@@ -61,6 +71,11 @@ class NumberRange {
 	String renderRange() {
 
 		return "[" + renderLimit(min) + ", " + renderLimit(max) + "]";
+	}
+
+	private boolean equalsNumberRange(NumberRange other) {
+
+		return min.equals(other.min) && max.equals(other.max);
 	}
 
 	private boolean notMoreThan(Number test, Number limit) {

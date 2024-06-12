@@ -31,14 +31,14 @@ import java.util.*;
  */
 class NumberRangeDisjunction extends NumberValue {
 
-	private Collection<NumberRange> disjuncts;
+	private List<NumberRange> disjuncts;
 
-	NumberRangeDisjunction(Collection<NumberRange> disjuncts) {
+	NumberRangeDisjunction(List<NumberRange> disjuncts) {
 
 		this.disjuncts = disjuncts;
 	}
 
-	Collection<NumberRange> getDisjunctRanges() {
+	List<NumberRange> getDisjunctRanges() {
 
 		return disjuncts;
 	}
