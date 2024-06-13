@@ -126,7 +126,7 @@ class ProfileRelations {
 
 			if (expander.checkExpand(this)) {
 
-				if (expander.incompleteExpansion()) {
+				if (expander.incompleteTraversal()) {
 
 					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
 

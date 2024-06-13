@@ -33,8 +33,9 @@ class ProfileRelationsExpander {
 
 	private Ontology ontology;
 
-	private NameSet visited = new NameSet();
-	private NameSet revisited = new NameSet();
+	private Deque<NodeX> visitedNodes = new ArrayDeque<NodeX>();
+
+	private boolean incompleteTraversal = false;
 
 	private class DisjunctionBasedDeriver extends DisjunctionBasedProfileRelationDeriver {
 
@@ -228,19 +229,25 @@ class ProfileRelationsExpander {
 
 		NodeX n = profileRelations.getNode();
 
-		startVisit(n);
+		if (visitedNodes.contains(n)) {
 
-		if (revisiting(n)) {
+			incompleteTraversal = true;
 
 			return false;
 		}
 
-		return new ExpansionChecker(profileRelations).checkExpand();
+		visitedNodes.push(n);
+
+		boolean expanded = new ExpansionChecker(profileRelations).checkExpand();
+
+		visitedNodes.pop();
+
+		return expanded;
 	}
 
-	boolean incompleteExpansion() {
+	boolean incompleteTraversal() {
 
-		return !revisited.isEmpty();
+		return incompleteTraversal;
 	}
 
 	private Collection<Relation> getAllChainBasedExpansions(Relation relation) {
@@ -274,20 +281,7 @@ class ProfileRelationsExpander {
 
 		ProfileRelations rels = p.getPattern().getProfileRelations();
 
-		return revisiting(node) ? rels.getAll() : rels.ensureExpansions(this);
-	}
-
-	private void startVisit(NodeX node) {
-
-		if (!visited.add(node)) {
-
-			revisited.add(node);
-		}
-	}
-
-	private boolean revisiting(NodeX node) {
-
-		return revisited.contains(node);
+		return visitedNodes.contains(node) ? rels.getAll() : rels.ensureExpansions(this);
 	}
 
 	private boolean localExpansion() {
