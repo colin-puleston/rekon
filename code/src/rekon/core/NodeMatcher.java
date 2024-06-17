@@ -52,4 +52,6 @@ abstract class NodeMatcher {
 	abstract boolean hasExpandedDisjunct(NodeX test);
 
 	abstract void acceptVisitor(NodeMatcherVisitor visitor);
+
+	abstract void render(PatternRenderer r);
 }

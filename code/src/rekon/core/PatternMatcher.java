@@ -119,4 +119,9 @@ class PatternMatcher extends NodeMatcher {
 
 		visitor.visit(this);
 	}
+
+	void render(PatternRenderer r) {
+
+		pattern.render(r);
+	}
 }

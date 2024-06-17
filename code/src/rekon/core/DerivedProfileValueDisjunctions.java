@@ -29,60 +29,31 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class ProfileRelationCollector {
+class DerivedProfileValueDisjunctions {
 
-	private Set<Relation> collectorSet;
-	private boolean anyAdditions = false;
+	private MatchStructures matchStructures;
 
-	ProfileRelationCollector(Set<Relation> initialCollectorSet) {
+	private Map<Collection<NodeX>, ClassNode> classesByDisjuncts
+						= new HashMap<Collection<NodeX>, ClassNode>();
 
-		collectorSet = initialCollectorSet;
+	DerivedProfileValueDisjunctions(MatchStructures matchStructures) {
+
+		this.matchStructures = matchStructures;
 	}
 
-	void checkAddAll(Collection<Relation> relations) {
+	ClassNode resolve(Collection<NodeX> disjuncts) {
 
-		for (Relation r : relations) {
+		ClassNode cn = classesByDisjuncts.get(disjuncts);
 
-			checkAdd(r);
-		}
-	}
+		if (cn == null) {
 
-	boolean anyAdditions() {
+			cn = matchStructures.createPatternClass();
 
-		return anyAdditions;
-	}
+			matchStructures.addDisjunction(cn, disjuncts, false);
 
-	void checkAdd(Relation r) {
-
-		if (collectorSet.contains(r)) {
-
-			return;
+			classesByDisjuncts.put(disjuncts, cn);
 		}
 
-		for (Relation cr : new ArrayList<Relation>(collectorSet)) {
-
-			if (r.subsumes(cr)) {
-
-				return;
-			}
-
-			if (cr.subsumes(r)) {
-
-				resolveCollectorSet().remove(cr);
-			}
-		}
-
-		resolveCollectorSet().add(r);
-
-		anyAdditions |= true;
-	}
-
-	abstract Set<Relation> ensureUpdatableCollectorSet();
-
-	private Set<Relation> resolveCollectorSet() {
-
-		collectorSet = ensureUpdatableCollectorSet();
-
-		return collectorSet;
+		return cn;
 	}
 }

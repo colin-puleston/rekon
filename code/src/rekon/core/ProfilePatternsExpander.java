@@ -40,24 +40,36 @@ class ProfilePatternsExpander {
 
 			this.ontology = ontology;
 
-			initCurrentProfiles();
-			initPotentialProfiles();
-
-			processProfiles(ontology.getProfilePatterns());
-			processProfiles(potentialProfiles);
-
+			findPotentialProfiles();
+			performAllExpansions();
 			resolvePotentialProfiles();
 		}
 
-		private void initCurrentProfiles() {
+		private void performAllExpansions() {
 
-			for (PatternMatcher p : ontology.getProfilePatterns()) {
+			List<PatternMatcher> currentProfiles = ontology.getProfilePatterns();
+			boolean firstPass = true;
 
-				initExpansion(p);
+			while (true) {
+
+				initExpansions(currentProfiles, firstPass);
+				initExpansions(potentialProfiles, firstPass);
+
+				boolean anyNew = false;
+
+				anyNew |= checkExpansions(currentProfiles);
+				anyNew |= checkExpansions(potentialProfiles);
+
+				if (!anyNew) {
+
+					break;
+				}
+
+				firstPass = false;
 			}
 		}
 
-		private void initPotentialProfiles() {
+		private void findPotentialProfiles() {
 
 			for (DisjunctionMatcher d : ontology.getAllDisjunctions()) {
 
@@ -65,22 +77,34 @@ class ProfilePatternsExpander {
 
 				if (n.getProfilePatternMatcher() == null) {
 
-					PatternMatcher p = n.addProfilePatternMatcher();
-
-					potentialProfiles.add(p);
-					initExpansion(p);
+					potentialProfiles.add(n.addProfilePatternMatcher());
 				}
 			}
 		}
 
-		private void processProfiles(List<PatternMatcher> patterns) {
+		private void initExpansions(List<PatternMatcher> profiles, boolean firstPass) {
 
-			for (PatternMatcher p : patterns) {
+			for (PatternMatcher p : profiles) {
+
+				initExpansion(p, firstPass);
+			}
+		}
+
+		private boolean checkExpansions(List<PatternMatcher> profiles) {
+
+			boolean anyNew = false;
+
+			for (PatternMatcher p : profiles) {
 
 				ProfileRelations prs = getProfileRelations(p);
+				ProfileRelationsExpander e = new ProfileRelationsExpander(ontology);
 
-				prs.processExpansion(new ProfileRelationsExpander(ontology));
+				prs.checkExpansion(e, true);
+
+				anyNew |= prs.newlyExpanded();
 			}
+
+			return anyNew;
 		}
 
 		private void resolvePotentialProfiles() {
@@ -102,9 +126,9 @@ class ProfilePatternsExpander {
 			potentialProfiles.clear();
 		}
 
-		private void initExpansion(PatternMatcher p) {
+		private void initExpansion(PatternMatcher p, boolean firstPass) {
 
-			getProfileRelations(p).initExpansion();
+			getProfileRelations(p).initExpansion(firstPass);
 		}
 
 		private ProfileRelations getProfileRelations(PatternMatcher p) {
@@ -122,7 +146,7 @@ class ProfilePatternsExpander {
 
 		ProfileRelations prs = pattern.getProfileRelations();
 
-		prs.initExpansion();
-		prs.processExpansion(new ProfileRelationsExpander());
+		prs.initExpansion(true);
+		prs.checkExpansion(new ProfileRelationsExpander(), true);
 	}
 }

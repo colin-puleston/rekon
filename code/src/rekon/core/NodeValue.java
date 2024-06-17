@@ -67,6 +67,20 @@ public class NodeValue extends Value {
 
 	void render(PatternRenderer r) {
 
-		r.addLine(node.getLabel());
+		if (r.profile() && !node.mapped()) {
+
+			r.addLine(node.getLabel() + "==>");
+
+			r = r.nextLevel();
+
+			for (NodeMatcher m : node.getAllProfileMatchers()) {
+
+				m.render(r);
+			}
+		}
+		else {
+
+			r.addLine(node.getLabel());
+		}
 	}
 }

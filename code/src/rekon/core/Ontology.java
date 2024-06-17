@@ -44,14 +44,16 @@ public class Ontology {
 	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
 	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
 
-	private MatchStructures matchStructures;
+	private DerivedProfileValueDisjunctions derivedProfileValueDisjunctions;
 
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		matchStructures = createMatchStructures();
+		MatchStructures matchStructures = createMatchStructures();
+
+		derivedProfileValueDisjunctions = new DerivedProfileValueDisjunctions(matchStructures);
 
 		structureBuilder.build(matchStructures);
 
@@ -96,15 +98,6 @@ public class Ontology {
 		profilePatterns.add(p);
 	}
 
-	ClassNode addDerivedProfileValueDisjunction(Collection<NodeX> disjuncts) {
-
-		ClassNode cn = matchStructures.createPatternClass();
-
-		matchStructures.addDisjunction(cn, disjuncts, false);
-
-		return cn;
-	}
-
 	Iterable<Name> getAllNames() {
 
 		return allNames;
@@ -133,6 +126,11 @@ public class Ontology {
 	List<DisjunctionMatcher> getDefinitionDisjunctions() {
 
 		return definitionDisjunctions;
+	}
+
+	DerivedProfileValueDisjunctions getDerivedProfileValueDisjunctions() {
+
+		return derivedProfileValueDisjunctions;
 	}
 
 	DynamicSubsumers getDynamicSubsumers() {

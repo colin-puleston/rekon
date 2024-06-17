@@ -31,14 +31,24 @@ public abstract class PatternComponent {
 
 	public String toString() {
 
-		PatternRenderer r = new PatternRenderer(getComponentTypeName());
+		return toString(false);
+	}
+
+	public String toProfileString() {
+
+		return toString(true);
+	}
+
+	abstract void render(PatternRenderer r);
+
+	private String toString(boolean profile) {
+
+		PatternRenderer r = new PatternRenderer(getComponentTypeName(), profile);
 
 		render(r);
 
 		return r.getRendering();
 	}
-
-	abstract void render(PatternRenderer r);
 
 	private String getComponentTypeName() {
 

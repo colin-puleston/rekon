@@ -34,6 +34,10 @@ class ProfileRelations {
 	private Pattern pattern;
 	private Set<Relation> profileRelations;
 
+	private boolean expanded = false;
+	private boolean newlyExpanded = false;
+	private boolean expansionCheckRequired = false;
+
 	private ExpansionStatus expansionStatus = ExpansionStatus.UNEXPANDED;
 
 	private enum ExpansionStatus {UNEXPANDED, EXPANDED, CHECK}
@@ -45,16 +49,9 @@ class ProfileRelations {
 			super(profileRelations);
 		}
 
-		Set<Relation> ensureUpdatableCollectorSet() {
+		void onAdditions() {
 
-			Set<Relation> dirRels = getDirectRelations();
-
-			if (profileRelations == dirRels) {
-
-				profileRelations = new HashSet<Relation>(dirRels);
-			}
-
-			return profileRelations;
+			profileRelations = getCollected();
 		}
 	}
 
@@ -65,18 +62,32 @@ class ProfileRelations {
 		profileRelations = getDirectRelations();
 	}
 
-	void initExpansion() {
+	void initExpansion(boolean firstPass) {
 
-		expansionStatus = ExpansionStatus.CHECK;
+		expansionCheckRequired = true;
+
+		if (firstPass) {
+
+			expanded = false;
+		}
+
+		newlyExpanded = false;
 	}
 
-	void processExpansion(ProfileRelationsExpander expander) {
+	void checkExpansion(ProfileRelationsExpander expander, boolean topLevel) {
 
-		if (expansionStatus == ExpansionStatus.CHECK) {
+		if (expansionCheckRequired) {
 
-			boolean exp = expander.checkExpand(this);
+			expansionCheckRequired = false;
 
-			expansionStatus = exp ? ExpansionStatus.EXPANDED : ExpansionStatus.UNEXPANDED;
+			if (expander.checkExpand(this)) {
+
+				if (topLevel || !expander.incompleteTraversal()) {
+
+					expanded = true;
+					newlyExpanded = true;
+				}
+			}
 		}
 	}
 
@@ -87,7 +98,12 @@ class ProfileRelations {
 
 	boolean expanded() {
 
-		return expansionStatus == ExpansionStatus.EXPANDED;
+		return expanded;
+	}
+
+	boolean newlyExpanded() {
+
+		return newlyExpanded;
 	}
 
 	NodeX getNode() {
@@ -95,14 +111,14 @@ class ProfileRelations {
 		return pattern.getSingleNode();
 	}
 
-	Collection<Relation> getAll() {
-
-		return profileRelations;
-	}
-
 	Set<Relation> getDirectRelations() {
 
 		return pattern.getDirectRelations();
+	}
+
+	Set<Relation> getAll() {
+
+		return profileRelations;
 	}
 
 	boolean anySubsumedBy(Relation r) {
@@ -116,30 +132,6 @@ class ProfileRelations {
 		}
 
 		return false;
-	}
-
-	Collection<Relation> ensureExpansions(ProfileRelationsExpander expander) {
-
-		if (expansionStatus == ExpansionStatus.CHECK) {
-
-			Set<Relation> preProfileRels = new HashSet<Relation>(profileRelations);
-
-			if (expander.checkExpand(this)) {
-
-				if (expander.incompleteTraversal()) {
-
-					Set<Relation> postProfileRels = new HashSet<Relation>(profileRelations);
-
-					profileRelations = preProfileRels;
-
-					return postProfileRels;
-				}
-
-				expansionStatus = ExpansionStatus.EXPANDED;
-			}
-		}
-
-		return profileRelations;
 	}
 
 	RelationCollector createCollector() {

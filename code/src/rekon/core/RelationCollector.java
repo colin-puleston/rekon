@@ -31,45 +31,66 @@ import java.util.*;
  */
 class RelationCollector {
 
-	private Set<Relation> collectorSet;
+	private Set<Relation> collected = new HashSet<Relation>();
 	private boolean anyAdditions = false;
 
 	RelationCollector() {
-
-		this(new HashSet<Relation>());
 	}
 
-	RelationCollector(Set<Relation> initialCollectorSet) {
+	RelationCollector(Set<Relation> initialCollection) {
 
-		collectorSet = initialCollectorSet;
+		absorbAll(initialCollection, true);
 	}
 
-	void checkAddAll(Collection<Relation> relations) {
+	void absorbAll(Collection<Relation> relations) {
 
-		for (Relation r : relations) {
+		absorbAll(relations, false);
+	}
 
-			checkAdd(r);
+	void absorb(Relation r) {
+
+		absorb(r, false);
+	}
+
+	boolean checkAdditions() {
+
+		if (anyAdditions) {
+
+			onAdditions();
 		}
-	}
-
-	boolean anyAdditions() {
 
 		return anyAdditions;
 	}
 
-	Set<Relation> getCollected() {
-
-		return collectorSet;
+	void onAdditions() {
 	}
 
-	void checkAdd(Relation r) {
+	Set<Relation> getCollected() {
 
-		if (collectorSet.contains(r)) {
+		return collected;
+	}
+
+	Collection<Relation> copyCollected() {
+
+		return new ArrayList<Relation>(collected);
+	}
+
+	private void absorbAll(Collection<Relation> relations, boolean initialising) {
+
+		for (Relation r : relations) {
+
+			absorb(r, initialising);
+		}
+	}
+
+	private void absorb(Relation r, boolean initialising) {
+
+		if (collected.contains(r)) {
 
 			return;
 		}
 
-		for (Relation cr : new ArrayList<Relation>(collectorSet)) {
+		for (Relation cr : copyCollected()) {
 
 			if (r.subsumes(cr)) {
 
@@ -78,24 +99,15 @@ class RelationCollector {
 
 			if (cr.subsumes(r)) {
 
-				resolveCollectorSet().remove(cr);
+				collected.remove(cr);
 			}
 		}
 
-		resolveCollectorSet().add(r);
+		collected.add(r);
 
-		anyAdditions |= true;
-	}
+		if (!initialising) {
 
-	Set<Relation> ensureUpdatableCollectorSet() {
-
-		return collectorSet;
-	}
-
-	private Set<Relation> resolveCollectorSet() {
-
-		collectorSet = ensureUpdatableCollectorSet();
-
-		return collectorSet;
+			anyAdditions |= true;
+		}
 	}
 }

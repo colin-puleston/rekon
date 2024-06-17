@@ -32,9 +32,9 @@ import java.util.*;
 class ProfileRelationsExpander {
 
 	private Ontology ontology;
+	private ProfileRelations topLevelRelations;
 
 	private Deque<NodeX> visitedNodes = new ArrayDeque<NodeX>();
-
 	private boolean incompleteTraversal = false;
 
 	private class DisjunctionBasedDeriver extends DisjunctionBasedProfileRelationDeriver {
@@ -51,7 +51,7 @@ class ProfileRelationsExpander {
 				throw new Error("Unexpected disjunction-value derivation!");
 			}
 
-			return ontology.addDerivedProfileValueDisjunction(disjuncts);
+			return ontology.getDerivedProfileValueDisjunctions().resolve(disjuncts);
 		}
 
 		Collection<Relation> resolveRelationExpansions(NodeX node) {
@@ -79,39 +79,33 @@ class ProfileRelationsExpander {
 		private RelationCollector relationCollector;
 
 		private Collection<Relation> inputRelations;
-		private Collection<Relation> disjunctionBasedRelations;
+		private Collection<Relation> disjunctsBasedRelations;
 
-		ExpansionChecker(ProfileRelations profileRelations) {
+		ExpansionChecker(ProfileRelations relations) {
 
-			this(
-				profileRelations.getNode(),
-				profileRelations.getDirectRelations(),
-				profileRelations.createCollector());
+			this(relations.getNode(), relations.createCollector());
 		}
 
 		ExpansionChecker(NodeX node) {
 
-			this(node, Collections.emptySet(), new RelationCollector());
+			this(node, new RelationCollector());
 		}
 
 		boolean checkExpand() {
 
-			if (!disjunctionBasedRelations.isEmpty()) {
-
-				relationCollector.checkAddAll(disjunctionBasedRelations);
-			}
+			relationCollector.absorbAll(resolveDisjunctionBasedRelations());
 
 			if (anyLastPhaseInferredSubsumers()) {
 
 				collectFromSubsumers(node);
 			}
 
-			if (anyChainExpandableInputRelations()) {
+			if (anyChainExpandableRelations()) {
 
 				collectFromChainBasedExpansions();
 			}
 
-			return relationCollector.anyAdditions();
+			return relationCollector.checkAdditions();
 		}
 
 		Collection<Relation> getExpanded() {
@@ -121,16 +115,10 @@ class ProfileRelationsExpander {
 			return relationCollector.getCollected();
 		}
 
-		private ExpansionChecker(
-					NodeX node,
-					Collection<Relation> directRelations,
-					RelationCollector relationCollector) {
+		private ExpansionChecker(NodeX node, RelationCollector relationCollector) {
 
 			this.node = node;
 			this.relationCollector = relationCollector;
-
-			disjunctionBasedRelations = resolveDisjunctionBasedRelations();
-			inputRelations = resolveInputRelations(directRelations);
 		}
 
 		private void collectFromSubsumers(NodeX node) {
@@ -143,7 +131,7 @@ class ProfileRelationsExpander {
 
 					for (Relation r : resolveExpansions(s, p)) {
 
-						relationCollector.checkAdd(r);
+						relationCollector.absorb(r);
 					}
 				}
 			}
@@ -151,11 +139,11 @@ class ProfileRelationsExpander {
 
 		private void collectFromChainBasedExpansions() {
 
-			for (Relation r : inputRelations) {
+			for (Relation r : relationCollector.copyCollected()) {
 
 				for (Relation sr : getAllChainBasedExpansions(r)) {
 
-					relationCollector.checkAdd(sr);
+					relationCollector.absorb(sr);
 				}
 			}
 		}
@@ -170,27 +158,6 @@ class ProfileRelationsExpander {
 			return new DisjunctionBasedDeriver(node).getAll();
 		}
 
-		private Collection<Relation> resolveInputRelations(
-										Collection<Relation> directRelations) {
-
-			if (disjunctionBasedRelations.isEmpty()) {
-
-				return directRelations;
-			}
-
-			if (directRelations.isEmpty()) {
-
-				return disjunctionBasedRelations;
-			}
-
-			Set<Relation> inputRels = new HashSet<Relation>();
-
-			inputRels.addAll(directRelations);
-			inputRels.addAll(disjunctionBasedRelations);
-
-			return inputRels;
-		}
-
 		private boolean anyLastPhaseInferredSubsumers() {
 
 			if (node.classified()) {
@@ -201,9 +168,9 @@ class ProfileRelationsExpander {
 			return node.getNodeClassifier().anyLastPhaseInferredSubsumers();
 		}
 
-		private boolean anyChainExpandableInputRelations() {
+		private boolean anyChainExpandableRelations() {
 
-			for (Relation r : inputRelations) {
+			for (Relation r : relationCollector.getCollected()) {
 
 				if (r.chainExpandable()) {
 
@@ -225,9 +192,9 @@ class ProfileRelationsExpander {
 		this.ontology = ontology;
 	}
 
-	boolean checkExpand(ProfileRelations profileRelations) {
+	boolean checkExpand(ProfileRelations relations) {
 
-		NodeX n = profileRelations.getNode();
+		NodeX n = relations.getNode();
 
 		if (visitedNodes.contains(n)) {
 
@@ -238,7 +205,7 @@ class ProfileRelationsExpander {
 
 		visitedNodes.push(n);
 
-		boolean expanded = new ExpansionChecker(profileRelations).checkExpand();
+		boolean expanded = new ExpansionChecker(relations).checkExpand();
 
 		visitedNodes.pop();
 
@@ -279,9 +246,11 @@ class ProfileRelationsExpander {
 
 	private Collection<Relation> resolveExpansions(NodeX node, PatternMatcher p) {
 
-		ProfileRelations rels = p.getPattern().getProfileRelations();
+		ProfileRelations rs = p.getPattern().getProfileRelations();
 
-		return visitedNodes.contains(node) ? rels.getAll() : rels.ensureExpansions(this);
+		rs.checkExpansion(this, false);
+
+		return rs.getAll();
 	}
 
 	private boolean localExpansion() {

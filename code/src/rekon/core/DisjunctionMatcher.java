@@ -124,7 +124,7 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	public String toString() {
 
-		return getClass().getSimpleName() + "(" + getDisjunctLabelsList() + ")";
+		return toString(getClass().getSimpleName());
 	}
 
 	DisjunctionMatcher(NodeX node, Collection<? extends NodeX> disjuncts) {
@@ -241,6 +241,11 @@ class DisjunctionMatcher extends NodeMatcher {
 		visitor.visit(this);
 	}
 
+	void render(PatternRenderer r) {
+
+		r.addLine(toString("OR"));
+	}
+
 	private void configureAsDefinition(NodeX node) {
 
 		for (Name d : expandDisjuncts()) {
@@ -303,6 +308,11 @@ class DisjunctionMatcher extends NodeMatcher {
 				m.collectDisjunctExpansions(expansions);
 			}
 		}
+	}
+
+	private String toString(String prefix) {
+
+		return prefix + "(" + getDisjunctLabelsList() + ")";
 	}
 
 	private String getDisjunctLabelsList() {
