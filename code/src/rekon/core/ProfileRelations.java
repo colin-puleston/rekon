@@ -32,7 +32,7 @@ import java.util.*;
 class ProfileRelations {
 
 	private Pattern pattern;
-	private Set<Relation> profileRelations;
+	private Collection<Relation> profileRelations;
 
 	private boolean expanded = false;
 	private boolean newlyExpanded = false;
@@ -111,12 +111,12 @@ class ProfileRelations {
 		return pattern.getSingleNode();
 	}
 
-	Set<Relation> getDirectRelations() {
+	Collection<Relation> getDirectRelations() {
 
 		return pattern.getDirectRelations();
 	}
 
-	Set<Relation> getAll() {
+	Collection<Relation> getAll() {
 
 		return profileRelations;
 	}

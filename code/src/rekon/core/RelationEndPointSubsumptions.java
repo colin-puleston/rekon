@@ -53,7 +53,7 @@ class RelationEndPointSubsumptions {
 			return false;
 		}
 
-		abstract Set<Relation> getProcessableRelations(NodeX node);
+		abstract Collection<Relation> getProcessableRelations(NodeX node);
 
 		abstract boolean process(Relation rel);
 	}
@@ -122,7 +122,7 @@ class RelationEndPointSubsumptions {
 
 		private abstract class SourceRelationsProcessor extends RelationsProcessor {
 
-			Set<Relation> getProcessableRelations(NodeX node) {
+			Collection<Relation> getProcessableRelations(NodeX node) {
 
 				return getDirectRelations(node);
 			}
@@ -214,7 +214,7 @@ class RelationEndPointSubsumptions {
 
 		private abstract class SourceRelationsProcessor extends RelationsProcessor {
 
-			Set<Relation> getProcessableRelations(NodeX node) {
+			Collection<Relation> getProcessableRelations(NodeX node) {
 
 				return getIndirectRelations(node);
 			}
@@ -423,7 +423,7 @@ class RelationEndPointSubsumptions {
 		return rels;
 	}
 
-	private Set<Relation> getDirectRelations(NodeX node) {
+	private Collection<Relation> getDirectRelations(NodeX node) {
 
 		return getProfilePattern(node).getDirectRelations();
 	}

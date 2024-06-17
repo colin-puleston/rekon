@@ -37,9 +37,9 @@ class RelationCollector {
 	RelationCollector() {
 	}
 
-	RelationCollector(Set<Relation> initialCollection) {
+	RelationCollector(Collection<Relation> initialRelations) {
 
-		absorbAll(initialCollection, true);
+		absorbAll(initialRelations, true);
 	}
 
 	void absorbAll(Collection<Relation> relations) {
@@ -65,7 +65,7 @@ class RelationCollector {
 	void onAdditions() {
 	}
 
-	Set<Relation> getCollected() {
+	Collection<Relation> getCollected() {
 
 		return collected;
 	}

@@ -193,7 +193,7 @@ public class Pattern extends PatternComponent {
 		throw new Error("Not a single-node pattern!");
 	}
 
-	Set<Relation> getDirectRelations() {
+	Collection<Relation> getDirectRelations() {
 
 		return directRelations;
 	}
