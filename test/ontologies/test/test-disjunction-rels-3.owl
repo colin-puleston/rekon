@@ -44,6 +44,12 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
+                <owl:someValuesFrom rdf:resource="urn:test#P"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#p"/>
                 <owl:someValuesFrom rdf:resource="urn:test#Q"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -58,6 +64,12 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
                 <owl:someValuesFrom rdf:resource="urn:test#R"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#p"/>
+                <owl:someValuesFrom rdf:resource="urn:test#S"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -87,15 +99,19 @@
 
     <!-- urn:test#Q -->
 
-    <owl:Class rdf:about="urn:test#Q">
-        <rdfs:subClassOf rdf:resource="urn:test#P"/>
-    </owl:Class>
+    <owl:Class rdf:about="urn:test#Q"/>
     
 
 
     <!-- urn:test#R -->
 
     <owl:Class rdf:about="urn:test#R"/>
+    
+
+
+    <!-- urn:test#S -->
+
+    <owl:Class rdf:about="urn:test#S"/>
     
 
 
