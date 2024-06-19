@@ -80,9 +80,9 @@ class PatternMatcher extends NodeMatcher {
 		pattern = pattern.extend(relation);
 	}
 
-	void checkExpandLocalProfile() {
+	void checkExpandLocalProfile(MatchStructures matchStructures) {
 
-		ProfilePatternsExpander.checkExpandLocal(pattern);
+		ProfilePatternsExpander.checkExpandLocal(matchStructures, pattern);
 	}
 
 	Pattern getPattern() {

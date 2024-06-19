@@ -34,6 +34,9 @@ public class MatchStructures {
 	private FreeClasses freeClasses;
 	private DefinitionPropagator definitionPropagator = new DefinitionPropagator();
 
+	private Map<Collection<NodeX>, ClassNode> insertedProfileDisjunctions
+									= new HashMap<Collection<NodeX>, ClassNode>();
+
 	private class DefinitionPropagator extends PatternCrawler {
 
 		boolean visit(NodeX n) {
@@ -124,6 +127,22 @@ public class MatchStructures {
 	MatchStructures(FreeClasses freeClasses) {
 
 		this.freeClasses = freeClasses;
+	}
+
+	ClassNode resolveInsertedProfileDisjunction(Collection<NodeX> disjuncts) {
+
+		ClassNode cn = insertedProfileDisjunctions.get(disjuncts);
+
+		if (cn == null) {
+
+			cn = createPatternClass();
+
+			addDisjunction(cn, disjuncts, false);
+
+			insertedProfileDisjunctions.put(disjuncts, cn);
+		}
+
+		return cn;
 	}
 
 	void onAddedProfileMatcher(NodeMatcher matcher) {

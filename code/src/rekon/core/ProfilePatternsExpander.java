@@ -97,7 +97,7 @@ class ProfilePatternsExpander {
 			for (PatternMatcher p : profiles) {
 
 				ProfileRelations prs = getProfileRelations(p);
-				ProfileRelationsExpander e = new ProfileRelationsExpander(ontology);
+				ProfileRelationsExpander e = createProfileRelationsExpander();
 
 				prs.checkExpansion(e, true);
 
@@ -131,6 +131,11 @@ class ProfilePatternsExpander {
 			getProfileRelations(p).initExpansion(firstPass);
 		}
 
+		private ProfileRelationsExpander createProfileRelationsExpander() {
+
+			return new ProfileRelationsExpander(ontology.getMatchStructures());
+		}
+
 		private ProfileRelations getProfileRelations(PatternMatcher p) {
 
 			return p.getPattern().getProfileRelations();
@@ -142,11 +147,11 @@ class ProfilePatternsExpander {
 		new OntologyExpander(ontology);
 	}
 
-	static void checkExpandLocal(Pattern pattern) {
+	static void checkExpandLocal(MatchStructures matchStructures, Pattern pattern) {
 
 		ProfileRelations prs = pattern.getProfileRelations();
 
 		prs.initExpansion(true);
-		prs.checkExpansion(new ProfileRelationsExpander(), true);
+		prs.checkExpansion(new ProfileRelationsExpander(matchStructures), true);
 	}
 }

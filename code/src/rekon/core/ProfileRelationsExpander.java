@@ -31,7 +31,7 @@ import java.util.*;
  */
 class ProfileRelationsExpander {
 
-	private Ontology ontology;
+	private MatchStructures matchStructures;
 	private ProfileRelations topLevelRelations;
 
 	private Deque<NodeX> visitedNodes = new ArrayDeque<NodeX>();
@@ -44,19 +44,14 @@ class ProfileRelationsExpander {
 			super(node);
 		}
 
-		ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts) {
+		ClassNode resolveDerivedValueDisjunction(Collection<NodeX> disjuncts) {
 
-			if (localExpansion()) {
-
-				throw new Error("Unexpected disjunction-value derivation!");
-			}
-
-			return ontology.getDerivedProfileValueDisjunctions().resolve(disjuncts);
+			return matchStructures.resolveInsertedProfileDisjunction(disjuncts);
 		}
 
 		Collection<Relation> resolveRelationExpansions(NodeX node) {
 
-			return resolveGeneralExpansions(node);
+			return resolveExpansions(node);
 		}
 	}
 
@@ -69,7 +64,7 @@ class ProfileRelationsExpander {
 
 		Collection<Relation> resolveRelationExpansions(NodeX node) {
 
-			return resolveGeneralExpansions(node);
+			return resolveExpansions(node);
 		}
 	}
 
@@ -150,11 +145,6 @@ class ProfileRelationsExpander {
 
 		private Collection<Relation> resolveDisjunctionBasedRelations() {
 
-			if (localExpansion()) {
-
-				return Collections.emptyList();
-			}
-
 			return new DisjunctionBasedDeriver(node).getAll();
 		}
 
@@ -182,14 +172,9 @@ class ProfileRelationsExpander {
 		}
 	}
 
-	ProfileRelationsExpander() {
+	ProfileRelationsExpander(MatchStructures matchStructures) {
 
-		this(null);
-	}
-
-	ProfileRelationsExpander(Ontology ontology) {
-
-		this.ontology = ontology;
+		this.matchStructures = matchStructures;
 	}
 
 	boolean checkExpand(ProfileRelations relations) {
@@ -232,7 +217,7 @@ class ProfileRelationsExpander {
 		return Collections.emptySet();
 	}
 
-	private Collection<Relation> resolveGeneralExpansions(NodeX node) {
+	private Collection<Relation> resolveExpansions(NodeX node) {
 
 		PatternMatcher p = node.getProfilePatternMatcher();
 
@@ -251,10 +236,5 @@ class ProfileRelationsExpander {
 		rs.checkExpansion(this, false);
 
 		return rs.getAll();
-	}
-
-	private boolean localExpansion() {
-
-		return ontology == null;
 	}
 }

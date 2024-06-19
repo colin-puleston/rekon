@@ -212,7 +212,9 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 				return nodes.iterator().next();
 			}
 
-			return addDerivedValueDisjunction(nodes);
+			nodes = resolveNestedDisjuncts(nodes);
+
+			return resolveDerivedValueDisjunction(nodes);
 		}
 
 		private void removeAllSubsumers(Collection<NodeX> nodes) {
@@ -221,6 +223,63 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 				nodes.removeAll(n.getSubsumers().copyNodes());
 			}
+		}
+
+		private Collection<NodeX> resolveNestedDisjuncts(Collection<NodeX> inDisjuncts) {
+
+			List<NodeX> outDisjuncts = new ArrayList<NodeX>();
+
+			for (NodeX n : inDisjuncts) {
+
+				List<DisjunctionMatcher> ds = n.getAllDisjunctionMatchers();
+
+				if (ds.isEmpty()) {
+
+					outDisjuncts.add(n);
+				}
+				else {
+
+					absorbNestedDisjuncts(outDisjuncts, ds);
+				}
+			}
+
+			return outDisjuncts;
+		}
+
+		private void absorbNestedDisjuncts(
+						Collection<NodeX> disjuncts,
+						List<DisjunctionMatcher> nestedDisjunctions) {
+
+			for (DisjunctionMatcher disjunction : nestedDisjunctions) {
+
+				for (NodeX d : disjunction.getDirectDisjuncts().asNodes()) {
+
+					absorbNestedDisjunct(disjuncts, d);
+				}
+			}
+		}
+
+		private void absorbNestedDisjunct(Collection<NodeX> disjuncts, NodeX nd) {
+
+			if (disjuncts.contains(nd)) {
+
+				return;
+			}
+
+			for (NodeX d : new ArrayList<NodeX>(disjuncts)) {
+
+				if (d.subsumes(nd)) {
+
+					return;
+				}
+
+				if (nd.subsumes(d)) {
+
+					disjuncts.remove(d);
+				}
+			}
+
+			disjuncts.add(nd);
 		}
 	}
 
@@ -364,7 +423,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		return derivedRelations;
 	}
 
-	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
+	abstract ClassNode resolveDerivedValueDisjunction(Collection<NodeX> disjuncts);
 
 	abstract Collection<Relation> resolveRelationExpansions(NodeX node);
 }
