@@ -31,8 +31,6 @@ import java.util.*;
  */
 class LocalClassifier extends NodeMatcherClassifier {
 
-	private MatchStructures matchStructures;
-
 	private PotentialLocalPatternSubsumers defnPatternsFilter;
 	private PotentialDisjunctionSubsumers defnDisjunctionsFilter;
 
@@ -69,7 +67,7 @@ class LocalClassifier extends NodeMatcherClassifier {
 
 			do {
 
-				candidate.checkExpandLocalProfile(matchStructures);
+				candidate.checkExpandLocalProfile();
 
 				classify(candidate);
 			}
@@ -221,8 +219,6 @@ class LocalClassifier extends NodeMatcherClassifier {
 	}
 
 	LocalClassifier(Ontology ontology) {
-
-		matchStructures = ontology.getMatchStructures();
 
 		defnPatternsFilter = createDefnPatternsFilter(ontology);
 		defnDisjunctionsFilter = createDefnDisjunctionsFilter(ontology);

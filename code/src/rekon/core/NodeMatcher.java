@@ -41,7 +41,7 @@ abstract class NodeMatcher {
 		return node;
 	}
 
-	abstract void checkExpandLocalProfile(MatchStructures matchStructures);
+	abstract void checkExpandLocalProfile();
 
 	abstract Names getDirectlyImpliedSubNodes();
 

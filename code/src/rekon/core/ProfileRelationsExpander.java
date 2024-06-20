@@ -31,7 +31,7 @@ import java.util.*;
  */
 class ProfileRelationsExpander {
 
-	private MatchStructures matchStructures;
+	private Ontology ontology;
 	private ProfileRelations topLevelRelations;
 
 	private Deque<NodeX> visitedNodes = new ArrayDeque<NodeX>();
@@ -44,9 +44,14 @@ class ProfileRelationsExpander {
 			super(node);
 		}
 
-		ClassNode resolveDerivedValueDisjunction(Collection<NodeX> disjuncts) {
+		ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts) {
 
-			return matchStructures.resolveInsertedProfileDisjunction(disjuncts);
+			if (localExpansion()) {
+
+				throw new Error("Unexpected disjunction-value derivation!");
+			}
+
+			return ontology.getInsertedProfileDisjunctions().resolve(disjuncts);
 		}
 
 		Collection<Relation> resolveRelationExpansions(NodeX node) {
@@ -145,6 +150,11 @@ class ProfileRelationsExpander {
 
 		private Collection<Relation> resolveDisjunctionBasedRelations() {
 
+			if (localExpansion()) {
+
+				return Collections.emptyList();
+			}
+
 			return new DisjunctionBasedDeriver(node).getAll();
 		}
 
@@ -172,9 +182,14 @@ class ProfileRelationsExpander {
 		}
 	}
 
-	ProfileRelationsExpander(MatchStructures matchStructures) {
+	ProfileRelationsExpander() {
 
-		this.matchStructures = matchStructures;
+		this(null);
+	}
+
+	ProfileRelationsExpander(Ontology ontology) {
+
+		this.ontology = ontology;
 	}
 
 	boolean checkExpand(ProfileRelations relations) {
@@ -236,5 +251,10 @@ class ProfileRelationsExpander {
 		rs.checkExpansion(this, false);
 
 		return rs.getAll();
+	}
+
+	private boolean localExpansion() {
+
+		return ontology == null;
 	}
 }

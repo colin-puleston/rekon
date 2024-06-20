@@ -44,16 +44,19 @@ public class Ontology {
 	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
 	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
 
-	private MatchStructures matchStructures;
+	private InsertedProfileDisjunctions insertedProfileDisjunctions;
 
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		matchStructures = createMatchStructures();
+		FreeOntologyClasses freeClasses = new FreeOntologyClasses(this);
+		MatchStructures matchStructs = new MatchStructures(freeClasses);
 
-		structureBuilder.build(matchStructures);
+		insertedProfileDisjunctions = new InsertedProfileDisjunctions(matchStructs, freeClasses);
+
+		structureBuilder.build(matchStructs);
 
 		allNodes.addComponent(names.getClassNodes());
 		allNodes.addComponent(names.getIndividualNodes());
@@ -126,9 +129,9 @@ public class Ontology {
 		return definitionDisjunctions;
 	}
 
-	MatchStructures getMatchStructures() {
+	InsertedProfileDisjunctions getInsertedProfileDisjunctions() {
 
-		return matchStructures;
+		return insertedProfileDisjunctions;
 	}
 
 	DynamicSubsumers getDynamicSubsumers() {
@@ -170,10 +173,5 @@ public class Ontology {
 				definitionDisjunctions.add(d);
 			}
 		}
-	}
-
-	private MatchStructures createMatchStructures() {
-
-		return new MatchStructures(new FreeOntologyClasses(this));
 	}
 }
