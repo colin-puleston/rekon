@@ -34,44 +34,16 @@ abstract class LocalExpression {
 	private NodeX expressionNode = null;
 	private List<NodeMatcher> orderedProfileMatchers = new ArrayList<NodeMatcher>();
 
-	abstract class LocalClasses extends FreeClasses {
-
-		abstract class LocalPatternClassNode extends PatternClassNode {
-
-			boolean local() {
-
-				return true;
-			}
-		}
-
-		abstract class LocalDefinitionClassNode extends DefinitionClassNode {
-
-			boolean local() {
-
-				return true;
-			}
-		}
-
-		LocalPatternClassNode createPatternClass() {
-
-			return createLocalPatternClass();
-		}
-
-		LocalDefinitionClassNode createDefinitionClass() {
-
-			return createLocalDefinitionClass();
-		}
-
-		abstract LocalPatternClassNode createLocalPatternClass();
-
-		abstract LocalDefinitionClassNode createLocalDefinitionClass();
-	}
-
 	private class LocalMatchStructures extends MatchStructures {
 
-		LocalMatchStructures(LocalClasses localClasses) {
+		LocalMatchStructures(FreeClasses localClasses) {
 
 			super(localClasses);
+
+			if (!localClasses.localClasses()) {
+
+				throw new Error("Free-classes not defined as local!");
+			}
 		}
 
 		void onAddedProfileMatcher(NodeMatcher matcher) {
@@ -80,7 +52,7 @@ abstract class LocalExpression {
 		}
 	}
 
-	void initialise(LocalClasses localClasses) {
+	void initialise(FreeClasses localClasses) {
 
 		expressionNode = createExpression(new LocalMatchStructures(localClasses));
 

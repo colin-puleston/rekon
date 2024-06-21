@@ -36,20 +36,25 @@ class DynamicExpression extends LocalExpression {
 	private NodeMatcher expressionMatcher = null;
 	private NodeX asSingleNode = null;
 
-	private class DynamicClasses extends LocalClasses {
+	private class DynamicClasses extends FreeClasses {
 
-		private class DynamicPatternClassNode extends LocalPatternClassNode {
+		private class DynamicPatternClassNode extends PatternClassNode {
 		}
 
-		private class DynamicDefinitionClassNode extends LocalDefinitionClassNode {
+		private class DynamicDefinitionClassNode extends DefinitionClassNode {
 		}
 
-		LocalPatternClassNode createLocalPatternClass() {
+		boolean localClasses() {
+
+			return true;
+		}
+
+		PatternClassNode createPatternClass() {
 
 			return new DynamicPatternClassNode();
 		}
 
-		LocalDefinitionClassNode createLocalDefinitionClass() {
+		DefinitionClassNode createDefinitionClass() {
 
 			return new DynamicDefinitionClassNode();
 		}

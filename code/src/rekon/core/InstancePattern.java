@@ -36,9 +36,9 @@ class InstancePattern extends LocalExpression {
 	private InstanceNode instanceNode;
 	private PatternMatcher patternMatcher;
 
-	private class InstanceClasses extends LocalClasses {
+	private class InstanceClasses extends FreeClasses {
 
-		private class InstancePatternClassNode extends LocalPatternClassNode {
+		private class InstancePatternClassNode extends PatternClassNode {
 
 			String getLabelPrefix() {
 
@@ -49,14 +49,19 @@ class InstancePattern extends LocalExpression {
 			}
 		}
 
-		LocalPatternClassNode createLocalPatternClass() {
+		boolean localClasses() {
+
+			return true;
+		}
+
+		PatternClassNode createPatternClass() {
 
 			return new InstancePatternClassNode();
 		}
 
-		LocalDefinitionClassNode createLocalDefinitionClass() {
+		DefinitionClassNode createDefinitionClass() {
 
-			throw new Error("Cannot create instanceNode-definition class!");
+			throw new Error("Cannot create definition class for instance!");
 		}
 	}
 

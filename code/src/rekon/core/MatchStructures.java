@@ -38,7 +38,7 @@ public class MatchStructures {
 
 		boolean visit(NodeX n) {
 
-			if (n instanceof FreeClassNode) {
+			if (!n.mapped()) {
 
 				n.ensurePatternProfiledImpliesPatternDefined();
 

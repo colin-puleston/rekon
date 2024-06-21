@@ -31,6 +31,39 @@ abstract class FreeClasses {
 
 	private int patternClassIndex = 0;
 	private int definitionClassIndex = 0;
+	private int insertedClassIndex = 0;
+
+	private abstract class FreeClassNode extends ClassNode {
+
+		static private final String LABEL_FORMAT = "[%s-%d]";
+
+		private int index;
+
+		public String getLabel() {
+
+			return String.format(LABEL_FORMAT, getLabelPrefix(), index);
+		}
+
+		public boolean mapped() {
+
+			return false;
+		}
+
+		FreeClassNode(int index) {
+
+			this.index = index;
+		}
+
+		boolean local() {
+
+			return localClasses();
+		}
+
+		String getLabelPrefix() {
+
+			return getClass().getSimpleName();
+		}
+	}
 
 	class PatternClassNode extends FreeClassNode {
 
@@ -47,6 +80,21 @@ abstract class FreeClasses {
 			super(definitionClassIndex++);
 		}
 	}
+
+	class InsertedClassNode extends FreeClassNode {
+
+		InsertedClassNode() {
+
+			super(insertedClassIndex++);
+		}
+
+		boolean local() {
+
+			return localClasses();
+		}
+	}
+
+	abstract boolean localClasses();
 
 	abstract PatternClassNode createPatternClass();
 

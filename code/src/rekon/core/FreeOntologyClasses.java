@@ -33,8 +33,6 @@ class FreeOntologyClasses extends FreeClasses {
 
 	private Ontology ontology;
 
-	private int insertedClassIndex = 0;
-
 	private class OntologyPatternClassNode extends PatternClassNode {
 
 		OntologyPatternClassNode() {
@@ -51,11 +49,9 @@ class FreeOntologyClasses extends FreeClasses {
 		}
 	}
 
-	private class InsertedClassNode extends FreeClassNode {
+	private class OntologyInsertedClassNode extends InsertedClassNode {
 
-		InsertedClassNode() {
-
-			super(insertedClassIndex++);
+		OntologyInsertedClassNode() {
 
 			ontology.addFreeClass(this);
 		}
@@ -64,6 +60,11 @@ class FreeOntologyClasses extends FreeClasses {
 	FreeOntologyClasses(Ontology ontology) {
 
 		this.ontology = ontology;
+	}
+
+	boolean localClasses() {
+
+		return false;
 	}
 
 	PatternClassNode createPatternClass() {
@@ -78,11 +79,11 @@ class FreeOntologyClasses extends FreeClasses {
 
 	InsertedClassNode createInsertedClass() {
 
-		return new InsertedClassNode();
+		return new OntologyInsertedClassNode();
 	}
 
 	boolean insertedClass(NodeX test) {
 
-		return test instanceof InsertedClassNode;
+		return test instanceof OntologyInsertedClassNode;
 	}
 }

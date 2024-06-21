@@ -121,7 +121,7 @@ public class InstanceNode extends NodeX {
 				return false;
 			}
 
-			return n instanceof FreeClassNode;
+			return !n.mapped();
 		}
 
 		boolean visit(PatternMatcher m) {

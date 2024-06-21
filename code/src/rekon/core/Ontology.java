@@ -36,7 +36,7 @@ public class Ontology {
 	private MultiIterable<Name> allNames = new MultiIterable<Name>();
 	private MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
 
-	private List<FreeClassNode> freeClassNodes = new ArrayList<FreeClassNode>();
+	private List<ClassNode> freeClassNodes = new ArrayList<ClassNode>();
 
 	private List<PatternMatcher> profilePatterns = new ArrayList<PatternMatcher>();
 	private List<PatternMatcher> definitionPatterns = new ArrayList<PatternMatcher>();
@@ -89,7 +89,12 @@ public class Ontology {
 		return new InstanceOps(this);
 	}
 
-	void addFreeClass(FreeClassNode cn) {
+	void addFreeClass(ClassNode cn) {
+
+		if (cn.mapped()) {
+
+			throw new Error("Not a free ClassNode!");
+		}
 
 		freeClassNodes.add(cn);
 	}
