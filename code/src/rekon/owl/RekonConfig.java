@@ -34,7 +34,7 @@ public class RekonConfig {
 	public final Option multiThread = MultiThreadProcessor.OPTION;
 	public final Option noValueSubstitutions = NoValueSubstitutions.OPTION;
 	public final Option warningLogger = WarningLogger.OPTION;
-	public final Option progressLogging = ProgressLogger.OPTION;
+	public final Option progressLogger = ProgressLogger.OPTION;
 
 	public void setLogOutput(LogOutput output) {
 
