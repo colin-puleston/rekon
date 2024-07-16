@@ -78,15 +78,19 @@ class ProfileRelations {
 
 		if (expansionCheckRequired) {
 
-			expansionCheckRequired = false;
-
 			if (expander.checkExpand(this)) {
+
+				expanded = true;
+				newlyExpanded = true;
 
 				if (topLevel || !expander.incompleteTraversal()) {
 
-					expanded = true;
-					newlyExpanded = true;
+					expansionCheckRequired = false;
 				}
+			}
+			else {
+
+				expansionCheckRequired = false;
 			}
 		}
 	}
