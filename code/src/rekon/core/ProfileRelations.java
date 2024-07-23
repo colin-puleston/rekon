@@ -74,24 +74,17 @@ class ProfileRelations {
 		newlyExpanded = false;
 	}
 
-	void checkExpansion(ProfileRelationsExpander expander, boolean topLevel) {
+	void checkExpansion(ProfileRelationsResolver resolver) {
 
 		if (expansionCheckRequired) {
 
-			if (expander.checkExpand(this)) {
+			if (checkExpand(resolver)) {
 
 				expanded = true;
 				newlyExpanded = true;
-
-				if (topLevel || !expander.incompleteTraversal()) {
-
-					expansionCheckRequired = false;
-				}
 			}
-			else {
 
-				expansionCheckRequired = false;
-			}
+			expansionCheckRequired = false;
 		}
 	}
 
@@ -138,8 +131,12 @@ class ProfileRelations {
 		return false;
 	}
 
-	RelationCollector createCollector() {
+	private boolean checkExpand(ProfileRelationsResolver resolver) {
 
-		return new Collector();
+		RelationCollector collector = new Collector();
+
+		resolver.collectForNode(getNode(), collector);
+
+		return collector.checkAdditions();
 	}
 }

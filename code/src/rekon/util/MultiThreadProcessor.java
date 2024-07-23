@@ -34,7 +34,12 @@ public abstract class MultiThreadProcessor<E> {
 
 	static public final Option OPTION = new Option(true, "multithread");
 
-	private int totalThreads = Runtime.getRuntime().availableProcessors();
+	static private int maxProcessors() {
+
+		return Runtime.getRuntime().availableProcessors();
+	}
+
+	private int totalThreads = maxProcessors();
 
 	private class ThreadProcessor extends ForkJoinTask<Boolean> {
 
@@ -64,6 +69,8 @@ public abstract class MultiThreadProcessor<E> {
 	}
 
 	public void setMaxProcesses(int maxProcesses) {
+
+		totalThreads = maxProcessors();
 
 		if (maxProcesses < totalThreads) {
 

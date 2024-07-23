@@ -111,7 +111,6 @@ class NodeClassifier extends NameClassifier {
 	private InferredSubsumers inferredSubsumers = new InactiveInferredSubsumers();
 
 	private boolean anyPhaseInferredSubsumers = false;
-	private boolean anyLastPhaseInferredSubsumers = true;
 
 	private abstract class InferredSubsumers {
 
@@ -270,11 +269,6 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
-	boolean anyLastPhaseInferredSubsumers() {
-
-		return anyLastPhaseInferredSubsumers;
-	}
-
 	void checkAddInferredSubsumers(Names subsumers) {
 
 		for (NodeX s : subsumers.asNodes()) {
@@ -310,11 +304,11 @@ class NodeClassifier extends NameClassifier {
 
 	private boolean resetPhaseInferredSubsumers() {
 
-		anyLastPhaseInferredSubsumers = anyPhaseInferredSubsumers;
+		boolean any = anyPhaseInferredSubsumers;
 
 		anyPhaseInferredSubsumers = false;
 
-		return anyLastPhaseInferredSubsumers;
+		return any;
 	}
 
 	private NodeX getNode() {

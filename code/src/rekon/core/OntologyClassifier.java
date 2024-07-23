@@ -236,6 +236,8 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			if (initialPhase) {
 
+				resetAllPhaseInferredSubsumers();
+
 				return true;
 			}
 
@@ -244,7 +246,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 				return false;
 			}
 
-			return NodeClassifier.resetAllPhaseInferredSubsumers(getAllNodes());
+			return resetAllPhaseInferredSubsumers();
 		}
 
 		Phase createNextPhase() {
@@ -257,6 +259,11 @@ class OntologyClassifier extends NodeMatcherClassifier {
 			this.initialPhase = initialPhase;
 
 			initialPass = new Pass(initialPassType);
+		}
+
+		private boolean resetAllPhaseInferredSubsumers() {
+
+			return NodeClassifier.resetAllPhaseInferredSubsumers(getAllNodes());
 		}
 	}
 

@@ -325,7 +325,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		private void processDisjunct(NodeX disjunct, int disjunctIndex) {
 
-			for (Relation r : resolveRelationExpansions(disjunct)) {
+			for (Relation r : resolveProfileRelations(disjunct)) {
 
 				processDisjunctRelation(r, disjunctIndex);
 			}
@@ -366,5 +366,5 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
 
-	abstract Collection<Relation> resolveRelationExpansions(NodeX node);
+	abstract Collection<Relation> resolveProfileRelations(NodeX node);
 }

@@ -26,6 +26,8 @@ package rekon.core;
 
 import java.util.*;
 
+import rekon.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -34,11 +36,60 @@ class ProfilePatternsExpander {
 	static private class OntologyExpander {
 
 		private Ontology ontology;
+
+		private List<PatternMatcher> currentProfiles;
 		private List<PatternMatcher> potentialProfiles = new ArrayList<PatternMatcher>();
+
+		private class ExpansionsChecker extends MultiThreadListProcessor<PatternMatcher> {
+
+			private boolean anyNewExpansions = false;
+
+			protected void processElement(PatternMatcher profile) {
+
+				if (checkNewExpansion(profile) && !anyNewExpansions) {
+
+					setNewExpansions();
+				}
+			}
+
+			boolean checkNewExpansions() {
+
+				anyNewExpansions = false;
+
+				checkNewExpansions(currentProfiles);
+				checkNewExpansions(potentialProfiles);
+
+				return anyNewExpansions;
+			}
+
+			private void checkNewExpansions(List<PatternMatcher> profiles) {
+
+				if (!profiles.isEmpty()) {
+
+					invokeListProcesses(profiles);
+				}
+			}
+
+			private boolean checkNewExpansion(PatternMatcher profile) {
+
+				ProfileRelations prs = getProfileRelations(profile);
+
+				prs.checkExpansion(new ProfileRelationsResolver(ontology));
+
+				return prs.newlyExpanded();
+			}
+
+			private synchronized void setNewExpansions() {
+
+				anyNewExpansions = true;
+			}
+		}
 
 		OntologyExpander(Ontology ontology) {
 
 			this.ontology = ontology;
+
+			currentProfiles = ontology.getProfilePatterns();
 
 			findPotentialProfiles();
 			performAllExpansions();
@@ -47,7 +98,7 @@ class ProfilePatternsExpander {
 
 		private void performAllExpansions() {
 
-			List<PatternMatcher> currentProfiles = ontology.getProfilePatterns();
+			ExpansionsChecker checker = new ExpansionsChecker();
 			boolean firstPass = true;
 
 			while (true) {
@@ -55,12 +106,7 @@ class ProfilePatternsExpander {
 				initExpansions(currentProfiles, firstPass);
 				initExpansions(potentialProfiles, firstPass);
 
-				boolean anyNew = false;
-
-				anyNew |= checkExpansions(currentProfiles);
-				anyNew |= checkExpansions(potentialProfiles);
-
-				if (!anyNew) {
+				if (!checker.checkNewExpansions()) {
 
 					break;
 				}
@@ -88,23 +134,6 @@ class ProfilePatternsExpander {
 
 				initExpansion(p, firstPass);
 			}
-		}
-
-		private boolean checkExpansions(List<PatternMatcher> profiles) {
-
-			boolean anyNew = false;
-
-			for (PatternMatcher p : profiles) {
-
-				ProfileRelations prs = getProfileRelations(p);
-				ProfileRelationsExpander e = new ProfileRelationsExpander(ontology);
-
-				prs.checkExpansion(e, true);
-
-				anyNew |= prs.newlyExpanded();
-			}
-
-			return anyNew;
 		}
 
 		private void resolvePotentialProfiles() {
@@ -147,6 +176,6 @@ class ProfilePatternsExpander {
 		ProfileRelations prs = pattern.getProfileRelations();
 
 		prs.initExpansion(true);
-		prs.checkExpansion(new ProfileRelationsExpander(), true);
+		prs.checkExpansion(new ProfileRelationsResolver());
 	}
 }

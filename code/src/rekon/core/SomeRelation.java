@@ -46,11 +46,6 @@ public class SomeRelation extends NodeRelation {
 		return (NodeValue)getTarget();
 	}
 
-	boolean anyChains() {
-
-		return getNodeProperty().anyChains();
-	}
-
 	Collection<PropertyChain> getAllChains() {
 
 		return getNodeProperty().getAllChains();

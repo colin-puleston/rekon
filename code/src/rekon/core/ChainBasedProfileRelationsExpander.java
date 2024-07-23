@@ -65,7 +65,7 @@ abstract class ChainBasedProfileRelationsExpander {
 
 		private void collectFromTarget(NodeX target) {
 
-			for (Relation r : resolveRelationExpansions(target)) {
+			for (Relation r : resolveProfileRelations(target)) {
 
 				if (r instanceof SomeRelation) {
 
@@ -109,7 +109,7 @@ abstract class ChainBasedProfileRelationsExpander {
 		return allExpansions;
 	}
 
-	abstract Collection<Relation> resolveRelationExpansions(NodeX node);
+	abstract Collection<Relation> resolveProfileRelations(NodeX node);
 
 	private void collectExpansions(List<ExpansionCollector> collectors) {
 
