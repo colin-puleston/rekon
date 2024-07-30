@@ -47,7 +47,7 @@ class ProfileRelationsResolver {
 				throw new Error("Unexpected disjunction-value derivation!");
 			}
 
-			return ontology.getInsertedProfileDisjunctions().resolve(disjuncts);
+			return ontology.getDerivedDisjunctions().resolveProfile(disjuncts);
 		}
 
 		Collection<Relation> resolveProfileRelations(NodeX node) {

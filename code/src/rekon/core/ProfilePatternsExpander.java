@@ -106,7 +106,7 @@ class ProfilePatternsExpander {
 				initExpansions(currentProfiles, firstPass);
 				initExpansions(potentialProfiles, firstPass);
 
-				if (!checker.checkNewExpansions()) {
+				if (!checker.checkNewExpansions() || subsumerOnlyExpansions()) {
 
 					break;
 				}
@@ -153,6 +153,13 @@ class ProfilePatternsExpander {
 			}
 
 			potentialProfiles.clear();
+		}
+
+		private boolean subsumerOnlyExpansions() {
+
+			OntologySummary summary = ontology.getSummary();
+
+			return !summary.disjunctions && !summary.propertyChains;
 		}
 
 		private void initExpansion(PatternMatcher p, boolean firstPass) {

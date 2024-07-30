@@ -94,7 +94,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			this.passType = passType;
 
-			relationEndPointSubsumptions = new RelationEndPointSubsumptions(passType);
+			relationEndPointSubsumptions = createRelationEndPointSubsumptions();
 
 			if (!expansionPass()) {
 
@@ -146,6 +146,11 @@ class OntologyClassifier extends NodeMatcherClassifier {
 			return expansionPass()
 					? pattern.expandedProfile()
 					: pattern.matchable(phaseInitialPass());
+		}
+
+		private RelationEndPointSubsumptions createRelationEndPointSubsumptions() {
+
+			return new RelationEndPointSubsumptions(ontology.getSummary(), passType);
 		}
 
 		private boolean expansionPass() {

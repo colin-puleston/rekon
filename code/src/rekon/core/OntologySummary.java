@@ -24,41 +24,53 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-public abstract class NodeProperty extends PropertyX {
+class OntologySummary {
 
-	private ClassNode domain = null;
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	final boolean propertyDomains;
 
-	public void setDomain(ClassNode domain) {
+	final boolean propertyChains;
 
-		this.domain = domain;
+	final boolean allRelations;
+
+	final boolean disjunctions;
+
+	private enum PropertyAttribute {
+
+		DOMAIN {
+
+			boolean present(NodeProperty p) {
+
+				return p.hasDomain();
+			}
+		},
+
+		CHAINS {
+
+			boolean present(NodeProperty p) {
+
+				return p.directChains();
+			}
+		};
+
+		abstract boolean present(NodeProperty p);
 	}
 
-	public void addChain(PropertyChain chain) {
+	OntologySummary(OntologyNames names, Ontology ontology) {
 
-		chains.add(chain);
+		propertyDomains = properties(names, PropertyAttribute.DOMAIN);
+		propertyChains = properties(names, PropertyAttribute.CHAINS);
+		allRelations = allRelations(ontology);
+		disjunctions = !ontology.getAllDisjunctions().isEmpty();
 	}
 
-	boolean directChains() {
+	private boolean properties(OntologyNames names, PropertyAttribute attr) {
 
-		return !chains.isEmpty();
-	}
+		for (NodeProperty p : names.getNodeProperties()) {
 
-	boolean anyChains() {
-
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (!((NodeProperty)s).chains.isEmpty()) {
+			if (attr.present(p)) {
 
 				return true;
 			}
@@ -67,25 +79,22 @@ public abstract class NodeProperty extends PropertyX {
 		return false;
 	}
 
-	boolean hasDomain() {
+	private boolean allRelations(Ontology ontology) {
 
-		return domain != null;
-	}
+		for (NodeX n : ontology.getAllNodes()) {
 
-	ClassNode getDomain() {
+			for (PatternMatcher p : n.getAllPatternMatchers()) {
 
-		return domain;
-	}
+				for (Relation r : p.getPattern().getDirectRelations()) {
 
-	Collection<PropertyChain> getAllChains() {
+					if (r instanceof AllRelation) {
 
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
-
-		for (Name s : getSubsumers()) {
-
-			allChains.addAll(((NodeProperty)s).chains);
+						return true;
+					}
+				}
+			}
 		}
 
-		return allChains;
+		return false;
 	}
 }

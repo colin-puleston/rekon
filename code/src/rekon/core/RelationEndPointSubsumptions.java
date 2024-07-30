@@ -371,12 +371,19 @@ class RelationEndPointSubsumptions {
 		}
 	}
 
-	RelationEndPointSubsumptions(ClassifyPassType passType) {
+	RelationEndPointSubsumptions(OntologySummary summary, ClassifyPassType passType) {
 
 		this.passType = passType;
 
-		new DomainConstrainedSourceSubsumptions();
-		new AllRelationTargetSubsumptions();
+		if (summary.propertyDomains) {
+
+			new DomainConstrainedSourceSubsumptions();
+		}
+
+		if (summary.allRelations) {
+
+			new AllRelationTargetSubsumptions();
+		}
 	}
 
 	void checkAddInferenceSource(PatternMatcher profile) {

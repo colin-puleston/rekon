@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class InsertedProfileDisjunctions {
+class DerivedDisjunctions {
 
 	private MatchStructures matchStructures;
 	private FreeOntologyClasses freeOntologyClasses;
@@ -37,7 +37,7 @@ class InsertedProfileDisjunctions {
 	private Map<Set<NodeX>, ClassNode> classesByDisjuncts
 						= new HashMap<Set<NodeX>, ClassNode>();
 
-	InsertedProfileDisjunctions(
+	DerivedDisjunctions(
 		MatchStructures matchStructures,
 		FreeOntologyClasses freeOntologyClasses) {
 
@@ -45,7 +45,7 @@ class InsertedProfileDisjunctions {
 		this.freeOntologyClasses = freeOntologyClasses;
 	}
 
-	ClassNode resolve(Collection<NodeX> disjuncts) {
+	ClassNode resolveProfile(Collection<NodeX> disjuncts) {
 
 		Set<NodeX> resolvedDisjuncts = resolveNestedDisjuncts(disjuncts);
 		ClassNode cn = classesByDisjuncts.get(resolvedDisjuncts);
