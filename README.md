@@ -49,6 +49,7 @@ Simple OWL reasoner. Implements OWL API.
 ### Axioms ###
 
     ObjectComplementOf
+    DataComplementOf
     DisjointClasses
     DisjointUnion
     DifferentIndividuals,
