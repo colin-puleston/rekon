@@ -1,2 +1,2 @@
-# goblin
-Simple OWL reasoner (incomplete reasoning / implemets OWL API)
+# rekon
+Simple OWL reasoner (implements OWL API)
