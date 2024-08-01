@@ -40,11 +40,11 @@ Simple OWL reasoner. Implements OWL API.
     ObjectExactCardinality
     ObjectHasSelf
     DataIntersectionOf
+    DataOneOf
     DataMaxCardinality
     DataMinCardinality
     DataExactCardinality
     DataAllValuesFrom
-    DataOneOf
 
 ### Axioms ###
 
