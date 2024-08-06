@@ -150,7 +150,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 		private RelationEndPointSubsumptions createRelationEndPointSubsumptions() {
 
-			return new RelationEndPointSubsumptions(ontology.getSummary(), passType);
+			return new RelationEndPointSubsumptions(ontology, passType);
 		}
 
 		private boolean expansionPass() {

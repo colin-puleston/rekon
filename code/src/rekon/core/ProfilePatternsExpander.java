@@ -157,9 +157,9 @@ class ProfilePatternsExpander {
 
 		private boolean subsumerOnlyExpansions() {
 
-			OntologySummary summary = ontology.getSummary();
+			ConstructInclusions inclusions = ontology.getConstructInclusions();
 
-			return !summary.disjunctions && !summary.propertyChains;
+			return !inclusions.disjunctions && !inclusions.propertyChains;
 		}
 
 		private void initExpansion(PatternMatcher p, boolean firstPass) {

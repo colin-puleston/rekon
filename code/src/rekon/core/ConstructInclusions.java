@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class OntologySummary {
+class ConstructInclusions {
 
 	final boolean propertyDomains;
 
@@ -58,7 +58,7 @@ class OntologySummary {
 		abstract boolean present(NodeProperty p);
 	}
 
-	OntologySummary(OntologyNames names, Ontology ontology) {
+	ConstructInclusions(OntologyNames names, Ontology ontology) {
 
 		propertyDomains = properties(names, PropertyAttribute.DOMAIN);
 		propertyChains = properties(names, PropertyAttribute.CHAINS);

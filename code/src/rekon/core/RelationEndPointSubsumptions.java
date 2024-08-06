@@ -371,16 +371,18 @@ class RelationEndPointSubsumptions {
 		}
 	}
 
-	RelationEndPointSubsumptions(OntologySummary summary, ClassifyPassType passType) {
+	RelationEndPointSubsumptions(Ontology ontology, ClassifyPassType passType) {
 
 		this.passType = passType;
 
-		if (summary.propertyDomains) {
+		ConstructInclusions inclusions = ontology.getConstructInclusions();
+
+		if (inclusions.propertyDomains) {
 
 			new DomainConstrainedSourceSubsumptions();
 		}
 
-		if (summary.allRelations) {
+		if (inclusions.allRelations) {
 
 			new AllRelationTargetSubsumptions();
 		}
