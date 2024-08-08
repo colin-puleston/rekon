@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+
+<project name="REKON-PROTEGE" default="jar" basedir=".">
+
+	<!-- Build script for REKON -->
+	<echo message="OS: ${os.name}"/>
+	<echo message="Java Runtime Environment version: ${java.version}"/>
+
+	<!-- reasoner -->
+	<property name="reasoner" location="../rekon-reasoner"/>
+	<property name="reasoner.classes" location="${reasoner}/build/classes"/>
+
+	<!-- sources -->
+	<property name="src.lib" value="lib"/>
+	<property name="src.lib.jars" value="${src.lib}/jars"/>
+	<property name="src.lib.classes.hppc" value="${src.lib}/classes/hppc"/>
+	<property name="src.resource" value="resource"/>
+	<property name="src.code.src" value="code/src"/>
+
+	<!-- build -->
+	<property name="build" location="build"/>
+	<property name="build.classes.rel" value="classes" />
+	<property name="build.classes" location="${build}/${build.classes.rel}" />
+
+	<!-- output jar -->
+	<property name="plugin.jar" location="plugin/rekon-protege.jar"/>
+
+	<!-- debug property -->
+	<property name="debug" value="true"/>
+
+	<!-- build class-path -->
+	<path id="classpath">
+		<pathelement location="${build.classes}"/>
+		<fileset dir="${src.lib.jars}">
+			<include name="protege/*.jar"/>
+			<include name="owlapi/*.jar"/>
+		</fileset>
+	</path>
+
+	<!-- clean target -->
+	<target name="clean">
+		<delete dir="${build}"/>
+	</target>
+
+	<!-- base target -->
+	<target name="base">
+		<mkdir dir="${build.classes}"/>
+		<subant target="jar">
+			<fileset dir="${reasoner}" includes="build.xml"/>
+        </subant>
+		<copy todir="${build.classes}" flatten="false">
+			<fileset dir="${reasoner.classes}/">
+                <include name="**/*"/>
+			</fileset>
+			<fileset dir="${src.lib.classes.hppc}/">
+                <include name="**/*"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- rekon-protege targets -->
+	<target name="code" depends="base">
+		<mkdir dir="${build.classes}"/>
+		<javac srcdir="${src.code.src}" classpathref="classpath" destdir="${build.classes}" debug="${debug}">
+			<compilerarg value="-Xlint"/>
+		</javac>
+	</target>
+
+	<target name="jar" depends="code">
+		<jar destfile="${plugin.jar}">
+			<manifest>
+				<attribute name="Bundle-ManifestVersion" value="2" />
+				<attribute name="Bundle-Name" value="Rekon Reasoner Protege Plug-in" />
+				<attribute name="Bundle-SymbolicName" value="rekon-protege;singleton:=true" />
+				<attribute name="Bundle-Version" value="1.0" />
+				<attribute name="Embed-Dependency" value="*;scope=!provided;scope=compile|runtime;inline=false" />
+				<attribute name="Embed-Directory" value="lib" />
+				<attribute name="Embed-StripGroup" value="true" />
+				<attribute name="Embed-Transitive" value="true" />
+				<attribute name="Embedded-Artifacts" value="lib/rekon.jar, lib/hppc-0.9.1.jar" />
+				<attribute name="Require-Bundle" value="org.protege.common, org.protege.editor.core.application, org.protege.editor.owl, org.semanticweb.owl.owlapi" />
+				<attribute name="Import-Package" value="javax.swing, javax.swing.text" />
+			</manifest>
+			<fileset dir="${build.classes}" />
+			<fileset dir="${src.resource}" includes="plugin.xml"/>
+		</jar>
+	</target>
+
+</project>

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<plugin>
+	<extension id="rekon-protege.reasoner" point="org.protege.editor.owl.inference_reasonerfactory">
+        <name value="Rekon"/>
+        <label value="Rekon"/>
+        <class value="rekon.protege.RekonProtegePlugin"/>
+    </extension>
+	<extension id="rekon-protege.config" point="org.protege.editor.owl.inference_preferences">
+		<label value="Rekon"/>
+		<class value="rekon.protege.RekonProtegePreferencesPanel"/>
+	</extension>
+</plugin>
