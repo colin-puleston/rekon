@@ -72,7 +72,7 @@
 			<fileset dir="${build.classes}" />
 			<fileset dir="${src.code.src}" includes="**/*.java"/>
 		</jar>
-		<copy file="reasoner.jar" todir="${reasoner}"/>
+		<copy file="${reasoner.jar}" todir="${reasoner}"/>
 	</target>
 
 </project>
