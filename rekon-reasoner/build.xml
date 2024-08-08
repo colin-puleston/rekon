@@ -6,10 +6,14 @@
 	<echo message="OS: ${os.name}"/>
 	<echo message="Java Runtime Environment version: ${java.version}"/>
 
+	<!-- reasoner -->
+	<property name="reasoner" value="reasoner"/>
+	<property name="reasoner.lib" value="${reasoner}/lib"/>
+
 	<!-- sources -->
-	<property name="src.lib" value="lib"/>
 	<property name="src.code.src" value="code/src"/>
 	<property name="src.code.test" value="code/test"/>
+	<property name="src.test.lib" value="test/lib"/>
 
 	<!-- build -->
 	<property name="build" location="build"/>
@@ -19,7 +23,7 @@
 	<property name="build.lib" location="${build}/${build.lib.rel}" />
 
 	<!-- output jar -->
-	<property name="build.jar" location="${build.lib}/rekon.jar"/>
+	<property name="reasoner.jar" location="${reasoner}/rekon.jar"/>
 
 	<!-- debug property -->
 	<property name="debug" value="true"/>
@@ -41,7 +45,12 @@
 		<mkdir dir="${build.lib}"/>
 		<mkdir dir="${build.classes}"/>
 		<copy todir="${build.lib}" flatten="true">
-			<fileset dir="${src.lib}/">
+			<fileset dir="${reasoner.lib}/">
+                <include name="**/*"/>
+			</fileset>
+		</copy>
+		<copy todir="${build.lib}" flatten="true">
+			<fileset dir="${src.test.lib}/">
                 <include name="**/*"/>
 			</fileset>
 		</copy>
@@ -59,10 +68,11 @@
 	</target>
 
 	<target name="jar" depends="code">
-		<jar destfile="${build.jar}">
+		<jar destfile="${reasoner.jar}">
 			<fileset dir="${build.classes}" />
 			<fileset dir="${src.code.src}" includes="**/*.java"/>
 		</jar>
+		<copy file="reasoner.jar" todir="${reasoner}"/>
 	</target>
 
 </project>
