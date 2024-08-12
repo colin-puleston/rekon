@@ -303,9 +303,9 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		DisjunctionRelationsDeriver(DisjunctionMatcher disjunction) {
 
 			typeDerivers.add(new SomeRelationDeriver());
-			typeDerivers.add(new AllRelationDeriver());
-			typeDerivers.add(new NumberRelationDeriver());
-			typeDerivers.add(new BooleanRelationDeriver());
+//			typeDerivers.add(new AllRelationDeriver());
+//			typeDerivers.add(new NumberRelationDeriver());
+//			typeDerivers.add(new BooleanRelationDeriver());
 
 			Names disjuncts = disjunction.getDirectDisjuncts();
 
@@ -319,22 +319,28 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 			for (NodeX d : disjuncts.asNodes()) {
 
-				PatternMatcher p = d.getProfilePatternMatcher();
-
-				if (p != null) {
-
-					processDisjunctProfile(p, disjunctIndex);
-				}
-
-				disjunctIndex++;
+				processDisjunct(d, disjunctIndex++);
 			}
 		}
 
-		private void processDisjunctProfile(PatternMatcher p, int disjunctIndex) {
+		private void processDisjunct(NodeX disjunct, int disjunctIndex) {
 
-			for (Relation r : p.getPattern().getDirectRelations()) {
+			processDisjunctRelations(disjunct, disjunctIndex);
 
-				processDisjunctRelation(r, disjunctIndex);
+			for (NodeX s : disjunct.getSubsumers().asNodes()) {
+
+				processDisjunctRelations(s, disjunctIndex);
+			}
+		}
+
+		private void processDisjunctRelations(NodeX source, int disjunctIndex) {
+
+			for (PatternMatcher p : source.getProfilePatternMatcherAsList()) {
+
+				for (Relation r : p.getPattern().getDirectRelations()) {
+
+					processDisjunctRelation(r, disjunctIndex);
+				}
 			}
 		}
 
