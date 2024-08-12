@@ -49,11 +49,6 @@ class ProfileRelationsResolver {
 
 			return ontology.getDerivedDisjunctions().resolveProfile(disjuncts);
 		}
-
-		Collection<Relation> resolveProfileRelations(NodeX node) {
-
-			return ProfileRelationsResolver.this.resolveProfileRelations(node);
-		}
 	}
 
 	private class ChainBasedExpander extends ChainBasedProfileRelationsExpander {

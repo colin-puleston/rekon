@@ -319,13 +319,20 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 			for (NodeX d : disjuncts.asNodes()) {
 
-				processDisjunct(d, disjunctIndex++);
+				PatternMatcher p = d.getProfilePatternMatcher();
+
+				if (p != null) {
+
+					processDisjunctProfile(p, disjunctIndex);
+				}
+
+				disjunctIndex++;
 			}
 		}
 
-		private void processDisjunct(NodeX disjunct, int disjunctIndex) {
+		private void processDisjunctProfile(PatternMatcher p, int disjunctIndex) {
 
-			for (Relation r : resolveProfileRelations(disjunct)) {
+			for (Relation r : p.getPattern().getDirectRelations()) {
 
 				processDisjunctRelation(r, disjunctIndex);
 			}
@@ -365,6 +372,4 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 	}
 
 	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
-
-	abstract Collection<Relation> resolveProfileRelations(NodeX node);
 }
