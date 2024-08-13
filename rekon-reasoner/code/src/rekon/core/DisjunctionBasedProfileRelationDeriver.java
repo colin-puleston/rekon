@@ -212,27 +212,22 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		private NodeValue toSingleTargetValue(Collection<NodeValue> inputTargets) {
 
-			return new NodeValue(toSingleTargetNode(toExpandedValueNodes(inputTargets)));
+			return new NodeValue(toSingleTargetNode(extractNodes(inputTargets)));
 		}
 
-		private Set<NodeX> toExpandedValueNodes(Collection<NodeValue> inputTargets) {
+		private Set<NodeX> extractNodes(Collection<NodeValue> inputTargets) {
 
-			Set<NodeX> expNodes = new HashSet<NodeX>();
+			Set<NodeX> nodes = new HashSet<NodeX>();
 
 			for (NodeValue t : inputTargets) {
 
-				NodeX n = t.getValueNode();
-
-				expNodes.add(n);
-				expNodes.addAll(n.getSubsumers().copyNodes());
+				nodes.add(t.getValueNode());
 			}
 
-			return expNodes;
+			return nodes;
 		}
 
 		private NodeX toSingleTargetNode(Collection<NodeX> nodes) {
-
-			removeAllSubsumers(nodes);
 
 			if (nodes.size() == 1) {
 
@@ -240,14 +235,6 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			}
 
 			return addDerivedValueDisjunction(nodes);
-		}
-
-		private void removeAllSubsumers(Collection<NodeX> nodes) {
-
-			for (NodeX n : new ArrayList<NodeX>(nodes)) {
-
-				nodes.removeAll(n.getSubsumers().copyNodes());
-			}
 		}
 	}
 
