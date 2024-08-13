@@ -38,10 +38,6 @@ class ProfileRelations {
 	private boolean newlyExpanded = false;
 	private boolean expansionCheckRequired = false;
 
-	private ExpansionStatus expansionStatus = ExpansionStatus.UNEXPANDED;
-
-	private enum ExpansionStatus {UNEXPANDED, EXPANDED, CHECK}
-
 	private class Collector extends RelationCollector {
 
 		Collector() {
