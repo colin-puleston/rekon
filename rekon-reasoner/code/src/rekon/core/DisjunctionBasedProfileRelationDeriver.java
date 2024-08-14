@@ -45,7 +45,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			private List<T> previousInputTargets;
 
 			private int currentDisjunctIndex;
-			private boolean inputTargetsUpdatedForCurrentDisjunct = false;
+			private boolean updatedForCurrentDisjunct = false;
 
 			RelationSpec(PropertyX property, T firstTarget) {
 
@@ -62,19 +62,22 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 						currentDisjunctIndex = disjunctIndex;
 
-						checkUpdateInputTargets(target);
+						updatedForCurrentDisjunct = checkUpdateInputTargets(target);
 					}
 					else {
 
 						if (currentDisjunctIndex == disjunctIndex) {
 
-							if (inputTargetsUpdatedForCurrentDisjunct) {
+							if (updatedForCurrentDisjunct) {
 
 								checkSplitSpecForAdditionalInputTarget(target);
 							}
 							else {
 
-								checkUpdateInputTargets(target);
+								if (checkUpdateInputTargets(target)) {
+
+									updatedForCurrentDisjunct = true;
+								}
 							}
 						}
 						else {
@@ -116,19 +119,18 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 				relationSpecs.add(this);
 			}
 
-			private void checkUpdateInputTargets(T target) {
+			private boolean checkUpdateInputTargets(T target) {
 
 				List<T> its = new ArrayList<T>(inputTargets);
 
 				if (updateInputTargets(inputTargets, target)) {
 
 					previousInputTargets = its;
-					inputTargetsUpdatedForCurrentDisjunct = true;
-				}
-				else {
 
-					inputTargetsUpdatedForCurrentDisjunct = false;
+					return true;
 				}
+
+				return false;
 			}
 
 			private void checkSplitSpecForAdditionalInputTarget(T target) {
