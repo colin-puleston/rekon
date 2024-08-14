@@ -40,54 +40,58 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		private class RelationSpec {
 
 			private PropertyX property;
-			private List<T> inputTargets;
 
-			private int nextDisjunctIndex;
+			private List<T> inputTargets;
+			private List<T> previousInputTargets;
+
+			private int currentDisjunctIndex;
+			private boolean inputTargetsUpdatedForCurrentDisjunct = false;
 
 			RelationSpec(PropertyX property, T firstTarget) {
 
-				this(property, new ArrayList<T>(), 1);
+				this(property, new ArrayList<T>(), Collections.emptyList(), 0);
 
 				inputTargets.add(firstTarget);
 			}
 
-			boolean checkAbsorbRelation(PropertyX property, T target, int disjunctIndex) {
+			boolean checkAbsorbInputTarget(PropertyX property, T target, int disjunctIndex) {
 
-				if (property != this.property) {
+				if (property == this.property) {
 
-					return false;
-				}
+					if (currentDisjunctIndex == disjunctIndex - 1) {
 
-				if (disjunctIndex > nextDisjunctIndex) {
+						currentDisjunctIndex = disjunctIndex;
 
-					relationSpecs.remove(this);
-				}
-				else if (disjunctIndex == nextDisjunctIndex) {
-
-					absorbInputTarget(inputTargets, target);
-
-					nextDisjunctIndex++;
-				}
-				else if (disjunctIndex == nextDisjunctIndex - 1) {
-
-					List<T> itsCopy = new ArrayList<T>(inputTargets);
-
-					if (absorbInputTarget(itsCopy, target)) {
-
-						new RelationSpec(property, itsCopy, nextDisjunctIndex);
+						checkUpdateInputTargets(target);
 					}
-				}
-				else {
+					else {
 
-					throw new Error("Should never happen!");
+						if (currentDisjunctIndex == disjunctIndex) {
+
+							if (inputTargetsUpdatedForCurrentDisjunct) {
+
+								checkSplitSpecForAdditionalInputTarget(target);
+							}
+							else {
+
+								checkUpdateInputTargets(target);
+							}
+						}
+						else {
+
+							relationSpecs.remove(this);
+						}
+					}
+
+					return true;
 				}
 
-				return true;
+				return false;
 			}
 
 			void checkAddDerivedRelation(int totalDisjuncts) {
 
-				if (totalDisjuncts == nextDisjunctIndex) {
+				if (totalDisjuncts == currentDisjunctIndex + 1) {
 
 					Relation rel = checkCreateRelation(property, inputTargets);
 
@@ -98,16 +102,46 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 				}
 			}
 
-			private RelationSpec(PropertyX property, List<T> inputTargets, int nextDisjunctIndex) {
+			private RelationSpec(
+						PropertyX property,
+						List<T> inputTargets,
+						List<T> previousInputTargets,
+						int currentDisjunctIndex) {
 
 				this.property = property;
 				this.inputTargets = inputTargets;
-				this.nextDisjunctIndex = nextDisjunctIndex;
+				this.previousInputTargets = previousInputTargets;
+				this.currentDisjunctIndex = currentDisjunctIndex;
 
 				relationSpecs.add(this);
 			}
 
-			private boolean absorbInputTarget(List<T> targets, T target) {
+			private void checkUpdateInputTargets(T target) {
+
+				List<T> its = new ArrayList<T>(inputTargets);
+
+				if (updateInputTargets(inputTargets, target)) {
+
+					previousInputTargets = its;
+					inputTargetsUpdatedForCurrentDisjunct = true;
+				}
+				else {
+
+					inputTargetsUpdatedForCurrentDisjunct = false;
+				}
+			}
+
+			private void checkSplitSpecForAdditionalInputTarget(T target) {
+
+				List<T> its = new ArrayList<T>(previousInputTargets);
+
+				if (updateInputTargets(its, target)) {
+
+					new RelationSpec(property, its, previousInputTargets, currentDisjunctIndex);
+				}
+			}
+
+			private boolean updateInputTargets(List<T> targets, T target) {
 
 				for (T t : new ArrayList<T>(targets)) {
 
@@ -162,21 +196,21 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			PropertyX p = rel.getProperty();
 			T t = getTarget(rel);
 
-			addInputTarget(p, t, disjunctIndex);
+			processInputTarget(p, t, disjunctIndex);
 
 			for (Name s : p.getSubsumers()) {
 
-				addInputTarget((PropertyX)s, t, disjunctIndex);
+				processInputTarget((PropertyX)s, t, disjunctIndex);
 			}
 		}
 
-		private void addInputTarget(PropertyX prop, T target, int disjunctIndex) {
+		private void processInputTarget(PropertyX prop, T target, int disjunctIndex) {
 
 			boolean absorbed = false;
 
 			for (RelationSpec s : copyRelationSpecs()) {
 
-				absorbed |= s.checkAbsorbRelation(prop, target, disjunctIndex);
+				absorbed |= s.checkAbsorbInputTarget(prop, target, disjunctIndex);
 			}
 
 			if (disjunctIndex == 0 && !absorbed) {
