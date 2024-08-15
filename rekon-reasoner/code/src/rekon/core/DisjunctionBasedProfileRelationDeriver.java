@@ -40,50 +40,35 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		private class RelationSpec {
 
 			private PropertyX property;
+			private List<T> inputTargets = new ArrayList<T>();
 
-			private List<T> inputTargets;
-			private List<T> previousInputTargets;
-
-			private int currentDisjunctIndex;
-			private boolean updatedForCurrentDisjunct = false;
+			private int currentDisjunctIndex = 0;
 
 			RelationSpec(PropertyX property, T firstTarget) {
 
-				this(property, new ArrayList<T>(), Collections.emptyList(), 0);
+				this.property = property;
 
 				inputTargets.add(firstTarget);
+
+				relationSpecs.add(this);
 			}
 
 			boolean checkAbsorbInputTarget(PropertyX property, T target, int disjunctIndex) {
 
 				if (property == this.property) {
 
-					if (currentDisjunctIndex == disjunctIndex - 1) {
+					if (currentDisjunctIndex < disjunctIndex - 1) {
 
-						currentDisjunctIndex = disjunctIndex;
-
-						updatedForCurrentDisjunct = checkUpdateInputTargets(target);
+						relationSpecs.remove(this);
 					}
 					else {
 
-						if (currentDisjunctIndex == disjunctIndex) {
+						if (currentDisjunctIndex == disjunctIndex - 1) {
 
-							if (updatedForCurrentDisjunct) {
-
-								checkSplitSpecForAdditionalInputTarget(target);
-							}
-							else {
-
-								if (checkUpdateInputTargets(target)) {
-
-									updatedForCurrentDisjunct = true;
-								}
-							}
+							currentDisjunctIndex = disjunctIndex;
 						}
-						else {
 
-							relationSpecs.remove(this);
-						}
+						updateInputTargets(target);
 					}
 
 					return true;
@@ -105,62 +90,22 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 				}
 			}
 
-			private RelationSpec(
-						PropertyX property,
-						List<T> inputTargets,
-						List<T> previousInputTargets,
-						int currentDisjunctIndex) {
+			private void updateInputTargets(T target) {
 
-				this.property = property;
-				this.inputTargets = inputTargets;
-				this.previousInputTargets = previousInputTargets;
-				this.currentDisjunctIndex = currentDisjunctIndex;
-
-				relationSpecs.add(this);
-			}
-
-			private boolean checkUpdateInputTargets(T target) {
-
-				List<T> its = new ArrayList<T>(inputTargets);
-
-				if (updateInputTargets(inputTargets, target)) {
-
-					previousInputTargets = its;
-
-					return true;
-				}
-
-				return false;
-			}
-
-			private void checkSplitSpecForAdditionalInputTarget(T target) {
-
-				List<T> its = new ArrayList<T>(previousInputTargets);
-
-				if (updateInputTargets(its, target)) {
-
-					new RelationSpec(property, its, previousInputTargets, currentDisjunctIndex);
-				}
-			}
-
-			private boolean updateInputTargets(List<T> targets, T target) {
-
-				for (T t : new ArrayList<T>(targets)) {
+				for (T t : new ArrayList<T>(inputTargets)) {
 
 					if (t.subsumes(target)) {
 
-						return false;
+						return;
 					}
 
 					if (target.subsumes(t)) {
 
-						targets.remove(t);
+						inputTargets.remove(t);
 					}
 				}
 
-				targets.add(target);
-
-				return true;
+				inputTargets.add(target);
 			}
 		}
 
