@@ -407,6 +407,8 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 			new DisjunctionRelationsDeriver(d);
 		}
+
+		purgeDerivedRelations();
 	}
 
 	Collection<Relation> getAll() {
@@ -417,4 +419,28 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
 
 	abstract Collection<Relation> resolveProfileRelations(NodeX node);
+
+	private void purgeDerivedRelations()  {
+
+		for (Relation r : new ArrayList<Relation>(derivedRelations)) {
+
+			if (subsumingDerivedRelation(r)) {
+
+				derivedRelations.remove(r);
+			}
+		}
+	}
+
+	private boolean subsumingDerivedRelation(Relation rel)  {
+
+		for (Relation r : derivedRelations) {
+
+			if (r != rel && rel.subsumes(r)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
 }
