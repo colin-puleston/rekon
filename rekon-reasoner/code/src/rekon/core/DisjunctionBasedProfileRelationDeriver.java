@@ -136,6 +136,11 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 		abstract Class<T> getTargetType();
 
+		boolean existentialRelationType() {
+
+			return true;
+		}
+
 		abstract Relation checkCreateRelation(PropertyX prop, Collection<T> inputTargets);
 
 		private void processDisjunctRelation(Relation rel, int disjunctIndex) {
@@ -145,9 +150,12 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 			processInputTarget(p, t, disjunctIndex);
 
-			for (Name s : p.getSubsumers()) {
+			if (existentialRelationType()) {
 
-				processInputTarget((PropertyX)s, t, disjunctIndex);
+				for (Name s : p.getSubsumers()) {
+
+					processInputTarget((PropertyX)s, t, disjunctIndex);
+				}
 			}
 		}
 
@@ -237,6 +245,11 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		Class<AllRelation> getRelationType() {
 
 			return AllRelation.class;
+		}
+
+		boolean existentialRelationType() {
+
+			return false;
 		}
 
 		Relation createRelation(NodeProperty prop, NodeValue target) {
