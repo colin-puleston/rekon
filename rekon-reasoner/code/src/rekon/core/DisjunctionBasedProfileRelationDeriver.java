@@ -305,7 +305,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 			typeDerivers.add(new NumberRelationDeriver());
 			typeDerivers.add(new BooleanRelationDeriver());
 
-			Names disjuncts = disjunction.getDirectDisjuncts();
+			Names disjuncts = disjunction.getExpandedDisjuncts();
 
 			processDisjuncts(disjuncts);
 			deriveRelations(disjuncts.size());

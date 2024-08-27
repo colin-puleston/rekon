@@ -70,9 +70,17 @@ class PatternMatcher extends NodeMatcher {
 		this.pattern = pattern;
 	}
 
-	void absorbDefinitionIntoProfile(Pattern defn) {
+	Collection<Relation> absorbDefinitionIntoProfile(Pattern defn) {
+
+		Collection<Relation> preRels = pattern.getDirectRelations();
 
 		pattern = pattern.combineWith(defn);
+
+		Set<Relation> newRels = new HashSet<Relation>(pattern.getDirectRelations());
+
+		newRels.removeAll(preRels);
+
+		return newRels;
 	}
 
 	void addRelation(Relation relation) {
