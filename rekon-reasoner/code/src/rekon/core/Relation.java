@@ -40,6 +40,11 @@ public abstract class Relation extends PatternComponent {
 		this.target = target;
 	}
 
+	boolean existential() {
+
+		return true;
+	}
+
 	boolean chainExpandable() {
 
 		return false;
@@ -62,7 +67,7 @@ public abstract class Relation extends PatternComponent {
 
 	void collectNames(NameCollector collector) {
 
-		collector.collectName(property);
+		collector.collectProperty(property, existential());
 
 		target.collectNames(collector.forNextRank());
 	}
@@ -86,6 +91,16 @@ public abstract class Relation extends PatternComponent {
 
 	private boolean subsumesOtherOfType(Relation r) {
 
-		return property.subsumes(r.property) && target.subsumes(r.target);
+		return propertySubsumption(r) && target.subsumes(r.target);
+	}
+
+	private boolean propertySubsumption(Relation r) {
+
+		return existential() ? subsumesProperty(r) : r.subsumesProperty(this);
+	}
+
+	private boolean subsumesProperty(Relation r) {
+
+		return property.subsumes(r.property);
 	}
 }

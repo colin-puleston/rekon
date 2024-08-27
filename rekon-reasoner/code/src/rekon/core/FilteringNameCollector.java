@@ -91,6 +91,18 @@ class FilteringNameCollector {
 			}
 		}
 
+		void collectProperty(PropertyX p, boolean existentialRelation) {
+
+			if (existentialRelation) {
+
+				collectName(p);
+			}
+			else {
+
+				collectName(p.getRootName());
+			}
+		}
+
 		boolean continueForNextRelationsRank() {
 
 			return continueForNextRelationsRank(rank);

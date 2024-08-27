@@ -34,6 +34,11 @@ public class AllRelation extends NodeRelation {
 		super(property, target);
 	}
 
+	boolean existential() {
+
+		return false;
+	}
+
 	String renderRelationType() {
 
 		return "all";
