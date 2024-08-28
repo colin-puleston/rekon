@@ -145,24 +145,6 @@ public abstract class Name {
 		return rootName;
 	}
 
-	Name getRootName() {
-
-		if (rootName) {
-
-			return this;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (s.rootName) {
-
-				return s;
-			}
-		}
-
-		throw new Error("Root-name not found!");
-	}
-
 	boolean local() {
 
 		return false;

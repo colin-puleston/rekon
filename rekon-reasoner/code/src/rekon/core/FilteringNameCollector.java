@@ -91,7 +91,7 @@ class FilteringNameCollector {
 			}
 		}
 
-		boolean includeUniversalRelations() {
+		boolean includeUniversalRelationProperties() {
 
 			return false;
 		}

@@ -45,7 +45,7 @@ abstract class NameCollector {
 
 	abstract void collectNames(Names ns);
 
-	abstract boolean includeUniversalRelations();
+	abstract boolean includeUniversalRelationProperties();
 
 	abstract boolean continueForNextRelationsRank();
 

@@ -64,7 +64,7 @@ class SimpleNameCollector extends NameCollector {
 		}
 	}
 
-	boolean includeUniversalRelations() {
+	boolean includeUniversalRelationProperties() {
 
 		return true;
 	}
@@ -81,4 +81,3 @@ class SimpleNameCollector extends NameCollector {
 		return this;
 	}
 }
-

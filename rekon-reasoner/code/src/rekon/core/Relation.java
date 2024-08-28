@@ -67,12 +67,12 @@ public abstract class Relation extends PatternComponent {
 
 	void collectNames(NameCollector collector) {
 
-		if (existential() || collector.includeUniversalRelations()) {
+		if (existential() || collector.includeUniversalRelationProperties()) {
 
 			collector.collectName(property);
-
-			target.collectNames(collector.forNextRank());
 		}
+
+		target.collectNames(collector.forNextRank());
 	}
 
 	Names getTargetNodes() {
