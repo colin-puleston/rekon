@@ -54,31 +54,19 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#P"/>
+                <owl:someValuesFrom rdf:resource="urn:test#P1"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#Q"/>
+                <owl:someValuesFrom rdf:resource="urn:test#P2"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#R"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#S"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#T"/>
+                <owl:someValuesFrom rdf:resource="urn:test#P3"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -91,31 +79,19 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#U"/>
+                <owl:someValuesFrom rdf:resource="urn:test#Q1"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#V"/>
+                <owl:someValuesFrom rdf:resource="urn:test#Q2"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#W"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#X"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#Y"/>
+                <owl:someValuesFrom rdf:resource="urn:test#Q3"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -137,17 +113,17 @@
     
 
 
-    <!-- urn:test#D -->
+    <!-- urn:test#K -->
 
-    <owl:Class rdf:about="urn:test#D">
+    <owl:Class rdf:about="urn:test#K">
         <owl:equivalentClass>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
                 <owl:someValuesFrom>
                     <owl:Class>
                         <owl:unionOf rdf:parseType="Collection">
-                            <rdf:Description rdf:about="urn:test#P"/>
-                            <rdf:Description rdf:about="urn:test#U"/>
+                            <rdf:Description rdf:about="urn:test#P1"/>
+                            <rdf:Description rdf:about="urn:test#Q1"/>
                         </owl:unionOf>
                     </owl:Class>
                 </owl:someValuesFrom>
@@ -157,63 +133,59 @@
     
 
 
-    <!-- urn:test#P -->
+    <!-- urn:test#L -->
 
-    <owl:Class rdf:about="urn:test#P"/>
+    <owl:Class rdf:about="urn:test#L">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#q"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="urn:test#P2"/>
+                            <rdf:Description rdf:about="urn:test#Q3"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </owl:equivalentClass>
+    </owl:Class>
     
 
 
-    <!-- urn:test#Q -->
+    <!-- urn:test#P1 -->
 
-    <owl:Class rdf:about="urn:test#Q"/>
+    <owl:Class rdf:about="urn:test#P1"/>
     
 
 
-    <!-- urn:test#R -->
+    <!-- urn:test#P2 -->
 
-    <owl:Class rdf:about="urn:test#R"/>
+    <owl:Class rdf:about="urn:test#P2"/>
     
 
 
-    <!-- urn:test#S -->
+    <!-- urn:test#P3 -->
 
-    <owl:Class rdf:about="urn:test#S"/>
+    <owl:Class rdf:about="urn:test#P3"/>
     
 
 
-    <!-- urn:test#T -->
+    <!-- urn:test#Q1 -->
 
-    <owl:Class rdf:about="urn:test#T"/>
+    <owl:Class rdf:about="urn:test#Q1"/>
     
 
 
-    <!-- urn:test#U -->
+    <!-- urn:test#Q2 -->
 
-    <owl:Class rdf:about="urn:test#U"/>
+    <owl:Class rdf:about="urn:test#Q2"/>
     
 
 
-    <!-- urn:test#V -->
+    <!-- urn:test#Q3 -->
 
-    <owl:Class rdf:about="urn:test#V"/>
-    
-
-
-    <!-- urn:test#W -->
-
-    <owl:Class rdf:about="urn:test#W"/>
-    
-
-
-    <!-- urn:test#X -->
-
-    <owl:Class rdf:about="urn:test#X"/>
-    
-
-
-    <!-- urn:test#Y -->
-
-    <owl:Class rdf:about="urn:test#Y"/>
+    <owl:Class rdf:about="urn:test#Q3"/>
 </rdf:RDF>
 
 
