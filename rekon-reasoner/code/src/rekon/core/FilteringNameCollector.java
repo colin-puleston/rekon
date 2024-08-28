@@ -91,16 +91,9 @@ class FilteringNameCollector {
 			}
 		}
 
-		void collectProperty(PropertyX p, boolean existentialRelation) {
+		boolean includeUniversalRelations() {
 
-			if (existentialRelation) {
-
-				collectName(p);
-			}
-			else {
-
-				collectName(p.getRootName());
-			}
+			return false;
 		}
 
 		boolean continueForNextRelationsRank() {

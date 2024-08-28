@@ -64,6 +64,11 @@ class SimpleNameCollector extends NameCollector {
 		}
 	}
 
+	boolean includeUniversalRelations() {
+
+		return true;
+	}
+
 	boolean continueForNextRelationsRank() {
 
 		return !nestedRank;
