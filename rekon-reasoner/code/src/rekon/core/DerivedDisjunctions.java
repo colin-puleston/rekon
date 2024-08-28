@@ -64,7 +64,7 @@ class DerivedDisjunctions {
 
 	private Set<NodeX> resolveNestedDisjuncts(Collection<NodeX> disjuncts) {
 
-		Set<NodeX> resolvedDisjuncts = new HashSet<NodeX>();
+		Set<NodeX> resolvedDisjuncts = new HashSet<NodeX>(disjuncts);
 
 		for (NodeX d : disjuncts) {
 

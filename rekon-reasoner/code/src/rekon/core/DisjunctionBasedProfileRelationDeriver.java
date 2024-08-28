@@ -40,35 +40,50 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		private class RelationSpec {
 
 			private PropertyX property;
-			private List<T> inputTargets = new ArrayList<T>();
 
-			private int currentDisjunctIndex = 0;
+			private List<T> inputTargets;
+			private List<T> previousInputTargets;
+
+			private int currentDisjunctIndex;
+			private boolean updatedForCurrentDisjunct = false;
 
 			RelationSpec(PropertyX property, T firstTarget) {
 
-				this.property = property;
+				this(property, new ArrayList<T>(), Collections.emptyList(), 0);
 
 				inputTargets.add(firstTarget);
-
-				relationSpecs.add(this);
 			}
 
 			boolean checkAbsorbInputTarget(PropertyX property, T target, int disjunctIndex) {
 
 				if (property == this.property) {
 
-					if (currentDisjunctIndex < disjunctIndex - 1) {
+					if (currentDisjunctIndex == disjunctIndex - 1) {
 
-						relationSpecs.remove(this);
+						currentDisjunctIndex = disjunctIndex;
+
+						updatedForCurrentDisjunct = checkUpdateInputTargets(target);
 					}
 					else {
 
-						if (currentDisjunctIndex == disjunctIndex - 1) {
+						if (currentDisjunctIndex == disjunctIndex) {
 
-							currentDisjunctIndex = disjunctIndex;
+							if (updatedForCurrentDisjunct) {
+
+								checkSplitSpecForAdditionalInputTarget(target);
+							}
+							else {
+
+								if (checkUpdateInputTargets(target)) {
+
+									updatedForCurrentDisjunct = true;
+								}
+							}
 						}
+						else {
 
-						updateInputTargets(target);
+							relationSpecs.remove(this);
+						}
 					}
 
 					return true;
@@ -85,27 +100,67 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 					if (rel != null) {
 
-						derivedRelations.add(rel);
+						absorbDerivedRelation(rel);
 					}
 				}
 			}
 
-			private void updateInputTargets(T target) {
+			private RelationSpec(
+						PropertyX property,
+						List<T> inputTargets,
+						List<T> previousInputTargets,
+						int currentDisjunctIndex) {
 
-				for (T t : new ArrayList<T>(inputTargets)) {
+				this.property = property;
+				this.inputTargets = inputTargets;
+				this.previousInputTargets = previousInputTargets;
+				this.currentDisjunctIndex = currentDisjunctIndex;
+
+				relationSpecs.add(this);
+			}
+
+			private boolean checkUpdateInputTargets(T target) {
+
+				List<T> its = new ArrayList<T>(inputTargets);
+
+				if (updateInputTargets(inputTargets, target)) {
+
+					previousInputTargets = its;
+
+					return true;
+				}
+
+				return false;
+			}
+
+			private void checkSplitSpecForAdditionalInputTarget(T target) {
+
+				List<T> its = new ArrayList<T>(previousInputTargets);
+
+				if (updateInputTargets(its, target)) {
+
+					new RelationSpec(property, its, previousInputTargets, currentDisjunctIndex);
+				}
+			}
+
+			private boolean updateInputTargets(List<T> targets, T target) {
+
+				for (T t : new ArrayList<T>(targets)) {
 
 					if (t.subsumes(target)) {
 
-						return;
+						return false;
 					}
 
 					if (target.subsumes(t)) {
 
-						inputTargets.remove(t);
+						targets.remove(t);
 					}
 				}
 
-				inputTargets.add(target);
+				targets.add(target);
+
+				return true;
 			}
 		}
 
@@ -355,8 +410,6 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 			new DisjunctionRelationsDeriver(d);
 		}
-
-		purgeDerivedRelations();
 	}
 
 	Collection<Relation> getAll() {
@@ -368,27 +421,21 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 	abstract Collection<Relation> resolveProfileRelations(NodeX node);
 
-	private void purgeDerivedRelations()  {
+	private void absorbDerivedRelation(Relation rel) {
 
 		for (Relation r : new ArrayList<Relation>(derivedRelations)) {
 
-			if (subsumingDerivedRelation(r)) {
+			if (rel.subsumes(r)) {
+
+				return;
+			}
+
+			if (r.subsumes(rel)) {
 
 				derivedRelations.remove(r);
 			}
 		}
-	}
 
-	private boolean subsumingDerivedRelation(Relation rel)  {
-
-		for (Relation r : derivedRelations) {
-
-			if (r != rel && rel.subsumes(r)) {
-
-				return true;
-			}
-		}
-
-		return false;
+		derivedRelations.add(rel);
 	}
 }
