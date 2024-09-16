@@ -15,8 +15,6 @@ Simple OWL reasoner. Implements OWL API.
     DataSomeValuesFrom (numeric and boolean values only)
     DataHasValue (numeric and boolean values only)
     
-NOTE: Inclusion of ObjectUnionOf/DataUnionOf will result in incomplete reasoning
-
 ### Axioms ###
 
     SubClassOf
