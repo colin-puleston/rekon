@@ -29,12 +29,25 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class MultiIterable<E> implements Iterable<E> {
+public class CompoundIterable<E> implements Iterable<E> {
 
 	private List<Iterable<? extends E>> components = new ArrayList<Iterable<? extends E>>();
-	private MultiListReader<E> listReader = new MultiListReader<E>();
+	private CompoundListReader<E> listReader = new CompoundListReader<E>();
 
-	private class MultiIterator implements Iterator<E> {
+	private class EmptyIterator implements Iterator<E> {
+
+		public boolean hasNext() {
+
+			return false;
+		}
+
+		public E next() {
+
+			throw new NoSuchElementException();
+		}
+	}
+
+	private class CompoundIterator implements Iterator<E> {
 
 		private int currentComponentIdx = 0;
 		private Iterator<? extends E> currentIterator = components.get(0).iterator();
@@ -67,14 +80,14 @@ public class MultiIterable<E> implements Iterable<E> {
 
 	public Iterator<E> iterator() {
 
-		return new MultiIterator();
+		return components.size() == 0 ? new EmptyIterator() : new CompoundIterator();
 	}
 
 	public void addComponent(Iterable<? extends E> component) {
 
-		if (component instanceof MultiIterable) {
+		if (component instanceof CompoundIterable) {
 
-			addMultiComponents((MultiIterable<? extends E>)component);
+			addMultiComponents((CompoundIterable<? extends E>)component);
 		}
 		else {
 
@@ -87,7 +100,7 @@ public class MultiIterable<E> implements Iterable<E> {
 		return listReader;
 	}
 
-	private void addMultiComponents(MultiIterable<? extends E> multiIter) {
+	private void addMultiComponents(CompoundIterable<? extends E> multiIter) {
 
 		for (Iterable<? extends E> comp : multiIter.components) {
 

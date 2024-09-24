@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class MultiListReader<E> extends ListReader<E> {
+class CompoundListReader<E> extends ListReader<E> {
 
 	private int size = 0;
 	private List<List<? extends E>> components = new ArrayList<List<? extends E>>();

@@ -430,8 +430,8 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 	Iterable<InputIndividualRelation> getIndividualRelations() {
 
-		MultiIterable<InputIndividualRelation> all
-			= new MultiIterable<InputIndividualRelation>();
+		CompoundIterable<InputIndividualRelation> all
+			= new CompoundIterable<InputIndividualRelation>();
 
 		all.addComponent(getInputAxioms(IndividualObjectRelationConverter.class));
 		all.addComponent(getInputAxioms(IndividualDataRelationConverter.class));

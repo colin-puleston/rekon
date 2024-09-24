@@ -477,8 +477,8 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 	Iterable<InputClassComplexEquivalence> getClassComplexEquivalences() {
 
-		MultiIterable<InputClassComplexEquivalence> all
-			= new MultiIterable<InputClassComplexEquivalence>();
+		CompoundIterable<InputClassComplexEquivalence> all
+			= new CompoundIterable<InputClassComplexEquivalence>();
 
 		all.addComponent(getInputAxioms(ClassComplexEquivalenceConverter.class));
 		all.addComponent(getInputAxioms(ComplexClassEquivalenceConverter.class));

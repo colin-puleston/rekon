@@ -58,9 +58,9 @@ public abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E
 
 	private ListReader<E> toListReader(Iterable<E> elements) {
 
-		if (elements instanceof MultiIterable) {
+		if (elements instanceof CompoundIterable) {
 
-			return ((MultiIterable<E>)elements).asListReader();
+			return ((CompoundIterable<E>)elements).asListReader();
 		}
 
 		return new SingleListReader<E>(elements);

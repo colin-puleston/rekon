@@ -33,8 +33,8 @@ import rekon.util.*;
  */
 public class Ontology {
 
-	private MultiIterable<Name> allNames = new MultiIterable<Name>();
-	private MultiIterable<NodeX> allNodes = new MultiIterable<NodeX>();
+	private CompoundIterable<Name> allNames = new CompoundIterable<Name>();
+	private CompoundIterable<NodeX> allNodes = new CompoundIterable<NodeX>();
 
 	private List<ClassNode> freeClassNodes = new ArrayList<ClassNode>();
 
