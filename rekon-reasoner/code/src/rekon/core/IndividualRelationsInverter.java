@@ -29,80 +29,57 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public abstract class NodeProperty extends PropertyX {
+class IndividualRelationsInverter {
 
-	private ClassNode domain = null;
-	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
-	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
+	static void addAllInvertions(OntologyNames names) {
 
-	public void setDomain(ClassNode domain) {
+		for (IndividualNode n : names.getIndividualNodes()) {
 
-		this.domain = domain;
-	}
+			for (PatternMatcher p : n.getProfilePatternMatcherAsList()) {
 
-	public void setSymmetric() {
-
-		inverses.add(this);
-	}
-
-	public void addInverse(NodeProperty inverse) {
-
-		inverses.add(inverse);
-		inverse.inverses.add(this);
-	}
-
-	public void addChain(PropertyChain chain) {
-
-		chains.add(chain);
-	}
-
-	Collection<NodeProperty> getInverses() {
-
-		return inverses;
-	}
-
-	boolean directChains() {
-
-		return !chains.isEmpty();
-	}
-
-	boolean anyChains() {
-
-		if (!chains.isEmpty()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (!((NodeProperty)s).chains.isEmpty()) {
-
-				return true;
+				invertAnyFor(p);
 			}
 		}
-
-		return false;
 	}
 
-	boolean hasDomain() {
+	static private void invertAnyFor(PatternMatcher p) {
 
-		return domain != null;
+		for (Relation r : p.getPattern().getDirectRelations()) {
+
+			if (r instanceof SomeRelation) {
+
+				invertAnyFor(p.getNode(), (SomeRelation)r);
+			}
+		}
 	}
 
-	ClassNode getDomain() {
+	static private void invertAnyFor(NodeX forwardSource, SomeRelation forwardRel) {
 
-		return domain;
+		Collection<NodeProperty> ips = forwardRel.getNodeProperty().getInverses();
+
+		if (!ips.isEmpty()) {
+
+			NodeValue invSource = forwardRel.getNodeValueTarget();
+			NodeValue invTarget = new NodeValue(forwardSource);
+
+			PatternMatcher p = resolveProfilePattern(invSource.getValueNode());
+
+			for (NodeProperty ip : ips) {
+
+				p.addRelation(new SomeRelation(ip, invTarget));
+			}
+		}
 	}
 
-	Collection<PropertyChain> getAllChains() {
+	static private PatternMatcher resolveProfilePattern(NodeX node) {
 
-		List<PropertyChain> allChains = new ArrayList<PropertyChain>(chains);
+		PatternMatcher p = node.getProfilePatternMatcher();
 
-		for (Name s : getSubsumers()) {
+		if (p == null) {
 
-			allChains.addAll(((NodeProperty)s).chains);
+			p = node.addProfilePatternMatcher();
 		}
 
-		return allChains;
+		return p;
 	}
 }

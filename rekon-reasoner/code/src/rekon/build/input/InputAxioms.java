@@ -63,7 +63,11 @@ public interface InputAxioms {
 
 	public Iterable<InputNodePropertyChain> getNodePropertyChains();
 
+	public Iterable<InputNodePropertyInverse> getNodePropertyInverses();
+
 	public Iterable<InputNodePropertyTransitive> getNodePropertyTransitives();
+
+	public Iterable<InputNodePropertySymmetric> getNodePropertySymmetrics();
 
 	public Iterable<InputDataPropertyEquivalence> getDataPropertyEquivalences();
 

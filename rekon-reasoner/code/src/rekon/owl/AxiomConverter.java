@@ -103,9 +103,19 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return propertyAxioms.getNodePropertyRanges();
 	}
 
+	public Iterable<InputNodePropertyInverse> getNodePropertyInverses() {
+
+		return propertyAxioms.getNodePropertyInverses();
+	}
+
 	public Iterable<InputNodePropertyChain> getNodePropertyChains() {
 
 		return propertyAxioms.getNodePropertyChains();
+	}
+
+	public Iterable<InputNodePropertySymmetric> getNodePropertySymmetrics() {
+
+		return propertyAxioms.getNodePropertySymmetrics();
 	}
 
 	public Iterable<InputNodePropertyTransitive> getNodePropertyTransitives() {

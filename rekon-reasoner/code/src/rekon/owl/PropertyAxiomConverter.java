@@ -128,6 +128,28 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
+	private class ConvertedNodePropertyInverse
+						extends ConvertedNodePropertyAttribute
+						implements InputNodePropertyInverse {
+
+		private NodeProperty inverse;
+
+		public NodeProperty getInverse() {
+
+			return inverse;
+		}
+
+		ConvertedNodePropertyInverse(
+			OWLAxiom source,
+			NodeProperty property,
+			NodeProperty inverse) {
+
+			super(source, property);
+
+			this.inverse = inverse;
+		}
+	}
+
 	private class ConvertedNodePropertyChain
 						extends ConvertedNodePropertyAttribute
 						implements InputNodePropertyChain {
@@ -147,6 +169,16 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 			super(source, property);
 
 			this.chain = chain;
+		}
+	}
+
+	private class ConvertedNodePropertySymmetric
+						extends ConvertedNodePropertyAttribute
+						implements InputNodePropertySymmetric {
+
+		ConvertedNodePropertySymmetric(OWLAxiom source, NodeProperty property) {
+
+			super(source, property);
 		}
 	}
 
@@ -302,6 +334,37 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 								extends PropertyLinkConverter<S, OwlObjectPropertyLink, I> {
 	}
 
+	private abstract class NodePropertyAttributeConverter
+								<S extends OWLAxiom, I extends InputAxiom>
+								extends TypeAxiomConverter<S, I> {
+
+		boolean convertAxiomOfType(S source) {
+
+			OWLObjectPropertyExpression expr = getPropertyExpr(source);
+			NodeProperty p = toNodeProperty(expr);
+
+			if (p != null) {
+
+				I ax = createInputAxiom(p, source);
+
+				if (ax != null) {
+
+					inputAxioms.add(ax);
+
+					return true;
+				}
+			}
+
+			logOutOfScopeAxiom(source, expr);
+
+			return true;
+		}
+
+		abstract OWLObjectPropertyExpression getPropertyExpr(S source);
+
+		abstract I createInputAxiom(NodeProperty prop, S source);
+	}
+
 	private class NodePropertyEquivalenceConverter
 					extends
 						NodePropertyLinkConverter
@@ -350,37 +413,6 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 							owlLink.firstOrSubAsName(),
 							owlLink.secondOrSupAsName());
 		}
-	}
-
-	private abstract class NodePropertyAttributeConverter
-								<S extends OWLAxiom, I extends InputAxiom>
-								extends TypeAxiomConverter<S, I> {
-
-		boolean convertAxiomOfType(S source) {
-
-			OWLObjectPropertyExpression expr = getPropertyExpr(source);
-			NodeProperty p = toNodeProperty(expr);
-
-			if (p != null) {
-
-				I ax = createInputAxiom(p, source);
-
-				if (ax != null) {
-
-					inputAxioms.add(ax);
-
-					return true;
-				}
-			}
-
-			logOutOfScopeAxiom(source, expr);
-
-			return true;
-		}
-
-		abstract OWLObjectPropertyExpression getPropertyExpr(S source);
-
-		abstract I createInputAxiom(NodeProperty prop, S source);
 	}
 
 	private class NodePropertyDomainConverter
@@ -435,6 +467,31 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		}
 	}
 
+	private class NodePropertyInverseConverter
+					extends
+						NodePropertyLinkConverter
+							<OWLInverseObjectPropertiesAxiom,
+							InputNodePropertyInverse> {
+
+		Class<OWLInverseObjectPropertiesAxiom> getSourceAxiomType() {
+
+			return OWLInverseObjectPropertiesAxiom.class;
+		}
+
+		OwlObjectPropertyLink createOwlLink(OWLInverseObjectPropertiesAxiom source) {
+
+			return new OwlObjectPropertyLink(source);
+		}
+
+		InputNodePropertyInverse createInputAxiom(OwlObjectPropertyLink owlLink) {
+
+			return new ConvertedNodePropertyInverse(
+							owlLink.source,
+							owlLink.firstOrSubAsName(),
+							owlLink.secondOrSupAsName());
+		}
+	}
+
 	private class NodePropertyChainConverter
 					extends
 						NodePropertyAttributeConverter
@@ -458,6 +515,30 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		OWLObjectPropertyExpression getPropertyExpr(OWLSubPropertyChainOfAxiom source) {
 
 			return source.getSuperProperty();
+		}
+	}
+
+	private class NodePropertySymmetricConverter
+					extends
+						NodePropertyAttributeConverter
+							<OWLSymmetricObjectPropertyAxiom,
+							InputNodePropertySymmetric> {
+
+		Class<OWLSymmetricObjectPropertyAxiom> getSourceAxiomType() {
+
+			return OWLSymmetricObjectPropertyAxiom.class;
+		}
+
+		OWLObjectPropertyExpression getPropertyExpr(OWLSymmetricObjectPropertyAxiom source) {
+
+			return source.getProperty();
+		}
+
+		InputNodePropertySymmetric createInputAxiom(
+										NodeProperty prop,
+										OWLSymmetricObjectPropertyAxiom source) {
+
+			return new ConvertedNodePropertySymmetric(source, prop);
 		}
 	}
 
@@ -554,7 +635,9 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		new NodePropertySubSuperConverter();
 		new NodePropertyDomainConverter();
 		new NodePropertyRangeConverter();
+		new NodePropertyInverseConverter();
 		new NodePropertyChainConverter();
+		new NodePropertySymmetricConverter();
 		new NodePropertyTransitiveConverter();
 		new DataPropertyEquivalenceConverter();
 		new DataPropertySubSuperConverter();
@@ -580,9 +663,19 @@ class PropertyAxiomConverter extends CategoryAxiomConverter {
 		return getInputAxioms(NodePropertyRangeConverter.class);
 	}
 
+	Iterable<InputNodePropertyInverse> getNodePropertyInverses() {
+
+		return getInputAxioms(NodePropertyInverseConverter.class);
+	}
+
 	Iterable<InputNodePropertyChain> getNodePropertyChains() {
 
 		return getInputAxioms(NodePropertyChainConverter.class);
+	}
+
+	Iterable<InputNodePropertySymmetric> getNodePropertySymmetrics() {
+
+		return getInputAxioms(NodePropertySymmetricConverter.class);
 	}
 
 	Iterable<InputNodePropertyTransitive> getNodePropertyTransitives() {
