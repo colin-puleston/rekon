@@ -23,6 +23,8 @@ Simple OWL reasoner. Implements OWL API.
     SubDataPropertyOf
     EquivalentObjectProperties
     EquivalentDataProperties
+    InverseObjectProperties
+    SymmetricObjectProperty
     TransitiveObjectProperty
     ObjectPropertyDomain
     ObjectPropertyRange
@@ -55,10 +57,8 @@ Simple OWL reasoner. Implements OWL API.
     DifferentIndividuals,
     DisjointObjectProperties
     DisjointDataProperties
-    InverseObjectProperties
     ReflexiveObjectProperty
     IrreflexiveObjectProperty
-    SymmetricObjectProperty
     AsymmetricObjectProperty
     FunctionalObjectProperty
     InverseFunctionalObjectProperty
