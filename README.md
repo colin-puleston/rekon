@@ -28,6 +28,7 @@ Simple OWL reasoner. Implements OWL API.
     TransitiveObjectProperty
     ObjectPropertyDomain
     ObjectPropertyRange
+    DataPropertyDomain
     SameIndividual
     ClassAssertion
     ObjectPropertyAssertion
@@ -63,7 +64,6 @@ Simple OWL reasoner. Implements OWL API.
     FunctionalObjectProperty
     InverseFunctionalObjectProperty
     FunctionalDataProperty
-    DataPropertyDomain
     DataPropertyRange
     NegativeObjectPropertyAssertion
     NegativeDataPropertyAssertion
