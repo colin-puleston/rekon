@@ -41,7 +41,7 @@ class ConstructInclusions {
 
 		DOMAIN {
 
-			boolean present(NodeProperty p) {
+			boolean present(PropertyX p) {
 
 				return p.hasDomain();
 			}
@@ -49,26 +49,39 @@ class ConstructInclusions {
 
 		CHAINS {
 
-			boolean present(NodeProperty p) {
+			boolean present(PropertyX p) {
 
-				return p.directChains();
+				return ((NodeProperty)p).directChains();
 			}
 		};
 
-		abstract boolean present(NodeProperty p);
+		abstract boolean present(PropertyX p);
 	}
 
 	ConstructInclusions(OntologyNames names, Ontology ontology) {
 
-		propertyDomains = properties(names, PropertyAttribute.DOMAIN);
-		propertyChains = properties(names, PropertyAttribute.CHAINS);
+		Iterable<NodeProperty> nodeProps = names.getNodeProperties();
+		Iterable<DataProperty> dataProps = names.getDataProperties();
+
+		propertyDomains = propertyDomains(nodeProps) || propertyDomains(dataProps);
+		propertyChains = propertyChains(nodeProps);
 		allRelations = allRelations(ontology);
 		disjunctions = !ontology.getAllDisjunctions().isEmpty();
 	}
 
-	private boolean properties(OntologyNames names, PropertyAttribute attr) {
+	private boolean propertyDomains(Iterable<? extends PropertyX> props) {
 
-		for (NodeProperty p : names.getNodeProperties()) {
+		return properties(props, PropertyAttribute.DOMAIN);
+	}
+
+	private boolean propertyChains(Iterable<NodeProperty> nodeProps) {
+
+		return properties(nodeProps, PropertyAttribute.CHAINS);
+	}
+
+	private boolean properties(Iterable<? extends PropertyX> props, PropertyAttribute attr) {
+
+		for (PropertyX p : props) {
 
 			if (attr.present(p)) {
 

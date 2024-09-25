@@ -22,45 +22,14 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build.input;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-public abstract class PropertyX extends Name {
+public interface InputDataPropertyAttribute extends InputAxiom {
 
-	private ClassNode domain = null;
-
-	public void setDomain(ClassNode domain) {
-
-		this.domain = domain;
-	}
-
-	boolean hasDomain() {
-
-		return domain != null;
-	}
-
-	ClassNode getDomain() {
-
-		return domain;
-	}
-
-	boolean matchablePatternProperty() {
-
-		if (definitionRefed()) {
-
-			return true;
-		}
-
-		for (Name s : getSubsumers()) {
-
-			if (s.definitionRefed()) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
+	DataProperty getProperty();
 }

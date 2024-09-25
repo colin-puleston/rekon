@@ -45,14 +45,6 @@ public interface InputAxioms {
 
 	public Iterable<InputComplexSubSuper> getComplexSubSupers();
 
-	public Iterable<InputIndividualEquivalence> getIndividualEquivalences();
-
-	public Iterable<InputIndividualClassType> getIndividualClassTypes();
-
-	public Iterable<InputIndividualComplexType> getIndividualComplexTypes();
-
-	public Iterable<InputIndividualRelation> getIndividualRelations();
-
 	public Iterable<InputNodePropertyEquivalence> getNodePropertyEquivalences();
 
 	public Iterable<InputNodePropertySubSuper> getNodePropertySubSupers();
@@ -72,4 +64,14 @@ public interface InputAxioms {
 	public Iterable<InputDataPropertyEquivalence> getDataPropertyEquivalences();
 
 	public Iterable<InputDataPropertySubSuper> getDataPropertySubSupers();
+
+	public Iterable<InputDataPropertyDomain> getDataPropertyDomains();
+
+	public Iterable<InputIndividualEquivalence> getIndividualEquivalences();
+
+	public Iterable<InputIndividualClassType> getIndividualClassTypes();
+
+	public Iterable<InputIndividualComplexType> getIndividualComplexTypes();
+
+	public Iterable<InputIndividualRelation> getIndividualRelations();
 }

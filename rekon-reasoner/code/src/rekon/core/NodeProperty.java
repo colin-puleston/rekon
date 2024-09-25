@@ -31,14 +31,8 @@ import java.util.*;
  */
 public abstract class NodeProperty extends PropertyX {
 
-	private ClassNode domain = null;
 	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
-
-	public void setDomain(ClassNode domain) {
-
-		this.domain = domain;
-	}
 
 	public void setSymmetric() {
 
@@ -82,16 +76,6 @@ public abstract class NodeProperty extends PropertyX {
 		}
 
 		return false;
-	}
-
-	boolean hasDomain() {
-
-		return domain != null;
-	}
-
-	ClassNode getDomain() {
-
-		return domain;
 	}
 
 	Collection<PropertyChain> getAllChains() {

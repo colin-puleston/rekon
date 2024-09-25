@@ -131,17 +131,7 @@ class RelationEndPointSubsumptions {
 
 				PropertyX p = rel.getProperty();
 
-				if (p instanceof NodeProperty) {
-
-					NodeProperty np = (NodeProperty)p;
-
-					if (np.hasDomain()) {
-
-						return processDomain(np.getDomain());
-					}
-				}
-
-				return false;
+				return p.hasDomain() && processDomain(p.getDomain());
 			}
 
 			abstract boolean processDomain(ClassNode domain);

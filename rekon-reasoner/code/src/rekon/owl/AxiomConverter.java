@@ -42,7 +42,8 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 	final ExpressionConverter expressions;
 
 	private ClassExprAxiomConverter classExprAxioms;
-	private PropertyAxiomConverter propertyAxioms;
+	private NodePropertyAxiomConverter nodePropertyAxioms;
+	private DataPropertyAxiomConverter dataPropertyAxioms;
 	private IndividualAxiomConverter individualAxioms;
 
 	private List<TypeAxiomResolver<?>> axiomTypeResolvers = new ArrayList<TypeAxiomResolver<?>>();
@@ -85,52 +86,57 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 	public Iterable<InputNodePropertyEquivalence> getNodePropertyEquivalences() {
 
-		return propertyAxioms.getNodePropertyEquivalences();
+		return nodePropertyAxioms.getEquivalences();
 	}
 
 	public Iterable<InputNodePropertySubSuper> getNodePropertySubSupers() {
 
-		return propertyAxioms.getNodePropertySubSupers();
+		return nodePropertyAxioms.getSubSupers();
 	}
 
 	public Iterable<InputNodePropertyDomain> getNodePropertyDomains() {
 
-		return propertyAxioms.getNodePropertyDomains();
+		return nodePropertyAxioms.getDomains();
 	}
 
 	public Iterable<InputNodePropertyRange> getNodePropertyRanges() {
 
-		return propertyAxioms.getNodePropertyRanges();
+		return nodePropertyAxioms.getRanges();
 	}
 
 	public Iterable<InputNodePropertyInverse> getNodePropertyInverses() {
 
-		return propertyAxioms.getNodePropertyInverses();
+		return nodePropertyAxioms.getInverses();
 	}
 
 	public Iterable<InputNodePropertyChain> getNodePropertyChains() {
 
-		return propertyAxioms.getNodePropertyChains();
+		return nodePropertyAxioms.getChains();
 	}
 
 	public Iterable<InputNodePropertySymmetric> getNodePropertySymmetrics() {
 
-		return propertyAxioms.getNodePropertySymmetrics();
+		return nodePropertyAxioms.getSymmetrics();
 	}
 
 	public Iterable<InputNodePropertyTransitive> getNodePropertyTransitives() {
 
-		return propertyAxioms.getNodePropertyTransitives();
+		return nodePropertyAxioms.getTransitives();
 	}
 
 	public Iterable<InputDataPropertyEquivalence> getDataPropertyEquivalences() {
 
-		return propertyAxioms.getDataPropertyEquivalences();
+		return dataPropertyAxioms.getEquivalences();
 	}
 
 	public Iterable<InputDataPropertySubSuper> getDataPropertySubSupers() {
 
-		return propertyAxioms.getDataPropertySubSupers();
+		return dataPropertyAxioms.getSubSupers();
+	}
+
+	public Iterable<InputDataPropertyDomain> getDataPropertyDomains() {
+
+		return dataPropertyAxioms.getDomains();
 	}
 
 	public Iterable<InputIndividualEquivalence> getIndividualEquivalences() {
@@ -164,7 +170,8 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		this.expressions = expressions;
 
 		classExprAxioms = new ClassExprAxiomConverter(this);
-		propertyAxioms = new PropertyAxiomConverter(this);
+		nodePropertyAxioms = new NodePropertyAxiomConverter(this);
+		dataPropertyAxioms = new DataPropertyAxiomConverter(this);
 		individualAxioms = new IndividualAxiomConverter(this);
 
 		convertAll(manager);

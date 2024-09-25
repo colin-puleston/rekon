@@ -197,6 +197,14 @@ class BasicStructureBuilder {
 
 	private class DataPropertyHandler extends HierarchyNameHandler<DataProperty> {
 
+		DataPropertyHandler() {
+
+			for (InputDataPropertyDomain ax : axioms.getDataPropertyDomains()) {
+
+				ax.getProperty().setDomain(ax.getDomain());
+			}
+		}
+
 		DataProperty getHierarchyRootName() {
 
 			return names.getRootDataProperty();
