@@ -66,49 +66,21 @@ class NodePropertyAxiomConverter
 		}
 	}
 
-	private abstract class ConvertedNodePropertyAttribute
-								extends ConvertedAxiom
-								implements InputNodePropertyAttribute {
-
-		private NodeProperty property;
-
-		public NodeProperty getProperty() {
-
-			return property;
-		}
-
-		ConvertedNodePropertyAttribute(OWLAxiom source, NodeProperty property) {
-
-			super(source);
-
-			this.property = property;
-		}
-	}
-
 	private class ConvertedNodePropertyDomain
-						extends ConvertedNodePropertyAttribute
+						extends ConvertedPropertyDomain<NodeProperty>
 						implements InputNodePropertyDomain {
-
-		private ClassNode domain;
-
-		public ClassNode getDomain() {
-
-			return domain;
-		}
 
 		ConvertedNodePropertyDomain(
 			OWLAxiom source,
 			NodeProperty property,
 			ClassNode domain) {
 
-			super(source, property);
-
-			this.domain = domain;
+			super(source, property, domain);
 		}
 	}
 
 	private class ConvertedNodePropertyRange
-						extends ConvertedNodePropertyAttribute
+						extends ConvertedPropertyAttribute<NodeProperty>
 						implements InputNodePropertyRange {
 
 		private ClassNode range;
@@ -130,7 +102,7 @@ class NodePropertyAxiomConverter
 	}
 
 	private class ConvertedNodePropertyInverse
-						extends ConvertedNodePropertyAttribute
+						extends ConvertedPropertyAttribute<NodeProperty>
 						implements InputNodePropertyInverse {
 
 		private NodeProperty inverse;
@@ -152,7 +124,7 @@ class NodePropertyAxiomConverter
 	}
 
 	private class ConvertedNodePropertyChain
-						extends ConvertedNodePropertyAttribute
+						extends ConvertedPropertyAttribute<NodeProperty>
 						implements InputNodePropertyChain {
 
 		private List<NodeProperty> chain;
@@ -174,7 +146,7 @@ class NodePropertyAxiomConverter
 	}
 
 	private class ConvertedNodePropertySymmetric
-						extends ConvertedNodePropertyAttribute
+						extends ConvertedPropertyAttribute<NodeProperty>
 						implements InputNodePropertySymmetric {
 
 		ConvertedNodePropertySymmetric(OWLAxiom source, NodeProperty property) {
@@ -184,7 +156,7 @@ class NodePropertyAxiomConverter
 	}
 
 	private class ConvertedNodePropertyTransitive
-						extends ConvertedNodePropertyAttribute
+						extends ConvertedPropertyAttribute<NodeProperty>
 						implements InputNodePropertyTransitive {
 
 		ConvertedNodePropertyTransitive(OWLAxiom source, NodeProperty property) {
@@ -208,19 +180,9 @@ class NodePropertyAxiomConverter
 		}
 	}
 
-	private abstract class NodePropertyLinkConverter
-								<S extends OWLAxiom, I extends InputAxiom>
-								extends PropertyLinkConverter<S, I> {
-	}
-
-	private abstract class NodePropertyAttributeConverter
-								<S extends OWLAxiom, I extends InputAxiom>
-								extends PropertyAttributeConverter<S, I> {
-	}
-
 	private class NodePropertyEquivalenceConverter
 					extends
-						NodePropertyLinkConverter
+						PropertyLinkConverter
 							<OWLEquivalentObjectPropertiesAxiom,
 							InputNodePropertyEquivalence> {
 
@@ -245,7 +207,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertySubSuperConverter
 					extends
-						NodePropertyLinkConverter
+						PropertyLinkConverter
 							<OWLSubObjectPropertyOfAxiom,
 							InputNodePropertySubSuper> {
 
@@ -273,7 +235,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertyDomainConverter
 					extends
-						NodePropertyAttributeConverter
+						PropertyAttributeConverter
 							<OWLObjectPropertyDomainAxiom,
 							InputNodePropertyDomain> {
 
@@ -299,7 +261,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertyRangeConverter
 					extends
-						NodePropertyAttributeConverter
+						PropertyAttributeConverter
 							<OWLObjectPropertyRangeAxiom,
 							InputNodePropertyRange> {
 
@@ -325,7 +287,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertyInverseConverter
 					extends
-						NodePropertyLinkConverter
+						PropertyLinkConverter
 							<OWLInverseObjectPropertiesAxiom,
 							InputNodePropertyInverse> {
 
@@ -353,7 +315,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertyChainConverter
 					extends
-						NodePropertyAttributeConverter
+						PropertyAttributeConverter
 							<OWLSubPropertyChainOfAxiom,
 							InputNodePropertyChain> {
 
@@ -379,7 +341,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertySymmetricConverter
 					extends
-						NodePropertyAttributeConverter
+						PropertyAttributeConverter
 							<OWLSymmetricObjectPropertyAxiom,
 							InputNodePropertySymmetric> {
 
@@ -403,7 +365,7 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertyTransitiveConverter
 					extends
-						NodePropertyAttributeConverter
+						PropertyAttributeConverter
 							<OWLTransitiveObjectPropertyAxiom,
 							InputNodePropertyTransitive> {
 

@@ -66,44 +66,16 @@ class DataPropertyAxiomConverter
 		}
 	}
 
-	private abstract class ConvertedDataPropertyAttribute
-								extends ConvertedAxiom
-								implements InputDataPropertyAttribute {
-
-		private DataProperty property;
-
-		public DataProperty getProperty() {
-
-			return property;
-		}
-
-		ConvertedDataPropertyAttribute(OWLAxiom source, DataProperty property) {
-
-			super(source);
-
-			this.property = property;
-		}
-	}
-
 	private class ConvertedDataPropertyDomain
-						extends ConvertedDataPropertyAttribute
+						extends ConvertedPropertyDomain<DataProperty>
 						implements InputDataPropertyDomain {
-
-		private ClassNode domain;
-
-		public ClassNode getDomain() {
-
-			return domain;
-		}
 
 		ConvertedDataPropertyDomain(
 			OWLAxiom source,
 			DataProperty property,
 			ClassNode domain) {
 
-			super(source, property);
-
-			this.domain = domain;
+			super(source, property, domain);
 		}
 	}
 
@@ -122,19 +94,9 @@ class DataPropertyAxiomConverter
 		}
 	}
 
-	private abstract class DataPropertyLinkConverter
-								<S extends OWLAxiom, I extends InputAxiom>
-								extends PropertyLinkConverter<S, I> {
-	}
-
-	private abstract class DataPropertyAttributeConverter
-								<S extends OWLAxiom, I extends InputAxiom>
-								extends PropertyAttributeConverter<S, I> {
-	}
-
 	private class DataPropertyEquivalenceConverter
 					extends
-						DataPropertyLinkConverter
+						PropertyLinkConverter
 							<OWLEquivalentDataPropertiesAxiom,
 							InputDataPropertyEquivalence> {
 
@@ -159,7 +121,7 @@ class DataPropertyAxiomConverter
 
 	private class DataPropertySubSuperConverter
 					extends
-						DataPropertyLinkConverter
+						PropertyLinkConverter
 							<OWLSubDataPropertyOfAxiom,
 							InputDataPropertySubSuper> {
 
@@ -187,7 +149,7 @@ class DataPropertyAxiomConverter
 
 	private class DataPropertyDomainConverter
 					extends
-						DataPropertyAttributeConverter
+						PropertyAttributeConverter
 							<OWLDataPropertyDomainAxiom,
 							InputDataPropertyDomain> {
 

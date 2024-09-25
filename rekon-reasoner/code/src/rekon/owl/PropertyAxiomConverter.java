@@ -38,6 +38,44 @@ abstract class PropertyAxiomConverter
 					<E extends OWLPropertyExpression, P extends PropertyX>
 					extends CategoryAxiomConverter {
 
+	abstract class ConvertedPropertyAttribute
+						<P extends PropertyX>
+						extends ConvertedAxiom {
+
+		private P property;
+
+		public P getProperty() {
+
+			return property;
+		}
+
+		ConvertedPropertyAttribute(OWLAxiom source, P property) {
+
+			super(source);
+
+			this.property = property;
+		}
+	}
+
+	abstract class ConvertedPropertyDomain
+						<P extends PropertyX>
+						extends ConvertedPropertyAttribute<P> {
+
+		private ClassNode domain;
+
+		public ClassNode getDomain() {
+
+			return domain;
+		}
+
+		ConvertedPropertyDomain(OWLAxiom source, P property, ClassNode domain) {
+
+			super(source, property);
+
+			this.domain = domain;
+		}
+	}
+
 	class OwlPropertyLink extends OwlLink<E, P> {
 
 		OwlPropertyLink(OWLAxiom source, Set<E> equivs) {
