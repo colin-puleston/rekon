@@ -32,6 +32,25 @@
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- urn:test#q -->
+
+    <owl:DatatypeProperty rdf:about="urn:test#q">
+        <rdfs:domain rdf:resource="urn:test#A"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
     // Classes
     //
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -52,7 +71,7 @@
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom rdf:resource="urn:test#C"/>
+                <owl:someValuesFrom rdf:resource="urn:test#D"/>
             </owl:Restriction>
         </rdfs:subClassOf>
     </owl:Class>
@@ -61,7 +80,32 @@
 
     <!-- urn:test#C -->
 
-    <owl:Class rdf:about="urn:test#C"/>
+    <owl:Class rdf:about="urn:test#C">
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#q"/>
+                <owl:someValuesFrom>
+                    <rdfs:Datatype>
+                        <owl:onDatatype rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+                        <owl:withRestrictions rdf:parseType="Collection">
+                            <rdf:Description>
+                                <xsd:minInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">10</xsd:minInclusive>
+                            </rdf:Description>
+                            <rdf:Description>
+                                <xsd:maxInclusive rdf:datatype="http://www.w3.org/2001/XMLSchema#integer">20</xsd:maxInclusive>
+                            </rdf:Description>
+                        </owl:withRestrictions>
+                    </rdfs:Datatype>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#D -->
+
+    <owl:Class rdf:about="urn:test#D"/>
 </rdf:RDF>
 
 
