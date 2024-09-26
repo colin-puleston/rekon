@@ -39,7 +39,7 @@ abstract class ChainBasedProfileRelationsExpander {
 	private class ExpansionCollector {
 
 		private PropertyChain chain;
-		private int tailSubsIndex = 0;
+		private int subsIndex = 1;
 
 		private Set<NodeX> visitedTargets = new HashSet<NodeX>();
 
@@ -76,17 +76,17 @@ abstract class ChainBasedProfileRelationsExpander {
 
 		private void collectFromRelation(SomeRelation current) {
 
-			if (chain.hasTailSub(current.getProperty(), tailSubsIndex)) {
+			if (chain.hasSub(current.getProperty(), subsIndex)) {
 
-				if (chain.lastTailSub(tailSubsIndex)) {
+				if (chain.lastSub(subsIndex)) {
 
 					addExpansion(createLinkRelation(current));
 				}
 				else {
 
-					tailSubsIndex++;
+					subsIndex++;
 					collectFromTargets(current);
-					tailSubsIndex--;
+					subsIndex--;
 				}
 			}
 		}

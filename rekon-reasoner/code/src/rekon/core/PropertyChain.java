@@ -32,16 +32,78 @@ import java.util.*;
 public class PropertyChain {
 
 	private NodeProperty sup;
-	private List<NodeProperty> subsTail = new ArrayList<NodeProperty>();
+	private List<NodeProperty> subs = new ArrayList<NodeProperty>();
+
+	private class InverseChainCreator {
+
+		private Collection<NodeProperty> inverseSups = sup.getInverses();
+		private Collection<List<NodeProperty>> allInverseSubs = new ArrayList<List<NodeProperty>>();
+
+		InverseChainCreator() {
+
+			if (!inverseSups.isEmpty()) {
+
+				findAllInverseSubs();
+
+				if (!allInverseSubs.isEmpty()) {
+
+					createInverseChains();
+				}
+			}
+		}
+
+		private void findAllInverseSubs() {
+
+			findAllInverseSubs(subs.size() - 1, Collections.emptyList());
+		}
+
+		private void findAllInverseSubs(int subsIndex, List<NodeProperty> inverseSubs) {
+
+			if (subsIndex == -1) {
+
+				allInverseSubs.add(inverseSubs);
+			}
+			else {
+
+				for (NodeProperty inv : subs.get(subsIndex).getInverses()) {
+
+					List<NodeProperty> nextInvs = new ArrayList<NodeProperty>(inverseSubs);
+
+					nextInvs.add(inv);
+
+					findAllInverseSubs(subsIndex - 1, nextInvs);
+				}
+			}
+		}
+
+		private void createInverseChains() {
+
+			for (NodeProperty invSup : inverseSups) {
+
+				for (List<NodeProperty> invSubs : allInverseSubs) {
+
+					new PropertyChain(invSup, invSubs);
+				}
+			}
+		}
+	}
 
 	public PropertyChain(NodeProperty transitiveProp) {
 
-		this(transitiveProp, transitiveProp, Collections.singletonList(transitiveProp));
+		this(transitiveProp, Arrays.asList(transitiveProp, transitiveProp));
 	}
 
 	public PropertyChain(NodeProperty sup, List<NodeProperty> subs) {
 
-		this(sup, subs.get(0), subs.subList(1, subs.size()));
+		this.sup = sup;
+		this.subs.addAll(subs);
+
+		subs.get(0).addChain(this);
+	}
+
+	public void checkInverseChains() {
+
+		new InverseChainCreator();
 	}
 
 	SomeRelation createLinkRelation(NodeValue target) {
@@ -54,24 +116,13 @@ public class PropertyChain {
 		return sup.subsumes(prop);
 	}
 
-	boolean hasTailSub(PropertyX prop, int index) {
+	boolean hasSub(PropertyX prop, int index) {
 
-		return subsTail.get(index).subsumes(prop);
+		return subs.get(index).subsumes(prop);
 	}
 
-	boolean lastTailSub(int index) {
+	boolean lastSub(int index) {
 
-		return index == subsTail.size() - 1;
-	}
-
-	private PropertyChain(
-				NodeProperty sup,
-				NodeProperty subsHead,
-				List<NodeProperty> subsTail) {
-
-		this.sup = sup;
-		this.subsTail = subsTail;
-
-		subsHead.addChain(this);
+		return index == subs.size() - 1;
 	}
 }

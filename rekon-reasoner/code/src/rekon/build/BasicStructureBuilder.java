@@ -158,19 +158,19 @@ class BasicStructureBuilder {
 				ax.getProperty().addInverse(ax.getInverse());
 			}
 
-			for (InputNodePropertyChain ax : axioms.getNodePropertyChains()) {
-
-				new PropertyChain(ax.getProperty(), ax.getChain());
-			}
-
 			for (InputNodePropertySymmetric ax : axioms.getNodePropertySymmetrics()) {
 
 				ax.getProperty().setSymmetric();
 			}
 
+			for (InputNodePropertyChain ax : axioms.getNodePropertyChains()) {
+
+				new PropertyChain(ax.getProperty(), ax.getChain()).checkInverseChains();
+			}
+
 			for (InputNodePropertyTransitive ax : axioms.getNodePropertyTransitives()) {
 
-				new PropertyChain(ax.getProperty());
+				new PropertyChain(ax.getProperty()).checkInverseChains();
 			}
 		}
 
