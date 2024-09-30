@@ -34,60 +34,6 @@ public class PropertyChain {
 	private NodeProperty sup;
 	private List<NodeProperty> subs = new ArrayList<NodeProperty>();
 
-	private class InverseChainCreator {
-
-		private Collection<NodeProperty> inverseSups = sup.getInverses();
-		private Collection<List<NodeProperty>> allInverseSubs = new ArrayList<List<NodeProperty>>();
-
-		InverseChainCreator() {
-
-			if (!inverseSups.isEmpty()) {
-
-				findAllInverseSubs();
-
-				if (!allInverseSubs.isEmpty()) {
-
-					createInverseChains();
-				}
-			}
-		}
-
-		private void findAllInverseSubs() {
-
-			findAllInverseSubs(subs.size() - 1, Collections.emptyList());
-		}
-
-		private void findAllInverseSubs(int subsIndex, List<NodeProperty> inverseSubs) {
-
-			if (subsIndex == -1) {
-
-				allInverseSubs.add(inverseSubs);
-			}
-			else {
-
-				for (NodeProperty inv : subs.get(subsIndex).getInverses()) {
-
-					List<NodeProperty> nextInvs = new ArrayList<NodeProperty>(inverseSubs);
-
-					nextInvs.add(inv);
-
-					findAllInverseSubs(subsIndex - 1, nextInvs);
-				}
-			}
-		}
-
-		private void createInverseChains() {
-
-			for (NodeProperty invSup : inverseSups) {
-
-				for (List<NodeProperty> invSubs : allInverseSubs) {
-
-					new PropertyChain(invSup, invSubs);
-				}
-			}
-		}
-	}
-
 	public PropertyChain(NodeProperty transitiveProp) {
 
 		this(transitiveProp, Arrays.asList(transitiveProp, transitiveProp));
@@ -101,9 +47,17 @@ public class PropertyChain {
 		subs.get(0).addChain(this);
 	}
 
-	public void checkInverseChains() {
+	public void checkInverseChain() {
 
-		new InverseChainCreator();
+		if (sup.hasInverse()) {
+
+			List<NodeProperty> invSubs = findInverseSubs();
+
+			if (invSubs != null) {
+
+				new PropertyChain(sup.getInverse(), invSubs);
+			}
+		}
 	}
 
 	SomeRelation createLinkRelation(NodeValue target) {
@@ -124,5 +78,24 @@ public class PropertyChain {
 	boolean lastSub(int index) {
 
 		return index == subs.size() - 1;
+	}
+
+	private List<NodeProperty> findInverseSubs() {
+
+		List<NodeProperty> invSubs = new ArrayList<NodeProperty>();
+
+		for (int i = subs.size() - 1 ; i >= 0 ; i--) {
+
+			NodeProperty sub = subs.get(i);
+
+			if (!sub.hasInverse()) {
+
+				return null;
+			}
+
+			invSubs.add(sub.getInverse());
+		}
+
+		return invSubs;
 	}
 }

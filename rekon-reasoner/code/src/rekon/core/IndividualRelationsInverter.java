@@ -55,19 +55,16 @@ class IndividualRelationsInverter {
 
 	static private void invertAnyFor(NodeX forwardSource, SomeRelation forwardRel) {
 
-		Collection<NodeProperty> ips = forwardRel.getNodeProperty().getInverses();
+		NodeProperty prop = forwardRel.getNodeProperty();
 
-		if (!ips.isEmpty()) {
+		if (prop.hasInverse()) {
 
 			NodeValue invSource = forwardRel.getNodeValueTarget();
 			NodeValue invTarget = new NodeValue(forwardSource);
 
-			PatternMatcher p = resolveProfilePattern(invSource.getValueNode());
+			PatternMatcher pp = resolveProfilePattern(invSource.getValueNode());
 
-			for (NodeProperty ip : ips) {
-
-				p.addRelation(new SomeRelation(ip, invTarget));
-			}
+			pp.addRelation(new SomeRelation(prop.getInverse(), invTarget));
 		}
 	}
 

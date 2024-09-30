@@ -31,18 +31,29 @@ import java.util.*;
  */
 public abstract class NodeProperty extends PropertyX {
 
-	private Set<NodeProperty> inverses = new HashSet<NodeProperty>();
+	private NodeProperty inverse = null;
 	private List<PropertyChain> chains = new ArrayList<PropertyChain>();
 
 	public void setSymmetric() {
 
-		inverses.add(this);
+		setInverse(this);
 	}
 
-	public void addInverse(NodeProperty inverse) {
+	public void setInverse(NodeProperty inverse) {
 
-		inverses.add(inverse);
-		inverse.inverses.add(this);
+		if (this.inverse == null) {
+
+			this.inverse = inverse;
+
+			inverse.setInverse(this);
+		}
+		else {
+
+			if (inverse != this.inverse) {
+
+				this.inverse.addEquivalent(inverse);
+			}
+		}
 	}
 
 	public void addChain(PropertyChain chain) {
@@ -50,9 +61,14 @@ public abstract class NodeProperty extends PropertyX {
 		chains.add(chain);
 	}
 
-	Collection<NodeProperty> getInverses() {
+	boolean hasInverse() {
 
-		return inverses;
+		return inverse != null;
+	}
+
+	NodeProperty getInverse() {
+
+		return inverse;
 	}
 
 	boolean directChains() {
