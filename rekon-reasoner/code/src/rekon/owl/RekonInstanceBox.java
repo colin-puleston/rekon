@@ -150,7 +150,7 @@ public class RekonInstanceBox {
 
 			return extractIRIs(instanceOps.match(createQueryExprBuilder(query)));
 		}
-		catch (RekonInstanceOpsException e) {
+		catch (InstanceOpsException e) {
 
 			throw new RekonInstanceBoxException(e);
 		}
@@ -164,7 +164,7 @@ public class RekonInstanceBox {
 						createQueryExprBuilder(query),
 						createInstanceExprBuilder(profile));
 		}
-		catch (RekonInstanceOpsException e) {
+		catch (InstanceOpsException e) {
 
 			throw new RekonInstanceBoxException(e);
 		}

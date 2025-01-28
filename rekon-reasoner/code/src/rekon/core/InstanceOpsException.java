@@ -27,11 +27,11 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public class RekonInstanceOpsException extends RuntimeException {
+public class InstanceOpsException extends RuntimeException {
 
 	static private final long serialVersionUID = -1;
 
-	RekonInstanceOpsException(String message) {
+	InstanceOpsException(String message) {
 
 		super(message);
 	}

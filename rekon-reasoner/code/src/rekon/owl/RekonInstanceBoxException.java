@@ -38,7 +38,7 @@ public class RekonInstanceBoxException extends RuntimeException {
 		super(message);
 	}
 
-	RekonInstanceBoxException(RekonInstanceOpsException e) {
+	RekonInstanceBoxException(InstanceOpsException e) {
 
 		super(e);
 	}

@@ -167,6 +167,6 @@ public class InstanceOps {
 			return expr;
 		}
 
-		throw new RekonInstanceOpsException("Invalid " + exprDesc + "-expression!");
+		throw new InstanceOpsException("Invalid " + exprDesc + "-expression!");
 	}
 }
