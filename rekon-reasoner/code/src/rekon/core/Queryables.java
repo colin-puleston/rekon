@@ -38,9 +38,9 @@ public class Queryables {
 		return new QueryableNode(node);
 	}
 
-	public Queryable create(MultiPatternSource disjunctsBuilder) {
+	public Queryable create(MultiPatternSource disjunctsSource) {
 
-		DynamicExpression expr = new DynamicExpression(disjunctsBuilder);
+		DynamicExpression expr = new DynamicExpression(disjunctsSource);
 
 		if (expr.expressionCreated()) {
 
