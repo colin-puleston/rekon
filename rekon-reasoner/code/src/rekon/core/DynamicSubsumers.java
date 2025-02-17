@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2022 Colin Puleston
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * Permission is hereby granted, free of charge, to new person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
@@ -31,73 +31,258 @@ import java.util.*;
  */
 class DynamicSubsumers {
 
-	static private EquivCheckDefinitions equivCheckDefinitions = new EquivCheckDefinitions();
+	private PotentialLocalPatternSubsumers defnPatternsFilter;
+	private PotentialDisjunctionSubsumers defnDisjunctionsFilter;
 
-	static private class EquivCheckDefinitions {
+	private DefaultClassifier defaultClassifier = new DefaultClassifier();
 
-		Collection<NodeMatcher> deriveFromSubsumeds(Names subsumeds) {
+	private abstract class LocalClassifier extends NodeMatcherClassifier {
 
-			Set<NodeMatcher> potentials = new HashSet<NodeMatcher>();
+		NameSet classify(LocalExpression expr) {
 
-			for (NodeX s : subsumeds.asNodes()) {
+			classifyProfiles(expr);
 
-				findAllFrom(s, potentials);
-			}
-
-			return potentials;
+			return expr.getExpressionNode().getClassifier().getSubsumers();
 		}
 
-		private void findAllFrom(NodeX n, Set<NodeMatcher> potentials) {
+		private void classifyProfiles(LocalExpression expr) {
 
-			findFrom(n, potentials);
+			for (NodeMatcher candidate : expr.getOrderedProfileMatchers()) {
+
+				exhaustivelyClassify(candidate);
+			}
+		}
+
+		private void exhaustivelyClassify(NodeMatcher candidate) {
+
+			do {
+
+				candidate.checkExpandLocalProfile();
+
+				classify(candidate);
+			}
+			while (absorbNewSubsumerExpansions(candidate));
+		}
+
+		abstract void classify(NodeMatcher candidate);
+
+		private boolean absorbNewSubsumerExpansions(NodeMatcher candidate) {
+
+			NodeClassifier c = candidate.getNode().getNodeClassifier();
+
+			return c.absorbNewLocallyInferredSubsumerExpansions();
+		}
+	}
+
+	private class DefaultClassifier extends LocalClassifier {
+
+		private TypeClassifier typeClassifier = new TypeClassifier();
+
+		private class TypeClassifier extends NodeMatcherVisitor {
+
+			void visit(PatternMatcher candidate) {
+
+				checkSubsumptions(candidate);
+			}
+
+			void visit(DisjunctionMatcher candidate) {
+
+				checkSubsumptions(candidate);
+			}
+		}
+
+		void classify(NodeMatcher candidate) {
+
+			candidate.acceptVisitor(typeClassifier);
+		}
+
+		boolean filteredCandidates() {
+
+			return true;
+		}
+
+		private void checkSubsumptions(PatternMatcher candidate) {
+
+			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
+
+				checkSubsumption(defn, candidate);
+			}
+		}
+
+		private void checkSubsumptions(DisjunctionMatcher candidate) {
+
+			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
+
+				checkSubsumption(defn, candidate);
+			}
+
+			for (DisjunctionMatcher defn : defnDisjunctionsFilter.getPotentialsFor(candidate)) {
+
+				checkSubsumption(defn, candidate);
+			}
+		}
+	}
+
+	private class EquivCheckClassifier extends LocalClassifier {
+
+		private Set<NodeMatcher> definitions = new HashSet<NodeMatcher>();
+
+		private abstract class TypeClassifier
+								<C extends NodeMatcher>
+								extends NodeMatcherVisitor {
+
+			final C candidate;
+
+			TypeClassifier(C candidate) {
+
+				this.candidate = candidate;
+			}
+		}
+
+		private class PatternClassifier extends TypeClassifier<PatternMatcher> {
+
+			PatternClassifier(PatternMatcher candidate) {
+
+				super(candidate);
+			}
+
+			void visit(PatternMatcher defn) {
+
+				checkSubsumption(defn, candidate);
+			}
+
+			void visit(DisjunctionMatcher defn) {
+
+				checkSubsumption(defn, candidate);
+			}
+		}
+
+		private class DisjunctionClassifier extends TypeClassifier<DisjunctionMatcher> {
+
+			DisjunctionClassifier(DisjunctionMatcher candidate) {
+
+				super(candidate);
+
+				candidate.inferNewCommonDisjunctSubsumers();
+			}
+
+			void visit(PatternMatcher defn) {
+			}
+
+			void visit(DisjunctionMatcher defn) {
+
+				checkSubsumption(defn, candidate);
+			}
+		}
+
+		private class TypeClassifierCreator extends NodeMatcherVisitor {
+
+			private TypeClassifier<?> created;
+
+			TypeClassifier<?> create(NodeMatcher candidate) {
+
+				candidate.acceptVisitor(this);
+
+				return created;
+			}
+
+			void visit(PatternMatcher defn) {
+
+				created = new PatternClassifier(defn);
+			}
+
+			void visit(DisjunctionMatcher defn) {
+
+				created = new DisjunctionClassifier(defn);
+			}
+		}
+
+		EquivCheckClassifier(Names subsumeds) {
+
+			findAllDefinitionsFor(subsumeds);
+		}
+
+		void classify(NodeMatcher candidate) {
+
+			TypeClassifier<?> tc = new TypeClassifierCreator().create(candidate);
+
+			for (NodeMatcher defn : definitions) {
+
+				defn.acceptVisitor(tc);
+			}
+		}
+
+		boolean filteredCandidates() {
+
+			return false;
+		}
+
+		private void findAllDefinitionsFor(Names nodes) {
+
+			for (NodeX n : nodes.asNodes()) {
+
+				findAllDefinitionsFor(n);
+			}
+		}
+
+		private void findAllDefinitionsFor(NodeX n) {
+
+			findDefinitionsFrom(n);
 
 			for (NodeX ss : n.getSubs(ClassNode.class, false).asNodes()) {
 
-				findFrom(ss, potentials);
+				findDefinitionsFrom(ss);
 			}
 		}
 
-		private void findFrom(NodeX n, Set<NodeMatcher> potentials) {
+		private void findDefinitionsFrom(NodeX n) {
 
 			for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
 
-				if (potentials.add(d)) {
+				if (definitions.add(d)) {
 
-					for (Name dn : getDefinitionMatchNames(d)) {
-
-						if (dn instanceof NodeX) {
-
-							findFrom((NodeX)dn, potentials);
-						}
-					}
+					findAllDefinitionsFor(getDefinitionMatchNames(d));
 				}
 			}
 
-			potentials.addAll(n.getDefinitionDisjunctionMatchers());
+			for (DisjunctionMatcher d : n.getDefinitionDisjunctionMatchers()) {
+
+				if (definitions.add(d)) {
+
+					findAllDefinitionsFor(d.getDirectDisjuncts());
+				}
+			}
 		}
 
 		private Names getDefinitionMatchNames(PatternMatcher defn) {
 
-			return new SimpleNameCollector(true).collect(defn.getPattern());
+			return new SimpleNameCollector(true, NodeX.class).collect(defn.getPattern());
 		}
 	}
 
-	private LocalClassifier localClassifier;
-
 	DynamicSubsumers(Ontology ontology) {
 
-		localClassifier = new LocalClassifier(ontology);
+		defnPatternsFilter = createDefnPatternsFilter(ontology);
+		defnDisjunctionsFilter = createDefnDisjunctionsFilter(ontology);
 	}
 
 	NameSet inferSubsumers(LocalExpression expr) {
 
-		return localClassifier.classify(expr);
+		return defaultClassifier.classify(expr);
 	}
 
-	NameSet inferSubsumersForSubsumeds(LocalExpression expr, Names subsumeds) {
+	NameSet inferEquivCheckSubsumers(LocalExpression expr, Names subsumeds) {
 
-		return localClassifier.classify(
-					expr,
-					equivCheckDefinitions.deriveFromSubsumeds(subsumeds));
+		return new EquivCheckClassifier(subsumeds).classify(expr);
+	}
+
+	private PotentialLocalPatternSubsumers createDefnPatternsFilter(Ontology ontology) {
+
+		return new PotentialLocalPatternSubsumers(ontology.getDefinitionPatterns());
+	}
+
+	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(Ontology ontology) {
+
+		return new PotentialDisjunctionSubsumers(ontology.getDefinitionDisjunctions());
 	}
 }

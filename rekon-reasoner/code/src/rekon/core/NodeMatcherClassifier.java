@@ -75,20 +75,32 @@ abstract class NodeMatcherClassifier {
 
 			return patternSubsumption(defn.getPattern(), candidate.getPattern());
 		}
+
+		private boolean patternSubsumption(Pattern defn, Pattern candidate) {
+
+			if (filteredCandidates()) {
+
+				if (candidate.getProfileRelations().getAll().size() < 2) {
+
+					return true;
+				}
+
+				return defn.subsumesRelations(candidate);
+			}
+
+			return defn.subsumes(candidate);
+		}
 	}
 
-	boolean checkMatcherSubsumption(NodeMatcher defn, NodeMatcher candidate) {
+	abstract boolean filteredCandidates();
+
+	boolean checkSubsumption(NodeMatcher defn, NodeMatcher candidate) {
 
 		return generalSubsumptions.check(defn, candidate);
 	}
 
-	boolean checkMatcherSubsumption(PatternMatcher defn, PatternMatcher candidate) {
+	boolean checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
 		return patternSubsumptions.check(defn, candidate);
-	}
-
-	boolean patternSubsumption(Pattern defn, Pattern candidate) {
-
-		return defn.subsumes(candidate);
 	}
 }

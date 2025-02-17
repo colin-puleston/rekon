@@ -44,7 +44,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			for (PatternMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
-				checkMatcherSubsumption(defn, c);
+				checkSubsumption(defn, c);
 			}
 		}
 
@@ -64,7 +64,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			for (DisjunctionMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
-				checkMatcherSubsumption(defn, c);
+				checkSubsumption(defn, c);
 			}
 		}
 
@@ -280,9 +280,9 @@ class OntologyClassifier extends NodeMatcherClassifier {
 		classify();
 	}
 
-	boolean patternSubsumption(Pattern defn, Pattern candidate) {
+	boolean filteredCandidates() {
 
-		return defn.subsumesRelations(candidate);
+		return true;
 	}
 
 	private void classify() {

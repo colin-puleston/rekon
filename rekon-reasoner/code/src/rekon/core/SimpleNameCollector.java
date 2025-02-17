@@ -30,13 +30,15 @@ package rekon.core;
 class SimpleNameCollector extends NameCollector {
 
 	private boolean definition;
+	private Class<? extends Name> requiredType;
 
 	private NameSet names = new NameSet();
 	private boolean nestedRank = false;
 
-	SimpleNameCollector(boolean definition) {
+	SimpleNameCollector(boolean definition, Class<? extends Name> requiredType) {
 
 		this.definition = definition;
+		this.requiredType = requiredType;
 	}
 
 	boolean definition() {
@@ -53,14 +55,17 @@ class SimpleNameCollector extends NameCollector {
 
 	void collectName(Name n) {
 
-		names.add(n);
+		if (requiredType.isAssignableFrom(n.getClass())) {
+
+			names.add(n);
+		}
 	}
 
 	void collectNames(Names ns) {
 
 		for (Name n : ns) {
 
-			names.add(n);
+			collectName(n);
 		}
 	}
 
