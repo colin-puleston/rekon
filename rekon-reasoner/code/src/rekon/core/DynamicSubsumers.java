@@ -194,7 +194,7 @@ class DynamicSubsumers {
 
 		EquivCheckClassifier(Names subsumeds) {
 
-			findAllDefinitionsFor(subsumeds, 0);
+			findAllDefinitionsFor(subsumeds);
 		}
 
 		void classify(NodeMatcher candidate) {
@@ -207,31 +207,31 @@ class DynamicSubsumers {
 			}
 		}
 
-		private void findAllDefinitionsFor(Names nodes, int nodeDepth) {
+		private void findAllDefinitionsFor(Names nodes) {
 
 			for (NodeX n : nodes.asNodes()) {
 
-				findAllDefinitionsFor(n, nodeDepth);
+				findAllDefinitionsFor(n);
 			}
 		}
 
-		private void findAllDefinitionsFor(NodeX n, int nodeDepth) {
+		private void findAllDefinitionsFor(NodeX n) {
 
-			findDefinitionsFrom(n, nodeDepth);
+			findDefinitionsFrom(n);
 
 			for (NodeX ss : n.getSubs(ClassNode.class, false).asNodes()) {
 
-				findDefinitionsFrom(ss, nodeDepth);
+				findDefinitionsFrom(ss);
 			}
 		}
 
-		private void findDefinitionsFrom(NodeX n, int nodeDepth) {
+		private void findDefinitionsFrom(NodeX n) {
 
 			for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
 
 				if (definitions.add(d)) {
 
-					findAllDefinitionsFor(getDefinitionMatchNames(d), nodeDepth + 1);
+					findAllDefinitionsFor(getDefinitionMatchNames(d));
 				}
 			}
 
@@ -239,7 +239,7 @@ class DynamicSubsumers {
 
 				if (definitions.add(d)) {
 
-					findAllDefinitionsFor(d.getDirectDisjuncts(), nodeDepth);
+					findAllDefinitionsFor(d.getDirectDisjuncts());
 				}
 			}
 		}
