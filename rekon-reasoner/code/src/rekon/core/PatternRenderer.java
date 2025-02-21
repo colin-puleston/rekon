@@ -31,14 +31,14 @@ class PatternRenderer {
 
 	static private final String TAB = "  ";
 
-	private boolean profile;
+	private PatternRenderType renderType;
 
 	private StringBuilder rendering;
 	private String tabs;
 
-	PatternRenderer(String rootComponentTypeName, boolean profile) {
+	PatternRenderer(String rootComponentTypeName, PatternRenderType renderType) {
 
-		this(profile, new StringBuilder(), "");
+		this(renderType, new StringBuilder(), "");
 
 		addLine(rootComponentTypeName + ":");
 
@@ -47,7 +47,7 @@ class PatternRenderer {
 
 	PatternRenderer nextLevel() {
 
-		return new PatternRenderer(profile, rendering, tabs + TAB);
+		return new PatternRenderer(renderType, rendering, tabs + TAB);
 	}
 
 	void addLine(Object obj) {
@@ -60,14 +60,17 @@ class PatternRenderer {
 		return rendering.toString();
 	}
 
-	boolean profile() {
+	PatternRenderType getRenderType() {
 
-		return profile;
+		return renderType;
 	}
 
-	private PatternRenderer(boolean profile, StringBuilder rendering, String tabs) {
+	private PatternRenderer(
+				PatternRenderType renderType,
+				StringBuilder rendering,
+				String tabs) {
 
-		this.profile = profile;
+		this.renderType = renderType;
 		this.rendering = rendering;
 		this.tabs = tabs;
 	}

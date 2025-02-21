@@ -27,36 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-public abstract class PatternComponent {
+enum PatternRenderType {
 
-	public String toString() {
-
-		return toString(PatternRenderType.NON_NESTED);
-	}
-
-	public String toNestedProfileString() {
-
-		return toString(PatternRenderType.NESTED_PROFILE);
-	}
-
-	public String toNestedDefinitionString() {
-
-		return toString(PatternRenderType.NESTED_DEFINITION);
-	}
-
-	abstract void render(PatternRenderer r);
-
-	private String toString(PatternRenderType renderType) {
-
-		PatternRenderer r = new PatternRenderer(getComponentTypeName(), renderType);
-
-		render(r);
-
-		return r.getRendering();
-	}
-
-	private String getComponentTypeName() {
-
-		return getClass().getSimpleName();
-	}
+	NON_NESTED, NESTED_PROFILE, NESTED_DEFINITION
 }

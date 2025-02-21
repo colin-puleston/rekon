@@ -280,9 +280,14 @@ class OntologyClassifier extends NodeMatcherClassifier {
 		classify();
 	}
 
-	boolean filteredCandidates() {
+	boolean patternSubsumption(Pattern defn, Pattern candidate) {
 
-		return true;
+		if (candidate.getProfileRelations().getAll().size() < 2) {
+
+			return true;
+		}
+
+		return defn.subsumesRelations(candidate);
 	}
 
 	private void classify() {

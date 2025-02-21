@@ -96,11 +96,6 @@ class DynamicSubsumers {
 			candidate.acceptVisitor(typeClassifier);
 		}
 
-		boolean filteredCandidates() {
-
-			return true;
-		}
-
 		private void checkSubsumptions(PatternMatcher candidate) {
 
 			for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
@@ -199,7 +194,7 @@ class DynamicSubsumers {
 
 		EquivCheckClassifier(Names subsumeds) {
 
-			findAllDefinitionsFor(subsumeds);
+			findAllDefinitionsFor(subsumeds, 0);
 		}
 
 		void classify(NodeMatcher candidate) {
@@ -212,36 +207,31 @@ class DynamicSubsumers {
 			}
 		}
 
-		boolean filteredCandidates() {
-
-			return false;
-		}
-
-		private void findAllDefinitionsFor(Names nodes) {
+		private void findAllDefinitionsFor(Names nodes, int nodeDepth) {
 
 			for (NodeX n : nodes.asNodes()) {
 
-				findAllDefinitionsFor(n);
+				findAllDefinitionsFor(n, nodeDepth);
 			}
 		}
 
-		private void findAllDefinitionsFor(NodeX n) {
+		private void findAllDefinitionsFor(NodeX n, int nodeDepth) {
 
-			findDefinitionsFrom(n);
+			findDefinitionsFrom(n, nodeDepth);
 
 			for (NodeX ss : n.getSubs(ClassNode.class, false).asNodes()) {
 
-				findDefinitionsFrom(ss);
+				findDefinitionsFrom(ss, nodeDepth);
 			}
 		}
 
-		private void findDefinitionsFrom(NodeX n) {
+		private void findDefinitionsFrom(NodeX n, int nodeDepth) {
 
 			for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
 
 				if (definitions.add(d)) {
 
-					findAllDefinitionsFor(getDefinitionMatchNames(d));
+					findAllDefinitionsFor(getDefinitionMatchNames(d), nodeDepth + 1);
 				}
 			}
 
@@ -249,7 +239,7 @@ class DynamicSubsumers {
 
 				if (definitions.add(d)) {
 
-					findAllDefinitionsFor(d.getDirectDisjuncts());
+					findAllDefinitionsFor(d.getDirectDisjuncts(), nodeDepth);
 				}
 			}
 		}

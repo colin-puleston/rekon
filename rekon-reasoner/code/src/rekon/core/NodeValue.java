@@ -67,20 +67,42 @@ public class NodeValue extends Value {
 
 	void render(PatternRenderer r) {
 
-		if (r.profile() && !node.mapped()) {
+		List<NodeMatcher> nlrMatchers = getNextLevelRenderMatchers(r);
+
+		if (nlrMatchers.isEmpty()) {
+
+			r.addLine(node.getLabel());
+		}
+		else {
 
 			r.addLine(node.getLabel() + "==>");
 
 			r = r.nextLevel();
 
-			for (NodeMatcher m : node.getAllProfileMatchers()) {
+			for (NodeMatcher m : nlrMatchers) {
 
 				m.render(r);
 			}
 		}
-		else {
+	}
 
-			r.addLine(node.getLabel());
+	private List<NodeMatcher> getNextLevelRenderMatchers(PatternRenderer r) {
+
+		if (!node.mapped()) {
+
+			PatternRenderType renderType = r.getRenderType();
+
+			if (renderType == PatternRenderType.NESTED_PROFILE) {
+
+				return node.getAllProfileMatchers();
+			}
+
+			if (renderType == PatternRenderType.NESTED_DEFINITION) {
+
+				return node.getAllDefinitionMatchers();
+			}
 		}
+
+		return Collections.emptyList();
 	}
 }
