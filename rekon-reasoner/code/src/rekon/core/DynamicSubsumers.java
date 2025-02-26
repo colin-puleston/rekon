@@ -120,7 +120,60 @@ class DynamicSubsumers {
 
 	private class EquivCheckClassifier extends LocalClassifier {
 
-		private Set<NodeMatcher> definitions = new HashSet<NodeMatcher>();
+		private NodeMatcher topLevelMatcher;
+		private Set<NodeMatcher> topLevelDefinitions = new HashSet<NodeMatcher>();
+
+		private class TopLevelDefnCollector {
+
+			private boolean relationFreesOnly;
+
+			TopLevelDefnCollector(Names subsumeds) {
+
+				relationFreesOnly = relationFreePattern(topLevelMatcher);
+
+				collectAll(subsumeds);
+			}
+
+			private void collectAll(Names subsumeds) {
+
+				for (NodeX n : subsumeds.asNodes()) {
+
+					collectFrom(n);
+
+					for (NodeX ss : n.getSubs(ClassNode.class, false).asNodes()) {
+
+						collectFrom(ss);
+					}
+				}
+			}
+
+			private void collectFrom(NodeX n) {
+
+				for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
+
+					if (!relationFreesOnly || relationFreePattern(d)) {
+
+						topLevelDefinitions.add(d);
+					}
+				}
+
+				for (DisjunctionMatcher d : n.getDefinitionDisjunctionMatchers()) {
+
+					topLevelDefinitions.add(d);
+				}
+			}
+
+			private boolean relationFreePattern(NodeMatcher matcher) {
+
+				return matcher instanceof PatternMatcher
+						&& relationFreePattern((PatternMatcher)matcher);
+			}
+
+			private boolean relationFreePattern(PatternMatcher m) {
+
+				return m.getPattern().getDirectRelations().isEmpty();
+			}
+		}
 
 		private abstract class TypeClassifier
 								<C extends NodeMatcher>
@@ -192,61 +245,33 @@ class DynamicSubsumers {
 			}
 		}
 
-		EquivCheckClassifier(Names subsumeds) {
+		EquivCheckClassifier(LocalExpression topLevelExpr, Names subsumeds) {
 
-			findAllDefinitionsFor(subsumeds);
+			topLevelMatcher = topLevelExpr.getExpressionMatcher();
+
+			new TopLevelDefnCollector(subsumeds);
 		}
 
 		void classify(NodeMatcher candidate) {
 
-			TypeClassifier<?> tc = new TypeClassifierCreator().create(candidate);
+			if (candidate == topLevelMatcher) {
 
-			for (NodeMatcher defn : definitions) {
+				classifyTopLevel();
+			}
+			else {
+
+				defaultClassifier.classify(candidate);
+			}
+		}
+
+		private void classifyTopLevel() {
+
+			TypeClassifier<?> tc = new TypeClassifierCreator().create(topLevelMatcher);
+
+			for (NodeMatcher defn : topLevelDefinitions) {
 
 				defn.acceptVisitor(tc);
 			}
-		}
-
-		private void findAllDefinitionsFor(Names nodes) {
-
-			for (NodeX n : nodes.asNodes()) {
-
-				findAllDefinitionsFor(n);
-			}
-		}
-
-		private void findAllDefinitionsFor(NodeX n) {
-
-			findDefinitionsFrom(n);
-
-			for (NodeX ss : n.getSubs(ClassNode.class, false).asNodes()) {
-
-				findDefinitionsFrom(ss);
-			}
-		}
-
-		private void findDefinitionsFrom(NodeX n) {
-
-			for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
-
-				if (definitions.add(d)) {
-
-					findAllDefinitionsFor(getDefinitionMatchNames(d));
-				}
-			}
-
-			for (DisjunctionMatcher d : n.getDefinitionDisjunctionMatchers()) {
-
-				if (definitions.add(d)) {
-
-					findAllDefinitionsFor(d.getDirectDisjuncts());
-				}
-			}
-		}
-
-		private Names getDefinitionMatchNames(PatternMatcher defn) {
-
-			return new SimpleNameCollector(true, NodeX.class).collect(defn.getPattern());
 		}
 	}
 
@@ -263,7 +288,7 @@ class DynamicSubsumers {
 
 	NameSet inferEquivCheckSubsumers(LocalExpression expr, Names subsumeds) {
 
-		return new EquivCheckClassifier(subsumeds).classify(expr);
+		return new EquivCheckClassifier(expr, subsumeds).classify(expr);
 	}
 
 	private PotentialLocalPatternSubsumers createDefnPatternsFilter(Ontology ontology) {
@@ -276,3 +301,4 @@ class DynamicSubsumers {
 		return new PotentialDisjunctionSubsumers(ontology.getDefinitionDisjunctions());
 	}
 }
+
