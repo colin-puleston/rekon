@@ -196,7 +196,7 @@ class QueryableExpression extends ValidInputQueryable {
 
 	private NameSet inferEquivsForSubsumeds(NameSet subsumeds) {
 
-		NameSet subsumers = inferEquivCheckSubsumers(subsumeds);
+		NameSet subsumers = inferSubsumers();
 
 		if (subsumers.isEmpty()) {
 
@@ -213,11 +213,6 @@ class QueryableExpression extends ValidInputQueryable {
 	private NameSet inferSubsumers() {
 
 		return dynamicSubsumers.inferSubsumers(expression);
-	}
-
-	private NameSet inferEquivCheckSubsumers(NameSet subsumeds) {
-
-		return dynamicSubsumers.inferEquivCheckSubsumers(expression, subsumeds);
 	}
 
 	private NameSet inferSubsumedClasses() {
