@@ -34,8 +34,10 @@ class DerivedDisjunctions {
 	private MatchStructures matchStructures;
 	private FreeOntologyClasses freeOntologyClasses;
 
-	private Map<Set<NodeX>, ClassNode> classesByDisjuncts
-						= new HashMap<Set<NodeX>, ClassNode>();
+	private Map<Set<NodeX>, ClassNode> derivedClassesByDisjunctSets
+						 			= new HashMap<Set<NodeX>, ClassNode>();
+
+	private List<Set<NodeX>> newDisjunctSets = new ArrayList<Set<NodeX>>();
 
 	DerivedDisjunctions(
 		MatchStructures matchStructures,
@@ -45,21 +47,32 @@ class DerivedDisjunctions {
 		this.freeOntologyClasses = freeOntologyClasses;
 	}
 
-	ClassNode resolveProfile(Collection<NodeX> disjuncts) {
+	synchronized ClassNode resolveProfile(Collection<NodeX> disjuncts) {
 
 		Set<NodeX> resolvedDisjuncts = resolveNestedDisjuncts(disjuncts);
-		ClassNode cn = classesByDisjuncts.get(resolvedDisjuncts);
+		ClassNode cn = derivedClassesByDisjunctSets.get(resolvedDisjuncts);
 
 		if (cn == null) {
 
 			cn = freeOntologyClasses.createInsertedClass();
 
-			matchStructures.addDisjunction(cn, resolvedDisjuncts, false);
-
-			classesByDisjuncts.put(resolvedDisjuncts, cn);
+			derivedClassesByDisjunctSets.put(resolvedDisjuncts, cn);
+			newDisjunctSets.add(resolvedDisjuncts);
 		}
 
 		return cn;
+	}
+
+	void addAllNewlyDerived() {
+
+		for (Set<NodeX> disjuncts : newDisjunctSets) {
+
+			ClassNode cn = derivedClassesByDisjunctSets.get(disjuncts);
+
+			matchStructures.addDisjunction(cn, disjuncts, false);
+		}
+
+		newDisjunctSets.clear();
 	}
 
 	private Set<NodeX> resolveNestedDisjuncts(Collection<NodeX> disjuncts) {

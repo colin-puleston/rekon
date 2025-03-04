@@ -120,11 +120,11 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			Iterable<NodeX> allNodes = ontology.getAllNodes();
 
-			NodeClassifier.expandAllNewInferredSubsumers(getAllNodes());
+			expandAllNewInferences();
 
 			Pass next = new Pass(ClassifyPassType.DEFAULT);
 
-			NodeClassifier.absorbAllNewInferredSubsumers(getAllNodes());
+			absorbAllNewInferences();
 
 			return next;
 		}
@@ -210,6 +210,18 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 				d.inferNewCommonDisjunctSubsumers();
 			}
+		}
+
+		private void expandAllNewInferences() {
+
+			NodeClassifier.expandAllNewInferredSubsumers(getAllNodes());
+
+			ontology.getDerivedDisjunctions().addAllNewlyDerived();
+		}
+
+		private void absorbAllNewInferences() {
+
+			NodeClassifier.absorbAllNewInferredSubsumers(getAllNodes());
 		}
 	}
 
