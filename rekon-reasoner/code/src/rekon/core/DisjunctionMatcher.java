@@ -299,13 +299,14 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	private void collectDisjunctExpansions(Names expansions) {
 
-		expansions.addAll(directDisjuncts);
-
 		for (NodeX d : directDisjuncts.asNodes()) {
 
-			for (DisjunctionMatcher m : d.getAllDisjunctionMatchers()) {
+			if (expansions.add(d)) {
 
-				m.collectDisjunctExpansions(expansions);
+				for (DisjunctionMatcher m : d.getAllDisjunctionMatchers()) {
+
+					m.collectDisjunctExpansions(expansions);
+				}
 			}
 		}
 	}
