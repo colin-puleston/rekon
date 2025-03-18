@@ -116,7 +116,7 @@ public class MatchStructures {
 
 		private ClassNode addNewDisjunction(List<ClassNode> disjuncts) {
 
-			ClassNode c = createPatternClass();
+			ClassNode c = createDisjunctionClass();
 
 			addDisjunction(c, disjuncts, false);
 
@@ -180,9 +180,9 @@ public class MatchStructures {
 		return freeClasses.createPatternClass();
 	}
 
-	public ClassNode createDefinitionClass() {
+	public ClassNode createDisjunctionClass() {
 
-		return freeClasses.createDefinitionClass();
+		return freeClasses.createDisjunctionClass();
 	}
 
 	MatchStructures(FreeClasses freeClasses) {

@@ -59,9 +59,9 @@ class InstancePattern extends LocalExpression {
 			return new InstancePatternClassNode();
 		}
 
-		DefinitionClassNode createDefinitionClass() {
+		DisjunctionClassNode createDisjunctionClass() {
 
-			throw new Error("Cannot create definition class for instance!");
+			throw new Error("Cannot create disjunction class for instance!");
 		}
 	}
 

@@ -54,7 +54,7 @@ class DerivedDisjunctions {
 
 		if (cn == null) {
 
-			cn = freeOntologyClasses.createInsertedClass();
+			cn = freeOntologyClasses.createDerivedDisjunctionClass();
 
 			derivedClassesByDisjunctSets.put(resolvedDisjuncts, cn);
 			newDisjunctSets.add(resolvedDisjuncts);
@@ -81,18 +81,18 @@ class DerivedDisjunctions {
 
 		for (NodeX d : disjuncts) {
 
-			if (freeOntologyClasses.insertedClass(d)) {
+			if (freeOntologyClasses.derivedDisjunctionClass(d)) {
 
-				absorbInsertedDisjunct(resolvedDisjuncts, d);
+				absorbDerivedDisjunct(resolvedDisjuncts, d);
 			}
 		}
 
 		return resolvedDisjuncts;
 	}
 
-	private void absorbInsertedDisjunct(Collection<NodeX> disjuncts, NodeX inserted) {
+	private void absorbDerivedDisjunct(Collection<NodeX> disjuncts, NodeX derivedDj) {
 
-		for (DisjunctionMatcher disjunction : inserted.getAllDisjunctionMatchers()) {
+		for (DisjunctionMatcher disjunction : derivedDj.getAllDisjunctionMatchers()) {
 
 			for (NodeX d : disjunction.getDirectDisjuncts().asNodes()) {
 

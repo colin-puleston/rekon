@@ -33,6 +33,8 @@ class FreeOntologyClasses extends FreeClasses {
 
 	private Ontology ontology;
 
+	private int derivedDisjunctionIndex = 0;
+
 	private class OntologyPatternClassNode extends PatternClassNode {
 
 		OntologyPatternClassNode() {
@@ -41,17 +43,19 @@ class FreeOntologyClasses extends FreeClasses {
 		}
 	}
 
-	private class OntologyDefinitionClassNode extends DefinitionClassNode {
+	private class OntologyDisjunctionClassNode extends DisjunctionClassNode {
 
-		OntologyDefinitionClassNode() {
+		OntologyDisjunctionClassNode() {
 
 			ontology.addFreeClass(this);
 		}
 	}
 
-	private class OntologyInsertedClassNode extends InsertedClassNode {
+	private class DerivedDisjunctionClassNode extends FreeClassNode {
 
-		OntologyInsertedClassNode() {
+		DerivedDisjunctionClassNode() {
+
+			super(derivedDisjunctionIndex++);
 
 			ontology.addFreeClass(this);
 		}
@@ -72,18 +76,18 @@ class FreeOntologyClasses extends FreeClasses {
 		return new OntologyPatternClassNode();
 	}
 
-	DefinitionClassNode createDefinitionClass() {
+	DisjunctionClassNode createDisjunctionClass() {
 
-		return new OntologyDefinitionClassNode();
+		return new OntologyDisjunctionClassNode();
 	}
 
-	InsertedClassNode createInsertedClass() {
+	DerivedDisjunctionClassNode createDerivedDisjunctionClass() {
 
-		return new OntologyInsertedClassNode();
+		return new DerivedDisjunctionClassNode();
 	}
 
-	boolean insertedClass(NodeX test) {
+	boolean derivedDisjunctionClass(NodeX test) {
 
-		return test instanceof OntologyInsertedClassNode;
+		return test instanceof DerivedDisjunctionClassNode;
 	}
 }

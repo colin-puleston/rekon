@@ -30,10 +30,9 @@ package rekon.core;
 abstract class FreeClasses {
 
 	private int patternClassIndex = 0;
-	private int definitionClassIndex = 0;
-	private int insertedClassIndex = 0;
+	private int disjunctionClassIndex = 0;
 
-	private abstract class FreeClassNode extends ClassNode {
+	abstract class FreeClassNode extends ClassNode {
 
 		static private final String LABEL_FORMAT = "[%s-%d]";
 
@@ -73,24 +72,11 @@ abstract class FreeClasses {
 		}
 	}
 
-	class DefinitionClassNode extends FreeClassNode {
+	class DisjunctionClassNode extends FreeClassNode {
 
-		DefinitionClassNode() {
+		DisjunctionClassNode() {
 
-			super(definitionClassIndex++);
-		}
-	}
-
-	class InsertedClassNode extends FreeClassNode {
-
-		InsertedClassNode() {
-
-			super(insertedClassIndex++);
-		}
-
-		boolean local() {
-
-			return localClasses();
+			super(disjunctionClassIndex++);
 		}
 	}
 
@@ -98,5 +84,5 @@ abstract class FreeClasses {
 
 	abstract PatternClassNode createPatternClass();
 
-	abstract DefinitionClassNode createDefinitionClass();
+	abstract DisjunctionClassNode createDisjunctionClass();
 }

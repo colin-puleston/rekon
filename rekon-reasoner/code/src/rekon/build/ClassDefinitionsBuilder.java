@@ -49,20 +49,20 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		abstract ClassNode resolveDefinedClass();
+		abstract ClassNode resolvePatternDefinitionClass();
+
+		abstract ClassNode resolveDisjunctionDefinitionClass();
 
 		private void create() {
 
-			ClassNode c = resolveDefinedClass();
-
 			for (Pattern defn : patternDefns) {
 
-				addDefinitionPattern(c, defn);
+				addDefinitionPattern(resolvePatternDefinitionClass(), defn);
 			}
 
 			for (List<Pattern> disjuncts : disjunctionDefns) {
 
-				addDefinitionDisjunction(c, disjuncts);
+				addDefinitionDisjunction(resolveDisjunctionDefinitionClass(), disjuncts);
 			}
 		}
 
@@ -103,18 +103,23 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 	private class ClassComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
 
-		private InputClassComplexEquivalence axiom;
+		private ClassNode first;
 
 		ClassComplexEquivalenceBasedBuilder(InputClassComplexEquivalence axiom) {
 
-			this.axiom = axiom;
+			first = axiom.getFirst();
 
 			checkCreate(axiom, axiom.getSecond());
 		}
 
-		ClassNode resolveDefinedClass() {
+		ClassNode resolvePatternDefinitionClass() {
 
-			return axiom.getFirst();
+			return first;
+		}
+
+		ClassNode resolveDisjunctionDefinitionClass() {
+
+			return first;
 		}
 	}
 
@@ -125,9 +130,14 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			checkCreate(axiom, axiom.getFirst(), axiom.getSecond());
 		}
 
-		ClassNode resolveDefinedClass() {
+		ClassNode resolvePatternDefinitionClass() {
 
-			return createDefinitionClass();
+			return createPatternClass();
+		}
+
+		ClassNode resolveDisjunctionDefinitionClass() {
+
+			return createDisjunctionClass();
 		}
 	}
 
@@ -184,7 +194,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 			Pattern p = components.toPattern(sup.toNode());
 
-			return p != null ? createDefinitionClass(p) : null;
+			return p != null ? createPatternClass(p) : null;
 		}
 
 		private ClassNode checkCreateDisjunctionSuperClass(Collection<InputNode> disjuncts) {
@@ -196,7 +206,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 				return null;
 			}
 
-			ClassNode c = createDefinitionClass();
+			ClassNode c = createDisjunctionClass();
 
 			addProfileDisjunction(c, djs);
 
