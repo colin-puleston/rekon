@@ -29,8 +29,6 @@ package rekon.core;
  */
 class InstancePattern extends LocalExpression {
 
-	static private final String LOCAL_CLASS_NAMES_PREFIX_FORMAT = "%s(%s)";
-
 	private SinglePatternSource patternSource;
 
 	private InstanceNode instanceNode;
@@ -38,14 +36,21 @@ class InstancePattern extends LocalExpression {
 
 	private class InstanceClasses extends FreeClasses {
 
-		private class InstancePatternClassNode extends PatternClassNode {
+		private class InstanceClassGenerator extends FreeClassGenerator {
+
+			InstanceClassGenerator(ClassRole classRole) {
+
+				super(classRole);
+			}
+
+			String createLabel() {
+
+				return super.createLabel() + '(' + instanceNode.getLabel() + ')';
+			}
 
 			String getLabelPrefix() {
 
-				String gen = super.getLabelPrefix();
-				String spec = instanceNode.getLabel();
-
-				return String.format(LOCAL_CLASS_NAMES_PREFIX_FORMAT, gen, spec);
+				return "INSTANCE";
 			}
 		}
 
@@ -54,14 +59,9 @@ class InstancePattern extends LocalExpression {
 			return true;
 		}
 
-		PatternClassNode createPatternClass() {
+		FreeClassGenerator createDefaultClassGenerator(ClassRole classRole) {
 
-			return new InstancePatternClassNode();
-		}
-
-		DisjunctionClassNode createDisjunctionClass() {
-
-			throw new Error("Cannot create disjunction class for instance!");
+			return new InstanceClassGenerator(classRole);
 		}
 	}
 

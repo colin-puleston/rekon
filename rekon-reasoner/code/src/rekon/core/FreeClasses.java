@@ -29,18 +29,18 @@ package rekon.core;
  */
 abstract class FreeClasses {
 
-	private int patternClassIndex = 0;
-	private int disjunctionClassIndex = 0;
+	private FreeClassGenerator patternClasses = createDefaultClassGenerator(ClassRole.PATTERN);
+	private FreeClassGenerator disjunctionClasses = createDefaultClassGenerator(ClassRole.DISJUNCTION);
 
-	abstract class FreeClassNode extends ClassNode {
+	enum ClassRole {PATTERN, DISJUNCTION}
 
-		static private final String LABEL_FORMAT = "[%s-%d]";
+	class FreeClassNode extends ClassNode {
 
-		private int index;
+		private String label;
 
 		public String getLabel() {
 
-			return String.format(LABEL_FORMAT, getLabelPrefix(), index);
+			return label;
 		}
 
 		public boolean mapped() {
@@ -48,9 +48,9 @@ abstract class FreeClasses {
 			return false;
 		}
 
-		FreeClassNode(int index) {
+		FreeClassNode(String label) {
 
-			this.index = index;
+			this.label = label;
 		}
 
 		boolean local() {
@@ -58,31 +58,59 @@ abstract class FreeClasses {
 			return localClasses();
 		}
 
-		String getLabelPrefix() {
+		String getClassNameString() {
 
-			return getClass().getSimpleName();
+			return FreeClassNode.class.getSimpleName();
 		}
 	}
 
-	class PatternClassNode extends FreeClassNode {
+	abstract class FreeClassGenerator {
 
-		PatternClassNode() {
+		private ClassRole classRole;
 
-			super(patternClassIndex++);
+		private int nextIndex = 0;
+
+		FreeClassGenerator(ClassRole classRole) {
+
+			this.classRole = classRole;
 		}
-	}
 
-	class DisjunctionClassNode extends FreeClassNode {
+		FreeClassNode next() {
 
-		DisjunctionClassNode() {
+			FreeClassNode c = create(createLabel());
 
-			super(disjunctionClassIndex++);
+			initialise(c);
+
+			return c;
+		}
+
+		String createLabel() {
+
+			return getLabelPrefix() + "-" + classRole + "-" + nextIndex++;
+		}
+
+		abstract String getLabelPrefix();
+
+		FreeClassNode create(String label) {
+
+			return new FreeClassNode(label);
+		}
+
+		void initialise(FreeClassNode c) {
 		}
 	}
 
 	abstract boolean localClasses();
 
-	abstract PatternClassNode createPatternClass();
+	FreeClassNode createPatternClass() {
 
-	abstract DisjunctionClassNode createDisjunctionClass();
+		return patternClasses.next();
+	}
+
+	FreeClassNode createDisjunctionClass() {
+
+		return disjunctionClasses.next();
+	}
+
+	abstract FreeClassGenerator createDefaultClassGenerator(ClassRole classRole);
 }

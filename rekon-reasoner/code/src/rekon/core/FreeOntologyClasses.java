@@ -33,31 +33,49 @@ class FreeOntologyClasses extends FreeClasses {
 
 	private Ontology ontology;
 
-	private int derivedDisjunctionIndex = 0;
-
-	private class OntologyPatternClassNode extends PatternClassNode {
-
-		OntologyPatternClassNode() {
-
-			ontology.addFreeClass(this);
-		}
-	}
-
-	private class OntologyDisjunctionClassNode extends DisjunctionClassNode {
-
-		OntologyDisjunctionClassNode() {
-
-			ontology.addFreeClass(this);
-		}
-	}
+	private FreeClassGenerator derivedDisjunctionClasses = new DerivedDisjunctionClassGenerator();
 
 	private class DerivedDisjunctionClassNode extends FreeClassNode {
 
-		DerivedDisjunctionClassNode() {
+		DerivedDisjunctionClassNode(String label) {
 
-			super(derivedDisjunctionIndex++);
+			super(label);
+		}
+	}
 
-			ontology.addFreeClass(this);
+	private class DefaultClassGenerator extends FreeClassGenerator {
+
+		DefaultClassGenerator(ClassRole classRole) {
+
+			super(classRole);
+		}
+
+		String getLabelPrefix() {
+
+			return "ONTO";
+		}
+
+		void initialise(FreeClassNode c) {
+
+			ontology.addFreeClass(c);
+		}
+	}
+
+	private class DerivedDisjunctionClassGenerator extends DefaultClassGenerator {
+
+		DerivedDisjunctionClassGenerator() {
+
+			super(ClassRole.DISJUNCTION);
+		}
+
+		String getLabelPrefix() {
+
+			return super.getLabelPrefix() + "-DERIVED";
+		}
+
+		FreeClassNode create(String label) {
+
+			return new DerivedDisjunctionClassNode(label);
 		}
 	}
 
@@ -71,23 +89,18 @@ class FreeOntologyClasses extends FreeClasses {
 		return false;
 	}
 
-	PatternClassNode createPatternClass() {
+	FreeClassNode createDerivedDisjunctionClass() {
 
-		return new OntologyPatternClassNode();
+		return derivedDisjunctionClasses.next();
 	}
 
-	DisjunctionClassNode createDisjunctionClass() {
+	boolean derivedDisjunctionClass(NodeX c) {
 
-		return new OntologyDisjunctionClassNode();
+		return c instanceof DerivedDisjunctionClassNode;
 	}
 
-	DerivedDisjunctionClassNode createDerivedDisjunctionClass() {
+	FreeClassGenerator createDefaultClassGenerator(ClassRole classRole) {
 
-		return new DerivedDisjunctionClassNode();
-	}
-
-	boolean derivedDisjunctionClass(NodeX test) {
-
-		return test instanceof DerivedDisjunctionClassNode;
+		return new DefaultClassGenerator(classRole);
 	}
 }

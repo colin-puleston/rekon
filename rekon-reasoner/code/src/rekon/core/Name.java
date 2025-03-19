@@ -52,7 +52,7 @@ public abstract class Name {
 
 	public String toString() {
 
-		return getClass().getSimpleName() + "(" + getLabel() + ")";
+		return getClassNameString() + "(" + getLabel() + ")";
 	}
 
 	public abstract String getLabel();
@@ -168,6 +168,11 @@ public abstract class Name {
 	NameClassifier createClassifier() {
 
 		return new NameClassifier(this);
+	}
+
+	String getClassNameString() {
+
+		return getClass().getSimpleName();
 	}
 
 	private boolean hasSubsumer(Name name) {

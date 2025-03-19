@@ -38,10 +38,17 @@ class DynamicExpression extends LocalExpression {
 
 	private class DynamicClasses extends FreeClasses {
 
-		private class DynamicPatternClassNode extends PatternClassNode {
-		}
+		private class DynamicClassGenerator extends FreeClassGenerator {
 
-		private class DynamicDisjunctionClassNode extends DisjunctionClassNode {
+			DynamicClassGenerator(ClassRole classRole) {
+
+				super(classRole);
+			}
+
+			String getLabelPrefix() {
+
+				return "DYNAMIC";
+			}
 		}
 
 		boolean localClasses() {
@@ -49,14 +56,9 @@ class DynamicExpression extends LocalExpression {
 			return true;
 		}
 
-		PatternClassNode createPatternClass() {
+		FreeClassGenerator createDefaultClassGenerator(ClassRole classRole) {
 
-			return new DynamicPatternClassNode();
-		}
-
-		DisjunctionClassNode createDisjunctionClass() {
-
-			return new DynamicDisjunctionClassNode();
+			return new DynamicClassGenerator(classRole);
 		}
 	}
 
