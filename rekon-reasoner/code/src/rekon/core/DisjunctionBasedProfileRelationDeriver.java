@@ -31,6 +31,9 @@ import java.util.*;
  */
 abstract class DisjunctionBasedProfileRelationDeriver {
 
+	private List<TypeRelationDeriver<?>> typeDerivers
+				= new ArrayList<TypeRelationDeriver<?>>();
+
 	private List<Relation> derivedRelations = new ArrayList<Relation>();
 
 	private abstract class TypeRelationDeriver<T extends Value> {
@@ -100,7 +103,7 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 
 					if (rel != null) {
 
-						absorbDerivedRelation(rel);
+						derivedRelations.add(rel);
 					}
 				}
 			}
@@ -348,67 +351,53 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 		}
 	}
 
-	private class DisjunctionRelationsDeriver {
+	DisjunctionBasedProfileRelationDeriver(DisjunctionMatcher disjunction) {
 
-		private List<TypeRelationDeriver<?>> typeDerivers
-					= new ArrayList<TypeRelationDeriver<?>>();
+		typeDerivers.add(new SomeRelationDeriver());
+		typeDerivers.add(new AllRelationDeriver());
+		typeDerivers.add(new NumberRelationDeriver());
+		typeDerivers.add(new BooleanRelationDeriver());
 
-		DisjunctionRelationsDeriver(DisjunctionMatcher disjunction) {
+		Names disjuncts = disjunction.getExpandedDisjuncts();
 
-			typeDerivers.add(new SomeRelationDeriver());
-			typeDerivers.add(new AllRelationDeriver());
-			typeDerivers.add(new NumberRelationDeriver());
-			typeDerivers.add(new BooleanRelationDeriver());
+		processDisjuncts(disjuncts);
+		deriveRelations(disjuncts.size());
+	}
 
-			Names disjuncts = disjunction.getExpandedDisjuncts();
+	private void processDisjuncts(Names disjuncts) {
 
-			processDisjuncts(disjuncts);
-			deriveRelations(disjuncts.size());
+		int disjunctIndex = 0;
+
+		for (NodeX d : disjuncts.asNodes()) {
+
+			processDisjunct(d, disjunctIndex++);
 		}
+	}
 
-		private void processDisjuncts(Names disjuncts) {
+	private void processDisjunct(NodeX disjunct, int disjunctIndex) {
 
-			int disjunctIndex = 0;
+		for (Relation r : resolveProfileRelations(disjunct)) {
 
-			for (NodeX d : disjuncts.asNodes()) {
-
-				processDisjunct(d, disjunctIndex++);
-			}
+			processDisjunctRelation(r, disjunctIndex);
 		}
+	}
 
-		private void processDisjunct(NodeX disjunct, int disjunctIndex) {
+	private void processDisjunctRelation(Relation rel, int disjunctIndex) {
 
-			for (Relation r : resolveProfileRelations(disjunct)) {
+		for (TypeRelationDeriver<?> d : typeDerivers) {
 
-				processDisjunctRelation(r, disjunctIndex);
-			}
-		}
+			if (d.checkProcessDisjunctRelation(rel, disjunctIndex)) {
 
-		private void processDisjunctRelation(Relation rel, int disjunctIndex) {
-
-			for (TypeRelationDeriver<?> d : typeDerivers) {
-
-				if (d.checkProcessDisjunctRelation(rel, disjunctIndex)) {
-
-					break;
-				}
-			}
-		}
-
-		private void deriveRelations(int totalDisjuncts)  {
-
-			for (TypeRelationDeriver<?> d : typeDerivers) {
-
-				d.addDerivedRelations(totalDisjuncts);
+				break;
 			}
 		}
 	}
 
-	DisjunctionBasedProfileRelationDeriver(NodeX node) {
+	private void deriveRelations(int totalDisjuncts)  {
 
-		for (DisjunctionMatcher d : node.getAllDisjunctionMatchers()) {
+		for (TypeRelationDeriver<?> d : typeDerivers) {
 
-			new DisjunctionRelationsDeriver(d);
+			d.addDerivedRelations(totalDisjuncts);
 		}
 	}
 
@@ -420,22 +409,4 @@ abstract class DisjunctionBasedProfileRelationDeriver {
 	abstract ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts);
 
 	abstract Collection<Relation> resolveProfileRelations(NodeX node);
-
-	private void absorbDerivedRelation(Relation rel) {
-
-		for (Relation r : new ArrayList<Relation>(derivedRelations)) {
-
-			if (rel.subsumes(r)) {
-
-				return;
-			}
-
-			if (r.subsumes(rel)) {
-
-				derivedRelations.remove(r);
-			}
-		}
-
-		derivedRelations.add(rel);
-	}
 }

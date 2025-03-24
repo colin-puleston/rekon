@@ -35,9 +35,9 @@ class ProfileRelationsResolver {
 
 	private class DisjunctionBasedDeriver extends DisjunctionBasedProfileRelationDeriver {
 
-		DisjunctionBasedDeriver(NodeX node) {
+		DisjunctionBasedDeriver(DisjunctionMatcher disjunction) {
 
-			super(node);
+			super(disjunction);
 		}
 
 		ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts) {
@@ -96,7 +96,10 @@ class ProfileRelationsResolver {
 
 		void collectFromDisjunctions() {
 
-			collector.absorbAll(resolveDisjunctionBasedRelations());
+			for (DisjunctionMatcher d : node.getAllDisjunctionMatchers()) {
+
+				collector.absorbAll(new DisjunctionBasedDeriver(d).getAll());
+			}
 		}
 
 		void collectChainExpansions() {
@@ -108,16 +111,6 @@ class ProfileRelationsResolver {
 					collector.absorb(sr);
 				}
 			}
-		}
-
-		private Collection<Relation> resolveDisjunctionBasedRelations() {
-
-			if (localExpansion()) {
-
-				return Collections.emptyList();
-			}
-
-			return new DisjunctionBasedDeriver(node).getAll();
 		}
 
 		private Collection<Relation> getAllChainBasedExpansions(Relation relation) {
@@ -151,7 +144,12 @@ class ProfileRelationsResolver {
 		NodeRelationsResolver resolver = new NodeRelationsResolver(node, collector);
 
 		resolver.collectFromSubsumers();
-		resolver.collectFromDisjunctions();
+
+		if (!localExpansion()) {
+
+			resolver.collectFromDisjunctions();
+		}
+
 		resolver.collectChainExpansions();
 	}
 
