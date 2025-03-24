@@ -53,16 +53,24 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		abstract ClassNode resolveDisjunctionDefinitionClass();
 
+		abstract ClassNode resolveMultiDefinitionClass();
+
 		private void create() {
+
+			ClassNode mdc = multiDefinitions() ? resolveMultiDefinitionClass() : null;
 
 			for (Pattern defn : patternDefns) {
 
-				addDefinitionPattern(resolvePatternDefinitionClass(), defn);
+				ClassNode c = mdc != null ? mdc : resolvePatternDefinitionClass();
+
+				addDefinitionPattern(c, defn);
 			}
 
 			for (List<Pattern> disjuncts : disjunctionDefns) {
 
-				addDefinitionDisjunction(resolveDisjunctionDefinitionClass(), disjuncts);
+				ClassNode c = mdc != null ? mdc : resolveDisjunctionDefinitionClass();
+
+				addDefinitionDisjunction(c, disjuncts);
 			}
 		}
 
@@ -99,6 +107,11 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 			return true;
 		}
+
+		boolean multiDefinitions() {
+
+			return patternDefns.size() + disjunctionDefns.size() > 1;
+		}
 	}
 
 	private class ClassComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
@@ -121,6 +134,11 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 			return first;
 		}
+
+		ClassNode resolveMultiDefinitionClass() {
+
+			throw new Error("Method should never be invoked!");
+		}
 	}
 
 	private class ComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
@@ -138,6 +156,11 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 		ClassNode resolveDisjunctionDefinitionClass() {
 
 			return createDisjunctionClass();
+		}
+
+		ClassNode resolveMultiDefinitionClass() {
+
+			return createMultiDefinitionClass();
 		}
 	}
 

@@ -185,6 +185,11 @@ public class MatchStructures {
 		return freeClasses.createDisjunctionClass();
 	}
 
+	public ClassNode createMultiDefinitionClass() {
+
+		return freeClasses.createMultiDefinitionClass();
+	}
+
 	MatchStructures(FreeClasses freeClasses) {
 
 		this.freeClasses = freeClasses;

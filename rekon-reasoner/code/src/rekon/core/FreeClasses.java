@@ -31,8 +31,9 @@ abstract class FreeClasses {
 
 	private FreeClassGenerator patternClasses = createDefaultClassGenerator(ClassRole.PATTERN);
 	private FreeClassGenerator disjunctionClasses = createDefaultClassGenerator(ClassRole.DISJUNCTION);
+	private FreeClassGenerator multiDefnClasses = createDefaultClassGenerator(ClassRole.MULTI_DEFINITION);
 
-	enum ClassRole {PATTERN, DISJUNCTION}
+	enum ClassRole {PATTERN, DISJUNCTION, MULTI_DEFINITION}
 
 	class FreeClassNode extends ClassNode {
 
@@ -110,6 +111,11 @@ abstract class FreeClasses {
 	FreeClassNode createDisjunctionClass() {
 
 		return disjunctionClasses.next();
+	}
+
+	FreeClassNode createMultiDefinitionClass() {
+
+		return multiDefnClasses.next();
 	}
 
 	abstract FreeClassGenerator createDefaultClassGenerator(ClassRole classRole);

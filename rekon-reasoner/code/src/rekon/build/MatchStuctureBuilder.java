@@ -70,6 +70,11 @@ class MatchStuctureBuilder {
 		return matchStructures.createDisjunctionClass();
 	}
 
+	ClassNode createMultiDefinitionClass() {
+
+		return matchStructures.createMultiDefinitionClass();
+	}
+
 	void addDefinitionPattern(NodeX node, Pattern defn) {
 
 		matchStructures.addDefinitionPattern(node, defn);
