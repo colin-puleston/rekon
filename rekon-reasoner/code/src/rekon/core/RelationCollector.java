@@ -34,6 +34,29 @@ class RelationCollector {
 	private Set<Relation> collected = new HashSet<Relation>();
 	private boolean anyAdditions = false;
 
+	private class MostSpecificsBuilder extends ExtremeSetBuilder<Relation> {
+
+		void addToSet(Relation e) {
+
+			collected.add(e);
+		}
+
+		void removeFromSet(Relation e) {
+
+			collected.remove(e);
+		}
+
+		Collection<Relation> copyCurrentSet() {
+
+			return copyCollected();
+		}
+
+		boolean mostExtremeFirst(Relation e1, Relation e2) {
+
+			return e2.subsumes(e1);
+		}
+	}
+
 	RelationCollector() {
 	}
 
@@ -85,33 +108,9 @@ class RelationCollector {
 
 	private void retainMostSpecific(Relation r, boolean initialising) {
 
-		if (collected.contains(r)) {
+		if (!collected.contains(r)) {
 
-			return;
-		}
-
-		boolean newRequired = false;
-
-		for (Relation cr : copyCollected()) {
-
-			if (!newRequired && r.subsumes(cr)) {
-
-				return;
-			}
-
-			if (cr.subsumes(r)) {
-
-				collected.remove(cr);
-
-				newRequired |= true;
-			}
-		}
-
-		collected.add(r);
-
-		if (!initialising) {
-
-			anyAdditions |= true;
+			anyAdditions |= (new MostSpecificsBuilder().absorb(r) && !initialising);
 		}
 	}
 }

@@ -35,54 +35,37 @@ public class NameSet extends Names {
 
 	private Set<Name> names = new HashSet<Name>();
 
-	private abstract class MostExtremeRetainer {
+	private abstract class ExtremeNameSetBuilder extends ExtremeSetBuilder<Name> {
 
-		void absorbAll(Names newNames) {
+		void addToSet(Name e) {
 
-			for (Name name : newNames) {
-
-				absorb(name);
-			}
+			add(e);
 		}
 
-		void absorb(Name newName) {
+		void removeFromSet(Name e) {
 
-			boolean newRequired = false;
-
-			for (Name n : copyNames()) {
-
-				if (!newRequired && mostExtremeFirst(n, newName)) {
-
-					return;
-				}
-
-				if (mostExtremeFirst(newName, n)) {
-
-					remove(n);
-
-					newRequired |= true;
-				}
-			}
-
-			add(newName);
+			remove(e);
 		}
 
-		abstract boolean mostExtremeFirst(Name n1, Name n2);
-	}
+		Collection<Name> copyCurrentSet() {
 
-	private class MostGeneralRetainer extends MostExtremeRetainer {
-
-		boolean mostExtremeFirst(Name n1, Name n2) {
-
-			return n1.subsumes(n2);
+			return copyNames();
 		}
 	}
 
-	private class MostSpecificRetainer extends MostExtremeRetainer {
+	private class MostGeneralsBuilder extends ExtremeNameSetBuilder {
 
-		boolean mostExtremeFirst(Name n1, Name n2) {
+		boolean mostExtremeFirst(Name e1, Name e2) {
 
-			return n2.subsumes(n1);
+			return e1.subsumes(e2);
+		}
+	}
+
+	private class MostSpecificsBuilder extends ExtremeNameSetBuilder {
+
+		boolean mostExtremeFirst(Name e1, Name e2) {
+
+			return e2.subsumes(e1);
 		}
 	}
 
@@ -126,22 +109,22 @@ public class NameSet extends Names {
 
 	public void retainMostGeneral(Names newNames) {
 
-		new MostGeneralRetainer().absorbAll(newNames);
+		new MostGeneralsBuilder().absorbAll(newNames.getNames());
 	}
 
 	public void retainMostGeneral(Name newName) {
 
-		new MostGeneralRetainer().absorb(newName);
+		new MostGeneralsBuilder().absorb(newName);
 	}
 
 	public void retainMostSpecific(Names newNames) {
 
-		new MostSpecificRetainer().absorbAll(newNames);
+		new MostSpecificsBuilder().absorbAll(newNames.getNames());
 	}
 
 	public void retainMostSpecific(Name newName) {
 
-		new MostSpecificRetainer().absorb(newName);
+		new MostSpecificsBuilder().absorb(newName);
 	}
 
 	public void clear() {
