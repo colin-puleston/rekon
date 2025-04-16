@@ -63,7 +63,8 @@ class FilteringNameCollector {
 
 				if (n.rootName()) {
 
-					setRootCollected();
+					rankNames = new NameSet(n);
+					rankStatus = RankStatus.ROOT_COLLECTED;
 				}
 				else {
 
@@ -143,12 +144,6 @@ class FilteringNameCollector {
 
 				nextRankCollector.extendRankedNamesList(rankedNames);
 			}
-		}
-
-		private void setRootCollected() {
-
-			rankNames = MatchNamesResolver.ROOT_COLLECTED_NAME_SET;
-			rankStatus = RankStatus.ROOT_COLLECTED;
 		}
 	}
 

@@ -48,7 +48,7 @@ class PotentialDisjunctionSubsumers extends PotentialDisjunctionSubsumptions {
 
 	boolean unionRankOptionsForRetrieval() {
 
-		return true;
+		return false;
 	}
 
 	Names getRegistrationDisjuncts(DisjunctionMatcher option) {

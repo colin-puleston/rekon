@@ -33,26 +33,6 @@ class PatternMatcher extends NodeMatcher {
 
 	private Pattern pattern;
 
-	private class SubsumedTester extends NodeMatcherVisitor {
-
-		boolean subsumption = false;
-
-		SubsumedTester(NodeMatcher test) {
-
-			test.acceptVisitor(this);
-		}
-
-		void visit(PatternMatcher test) {
-
-			subsumption = subsumes(test);
-		}
-
-		void visit(DisjunctionMatcher test) {
-
-			subsumption = test.subsumedBy(PatternMatcher.this);
-		}
-	}
-
 	public String toString() {
 
 		return getClass().getSimpleName() + "(" + getNode().getLabel() + ")";
@@ -103,17 +83,30 @@ class PatternMatcher extends NodeMatcher {
 		return Names.NO_NAMES;
 	}
 
-	boolean subsumes(NodeMatcher test) {
-
-		return new SubsumedTester(test).subsumption;
-	}
-
 	boolean subsumes(PatternMatcher test) {
 
 		return pattern.subsumes(test.pattern);
 	}
 
 	boolean subsumesNodeDirectly(NodeX test) {
+
+		return false;
+	}
+
+	boolean subsumedBy(PatternMatcher test) {
+
+		return test.subsumes(this);
+	}
+
+	boolean subsumedBy(DisjunctionMatcher test) {
+
+		for (NodeX d : test.getExpandedDisjuncts().asNodes()) {
+
+			if (d.subsumesMatcher(this)) {
+
+				return true;
+			}
+		}
 
 		return false;
 	}

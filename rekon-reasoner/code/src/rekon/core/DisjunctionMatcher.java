@@ -34,39 +34,16 @@ class DisjunctionMatcher extends NodeMatcher {
 	private NameSet directDisjuncts;
 	private boolean definition = false;
 
-	private class GeneralSubsumedTester extends NodeMatcherVisitor {
-
-		boolean subsumption = false;
-
-		GeneralSubsumedTester(NodeMatcher test) {
-
-			test.acceptVisitor(this);
-		}
-
-		void visit(PatternMatcher test) {
-
-			if (getNode().local()) {
-
-				subsumption = subsumesPatternMatcher(test);
-			}
-		}
-
-		void visit(DisjunctionMatcher test) {
-
-			subsumption = subsumes(test);
-		}
-	}
-
 	private class SubsumedDisjunctionTester {
 
-		final boolean subsumption;
+		final boolean subsumed;
 
 		private Names testSubsumers = expandDisjuncts();
 		private NameSet visited = new NameSet();
 
 		SubsumedDisjunctionTester(DisjunctionMatcher test) {
 
-			subsumption = allDisjunctsSubsumed(test);
+			subsumed = allDisjunctsSubsumed(test);
 		}
 
 		private boolean allDisjunctsSubsumed(DisjunctionMatcher test) {
@@ -131,7 +108,14 @@ class DisjunctionMatcher extends NodeMatcher {
 
 		super(node);
 
-		directDisjuncts = new NameSet(disjuncts);
+		directDisjuncts = new NameSet();
+
+		directDisjuncts.retainMostGeneral(new NameList(disjuncts));
+
+		if (directDisjuncts.size() == 1) {
+
+			node.addSubsumer(directDisjuncts.getFirstName());
+		}
 	}
 
 	void ensureDefinition() {
@@ -172,14 +156,9 @@ class DisjunctionMatcher extends NodeMatcher {
 		return definition;
 	}
 
-	boolean subsumes(NodeMatcher test) {
-
-		return new GeneralSubsumedTester(test).subsumption;
-	}
-
 	boolean subsumes(DisjunctionMatcher test) {
 
-		return new SubsumedDisjunctionTester(test).subsumption;
+		return new SubsumedDisjunctionTester(test).subsumed;
 	}
 
 	boolean subsumesNodeDirectly(NodeX test) {
@@ -197,6 +176,11 @@ class DisjunctionMatcher extends NodeMatcher {
 
 	boolean subsumedBy(PatternMatcher test) {
 
+		if (test.getNode().local()) {
+
+			return false;
+		}
+
 		for (NodeX d : expandDisjuncts().asNodes()) {
 
 			if (!d.subsumedByMatcher(test)) {
@@ -206,6 +190,11 @@ class DisjunctionMatcher extends NodeMatcher {
 		}
 
 		return true;
+	}
+
+	boolean subsumedBy(DisjunctionMatcher test) {
+
+		return test.subsumes(this);
 	}
 
 	boolean hasExpandedDisjunct(NodeX test) {
@@ -221,19 +210,6 @@ class DisjunctionMatcher extends NodeMatcher {
 	boolean unprocessedSubsumers(boolean initialPass) {
 
 		return unprocessedSubsumers(initialPass, NodeSelector.ANY);
-	}
-
-	boolean unprocessedSubsumers(boolean initialPass, NodeSelector selector) {
-
-		for (NodeX d : expandDisjuncts().asNodes()) {
-
-			if (d.unprocessedSubsumers(initialPass, selector)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	void acceptVisitor(NodeMatcherVisitor visitor) {
@@ -253,9 +229,8 @@ class DisjunctionMatcher extends NodeMatcher {
 			if (!node.local()) {
 
 				d.addSubsumer(node);
+				d.registerAsDefinitionRefed(MatchRole.DISJUNCT);
 			}
-
-			d.registerAsDefinitionRefed(MatchRole.DISJUNCT);
 		}
 	}
 
@@ -273,19 +248,6 @@ class DisjunctionMatcher extends NodeMatcher {
 		ss.remove(getNode());
 
 		return ss;
-	}
-
-	private boolean subsumesPatternMatcher(PatternMatcher test) {
-
-		for (NodeX d : expandDisjuncts().asNodes()) {
-
-			if (d.subsumesMatcher(test)) {
-
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	private NameSet expandDisjuncts() {
@@ -309,6 +271,19 @@ class DisjunctionMatcher extends NodeMatcher {
 				}
 			}
 		}
+	}
+
+	private boolean unprocessedSubsumers(boolean initialPass, NodeSelector selector) {
+
+		for (NodeX d : expandDisjuncts().asNodes()) {
+
+			if (d.unprocessedSubsumers(initialPass, selector)) {
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	private String toString(String prefix) {

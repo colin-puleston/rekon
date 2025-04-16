@@ -166,13 +166,13 @@ class PatternBuilder {
 
 					case CLASS:
 
-						nodes.absorb(conjunct.asClassNode());
+						nodes.retainMostSpecific(conjunct.asClassNode());
 
 						return true;
 
 					case INDIVIDUAL:
 
-						nodes.absorb(conjunct.asIndividualNode());
+						nodes.retainMostSpecific(conjunct.asIndividualNode());
 
 						return true;
 
@@ -189,7 +189,7 @@ class PatternBuilder {
 							return false;
 						}
 
-						nodes.absorb(n);
+						nodes.retainMostSpecific(n);
 
 						return true;
 

@@ -215,8 +215,6 @@ class OntologyClassifier extends NodeMatcherClassifier {
 		private void expandAllNewInferences() {
 
 			NodeClassifier.expandAllNewInferredSubsumers(getAllNodes());
-
-			ontology.getDerivedDisjunctions().addAllNewlyDerived();
 		}
 
 		private void absorbAllNewInferences() {

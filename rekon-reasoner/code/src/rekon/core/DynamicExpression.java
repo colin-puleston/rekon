@@ -38,27 +38,14 @@ class DynamicExpression extends LocalExpression {
 
 	private class DynamicClasses extends FreeClasses {
 
-		private class DynamicClassGenerator extends FreeClassGenerator {
-
-			DynamicClassGenerator(ClassRole classRole) {
-
-				super(classRole);
-			}
-
-			String getLabelPrefix() {
-
-				return "DYNAMIC";
-			}
-		}
-
 		boolean localClasses() {
 
 			return true;
 		}
 
-		FreeClassGenerator createDefaultClassGenerator(ClassRole classRole) {
+		String getLabelPrefix() {
 
-			return new DynamicClassGenerator(classRole);
+			return "DYNAMIC";
 		}
 	}
 

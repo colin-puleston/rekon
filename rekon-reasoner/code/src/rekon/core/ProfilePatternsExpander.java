@@ -37,9 +37,6 @@ class ProfilePatternsExpander {
 
 		private Ontology ontology;
 
-		private List<PatternMatcher> currentProfiles;
-		private List<PatternMatcher> potentialProfiles = new ArrayList<PatternMatcher>();
-
 		private class ExpansionsChecker extends MultiThreadListProcessor<PatternMatcher> {
 
 			private boolean anyNewExpansions = false;
@@ -56,25 +53,16 @@ class ProfilePatternsExpander {
 
 				anyNewExpansions = false;
 
-				checkNewExpansions(currentProfiles);
-				checkNewExpansions(potentialProfiles);
+				invokeListProcesses(ontology.getProfilePatterns());
 
 				return anyNewExpansions;
-			}
-
-			private void checkNewExpansions(List<PatternMatcher> profiles) {
-
-				if (!profiles.isEmpty()) {
-
-					invokeListProcesses(profiles);
-				}
 			}
 
 			private boolean checkNewExpansion(PatternMatcher profile) {
 
 				ProfileRelations prs = getProfileRelations(profile);
 
-				prs.checkExpansion(new ProfileRelationsResolver(ontology));
+				prs.checkExpansion(new ProfileRelationsResolver());
 
 				return prs.newlyExpanded();
 			}
@@ -89,11 +77,7 @@ class ProfilePatternsExpander {
 
 			this.ontology = ontology;
 
-			currentProfiles = ontology.getProfilePatterns();
-
-			findPotentialProfiles();
 			performAllExpansions();
-			resolvePotentialProfiles();
 		}
 
 		private void performAllExpansions() {
@@ -103,8 +87,7 @@ class ProfilePatternsExpander {
 
 			while (true) {
 
-				initExpansions(currentProfiles, firstPass);
-				initExpansions(potentialProfiles, firstPass);
+				initExpansions(firstPass);
 
 				if (!checker.checkNewExpansions() || subsumerOnlyExpansions()) {
 
@@ -115,51 +98,17 @@ class ProfilePatternsExpander {
 			}
 		}
 
-		private void findPotentialProfiles() {
+		private void initExpansions(boolean firstPass) {
 
-			for (DisjunctionMatcher d : ontology.getAllDisjunctions()) {
-
-				NodeX n = d.getNode();
-
-				if (n.getProfilePatternMatcher() == null) {
-
-					potentialProfiles.add(n.addProfilePatternMatcher());
-				}
-			}
-		}
-
-		private void initExpansions(List<PatternMatcher> profiles, boolean firstPass) {
-
-			for (PatternMatcher p : profiles) {
+			for (PatternMatcher p : ontology.getProfilePatterns()) {
 
 				initExpansion(p, firstPass);
 			}
 		}
 
-		private void resolvePotentialProfiles() {
-
-			for (PatternMatcher p : potentialProfiles) {
-
-				ProfileRelations prs = getProfileRelations(p);
-
-				if (prs.anyRelations()) {
-
-					ontology.addDerivedProfilePattern(p);
-				}
-				else {
-
-					p.getNode().removeProfilePatternMatcher();
-				}
-			}
-
-			potentialProfiles.clear();
-		}
-
 		private boolean subsumerOnlyExpansions() {
 
-			ConstructInclusions inclusions = ontology.getConstructInclusions();
-
-			return !inclusions.disjunctions && !inclusions.propertyChains;
+			return !ontology.getConstructInclusions().propertyChains;
 		}
 
 		private void initExpansion(PatternMatcher p, boolean firstPass) {

@@ -36,9 +36,9 @@ class IntegerUnion extends IntegerCollector {
 	private IntHashSet integerUnion = EMPTY_UNION;
 	private int components = 0;
 
-	boolean absorb(IntHashSet integers) {
+	void absorb(IntHashSet integers) {
 
-		if (!integers.isEmpty()) {
+		if (!allOptionsResult() && !integers.isEmpty()) {
 
 			if (components == 0) {
 
@@ -56,17 +56,27 @@ class IntegerUnion extends IntegerCollector {
 
 			components++;
 		}
+	}
+
+	IntHashSet getSubsetResult() {
+
+		return integerUnion;
+	}
+
+	boolean emptySubsetResult() {
+
+		return integerUnion.isEmpty();
+	}
+
+	boolean enableSettingToAllOptions() {
+
+		integerUnion.clear();
 
 		return true;
 	}
 
-	void absorbInto(IntegerIntersection intersection) {
+	void absorbSubsetResultInto(IntegerIntersection intersection) {
 
 		intersection.absorb(integerUnion);
-	}
-
-	IntHashSet getUnion() {
-
-		return integerUnion;
 	}
 }

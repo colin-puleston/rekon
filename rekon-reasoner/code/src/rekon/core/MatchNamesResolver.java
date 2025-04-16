@@ -29,8 +29,6 @@ package rekon.core;
  */
 class MatchNamesResolver {
 
-	static final NameSet ROOT_COLLECTED_NAME_SET = new NameSet();
-
 	static Names expand(Names leafNames) {
 
 		return expand(leafNames, null);

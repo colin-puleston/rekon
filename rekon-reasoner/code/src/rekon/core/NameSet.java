@@ -35,6 +35,57 @@ public class NameSet extends Names {
 
 	private Set<Name> names = new HashSet<Name>();
 
+	private abstract class MostExtremeRetainer {
+
+		void absorbAll(Names newNames) {
+
+			for (Name name : newNames) {
+
+				absorb(name);
+			}
+		}
+
+		void absorb(Name newName) {
+
+			boolean newRequired = false;
+
+			for (Name n : copyNames()) {
+
+				if (!newRequired && mostExtremeFirst(n, newName)) {
+
+					return;
+				}
+
+				if (mostExtremeFirst(newName, n)) {
+
+					remove(n);
+
+					newRequired |= true;
+				}
+			}
+
+			add(newName);
+		}
+
+		abstract boolean mostExtremeFirst(Name n1, Name n2);
+	}
+
+	private class MostGeneralRetainer extends MostExtremeRetainer {
+
+		boolean mostExtremeFirst(Name n1, Name n2) {
+
+			return n1.subsumes(n2);
+		}
+	}
+
+	private class MostSpecificRetainer extends MostExtremeRetainer {
+
+		boolean mostExtremeFirst(Name n1, Name n2) {
+
+			return n2.subsumes(n1);
+		}
+	}
+
 	public NameSet() {
 	}
 
@@ -73,30 +124,24 @@ public class NameSet extends Names {
 		names.retainAll(allNames.getNames());
 	}
 
-	public void absorb(Name name) {
+	public void retainMostGeneral(Names newNames) {
 
-		for (Name n : copyNames()) {
-
-			if (name.subsumes(n)) {
-
-				return;
-			}
-
-			if (n.subsumes(name)) {
-
-				remove(n);
-			}
-		}
-
-		add(name);
+		new MostGeneralRetainer().absorbAll(newNames);
 	}
 
-	public void absorbAll(Names allNames) {
+	public void retainMostGeneral(Name newName) {
 
-		for (Name name : allNames) {
+		new MostGeneralRetainer().absorb(newName);
+	}
 
-			absorb(name);
-		}
+	public void retainMostSpecific(Names newNames) {
+
+		new MostSpecificRetainer().absorbAll(newNames);
+	}
+
+	public void retainMostSpecific(Name newName) {
+
+		new MostSpecificRetainer().absorb(newName);
 	}
 
 	public void clear() {

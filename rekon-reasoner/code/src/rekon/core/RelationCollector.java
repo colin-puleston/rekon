@@ -39,17 +39,17 @@ class RelationCollector {
 
 	RelationCollector(Collection<Relation> initialRelations) {
 
-		absorbAll(initialRelations, true);
+		retainMostSpecific(initialRelations, true);
 	}
 
-	void absorbAll(Collection<Relation> relations) {
+	void retainMostSpecific(Collection<Relation> relations) {
 
-		absorbAll(relations, false);
+		retainMostSpecific(relations, false);
 	}
 
-	void absorb(Relation r) {
+	void retainMostSpecific(Relation r) {
 
-		absorb(r, false);
+		retainMostSpecific(r, false);
 	}
 
 	boolean checkAdditions() {
@@ -75,24 +75,26 @@ class RelationCollector {
 		return new ArrayList<Relation>(collected);
 	}
 
-	private void absorbAll(Collection<Relation> relations, boolean initialising) {
+	private void retainMostSpecific(Collection<Relation> relations, boolean initialising) {
 
 		for (Relation r : relations) {
 
-			absorb(r, initialising);
+			retainMostSpecific(r, initialising);
 		}
 	}
 
-	private void absorb(Relation r, boolean initialising) {
+	private void retainMostSpecific(Relation r, boolean initialising) {
 
 		if (collected.contains(r)) {
 
 			return;
 		}
 
+		boolean newRequired = false;
+
 		for (Relation cr : copyCollected()) {
 
-			if (r.subsumes(cr)) {
+			if (!newRequired && r.subsumes(cr)) {
 
 				return;
 			}
@@ -100,6 +102,8 @@ class RelationCollector {
 			if (cr.subsumes(r)) {
 
 				collected.remove(cr);
+
+				newRequired |= true;
 			}
 		}
 

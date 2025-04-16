@@ -36,32 +36,19 @@ class InstancePattern extends LocalExpression {
 
 	private class InstanceClasses extends FreeClasses {
 
-		private class InstanceClassGenerator extends FreeClassGenerator {
-
-			InstanceClassGenerator(ClassRole classRole) {
-
-				super(classRole);
-			}
-
-			String createLabel() {
-
-				return super.createLabel() + '(' + instanceNode.getLabel() + ')';
-			}
-
-			String getLabelPrefix() {
-
-				return "INSTANCE";
-			}
-		}
-
 		boolean localClasses() {
 
 			return true;
 		}
 
-		FreeClassGenerator createDefaultClassGenerator(ClassRole classRole) {
+		String getLabelPrefix() {
 
-			return new InstanceClassGenerator(classRole);
+			return "INSTANCE";
+		}
+
+		String getLabelSuffix() {
+
+			return '(' + instanceNode.getLabel() + ')';
 		}
 	}
 

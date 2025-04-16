@@ -84,9 +84,9 @@ public class MatchStructures {
 		private void check(SomeRelation relation) {
 
 			NodeProperty p = relation.getNodeProperty();
-			NodeX n = relation.getNodeValueTarget().getValueNode();
+			NodeX v = relation.getNodeValueTarget().getValueNode();
 
-			for (DisjunctionMatcher d : n.getAllDisjunctionMatchers()) {
+			for (DisjunctionMatcher d : v.getAllDisjunctionMatchers()) {
 
 				convert(p, d);
 			}

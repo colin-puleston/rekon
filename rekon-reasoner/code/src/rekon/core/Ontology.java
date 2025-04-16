@@ -44,8 +44,6 @@ public class Ontology {
 	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
 	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
 
-	private DerivedDisjunctions derivedDisjunctions;
-
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
@@ -55,8 +53,6 @@ public class Ontology {
 
 		FreeOntologyClasses freeClasses = new FreeOntologyClasses(this);
 		MatchStructures matchStructs = new MatchStructures(freeClasses);
-
-		derivedDisjunctions = new DerivedDisjunctions(matchStructs, freeClasses);
 
 		structureBuilder.build(matchStructs);
 		IndividualRelationsInverter.addAllInvertions(names);
@@ -103,11 +99,6 @@ public class Ontology {
 		freeClassNodes.add(cn);
 	}
 
-	void addDerivedProfilePattern(PatternMatcher p) {
-
-		profilePatterns.add(p);
-	}
-
 	ConstructInclusions getConstructInclusions() {
 
 		return constructInclusions;
@@ -141,11 +132,6 @@ public class Ontology {
 	List<DisjunctionMatcher> getDefinitionDisjunctions() {
 
 		return definitionDisjunctions;
-	}
-
-	DerivedDisjunctions getDerivedDisjunctions() {
-
-		return derivedDisjunctions;
 	}
 
 	DynamicSubsumers getDynamicSubsumers() {

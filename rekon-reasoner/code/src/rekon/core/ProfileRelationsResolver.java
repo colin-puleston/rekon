@@ -31,31 +31,6 @@ import java.util.*;
  */
 class ProfileRelationsResolver {
 
-	private Ontology ontology;
-
-	private class DisjunctionBasedDeriver extends DisjunctionBasedProfileRelationDeriver {
-
-		DisjunctionBasedDeriver(DisjunctionMatcher disjunction) {
-
-			super(disjunction);
-		}
-
-		ClassNode addDerivedValueDisjunction(Collection<NodeX> disjuncts) {
-
-			if (localExpansion()) {
-
-				throw new Error("Unexpected disjunction-value derivation!");
-			}
-
-			return ontology.getDerivedDisjunctions().resolveProfile(disjuncts);
-		}
-
-		Collection<Relation> resolveProfileRelations(NodeX node) {
-
-			return ProfileRelationsResolver.this.resolveProfileRelations(node);
-		}
-	}
-
 	private class ChainBasedExpander extends ChainBasedProfileRelationsExpander {
 
 		ChainBasedExpander(SomeRelation relation) {
@@ -88,17 +63,9 @@ class ProfileRelationsResolver {
 
 					for (Relation r : getProfileRelations(p)) {
 
-						collector.absorb(r);
+						collector.retainMostSpecific(r);
 					}
 				}
-			}
-		}
-
-		void collectFromDisjunctions() {
-
-			for (DisjunctionMatcher d : node.getAllDisjunctionMatchers()) {
-
-				collector.absorbAll(new DisjunctionBasedDeriver(d).getAll());
 			}
 		}
 
@@ -108,7 +75,7 @@ class ProfileRelationsResolver {
 
 				for (Relation sr : getAllChainBasedExpansions(r)) {
 
-					collector.absorb(sr);
+					collector.retainMostSpecific(sr);
 				}
 			}
 		}
@@ -129,27 +96,11 @@ class ProfileRelationsResolver {
 		}
 	}
 
-	ProfileRelationsResolver() {
-
-		this(null);
-	}
-
-	ProfileRelationsResolver(Ontology ontology) {
-
-		this.ontology = ontology;
-	}
-
 	void collectForNode(NodeX node, RelationCollector collector) {
 
 		NodeRelationsResolver resolver = new NodeRelationsResolver(node, collector);
 
 		resolver.collectFromSubsumers();
-
-		if (!localExpansion()) {
-
-			resolver.collectFromDisjunctions();
-		}
-
 		resolver.collectChainExpansions();
 	}
 
@@ -175,10 +126,5 @@ class ProfileRelationsResolver {
 	private Collection<Relation> getProfileRelations(PatternMatcher p) {
 
 		return p.getPattern().getProfileRelations().getAll();
-	}
-
-	private boolean localExpansion() {
-
-		return ontology == null;
 	}
 }

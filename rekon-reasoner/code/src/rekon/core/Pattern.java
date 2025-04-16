@@ -77,7 +77,7 @@ public class Pattern extends PatternComponent {
 		NameSet newNodes = new NameSet(nodes);
 		Set<Relation> newRelations = new HashSet<Relation>(directRelations);
 
-		newNodes.absorbAll(other.nodes);
+		newNodes.retainMostSpecific(other.nodes);
 		newRelations.addAll(other.directRelations);
 
 		return new Pattern(newNodes, newRelations);
@@ -119,18 +119,23 @@ public class Pattern extends PatternComponent {
 
 		if (collector.continueForNextRelationsRank()) {
 
-			collector = collector.forNextRank();
+			Collection<Relation> rels = getRelations(collector.profile());
 
-			for (Relation r : getRelations(collector.profile())) {
+			if (!rels.isEmpty()) {
 
-				r.collectNames(collector);
+				collector = collector.forNextRank();
+
+				for (Relation r : rels) {
+
+					r.collectNames(collector);
+				}
 			}
 		}
 	}
 
 	boolean expandedProfile() {
 
-		return profileRelations.expanded();
+		return getProfileRelations().expanded();
 	}
 
 	boolean subsumes(Pattern p) {

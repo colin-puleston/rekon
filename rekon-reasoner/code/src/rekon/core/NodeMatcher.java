@@ -31,6 +31,26 @@ abstract class NodeMatcher {
 
 	private NodeX node;
 
+	private class GeneralSubsumedByTester extends NodeMatcherVisitor {
+
+		boolean subsumedBy = false;
+
+		GeneralSubsumedByTester(NodeMatcher test) {
+
+			test.acceptVisitor(this);
+		}
+
+		void visit(PatternMatcher test) {
+
+			subsumedBy = subsumedBy(test);
+		}
+
+		void visit(DisjunctionMatcher test) {
+
+			subsumedBy = subsumedBy(test);
+		}
+	}
+
 	NodeMatcher(NodeX node) {
 
 		this.node = node;
@@ -45,7 +65,14 @@ abstract class NodeMatcher {
 
 	abstract Names getDirectlyImpliedSubNodes();
 
-	abstract boolean subsumes(NodeMatcher test);
+	boolean subsumes(NodeMatcher test) {
+
+		return test.subsumedBy(this);
+	}
+
+	abstract boolean subsumedBy(PatternMatcher test);
+
+	abstract boolean subsumedBy(DisjunctionMatcher test);
 
 	abstract boolean subsumesNodeDirectly(NodeX test);
 
@@ -54,4 +81,9 @@ abstract class NodeMatcher {
 	abstract void acceptVisitor(NodeMatcherVisitor visitor);
 
 	abstract void render(PatternRenderer r);
+
+	private boolean subsumedBy(NodeMatcher test) {
+
+		return new GeneralSubsumedByTester(test).subsumedBy;
+	}
 }

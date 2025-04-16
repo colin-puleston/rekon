@@ -33,52 +33,6 @@ class FreeOntologyClasses extends FreeClasses {
 
 	private Ontology ontology;
 
-	private FreeClassGenerator derivedDisjunctionClasses = new DerivedDisjunctionClassGenerator();
-
-	private class DerivedDisjunctionClassNode extends FreeClassNode {
-
-		DerivedDisjunctionClassNode(String label) {
-
-			super(label);
-		}
-	}
-
-	private class DefaultClassGenerator extends FreeClassGenerator {
-
-		DefaultClassGenerator(ClassRole classRole) {
-
-			super(classRole);
-		}
-
-		String getLabelPrefix() {
-
-			return "ONTO";
-		}
-
-		void initialise(FreeClassNode c) {
-
-			ontology.addFreeClass(c);
-		}
-	}
-
-	private class DerivedDisjunctionClassGenerator extends DefaultClassGenerator {
-
-		DerivedDisjunctionClassGenerator() {
-
-			super(ClassRole.DISJUNCTION);
-		}
-
-		String getLabelPrefix() {
-
-			return super.getLabelPrefix() + "-DERIVED";
-		}
-
-		FreeClassNode create(String label) {
-
-			return new DerivedDisjunctionClassNode(label);
-		}
-	}
-
 	FreeOntologyClasses(Ontology ontology) {
 
 		this.ontology = ontology;
@@ -89,18 +43,13 @@ class FreeOntologyClasses extends FreeClasses {
 		return false;
 	}
 
-	FreeClassNode createDerivedDisjunctionClass() {
+	String getLabelPrefix() {
 
-		return derivedDisjunctionClasses.next();
+		return "ONTO";
 	}
 
-	boolean derivedDisjunctionClass(NodeX c) {
+	void initialise(ClassNode c) {
 
-		return c instanceof DerivedDisjunctionClassNode;
-	}
-
-	FreeClassGenerator createDefaultClassGenerator(ClassRole classRole) {
-
-		return new DefaultClassGenerator(classRole);
+		ontology.addFreeClass(c);
 	}
 }

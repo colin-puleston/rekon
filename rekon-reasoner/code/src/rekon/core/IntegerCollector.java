@@ -31,7 +31,62 @@ import com.carrotsearch.hppc.*;
  */
 abstract class IntegerCollector {
 
-	abstract boolean absorb(IntHashSet integers);
+	private boolean allOptionsResult = false;
 
-	abstract void absorbInto(IntegerIntersection intersection);
+	void absorbAllOptions() {
+
+		if (!allOptionsResult && enableSettingToAllOptions()) {
+
+			allOptionsResult = true;
+		}
+	}
+
+	abstract void absorb(IntHashSet integers);
+
+	void absorbFrom(IntegerCollector collector) {
+
+		if (collector.allOptionsResult()) {
+
+			absorbAllOptions();
+		}
+		else {
+
+			absorb(collector.getSubsetResult());
+		}
+	}
+
+	void absorbInto(IntegerIntersection intersection) {
+
+		if (allOptionsResult) {
+
+			intersection.absorbAllOptions();
+		}
+		else {
+
+			absorbSubsetResultInto(intersection);
+		}
+	}
+
+	boolean allOptionsResult() {
+
+		return allOptionsResult;
+	}
+
+	abstract IntHashSet getSubsetResult();
+
+	boolean emptyResult() {
+
+		return !allOptionsResult && emptySubsetResult();
+	}
+
+	abstract boolean emptySubsetResult();
+
+	abstract boolean enableSettingToAllOptions();
+
+	abstract void absorbSubsetResultInto(IntegerIntersection intersection);
+
+	void ensureNotAllOptionsResult() {
+
+		allOptionsResult &= false;
+	}
 }

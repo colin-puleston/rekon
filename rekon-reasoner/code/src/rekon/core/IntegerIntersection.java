@@ -64,31 +64,53 @@ class IntegerIntersection extends IntegerCollector {
 	}
 
 	private List<IntHashSet> integerSets = new ArrayList<IntHashSet>();
+	private boolean anySubsetsAbsorbed = false;
 
-	boolean absorb(IntHashSet integers) {
+	void absorb(IntHashSet integers) {
+
+		onAbsorbingSubset();
 
 		if (integers.isEmpty()) {
 
-			return false;
+			integerSets.clear();
 		}
+		else {
 
-		integerSets.add(integers);
-
-		return true;
+			integerSets.add(integers);
+		}
 	}
 
-	void absorbInto(IntegerIntersection intersection) {
-
-		intersection.integerSets.addAll(integerSets);
-	}
-
-	boolean anyComponents() {
-
-		return !integerSets.isEmpty();
-	}
-
-	IntHashSet getIntersection() {
+	IntHashSet getSubsetResult() {
 
 		return intersector.intersectSets(integerSets);
+	}
+
+	boolean emptySubsetResult() {
+
+		return integerSets.isEmpty();
+	}
+
+	boolean enableSettingToAllOptions() {
+
+		return !anySubsetsAbsorbed;
+	}
+
+	void absorbSubsetResultInto(IntegerIntersection intersection) {
+
+		intersection.absorbSubsetResultFrom(this);
+	}
+
+	void absorbSubsetResultFrom(IntegerIntersection intersection) {
+
+		onAbsorbingSubset();
+
+		integerSets.addAll(intersection.integerSets);
+	}
+
+	private void onAbsorbingSubset() {
+
+		anySubsetsAbsorbed |= true;
+
+		ensureNotAllOptionsResult();
 	}
 }

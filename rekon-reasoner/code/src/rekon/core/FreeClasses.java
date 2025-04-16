@@ -29,13 +29,13 @@ package rekon.core;
  */
 abstract class FreeClasses {
 
-	private FreeClassGenerator patternClasses = createDefaultClassGenerator(ClassRole.PATTERN);
-	private FreeClassGenerator disjunctionClasses = createDefaultClassGenerator(ClassRole.DISJUNCTION);
-	private FreeClassGenerator multiDefnClasses = createDefaultClassGenerator(ClassRole.MULTI_DEFINITION);
+	private FreeClassGenerator patternClasses = new FreeClassGenerator(ClassRole.PATTERN);
+	private FreeClassGenerator disjunctionClasses = new FreeClassGenerator(ClassRole.DISJUNCTION);
+	private FreeClassGenerator multiDefnClasses = new FreeClassGenerator(ClassRole.MULTI_DEFINITION);
 
-	enum ClassRole {PATTERN, DISJUNCTION, MULTI_DEFINITION}
+	private enum ClassRole {PATTERN, DISJUNCTION, MULTI_DEFINITION}
 
-	class FreeClassNode extends ClassNode {
+	private class FreeClassNode extends ClassNode {
 
 		private String label;
 
@@ -65,7 +65,7 @@ abstract class FreeClasses {
 		}
 	}
 
-	abstract class FreeClassGenerator {
+	private class FreeClassGenerator {
 
 		private ClassRole classRole;
 
@@ -78,45 +78,50 @@ abstract class FreeClasses {
 
 		FreeClassNode next() {
 
-			FreeClassNode c = create(createLabel());
+			FreeClassNode c = new FreeClassNode(createLabel());
 
 			initialise(c);
 
 			return c;
 		}
 
-		String createLabel() {
+		private String createLabel() {
 
-			return getLabelPrefix() + "-" + classRole + "-" + nextIndex++;
-		}
+			String suffix = getLabelSuffix();
 
-		abstract String getLabelPrefix();
+			if (!suffix.isEmpty()) {
 
-		FreeClassNode create(String label) {
+				suffix = "-" + suffix;
+			}
 
-			return new FreeClassNode(label);
-		}
-
-		void initialise(FreeClassNode c) {
+			return getLabelPrefix() + "-" + classRole + "-" + nextIndex++ + suffix;
 		}
 	}
 
 	abstract boolean localClasses();
 
-	FreeClassNode createPatternClass() {
+	ClassNode createPatternClass() {
 
 		return patternClasses.next();
 	}
 
-	FreeClassNode createDisjunctionClass() {
+	ClassNode createDisjunctionClass() {
 
 		return disjunctionClasses.next();
 	}
 
-	FreeClassNode createMultiDefinitionClass() {
+	ClassNode createMultiDefinitionClass() {
 
 		return multiDefnClasses.next();
 	}
 
-	abstract FreeClassGenerator createDefaultClassGenerator(ClassRole classRole);
+	abstract String getLabelPrefix();
+
+	String getLabelSuffix() {
+
+		return "";
+	}
+
+	void initialise(ClassNode c) {
+	}
 }
