@@ -46,7 +46,7 @@ abstract class PatternCrawler {
 
 	void crawlFrom(DisjunctionMatcher m) {
 
-		crawlFromNodes(m.getDirectDisjuncts());
+		crawlFromNodes(m.getDisjuncts());
 	}
 
 	void crawlFromRelations(Pattern p) {

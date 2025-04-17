@@ -122,7 +122,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			for (DisjunctionMatcher d : n.getAllDisjunctionMatchers()) {
 
-				for (NodeX dj : d.getDirectDisjuncts().asNodes()) {
+				for (NodeX dj : d.getDisjuncts().asNodes()) {
 
 					collectForProfileNode(dj);
 				}

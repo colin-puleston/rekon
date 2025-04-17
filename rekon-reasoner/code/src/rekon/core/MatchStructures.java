@@ -96,7 +96,7 @@ public class MatchStructures {
 
 			List<ClassNode> newDjs = new ArrayList<ClassNode>();
 
-			for (NodeX d : disjunction.getExpandedDisjuncts().asNodes()) {
+			for (NodeX d : disjunction.getDisjuncts().asNodes()) {
 
 				newDjs.add(addNewDisjunct(p, new NodeValue(d)));
 			}

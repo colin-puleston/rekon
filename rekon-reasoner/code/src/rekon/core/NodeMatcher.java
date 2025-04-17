@@ -76,7 +76,7 @@ abstract class NodeMatcher {
 
 	abstract boolean subsumesNodeDirectly(NodeX test);
 
-	abstract boolean hasExpandedDisjunct(NodeX test);
+	abstract boolean hasDisjunct(NodeX test);
 
 	abstract void acceptVisitor(NodeMatcherVisitor visitor);
 
