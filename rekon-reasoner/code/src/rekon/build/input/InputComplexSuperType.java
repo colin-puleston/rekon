@@ -29,7 +29,7 @@ package rekon.build.input;
  */
 public enum InputComplexSuperType {
 
-	DISJUNCTION,
+	CONJUNCTION,
 	RELATION,
 	OUT_OF_SCOPE;
 }

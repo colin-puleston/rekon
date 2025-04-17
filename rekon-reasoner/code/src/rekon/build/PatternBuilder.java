@@ -75,16 +75,14 @@ class PatternBuilder {
 
 		private Set<PatternSpec> disjuncts = new HashSet<PatternSpec>();
 
-		PatternDisjunctionSpec(Collection<InputNode> source) {
-
-			addDisjunctsFor(source);
-		}
-
 		PatternDisjunctionSpec(InputNode source) {
 
 			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
 
-				addDisjunctsFor(source.asDisjuncts());
+				for (InputNode n : source.asDisjuncts()) {
+
+					addDisjunctFor(n);
+				}
 			}
 			else {
 
@@ -109,14 +107,6 @@ class PatternBuilder {
 			}
 
 			return patternDisjuncts;
-		}
-
-		private void addDisjunctsFor(Collection<InputNode> source) {
-
-			for (InputNode n : source) {
-
-				addDisjunctFor(n);
-			}
 		}
 
 		private void addDisjunctFor(InputNode source) {
@@ -178,20 +168,11 @@ class PatternBuilder {
 
 					case CONJUNCTION:
 
-						throw new RuntimeException("Unexpected conjunction node: " + conjunct);
+						return processConjuncts(conjunct.asConjuncts());
 
 					case DISJUNCTION:
 
-						NodeX n = componentBuilder.disjunctsToNode(conjunct.asDisjuncts());
-
-						if (n == null) {
-
-							return false;
-						}
-
-						nodes.retainMostSpecific(n);
-
-						return true;
+						return false;
 
 					case RELATION:
 
@@ -297,11 +278,6 @@ class PatternBuilder {
 	}
 
 	List<Pattern> toPatternDisjunction(InputNode source) {
-
-		return new PatternDisjunctionSpec(source).checkCreate();
-	}
-
-	List<Pattern> toPatternDisjunction(Collection<InputNode> source) {
 
 		return new PatternDisjunctionSpec(source).checkCreate();
 	}

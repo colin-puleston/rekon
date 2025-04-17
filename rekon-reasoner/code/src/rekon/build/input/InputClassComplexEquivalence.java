@@ -31,5 +31,5 @@ import rekon.core.*;
  */
 public interface InputClassComplexEquivalence
 					extends
-						InputEquivalence<ClassNode, InputComplexNode> {
+						InputEquivalence<ClassNode, InputComplexSuper> {
 }

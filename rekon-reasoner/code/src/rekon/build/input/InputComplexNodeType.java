@@ -29,8 +29,8 @@ package rekon.build.input;
  */
 public enum InputComplexNodeType {
 
-	CONJUNCTION(null),
-	DISJUNCTION(InputComplexSuperType.DISJUNCTION),
+	CONJUNCTION(InputComplexSuperType.CONJUNCTION),
+	DISJUNCTION(null),
 	RELATION(InputComplexSuperType.RELATION),
 	OUT_OF_SCOPE(InputComplexSuperType.OUT_OF_SCOPE);
 

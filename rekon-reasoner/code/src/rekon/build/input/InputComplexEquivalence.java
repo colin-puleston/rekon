@@ -29,5 +29,5 @@ package rekon.build.input;
  */
 public interface InputComplexEquivalence
 					extends
-						InputEquivalence<InputComplexNode, InputComplexNode> {
+						InputEquivalence<InputComplexSuper, InputComplexSuper> {
 }

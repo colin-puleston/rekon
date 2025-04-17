@@ -32,8 +32,9 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class NodeProfilesBuilder extends MatchStuctureBuilder {
+class NodeProfilesBuilder {
 
+	private MatchStructures matchStructures;
 	private OntologyNames names;
 	private InputAxioms axioms;
 	private ComponentBuilder components;
@@ -62,7 +63,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 			for (NodeX n : nodes) {
 
-				checkAddProfilePattern(n, getRelations(n));
+				matchStructures.checkAddProfilePattern(n, getRelations(n));
 			}
 		}
 
@@ -108,9 +109,14 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 
 				switch (sup.getComplexSuperType()) {
 
-					case DISJUNCTION:
+					case CONJUNCTION:
 
-						checkCreateDisjunctionProfile(sub, sup.asDisjuncts());
+						Pattern p = components.toPattern(sup.toNode());
+
+						if (p != null) {
+
+							matchStructures.addProfilePattern(sub, p);
+						}
 						break;
 
 					case RELATION:
@@ -132,18 +138,6 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		abstract InputComplexSuper getSuper(A axiom);
 
 		abstract Iterable<? extends NodeX> getTypeNodes();
-
-		private void checkCreateDisjunctionProfile(
-						NodeX sub,
-						Collection<InputNode> supDisjuncts) {
-
-			List<Pattern> djs = components.toPatternDisjunction(supDisjuncts);
-
-			if (djs != null) {
-
-				addProfileDisjunction(sub, djs);
-			}
-		}
 	}
 
 	private class ClassNodesProfileCreator
@@ -229,8 +223,7 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		InputAxioms axioms,
 		ComponentBuilder components) {
 
-		super(matchStructures);
-
+		this.matchStructures = matchStructures;
 		this.names = names;
 		this.axioms = axioms;
 		this.components = components;
@@ -239,3 +232,4 @@ class NodeProfilesBuilder extends MatchStuctureBuilder {
 		new IndividualNodesProfileCreator();
 	}
 }
+

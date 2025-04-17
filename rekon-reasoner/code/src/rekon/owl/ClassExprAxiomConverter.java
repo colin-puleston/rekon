@@ -50,26 +50,26 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 	}
 
 	private class ConvertedClassComplexEquivalence
-						extends ConvertedEquivalence<ClassNode, InputComplexNode>
+						extends ConvertedEquivalence<ClassNode, InputComplexSuper>
 						implements InputClassComplexEquivalence {
 
 		ConvertedClassComplexEquivalence(
 			OWLAxiom source,
 			ClassNode first,
-			InputComplexNode second) {
+			InputComplexSuper second) {
 
 			super(source, first, second);
 		}
 	}
 
 	private class ConvertedComplexEquivalence
-						extends ConvertedEquivalence<InputComplexNode, InputComplexNode>
+						extends ConvertedEquivalence<InputComplexSuper, InputComplexSuper>
 						implements InputComplexEquivalence {
 
 		ConvertedComplexEquivalence(
 			OWLAxiom source,
-			InputComplexNode first,
-			InputComplexNode second) {
+			InputComplexSuper first,
+			InputComplexSuper second) {
 
 			super(source, first, second);
 		}
@@ -127,14 +127,19 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 			super(source, source.getSubClass(), source.getSuperClass());
 		}
 
-		InputComplexNode firstOrSubAsComplex() {
+		InputComplexSuper firstAsComplexSuper() {
 
-			return expressions.toComplexNode(getSourceAxiom(), firstOrSub);
+			return expressions.toComplexSuper(getSourceAxiom(), firstOrSub);
 		}
 
-		InputComplexNode secondAsComplex() {
+		InputComplexSuper secondAsComplexSuper() {
 
-			return expressions.toComplexNode(getSourceAxiom(), secondOrSup);
+			return expressions.toComplexSuper(getSourceAxiom(), secondOrSup);
+		}
+
+		InputComplexNode subAsComplexNode() {
+
+			return expressions.toComplexNode(getSourceAxiom(), firstOrSub);
 		}
 
 		InputComplexSuper supAsComplexSuper() {
@@ -293,7 +298,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 			return new ConvertedClassComplexEquivalence(
 							owlLink.source,
 							owlLink.firstOrSubAsName(),
-							owlLink.secondAsComplex());
+							owlLink.secondAsComplexSuper());
 		}
 	}
 
@@ -316,7 +321,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 			return new ConvertedClassComplexEquivalence(
 							owlLink.source,
 							owlLink.secondOrSupAsName(),
-							owlLink.firstOrSubAsComplex());
+							owlLink.firstAsComplexSuper());
 		}
 	}
 
@@ -338,8 +343,8 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 			return new ConvertedComplexEquivalence(
 							owlLink.source,
-							owlLink.firstOrSubAsComplex(),
-							owlLink.secondAsComplex());
+							owlLink.firstAsComplexSuper(),
+							owlLink.secondAsComplexSuper());
 		}
 	}
 
@@ -423,7 +428,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 			return new ConvertedComplexSubClassSuper(
 							owlLink.source,
-							owlLink.firstOrSubAsComplex(),
+							owlLink.subAsComplexNode(),
 							owlLink.secondOrSupAsName());
 		}
 	}
@@ -446,7 +451,7 @@ class ClassExprAxiomConverter extends CategoryAxiomConverter {
 
 			return new ConvertedComplexSubSuper(
 							owlLink.source,
-							owlLink.firstOrSubAsComplex(),
+							owlLink.subAsComplexNode(),
 							owlLink.supAsComplexSuper());
 		}
 	}

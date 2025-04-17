@@ -32,16 +32,16 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class ClassDefinitionsBuilder extends MatchStuctureBuilder {
+class ClassDefinitionsBuilder {
 
+	private MatchStructures matchStructures;
 	private ComponentBuilder components;
 
 	private abstract class EquivalenceBasedBuilder {
 
-		private Set<Pattern> patternDefns = new HashSet<Pattern>();
-		private Set<List<Pattern>> disjunctionDefns = new HashSet<List<Pattern>>();
+		private List<Pattern> definitions = new ArrayList<Pattern>();
 
-		void checkCreate(InputEquivalence<?, ?> axiom, InputComplexNode... complexEquivs) {
+		void checkCreate(InputEquivalence<?, ?> axiom, InputComplexSuper... complexEquivs) {
 
 			if (absorbComplexEquivs(complexEquivs)) {
 
@@ -49,34 +49,21 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			}
 		}
 
-		abstract ClassNode resolvePatternDefinitionClass();
-
-		abstract ClassNode resolveDisjunctionDefinitionClass();
-
-		abstract ClassNode resolveMultiDefinitionClass();
+		abstract ClassNode resolveDefinitionClass();
 
 		private void create() {
 
-			ClassNode mdc = multiDefinitions() ? resolveMultiDefinitionClass() : null;
+			ClassNode c = resolveDefinitionClass();
 
-			for (Pattern defn : patternDefns) {
-
-				ClassNode c = mdc != null ? mdc : resolvePatternDefinitionClass();
+			for (Pattern defn : definitions) {
 
 				addDefinitionPattern(c, defn);
 			}
-
-			for (List<Pattern> disjuncts : disjunctionDefns) {
-
-				ClassNode c = mdc != null ? mdc : resolveDisjunctionDefinitionClass();
-
-				addDefinitionDisjunction(c, disjuncts);
-			}
 		}
 
-		private boolean absorbComplexEquivs(InputComplexNode... equivs) {
+		private boolean absorbComplexEquivs(InputComplexSuper... equivs) {
 
-			for (InputComplexNode e : equivs) {
+			for (InputComplexSuper e : equivs) {
 
 				if (!absorbComplexEquiv(e)) {
 
@@ -87,30 +74,18 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			return true;
 		}
 
-		private boolean absorbComplexEquiv(InputComplexNode e) {
+		private boolean absorbComplexEquiv(InputComplexSuper e) {
 
 			List<Pattern> djs = components.toPatternDisjunction(e.toNode());
 
-			if (djs == null) {
+			if (djs != null && djs.size() == 1) {
 
-				return false;
+				definitions.add(djs.get(0));
+
+				return true;
 			}
 
-			if (djs.size() == 1) {
-
-				patternDefns.add(djs.get(0));
-			}
-			else {
-
-				disjunctionDefns.add(djs);
-			}
-
-			return true;
-		}
-
-		boolean multiDefinitions() {
-
-			return patternDefns.size() + disjunctionDefns.size() > 1;
+			return false;
 		}
 	}
 
@@ -125,19 +100,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			checkCreate(axiom, axiom.getSecond());
 		}
 
-		ClassNode resolvePatternDefinitionClass() {
+		ClassNode resolveDefinitionClass() {
 
 			return first;
-		}
-
-		ClassNode resolveDisjunctionDefinitionClass() {
-
-			return first;
-		}
-
-		ClassNode resolveMultiDefinitionClass() {
-
-			throw new Error("Method should never be invoked!");
 		}
 	}
 
@@ -148,19 +113,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 			checkCreate(axiom, axiom.getFirst(), axiom.getSecond());
 		}
 
-		ClassNode resolvePatternDefinitionClass() {
+		ClassNode resolveDefinitionClass() {
 
 			return createPatternClass();
-		}
-
-		ClassNode resolveDisjunctionDefinitionClass() {
-
-			return createDisjunctionClass();
-		}
-
-		ClassNode resolveMultiDefinitionClass() {
-
-			return createMultiDefinitionClass();
 		}
 	}
 
@@ -210,30 +165,9 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 		ClassNode resolveSuperClass(InputComplexSuper sup) {
 
-			if (sup.getComplexSuperType() == InputComplexSuperType.DISJUNCTION) {
-
-				return checkCreateDisjunctionSuperClass(sup.asDisjuncts());
-			}
-
 			Pattern p = components.toPattern(sup.toNode());
 
 			return p != null ? createPatternClass(p) : null;
-		}
-
-		private ClassNode checkCreateDisjunctionSuperClass(Collection<InputNode> disjuncts) {
-
-			List<Pattern> djs = components.toPatternDisjunction(disjuncts);
-
-			if (djs == null) {
-
-				return null;
-			}
-
-			ClassNode c = createDisjunctionClass();
-
-			addProfileDisjunction(c, djs);
-
-			return c;
 		}
 	}
 
@@ -242,8 +176,7 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 		InputAxioms axioms,
 		ComponentBuilder components) {
 
-		super(matchStructures);
-
+		this.matchStructures = matchStructures;
 		this.components = components;
 
 		for (InputClassComplexEquivalence ax : axioms.getClassComplexEquivalences()) {
@@ -265,5 +198,48 @@ class ClassDefinitionsBuilder extends MatchStuctureBuilder {
 
 			new ComplexSubSuperBasedBuilder(ax);
 		}
+	}
+
+	private ClassNode createPatternClass() {
+
+		return matchStructures.createPatternClass();
+	}
+
+	private ClassNode createPatternClass(Pattern defn) {
+
+		ClassNode c = createPatternClass();
+
+		addDefinitionPattern(c, defn);
+
+		return c;
+	}
+
+	private ClassNode createDisjunctionClass() {
+
+		return matchStructures.createDisjunctionClass();
+	}
+
+	private void addDefinitionPattern(NodeX node, Pattern defn) {
+
+		matchStructures.addDefinitionPattern(node, defn);
+	}
+
+	private List<NodeX> resolveDisjunctionToNodes(List<Pattern> disjuncts) {
+
+		List<NodeX> nodeDjs = new ArrayList<NodeX>();
+
+		for (Pattern d : disjuncts) {
+
+			nodeDjs.add(resolveDisjunctToNode(d));
+		}
+
+		return nodeDjs;
+	}
+
+	private NodeX resolveDisjunctToNode(Pattern disjunct) {
+
+		NodeX n = disjunct.toSingleNode();
+
+		return n != null ? n : createPatternClass(disjunct);
 	}
 }

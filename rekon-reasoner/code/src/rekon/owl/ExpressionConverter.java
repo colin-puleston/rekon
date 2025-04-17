@@ -294,17 +294,22 @@ class ExpressionConverter {
 				owlExpr = owlExprAs(owlExprType);
 			}
 
-			boolean owlNothingInOperands() {
+			boolean validOperands() {
 
 				for (OWLClassExpression e : owlExpr.getOperands()) {
 
-					if (e.equals(owlNothing)) {
+					if (invalidOperand(e)) {
 
-						return true;
+						return false;
 					}
 				}
 
-				return false;
+				return true;
+			}
+
+			boolean invalidOperand(OWLClassExpression e) {
+
+				return e.equals(owlNothing);
 			}
 
 			Collection<InputNode> operandsAsNodes() {
@@ -338,6 +343,11 @@ class ExpressionConverter {
 
 				super(OWLObjectIntersectionOf.class);
 			}
+
+			boolean invalidOperand(OWLClassExpression e) {
+
+				return super.invalidOperand(e) || e instanceof OWLObjectUnionOf;
+			}
 		}
 
 		private class DisjunctionHandler extends NaryBooleanHandler<OWLObjectUnionOf> {
@@ -350,16 +360,21 @@ class ExpressionConverter {
 
 		public InputNodeType getNodeType() {
 
-			InputNodeType type = getDisjunctionOrRelationNodeType();
+			InputNodeType type = getRelationNodeType();
 
-			if (type == InputNodeType.OUT_OF_SCOPE && !allowSuperComplexTypesOnly()) {
+			if (type == InputNodeType.OUT_OF_SCOPE && allowSimpleNodes()) {
+
+				type = getSimpleNodeType();
+			}
+
+			if (type == InputNodeType.OUT_OF_SCOPE) {
 
 				type = getConjunctionNodeType();
+			}
 
-				if (type == InputNodeType.OUT_OF_SCOPE && !allowComplexTypesOnly()) {
+			if (type == InputNodeType.OUT_OF_SCOPE && allowDisjunctions()) {
 
-					type = getSimpleNodeType();
-				}
+				type = getDisjunctionNodeType();
 			}
 
 			if (type == InputNodeType.OUT_OF_SCOPE) {
@@ -410,14 +425,14 @@ class ExpressionConverter {
 			}
 		}
 
-		boolean allowComplexTypesOnly() {
+		boolean allowSimpleNodes() {
 
-			return false;
+			return true;
 		}
 
-		boolean allowSuperComplexTypesOnly() {
+		boolean allowDisjunctions() {
 
-			return false;
+			return true;
 		}
 
 		private InputNodeType getSimpleNodeType() {
@@ -442,13 +457,21 @@ class ExpressionConverter {
 			return InputNodeType.OUT_OF_SCOPE;
 		}
 
+		private InputNodeType getRelationNodeType() {
+
+			if (getOwlExpr() instanceof OWLRestriction) {
+
+				return InputNodeType.RELATION;
+			}
+
+			return InputNodeType.OUT_OF_SCOPE;
+		}
+
 		private InputNodeType getConjunctionNodeType() {
 
-			OWLClassExpression owlExpr = getOwlExpr();
+			if (getOwlExpr() instanceof OWLObjectIntersectionOf) {
 
-			if (owlExpr instanceof OWLObjectIntersectionOf) {
-
-				if (!new ConjunctionHandler().owlNothingInOperands()) {
+				if (new ConjunctionHandler().validOperands()) {
 
 					return InputNodeType.CONJUNCTION;
 				}
@@ -457,22 +480,13 @@ class ExpressionConverter {
 			return InputNodeType.OUT_OF_SCOPE;
 		}
 
-		private InputNodeType getDisjunctionOrRelationNodeType() {
+		private InputNodeType getDisjunctionNodeType() {
 
-			OWLClassExpression owlExpr = getOwlExpr();
+			if (getOwlExpr() instanceof OWLObjectUnionOf) {
 
-			if (owlExpr instanceof OWLObjectUnionOf) {
-
-				if (!new DisjunctionHandler().owlNothingInOperands()) {
+				if (new DisjunctionHandler().validOperands()) {
 
 					return InputNodeType.DISJUNCTION;
-				}
-			}
-			else {
-
-				if (owlExpr instanceof OWLRestriction) {
-
-					return InputNodeType.RELATION;
 				}
 			}
 
@@ -502,9 +516,9 @@ class ExpressionConverter {
 			super(owlContainer, owlExpr);
 		}
 
-		boolean allowComplexTypesOnly() {
+		boolean allowSimpleNodes() {
 
-			return true;
+			return false;
 		}
 	}
 
@@ -522,9 +536,9 @@ class ExpressionConverter {
 			super(owlContainer, owlExpr);
 		}
 
-		boolean allowSuperComplexTypesOnly() {
+		boolean allowDisjunctions() {
 
-			return true;
+			return false;
 		}
 	}
 

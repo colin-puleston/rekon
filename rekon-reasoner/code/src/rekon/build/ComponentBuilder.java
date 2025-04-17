@@ -67,11 +67,6 @@ class ComponentBuilder {
 		return patternBuilder.toPatternDisjunction(source);
 	}
 
-	List<Pattern> toPatternDisjunction(Collection<InputNode> source) {
-
-		return patternBuilder.toPatternDisjunction(source);
-	}
-
 	Relation toRelation(InputRelation source) {
 
 		return relationBuilder.toRelation(source);
@@ -118,27 +113,6 @@ class ComponentBuilder {
 		throw new Error("Unexpected node-type: " + source.getNodeType());
 	}
 
-	NodeX disjunctsToNode(Collection<InputNode> source) {
-
-		Collection<NodeX> disjuncts = toDisjunction(source);
-
-		if (disjuncts == null) {
-
-			return null;
-		}
-
-		if (disjuncts.size() == 1) {
-
-			return disjuncts.iterator().next();
-		}
-
-		ClassNode c = structures.createDisjunctionClass();
-
-		structures.addDisjunction(c, disjuncts, false);
-
-		return c;
-	}
-
 	private ClassNode toPatternClassNode(InputNode source) {
 
 		ClassNode pCls = patternClasses.get(source);
@@ -158,5 +132,26 @@ class ComponentBuilder {
 		}
 
 		return pCls;
+	}
+
+	private NodeX disjunctsToNode(Collection<InputNode> source) {
+
+		Collection<NodeX> disjuncts = toDisjunction(source);
+
+		if (disjuncts == null) {
+
+			return null;
+		}
+
+		if (disjuncts.size() == 1) {
+
+			return disjuncts.iterator().next();
+		}
+
+		ClassNode c = structures.createDisjunctionClass();
+
+		structures.addDisjunction(c, disjuncts, false);
+
+		return c;
 	}
 }
