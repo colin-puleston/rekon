@@ -40,23 +40,21 @@ class PotentialLocalPatternSubsumers {
 								extends
 									PotentialSubsumptions<PatternMatcher> {
 
-		private List<PatternMatcher> categoryOptions = null;
-
-		void collectPotentialsFor(Pattern request, List<PatternMatcher> collector) {
+		void collectPotentialsFor(PatternMatcher request, List<PatternMatcher> potentials) {
 
 			checkInitialised();
 
-			collector.addAll(getPotentialsFor(getRankedProfileNames(request)));
-		}
-
-		List<PatternMatcher> getAllOptions() {
-
-			return categoryOptions;
+			potentials.addAll(getPotentialsFor(request));
 		}
 
 		List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
 			return getRankedDefinitionNames(option.getPattern());
+		}
+
+		List<Names> getRequestMatchNames(PatternMatcher request) {
+
+			return getRankedProfileNames(request.getPattern());
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -84,24 +82,26 @@ class PotentialLocalPatternSubsumers {
 
 		private synchronized void checkInitialised() {
 
-			if (categoryOptions == null) {
+			if (!initialised()) {
 
-				categoryOptions = new ArrayList<PatternMatcher>();
-
-				addCategoryOptions();
+				initialise(getCategoryOptions());
 				initialiseOptionRanks();
 			}
 		}
 
-		private void addCategoryOptions() {
+		private List<PatternMatcher> getCategoryOptions() {
+
+			List<PatternMatcher> categoryOpts = new ArrayList<PatternMatcher>();
 
 			for (PatternMatcher d : allDefinitionPatterns) {
 
 				if (d.getPattern().nestedPattern(false) == nestedPatterns()) {
 
-					categoryOptions.add(d);
+					categoryOpts.add(d);
 				}
 			}
+
+			return categoryOpts;
 		}
 	}
 
@@ -163,17 +163,16 @@ class PotentialLocalPatternSubsumers {
 
 	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
 
-		List<PatternMatcher> all = new ArrayList<PatternMatcher>();
-		Pattern pattern = request.getPattern();
+		List<PatternMatcher> potentials = new ArrayList<PatternMatcher>();
 
-		simplePotentials.collectPotentialsFor(pattern, all);
+		simplePotentials.collectPotentialsFor(request, potentials);
 
-		if (pattern.nestedPattern(true)) {
+		if (request.getPattern().nestedPattern(true)) {
 
-			nestedPotentials.collectPotentialsFor(pattern, all);
+			nestedPotentials.collectPotentialsFor(request, potentials);
 		}
 
-		return all;
+		return potentials;
 	}
 
 	Collection<PatternMatcher> getPotentialsFor(DisjunctionMatcher request) {

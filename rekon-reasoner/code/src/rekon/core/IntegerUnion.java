@@ -58,6 +58,18 @@ class IntegerUnion extends IntegerCollector {
 		}
 	}
 
+	void absorbExcept(IntHashSet integers, int exclude) {
+
+		boolean excludedPrePresent = integerUnion.contains(exclude);
+
+		absorb(integers);
+
+		if (!excludedPrePresent) {
+
+			integerUnion.remove(exclude);
+		}
+	}
+
 	IntHashSet getSubsetResult() {
 
 		return integerUnion;

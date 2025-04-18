@@ -36,6 +36,8 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 	PotentialPatternSubsumeds(List<PatternMatcher> allOptions) {
 
 		this.allOptions = allOptions;
+
+		initialise(allOptions);
 	}
 
 	void checkAddInstanceOption(InstanceNode node) {
@@ -59,19 +61,14 @@ abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMa
 		}
 	}
 
-	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
-
-		return getPotentialsFor(getRankedDefinitionNames(request.getPattern()));
-	}
-
-	List<PatternMatcher> getAllOptions() {
-
-		return allOptions;
-	}
-
 	List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
 		return getRankedProfileNames(option.getPattern(), startRank, stopRank);
+	}
+
+	List<Names> getRequestMatchNames(PatternMatcher request) {
+
+		return getRankedDefinitionNames(request.getPattern());
 	}
 
 	Names resolveNamesForRetrieval(Names names, int rank) {

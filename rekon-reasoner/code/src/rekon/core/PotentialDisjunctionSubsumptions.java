@@ -33,23 +33,11 @@ abstract class PotentialDisjunctionSubsumptions
 					extends
 						PotentialSubsumptions<DisjunctionMatcher> {
 
-	private List<DisjunctionMatcher> options;
+	PotentialDisjunctionSubsumptions(List<DisjunctionMatcher> allOptions) {
 
-	PotentialDisjunctionSubsumptions(List<DisjunctionMatcher> options) {
-
-		this.options = options;
+		initialise(allOptions);
 
 		registerSingleOptionRank();
-	}
-
-	Collection<DisjunctionMatcher> getPotentialsFor(DisjunctionMatcher request) {
-
-		return getPotentialsFor(requestToSingletonNamesList(request));
-	}
-
-	List<DisjunctionMatcher> getAllOptions() {
-
-		return options;
 	}
 
 	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
@@ -57,12 +45,12 @@ abstract class PotentialDisjunctionSubsumptions
 		return Collections.singletonList(getRegistrationDisjuncts(option));
 	}
 
-	abstract Names getRegistrationDisjuncts(DisjunctionMatcher option);
-
-	abstract Names getRequestDisjuncts(DisjunctionMatcher request);
-
-	private List<Names> requestToSingletonNamesList(DisjunctionMatcher request) {
+	List<Names> getRequestMatchNames(DisjunctionMatcher request) {
 
 		return Collections.singletonList(getRequestDisjuncts(request));
 	}
+
+	abstract Names getRegistrationDisjuncts(DisjunctionMatcher option);
+
+	abstract Names getRequestDisjuncts(DisjunctionMatcher request);
 }
