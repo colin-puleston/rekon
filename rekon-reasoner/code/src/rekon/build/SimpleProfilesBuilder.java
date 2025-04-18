@@ -32,7 +32,7 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class NodeProfilesBuilder {
+class SimpleProfilesBuilder {
 
 	private MatchStructures matchStructures;
 	private OntologyNames names;
@@ -217,7 +217,7 @@ class NodeProfilesBuilder {
 		}
 	}
 
-	NodeProfilesBuilder(
+	SimpleProfilesBuilder(
 		MatchStructures matchStructures,
 		OntologyNames names,
 		InputAxioms axioms,

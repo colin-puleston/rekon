@@ -54,8 +54,9 @@ public class CoreBuilder {
 			ComponentBuilder components = createComponentBuilder(matchStructures, false);
 
 			new BasicStructureBuilder(names, axioms);
-			new NodeProfilesBuilder(matchStructures, names, axioms, components);
-			new ClassDefinitionsBuilder(matchStructures, axioms, components);
+			new SimpleProfilesBuilder(matchStructures, names, axioms, components);
+			new SubsBasedComplexStructureBuilder(matchStructures, axioms, components);
+			new EquivsBasedComplexStructureBuilder(matchStructures, axioms, components);
 		}
 
 		StructureBuilderImpl(InputAxioms axioms) {
