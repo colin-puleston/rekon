@@ -69,8 +69,6 @@ class IntegerIntersection extends IntegerCollector {
 
 	void absorb(IntHashSet integers) {
 
-		onAbsorbingSubset();
-
 		if (integers.isEmpty()) {
 
 			integerSets.clear();
@@ -82,6 +80,8 @@ class IntegerIntersection extends IntegerCollector {
 				integerSets.add(integers);
 			}
 		}
+
+		onAbsorbedSubset();
 	}
 
 	IntHashSet getSubsetResult() {
@@ -106,12 +106,12 @@ class IntegerIntersection extends IntegerCollector {
 
 	private void absorbSubsetResultFrom(IntegerIntersection intersection) {
 
-		onAbsorbingSubset();
-
 		integerSets.addAll(intersection.integerSets);
+
+		onAbsorbedSubset();
 	}
 
-	private void onAbsorbingSubset() {
+	private void onAbsorbedSubset() {
 
 		anySubsetsAbsorbed |= true;
 
