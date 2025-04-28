@@ -31,11 +31,16 @@ import java.util.*;
  */
 public class NodeValue extends Value {
 
-	private NodeX node;
+	private NameSet disjunctNodes = new NameSet();
 
 	public NodeValue(NodeX node) {
 
-		this.node = node;
+		disjunctNodes.add(node);
+	}
+
+	public NodeValue(Collection<? extends NodeX> disjunctNodes) {
+
+		this.disjunctNodes.retainMostGeneral(new NameList(disjunctNodes));
 	}
 
 	NodeValue asNodeValue() {
@@ -43,63 +48,172 @@ public class NodeValue extends Value {
 		return this;
 	}
 
-	NodeX getValueNode() {
+	boolean singleValueNode() {
 
-		return node;
+		return disjunctNodes.size() == 1;
+	}
+
+	NodeX getSingleValueNode() {
+
+		if (singleValueNode()) {
+
+			return disjunctNodes.getFirstNode();
+		}
+
+		throw new Error("Not a single value node!");
+	}
+
+	Names getDisjunctNodes() {
+
+		return disjunctNodes;
+	}
+
+	Names getMostSpecificCommonDisjunctSubsumers() {
+
+		List<Collection<Name>> subsumerSets = new ArrayList<Collection<Name>>();
+
+		for (NodeX d : disjunctNodes.asNodes()) {
+
+			subsumerSets.add(d.getSubsumers().getNames());
+		}
+
+		NameSet mostSpecifics = new NameSet();
+
+		mostSpecifics.retainMostSpecific(NameSetIntersector.intersect(subsumerSets));
+
+		return mostSpecifics;
 	}
 
 	void collectNames(NameCollector collector) {
 
-		collector.collectForValueNode(node);
+		if (singleValueNode()) {
+
+			collector.collectForSingleValueNode(getSingleValueNode());
+		}
+		else {
+
+			collector.collectForDisjunctNodes(this);
+		}
 	}
 
 	boolean subsumesOther(Value v) {
 
 		NodeValue nv = v.asNodeValue();
 
-		return nv != null && node.subsumes(nv.node);
+		return nv != null && subsumesAllDisjunctNodesOf(nv);
 	}
 
 	boolean anyNewSubsumers(NodeSelector selector) {
 
-		return node.anyNewSubsumers(selector);
+		for (NodeX d : disjunctNodes.asNodes()) {
+
+			if (d.anyNewSubsumers(selector)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	void registerAsDefinitionRefed() {
+
+		registerAllAsDefinitionRefed(disjunctNodes);
+
+		if (!singleValueNode()) {
+
+			registerAllAsDefinitionRefed(getMostSpecificCommonDisjunctSubsumers());
+		}
 	}
 
 	void render(PatternRenderer r) {
 
-		List<NodeMatcher> nlrMatchers = getNextLevelRenderMatchers(r);
+		if (singleValueNode()) {
 
-		if (nlrMatchers.isEmpty()) {
-
-			r.addLine(node.getLabel());
+			renderNode(r, getSingleValueNode());
 		}
 		else {
 
-			r.addLine(node.getLabel() + "==>");
+			r.addLine("OR");
 
 			r = r.nextLevel();
 
-			for (NodeMatcher m : nlrMatchers) {
+			for (NodeX d : disjunctNodes.asNodes()) {
+
+				renderNode(r, d);
+			}
+		}
+	}
+
+	private boolean subsumesAllDisjunctNodesOf(NodeValue nv) {
+
+		for (NodeX d : nv.disjunctNodes.asNodes()) {
+
+			if (!subsumesNode(d)) {
+
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	private boolean subsumesNode(NodeX n) {
+
+		for (NodeX d : disjunctNodes.asNodes()) {
+
+			if (d.subsumes(n)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private void registerAllAsDefinitionRefed(Names names) {
+
+		for (NodeX n : names.asNodes()) {
+
+			n.registerAsDefinitionRefed(MatchRole.VALUE);
+		}
+	}
+
+	private void renderNode(PatternRenderer r, NodeX n) {
+
+		List<PatternMatcher> nlrMatchers = getNextLevelRenderMatchers(r, n);
+
+		if (nlrMatchers.isEmpty()) {
+
+			r.addLine(n.getLabel());
+		}
+		else {
+
+			r.addLine(n.getLabel() + "==>");
+
+			r = r.nextLevel();
+
+			for (PatternMatcher m : nlrMatchers) {
 
 				m.render(r);
 			}
 		}
 	}
 
-	private List<NodeMatcher> getNextLevelRenderMatchers(PatternRenderer r) {
+	private List<PatternMatcher> getNextLevelRenderMatchers(PatternRenderer r, NodeX n) {
 
-		if (!node.mapped()) {
+		if (!n.mapped()) {
 
 			PatternRenderType renderType = r.getRenderType();
 
 			if (renderType == PatternRenderType.NESTED_PROFILE) {
 
-				return node.getAllProfileMatchers();
+				return n.getProfileMatcherAsList();
 			}
 
 			if (renderType == PatternRenderType.NESTED_DEFINITION) {
 
-				return node.getAllDefinitionMatchers();
+				return n.getDefinitionMatchers();
 			}
 		}
 

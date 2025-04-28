@@ -29,10 +29,10 @@ package rekon.core;
  */
 class InstancePattern extends LocalExpression {
 
-	private SinglePatternSource patternSource;
+	private PatternSource patternSource;
 
 	private InstanceNode instanceNode;
-	private PatternMatcher patternMatcher;
+	private PatternMatcher expressionMatcher;
 
 	private class InstanceClasses extends FreeClasses {
 
@@ -52,7 +52,7 @@ class InstancePattern extends LocalExpression {
 		}
 	}
 
-	InstancePattern(InstanceNode instanceNode, SinglePatternSource patternSource) {
+	InstancePattern(InstanceNode instanceNode, PatternSource patternSource) {
 
 		this.instanceNode = instanceNode;
 		this.patternSource = patternSource;
@@ -62,17 +62,17 @@ class InstancePattern extends LocalExpression {
 
 	NodeX createExpression(MatchStructures matchStructures) {
 
-		patternMatcher = createPatternMatcher(matchStructures);
+		expressionMatcher = createExpressionMatcher(matchStructures);
 
 		return instanceNode;
 	}
 
-	NodeMatcher getExpressionMatcher() {
+	PatternMatcher getExpressionMatcher() {
 
-		return patternMatcher;
+		return expressionMatcher;
 	}
 
-	private PatternMatcher createPatternMatcher(MatchStructures matchStructures) {
+	private PatternMatcher createExpressionMatcher(MatchStructures matchStructures) {
 
 		Pattern p = createPattern(matchStructures);
 		NodeX n = p.toSingleNode();
@@ -82,7 +82,7 @@ class InstancePattern extends LocalExpression {
 			return new PatternMatcher(n);
 		}
 
-		return matchStructures.addDefinitionPattern(instanceNode, p);
+		return matchStructures.addDefinition(instanceNode, p);
 	}
 
 	private Pattern createPattern(MatchStructures matchStructures) {

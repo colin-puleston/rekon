@@ -31,9 +31,8 @@ abstract class NodeSelector {
 
 	static final NodeSelector ANY = new AnyNode();
 	static final NodeSelector STRUCTURED = new StructuredNode();
-	static final NodeSelector MATCHABLE_PATTERN_ROOT = new MatchablePatternRoot();
-	static final NodeSelector MATCHABLE_PATTERN_VALUE = new MatchablePatternValue();
-	static final NodeSelector MATCHABLE_DISJUNCT = new MatchableDisjunct();
+	static final NodeSelector PATTERN_ROOT = new PatternRoot();
+	static final NodeSelector PATTERN_VALUE = new PatternValue();
 
 	static private class AnyNode extends NodeSelector {
 
@@ -68,13 +67,13 @@ abstract class NodeSelector {
 
 		boolean select(NodeX node) {
 
-			PatternMatcher p = node.getProfilePatternMatcher();
+			PatternMatcher p = node.getProfileMatcher();
 
 			return p != null && p.getPattern().getProfileRelations().anyRelations();
 		}
 	}
 
-	static private abstract class MatchablePatternNode extends SelectiveSelector {
+	static private abstract class PatternNode extends SelectiveSelector {
 
 		boolean select(NodeX node) {
 
@@ -84,27 +83,19 @@ abstract class NodeSelector {
 		abstract MatchRole getMatchRole();
 	}
 
-	static private class MatchablePatternRoot extends MatchablePatternNode {
+	static private class PatternRoot extends PatternNode {
 
 		MatchRole getMatchRole() {
 
-			return MatchRole.PATTERN_ROOT;
+			return MatchRole.ROOT;
 		}
 	}
 
-	static private class MatchablePatternValue extends MatchablePatternNode {
+	static private class PatternValue extends PatternNode {
 
 		MatchRole getMatchRole() {
 
-			return MatchRole.PATTERN_VALUE;
-		}
-	}
-
-	static private class MatchableDisjunct extends SelectiveSelector {
-
-		boolean select(NodeX node) {
-
-			return node.definitionRefed(MatchRole.DISJUNCT);
+			return MatchRole.VALUE;
 		}
 	}
 

@@ -29,16 +29,14 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PotentialLocalPatternSubsumers {
+class PotentialLocalSubsumers {
 
-	private Collection<PatternMatcher> allDefinitionPatterns;
+	private Collection<PatternMatcher> allDefinitions;
 
 	private SimplePotentials simplePotentials = new SimplePotentials();
 	private NestedPotentials nestedPotentials = new NestedPotentials();
 
-	private abstract class CategoryPotentials
-								extends
-									PotentialSubsumptions<PatternMatcher> {
+	private abstract class CategoryPotentials extends PotentialSubsumptions {
 
 		void collectPotentialsFor(PatternMatcher request, List<PatternMatcher> potentials) {
 
@@ -64,7 +62,7 @@ class PotentialLocalPatternSubsumers {
 
 		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return MatchNamesResolver.expand(names, MatchRole.rankToPatternRole(rank));
+			return MatchNamesResolver.expand(names, MatchRole.rankToRole(rank));
 		}
 
 		boolean unionRankOptionsForRetrieval() {
@@ -93,7 +91,7 @@ class PotentialLocalPatternSubsumers {
 
 			List<PatternMatcher> categoryOpts = new ArrayList<PatternMatcher>();
 
-			for (PatternMatcher d : allDefinitionPatterns) {
+			for (PatternMatcher d : allDefinitions) {
 
 				if (d.getPattern().nestedPattern(false) == nestedPatterns()) {
 
@@ -156,9 +154,9 @@ class PotentialLocalPatternSubsumers {
 		}
 	}
 
-	PotentialLocalPatternSubsumers(Collection<PatternMatcher> allDefinitionPatterns) {
+	PotentialLocalSubsumers(Collection<PatternMatcher> allDefinitions) {
 
-		this.allDefinitionPatterns = allDefinitionPatterns;
+		this.allDefinitions = allDefinitions;
 	}
 
 	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
@@ -170,30 +168,6 @@ class PotentialLocalPatternSubsumers {
 		if (request.getPattern().nestedPattern(true)) {
 
 			nestedPotentials.collectPotentialsFor(request, potentials);
-		}
-
-		return potentials;
-	}
-
-	Collection<PatternMatcher> getPotentialsFor(DisjunctionMatcher request) {
-
-		List<Collection<PatternMatcher>> djPotentials = new ArrayList<Collection<PatternMatcher>>();
-
-		for (NodeX dj : request.getDisjuncts().asNodes()) {
-
-			djPotentials.add(getPotentialsForDisjunct(dj));
-		}
-
-		return new SetIntersector<PatternMatcher>().intersectSets(djPotentials);
-	}
-
-	private Collection<PatternMatcher> getPotentialsForDisjunct(NodeX disjunct) {
-
-		Set<PatternMatcher> potentials = new HashSet<PatternMatcher>();
-
-		for (PatternMatcher pm : disjunct.getProfilePatternMatcherAsList()) {
-
-			potentials.addAll(getPotentialsFor(pm));
 		}
 
 		return potentials;

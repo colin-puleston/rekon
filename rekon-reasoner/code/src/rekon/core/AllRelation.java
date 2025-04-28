@@ -34,9 +34,12 @@ public class AllRelation extends NodeRelation {
 		super(property, target);
 	}
 
-	boolean existential() {
+	boolean propertySubsumption(PropertyX otherProperty) {
 
-		return false;
+		return otherProperty.subsumes(getProperty());
+	}
+
+	void collectNamesForProperty(NameCollector collector) {
 	}
 
 	String renderRelationType() {

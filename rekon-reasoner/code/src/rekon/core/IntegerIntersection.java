@@ -94,6 +94,19 @@ class IntegerIntersection extends IntegerCollector {
 		return integerSets.isEmpty();
 	}
 
+	boolean emptySubsetResultIfExcluded(int exclude) {
+
+		for (IntHashSet integers : integerSets) {
+
+			if (integers.size() == 1 && integers.contains(exclude)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	boolean enableSettingToAllOptions() {
 
 		return !anySubsetsAbsorbed;

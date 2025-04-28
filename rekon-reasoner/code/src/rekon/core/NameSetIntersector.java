@@ -33,8 +33,8 @@ class NameSetIntersector extends SetIntersector<Name> {
 
 	static final NameSetIntersector SINGLETON = new NameSetIntersector();
 
-	static Collection<Name> intersect(Collection<Collection<Name>> sets) {
+	static Names intersect(Collection<Collection<Name>> sets) {
 
-		return SINGLETON.intersectSets(sets);
+		return new NameList(SINGLETON.intersectSets(sets));
 	}
 }

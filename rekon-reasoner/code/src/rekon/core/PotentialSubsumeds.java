@@ -22,70 +22,66 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.core;
 
 import java.util.*;
-
-import rekon.core.*;
-import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-class DisjunctionBuilder {
+abstract class PotentialSubsumeds extends PotentialSubsumptions {
 
-	private ComponentBuilder componentBuilder;
+	private List<PatternMatcher> allOptions;
 
-	private Disjunctions disjunctions;
+	PotentialSubsumeds(List<PatternMatcher> allOptions) {
 
-	private class Disjunctions extends EntityBuilder<Collection<InputNode>, Collection<NodeX>> {
+		this.allOptions = allOptions;
 
-		Disjunctions(boolean dynamic) {
+		initialise(allOptions);
+	}
 
-			super(dynamic);
-		}
+	void checkAddInstanceOption(InstanceNode node) {
 
-		Collection<NodeX> checkCreate(Collection<InputNode> source) {
+		PatternMatcher p = node.getProfileMatcher();
 
-			Set<NodeX> disjuncts = new HashSet<NodeX>();
+		if (p != null) {
 
-			for (InputNode n : source) {
-
-				Collection<? extends NodeX> djs = toDisjuncts(n);
-
-				if (djs == null) {
-
-					return null;
-				}
-
-				disjuncts.addAll(djs);
-			}
-
-			return disjuncts.isEmpty() ? null : disjuncts;
-		}
-
-		private Collection<? extends NodeX> toDisjuncts(InputNode source) {
-
-			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
-
-				return disjunctions.get(source.asDisjuncts());
-			}
-
-			NodeX n = componentBuilder.toNode(source);
-
-			return n != null ? Collections.singleton(n) : null;
+			allOptions.add(p);
+			registerTransientOption(p);
 		}
 	}
 
-	DisjunctionBuilder(ComponentBuilder componentBuilder, boolean dynamic) {
+	void checkRemoveInstanceOption(InstanceNode node) {
 
-		this.componentBuilder = componentBuilder;
+		PatternMatcher p = node.getProfileMatcher();
 
-		disjunctions = new Disjunctions(dynamic);
+		if (p != null) {
+
+			deregisterTransientOption(p);
+		}
 	}
 
-	Collection<NodeX> toDisjunction(Collection<InputNode> source) {
+	List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
-		return disjunctions.get(source);
+		return getRankedProfileNames(option.getPattern(), startRank, stopRank);
 	}
+
+	List<Names> getRequestMatchNames(PatternMatcher request) {
+
+		return getRankedDefinitionNames(request.getPattern());
+	}
+
+	Names resolveNamesForRetrieval(Names names, int rank) {
+
+		return names;
+	}
+
+	boolean unionRankOptionsForRetrieval() {
+
+		return false;
+	}
+
+	abstract List<Names> getRankedDefinitionNames(Pattern defn);
+
+	abstract List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank);
 }

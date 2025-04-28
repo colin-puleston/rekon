@@ -40,7 +40,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private NameSet profileValueNodesCollected = new NameSet();
 
-		void collectForValueNode(NodeX n) {
+		void collectForSingleValueNode(NodeX n) {
 
 			if (definition()) {
 
@@ -66,7 +66,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (n.local()) {
 
-				for (PatternMatcher d : n.getDefinitionPatternMatchers()) {
+				for (PatternMatcher d : n.getDefinitionMatchers()) {
 
 					d.getPattern().collectNames(this);
 				}
@@ -81,26 +81,15 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (collectProfileValueNode(n) && !profileLinkingNodes.contains(n)) {
 
-				collectForProfileMatchers(n);
+				collectForProfileMatchers(n, new NameSet());
 			}
 		}
 
-		private void collectForProfileMatchers(NodeX n) {
-
-			collectForProfilePatternMatchers(n, new NameSet());
-			collectForProfileDisjunctionMatchers(n);
-
-			for (Name s : n.getSubsumers()) {
-
-				collectForProfileDisjunctionMatchers(n);
-			}
-		}
-
-		private void collectForProfilePatternMatchers(NodeX n, NameSet visited) {
+		private void collectForProfileMatchers(NodeX n, NameSet visited) {
 
 			if (visited.add(n)) {
 
-				PatternMatcher p = n.getProfilePatternMatcher();
+				PatternMatcher p = n.getProfileMatcher();
 
 				if (p != null) {
 
@@ -112,19 +101,8 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 					for (NodeX s : n.getSupers(true).asNodes()) {
 
-						collectForProfilePatternMatchers(s, visited);
+						collectForProfileMatchers(s, visited);
 					}
-				}
-			}
-		}
-
-		private void collectForProfileDisjunctionMatchers(NodeX n) {
-
-			for (DisjunctionMatcher d : n.getAllDisjunctionMatchers()) {
-
-				for (NodeX dj : d.getDisjuncts().asNodes()) {
-
-					collectForProfileNode(dj);
 				}
 			}
 		}

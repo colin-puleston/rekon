@@ -32,7 +32,7 @@ import java.util.*;
 abstract class LocalExpression {
 
 	private NodeX expressionNode = null;
-	private List<NodeMatcher> orderedProfileMatchers = new ArrayList<NodeMatcher>();
+	private List<PatternMatcher> orderedProfileMatchers = new ArrayList<PatternMatcher>();
 
 	private class LocalMatchStructures extends MatchStructures {
 
@@ -46,7 +46,7 @@ abstract class LocalExpression {
 			}
 		}
 
-		void onAddedProfileMatcher(NodeMatcher matcher) {
+		void onAddedProfile(PatternMatcher matcher) {
 
 			orderedProfileMatchers.add(matcher);
 		}
@@ -74,16 +74,16 @@ abstract class LocalExpression {
 		return expressionNode;
 	}
 
-	abstract NodeMatcher getExpressionMatcher();
+	abstract PatternMatcher getExpressionMatcher();
 
-	List<NodeMatcher> getOrderedProfileMatchers() {
+	List<PatternMatcher> getOrderedProfileMatchers() {
 
 		return orderedProfileMatchers;
 	}
 
 	private void expandAllLocalNameSubsumers() {
 
-		for (NodeMatcher m : orderedProfileMatchers) {
+		for (PatternMatcher m : orderedProfileMatchers) {
 
 			m.getNode().getClassifier().expandSubsumers();
 		}

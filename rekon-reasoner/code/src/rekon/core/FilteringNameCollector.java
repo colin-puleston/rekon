@@ -57,6 +57,18 @@ class FilteringNameCollector {
 			return definition;
 		}
 
+		void collectForDisjunctNodes(NodeValue v) {
+
+			if (definition) {
+
+				collectNames(v.getMostSpecificCommonDisjunctSubsumers());
+			}
+			else {
+
+				super.collectForDisjunctNodes(v);
+			}
+		}
+
 		void collectName(Name n) {
 
 			if (rankStatus == RankStatus.COLLECT) {
@@ -92,7 +104,7 @@ class FilteringNameCollector {
 			}
 		}
 
-		boolean includeUniversalRelationProperties() {
+		boolean includeAllRelationProperties() {
 
 			return false;
 		}

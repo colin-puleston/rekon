@@ -29,10 +29,7 @@ package rekon.core;
  */
 abstract class FreeClasses {
 
-	private FreeClassGenerator patternClasses = new FreeClassGenerator(ClassRole.PATTERN);
-	private FreeClassGenerator disjunctionClasses = new FreeClassGenerator(ClassRole.DISJUNCTION);
-
-	private enum ClassRole {PATTERN, DISJUNCTION}
+	private int nextIndex = 0;
 
 	private class FreeClassNode extends ClassNode {
 
@@ -64,50 +61,16 @@ abstract class FreeClasses {
 		}
 	}
 
-	private class FreeClassGenerator {
+	FreeClassNode create() {
 
-		private ClassRole classRole;
+		FreeClassNode c = new FreeClassNode(createLabel());
 
-		private int nextIndex = 0;
+		initialise(c);
 
-		FreeClassGenerator(ClassRole classRole) {
-
-			this.classRole = classRole;
-		}
-
-		FreeClassNode next() {
-
-			FreeClassNode c = new FreeClassNode(createLabel());
-
-			initialise(c);
-
-			return c;
-		}
-
-		private String createLabel() {
-
-			String suffix = getLabelSuffix();
-
-			if (!suffix.isEmpty()) {
-
-				suffix = "-" + suffix;
-			}
-
-			return getLabelPrefix() + "-" + classRole + "-" + nextIndex++ + suffix;
-		}
+		return c;
 	}
 
 	abstract boolean localClasses();
-
-	ClassNode createPatternClass() {
-
-		return patternClasses.next();
-	}
-
-	ClassNode createDisjunctionClass() {
-
-		return disjunctionClasses.next();
-	}
 
 	abstract String getLabelPrefix();
 
@@ -117,5 +80,17 @@ abstract class FreeClasses {
 	}
 
 	void initialise(ClassNode c) {
+	}
+
+	private String createLabel() {
+
+		String suffix = getLabelSuffix();
+
+		if (!suffix.isEmpty()) {
+
+			suffix = "-" + suffix;
+		}
+
+		return getLabelPrefix() + "-" + nextIndex++ + suffix;
 	}
 }

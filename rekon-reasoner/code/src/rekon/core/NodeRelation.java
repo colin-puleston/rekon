@@ -44,8 +44,15 @@ public abstract class NodeRelation extends Relation {
 		return (NodeValue)getTarget();
 	}
 
-	Names getTargetNodes() {
+	Names getReferencedNodes() {
 
-		return new NameList(getNodeValueTarget().getValueNode());
+		return getNodeValueTarget().getDisjunctNodes();
+	}
+
+	void registerAsDefinitionRefed() {
+
+		super.registerAsDefinitionRefed();
+
+		getNodeValueTarget().registerAsDefinitionRefed();
 	}
 }

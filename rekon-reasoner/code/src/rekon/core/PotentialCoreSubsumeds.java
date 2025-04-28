@@ -29,59 +29,27 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialPatternSubsumeds extends PotentialSubsumptions<PatternMatcher> {
+class PotentialCoreSubsumeds extends PotentialSubsumeds {
 
-	private List<PatternMatcher> allOptions;
+	PotentialCoreSubsumeds(List<PatternMatcher> allOptions) {
 
-	PotentialPatternSubsumeds(List<PatternMatcher> allOptions) {
+		super(allOptions);
 
-		this.allOptions = allOptions;
-
-		initialise(allOptions);
+		registerDefaultNestedOptionRanks();
 	}
 
-	void checkAddInstanceOption(InstanceNode node) {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		PatternMatcher p = node.getProfilePatternMatcher();
-
-		if (p != null) {
-
-			allOptions.add(p);
-			registerTransientOption(p);
-		}
+		return MatchNamesResolver.expand(names, MatchRole.rankToRole(rank));
 	}
 
-	void checkRemoveInstanceOption(InstanceNode node) {
+	List<Names> getRankedDefinitionNames(Pattern defn) {
 
-		PatternMatcher p = node.getProfilePatternMatcher();
-
-		if (p != null) {
-
-			deregisterTransientOption(p);
-		}
+		return new FilteringNameCollector(true).collect(defn);
 	}
 
-	List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
+	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
 
-		return getRankedProfileNames(option.getPattern(), startRank, stopRank);
+		return new FilteringNameCollector(false).collect(profile);
 	}
-
-	List<Names> getRequestMatchNames(PatternMatcher request) {
-
-		return getRankedDefinitionNames(request.getPattern());
-	}
-
-	Names resolveNamesForRetrieval(Names names, int rank) {
-
-		return names;
-	}
-
-	boolean unionRankOptionsForRetrieval() {
-
-		return false;
-	}
-
-	abstract List<Names> getRankedDefinitionNames(Pattern defn);
-
-	abstract List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank);
 }

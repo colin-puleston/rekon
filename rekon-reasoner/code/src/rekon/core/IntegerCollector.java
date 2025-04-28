@@ -72,14 +72,31 @@ abstract class IntegerCollector {
 		return allOptionsResult;
 	}
 
-	abstract IntHashSet getSubsetResult();
-
 	boolean emptyResult() {
 
 		return !allOptionsResult && emptySubsetResult();
 	}
 
+	boolean emptyResultIfExcluded(Integer exclude) {
+
+		if (allOptionsResult) {
+
+			return false;
+		}
+
+		if (exclude != null) {
+
+			return emptySubsetResultIfExcluded(exclude);
+		}
+
+		return emptySubsetResult();
+	}
+
+	abstract IntHashSet getSubsetResult();
+
 	abstract boolean emptySubsetResult();
+
+	abstract boolean emptySubsetResultIfExcluded(int exclude);
 
 	abstract boolean enableSettingToAllOptions();
 

@@ -100,7 +100,7 @@ public class InstanceNode extends NodeX {
 
 		Set<InstanceNode> findAll() {
 
-			PatternMatcher p = getProfilePatternMatcher();
+			PatternMatcher p = getProfileMatcher();
 
 			if (p == null) {
 
@@ -125,11 +125,6 @@ public class InstanceNode extends NodeX {
 		}
 
 		boolean visit(PatternMatcher m) {
-
-			return true;
-		}
-
-		boolean visit(DisjunctionMatcher m) {
 
 			return true;
 		}

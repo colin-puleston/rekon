@@ -39,7 +39,7 @@ class SimpleProfilesBuilder {
 	private InputAxioms axioms;
 	private ComponentBuilder components;
 
-	private class ProfilePatternsBuilder {
+	private class ProfilesBuilder {
 
 		private Map<NodeX, List<Relation>> relationsByNode
 							= new HashMap<NodeX, List<Relation>>();
@@ -63,7 +63,7 @@ class SimpleProfilesBuilder {
 
 			for (NodeX n : nodes) {
 
-				matchStructures.checkAddProfilePattern(n, getRelations(n));
+				matchStructures.checkAddProfile(n, getRelations(n));
 			}
 		}
 
@@ -93,14 +93,14 @@ class SimpleProfilesBuilder {
 
 		TypeNodesProfileCreator() {
 
-			ProfilePatternsBuilder ppBuilder = new ProfilePatternsBuilder();
+			ProfilesBuilder ppBuilder = new ProfilesBuilder();
 
 			processSourceAxioms(ppBuilder);
 
 			ppBuilder.createAllProfiles(getTypeNodes());
 		}
 
-		void processSourceAxioms(ProfilePatternsBuilder ppBuilder) {
+		void processSourceAxioms(ProfilesBuilder ppBuilder) {
 
 			for (A ax : getSourceAxioms()) {
 
@@ -115,7 +115,7 @@ class SimpleProfilesBuilder {
 
 						if (p != null) {
 
-							matchStructures.addProfilePattern(sub, p);
+							matchStructures.addProfile(sub, p);
 						}
 						break;
 
@@ -144,7 +144,7 @@ class SimpleProfilesBuilder {
 						extends
 							TypeNodesProfileCreator<InputClassSubComplexSuper> {
 
-		void processSourceAxioms(ProfilePatternsBuilder ppBuilder) {
+		void processSourceAxioms(ProfilesBuilder ppBuilder) {
 
 			super.processSourceAxioms(ppBuilder);
 
@@ -186,7 +186,7 @@ class SimpleProfilesBuilder {
 						extends
 							TypeNodesProfileCreator<InputIndividualComplexType> {
 
-		void processSourceAxioms(ProfilePatternsBuilder ppBuilder) {
+		void processSourceAxioms(ProfilesBuilder ppBuilder) {
 
 			super.processSourceAxioms(ppBuilder);
 

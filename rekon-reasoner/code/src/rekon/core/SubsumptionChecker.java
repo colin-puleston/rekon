@@ -24,32 +24,38 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-class PotentialCorePatternSubsumeds extends PotentialPatternSubsumeds {
+abstract class SubsumptionChecker {
 
-	PotentialCorePatternSubsumeds(List<PatternMatcher> allOptions) {
+	boolean checkSubsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-		super(allOptions);
+		NodeX dn = defn.getNode();
+		NodeX cn = candidate.getNode();
 
-		registerDefaultNestedOptionRanks();
+		if (dn != cn && !dn.subsumes(cn) && subsumption(defn, candidate)) {
+
+			addSubsumption(dn, cn);
+
+			return true;
+		}
+
+		return false;
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	boolean subsumption(PatternMatcher defn, PatternMatcher candidate) {
 
-		return MatchNamesResolver.expand(names, MatchRole.rankToPatternRole(rank));
+		return patternSubsumption(defn.getPattern(), candidate.getPattern());
 	}
 
-	List<Names> getRankedDefinitionNames(Pattern defn) {
+	boolean patternSubsumption(Pattern defn, Pattern candidate) {
 
-		return new FilteringNameCollector(true).collect(defn);
+		return defn.subsumes(candidate);
 	}
 
-	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
+	private void addSubsumption(NodeX subsumer, NodeX subsumed) {
 
-		return new FilteringNameCollector(false).collect(profile);
+		subsumed.getNodeClassifier().addNewInferredSubsumer(subsumer);
 	}
 }

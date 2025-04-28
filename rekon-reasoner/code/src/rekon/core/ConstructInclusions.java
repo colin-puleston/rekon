@@ -35,8 +35,6 @@ class ConstructInclusions {
 
 	final boolean allRelations;
 
-	final boolean disjunctions;
-
 	private enum PropertyAttribute {
 
 		DOMAIN {
@@ -66,7 +64,6 @@ class ConstructInclusions {
 		propertyDomains = propertyDomains(nodeProps) || propertyDomains(dataProps);
 		propertyChains = propertyChains(nodeProps);
 		allRelations = allRelations(ontology);
-		disjunctions = !ontology.getAllDisjunctions().isEmpty();
 	}
 
 	private boolean propertyDomains(Iterable<? extends PropertyX> props) {
@@ -96,7 +93,7 @@ class ConstructInclusions {
 
 		for (NodeX n : ontology.getAllNodes()) {
 
-			for (PatternMatcher p : n.getAllPatternMatchers()) {
+			for (PatternMatcher p : n.getAllMatchers()) {
 
 				for (Relation r : p.getPattern().getDirectRelations()) {
 

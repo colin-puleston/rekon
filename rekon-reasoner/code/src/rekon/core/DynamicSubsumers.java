@@ -27,35 +27,18 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class DynamicSubsumers extends NodeMatcherClassifier {
+class DynamicSubsumers extends SubsumptionChecker {
 
-	private PotentialLocalPatternSubsumers defnPatternsFilter;
-	private PotentialDisjunctionSubsumers defnDisjunctionsFilter;
-
-	private TypeClassifier typeClassifier = new TypeClassifier();
-
-	private class TypeClassifier extends NodeMatcherVisitor {
-
-		void visit(PatternMatcher candidate) {
-
-			checkSubsumptions(candidate);
-		}
-
-		void visit(DisjunctionMatcher candidate) {
-
-			checkSubsumptions(candidate);
-		}
-	}
+	private PotentialLocalSubsumers definitionsFilter;
 
 	DynamicSubsumers(Ontology ontology) {
 
-		defnPatternsFilter = createDefnPatternsFilter(ontology);
-		defnDisjunctionsFilter = createDefnDisjunctionsFilter(ontology);
+		definitionsFilter = createDefinitionsFilter(ontology);
 	}
 
 	NameSet inferSubsumers(LocalExpression expr) {
 
-		for (NodeMatcher candidate : expr.getOrderedProfileMatchers()) {
+		for (PatternMatcher candidate : expr.getOrderedProfileMatchers()) {
 
 			exhaustivelyClassify(candidate);
 		}
@@ -63,17 +46,18 @@ class DynamicSubsumers extends NodeMatcherClassifier {
 		return expr.getExpressionNode().getClassifier().getSubsumers();
 	}
 
-	private void exhaustivelyClassify(NodeMatcher candidate) {
+	private void exhaustivelyClassify(PatternMatcher candidate) {
 
 		do {
 
 			candidate.checkExpandLocalProfile();
-			candidate.acceptVisitor(typeClassifier);
+
+			checkSubsumptions(candidate);
 		}
 		while (absorbNewSubsumerExpansions(candidate));
 	}
 
-	private boolean absorbNewSubsumerExpansions(NodeMatcher candidate) {
+	private boolean absorbNewSubsumerExpansions(PatternMatcher candidate) {
 
 		NodeClassifier c = candidate.getNode().getNodeClassifier();
 
@@ -82,33 +66,15 @@ class DynamicSubsumers extends NodeMatcherClassifier {
 
 	private void checkSubsumptions(PatternMatcher candidate) {
 
-		for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
+		for (PatternMatcher defn : definitionsFilter.getPotentialsFor(candidate)) {
 
 			checkSubsumption(defn, candidate);
 		}
 	}
 
-	private void checkSubsumptions(DisjunctionMatcher candidate) {
+	private PotentialLocalSubsumers createDefinitionsFilter(Ontology ontology) {
 
-		for (PatternMatcher defn : defnPatternsFilter.getPotentialsFor(candidate)) {
-
-			checkSubsumption(defn, candidate);
-		}
-
-		for (DisjunctionMatcher defn : defnDisjunctionsFilter.getPotentialsFor(candidate)) {
-
-			checkSubsumption(defn, candidate);
-		}
-	}
-
-	private PotentialLocalPatternSubsumers createDefnPatternsFilter(Ontology ontology) {
-
-		return new PotentialLocalPatternSubsumers(ontology.getDefinitionPatterns());
-	}
-
-	private PotentialDisjunctionSubsumers createDefnDisjunctionsFilter(Ontology ontology) {
-
-		return new PotentialDisjunctionSubsumers(ontology.getDefinitionDisjunctions());
+		return new PotentialLocalSubsumers(ontology.getAllDefinitions());
 	}
 }
 

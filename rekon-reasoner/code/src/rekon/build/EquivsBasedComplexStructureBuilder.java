@@ -57,7 +57,7 @@ class EquivsBasedComplexStructureBuilder {
 
 			for (Pattern defn : definitions) {
 
-				matchStructures.addDefinitionPattern(c, defn);
+				matchStructures.addDefinition(c, defn);
 			}
 		}
 
@@ -115,7 +115,7 @@ class EquivsBasedComplexStructureBuilder {
 
 		ClassNode resolveDefinitionClass() {
 
-			return matchStructures.createPatternClass();
+			return matchStructures.createFreeClass();
 		}
 	}
 

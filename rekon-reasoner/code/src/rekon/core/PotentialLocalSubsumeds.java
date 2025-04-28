@@ -29,28 +29,44 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialDisjunctionSubsumptions
-					extends
-						PotentialSubsumptions<DisjunctionMatcher> {
+class PotentialLocalSubsumeds extends PotentialSubsumeds {
 
-	PotentialDisjunctionSubsumptions(List<DisjunctionMatcher> allOptions) {
+	private int nextOptionRegRank = 0;
+	private boolean optionRegComplete = false;
 
-		initialise(allOptions);
+	PotentialLocalSubsumeds(List<PatternMatcher> allOptions) {
 
-		registerSingleOptionRank();
+		super(allOptions);
 	}
 
-	List<Names> getOptionMatchNames(DisjunctionMatcher option, int startRank, int stopRank) {
+	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return Collections.singletonList(getRegistrationDisjuncts(option));
+		return MatchNamesResolver.expand(names);
 	}
 
-	List<Names> getRequestMatchNames(DisjunctionMatcher request) {
+	List<Names> getRankedDefinitionNames(Pattern defn) {
 
-		return Collections.singletonList(getRequestDisjuncts(request));
+		List<Names> defnNames = new FilteringLinkedNameCollector(true).collect(defn);
+
+		checkExpandOptionRanksRegister(defnNames);
+
+		return defnNames;
 	}
 
-	abstract Names getRegistrationDisjuncts(DisjunctionMatcher option);
+	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
 
-	abstract Names getRequestDisjuncts(DisjunctionMatcher request);
+		return new FilteringLinkedNameCollector(false, startRank, stopRank).collect(profile);
+	}
+
+	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
+
+		int stopRank = defnNames.size();
+
+		if (!optionRegComplete && stopRank > nextOptionRegRank) {
+
+			registerOptionRanks(nextOptionRegRank, stopRank);
+
+			nextOptionRegRank = stopRank;
+		}
+	}
 }

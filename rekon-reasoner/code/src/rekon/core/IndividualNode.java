@@ -42,7 +42,7 @@ public abstract class IndividualNode extends NodeX {
 
 		List<V> retrieve() {
 
-			PatternMatcher p = getProfilePatternMatcher();
+			PatternMatcher p = getProfileMatcher();
 
 			return p != null ? retrieve(p) : Collections.emptyList();
 		}
@@ -83,7 +83,7 @@ public abstract class IndividualNode extends NodeX {
 
 			if (nv != null) {
 
-				NodeX vn = nv.getValueNode();
+				NodeX vn = nv.getSingleValueNode();
 
 				if (vn instanceof IndividualNode) {
 

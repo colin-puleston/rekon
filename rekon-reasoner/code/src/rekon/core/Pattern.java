@@ -103,13 +103,14 @@ public class Pattern extends PatternComponent {
 
 	void registerDefinitionRefedNames() {
 
-		registerAsDefinitionRefed(nodes, MatchRole.PATTERN_ROOT);
+		for (NodeX n : nodes.asNodes()) {
+
+			n.registerAsDefinitionRefed(MatchRole.ROOT);
+		}
 
 		for (Relation r : directRelations) {
 
-			r.getProperty().registerAsDefinitionRefed(MatchRole.PATTERN_RELATION);
-
-			registerAsDefinitionRefed(r.getTargetNodes(), MatchRole.PATTERN_VALUE);
+			r.registerAsDefinitionRefed();
 		}
 	}
 
@@ -170,7 +171,7 @@ public class Pattern extends PatternComponent {
 
 			if (r.getProperty().matchablePatternProperty()) {
 
-				for (NodeX tn : r.getTargetNodes().asNodes()) {
+				for (NodeX tn : r.getReferencedNodes().asNodes()) {
 
 					if (tn.matchablePatternValue(initialPass)) {
 
@@ -227,14 +228,6 @@ public class Pattern extends PatternComponent {
 		for (Relation re : directRelations) {
 
 			re.render(r);
-		}
-	}
-
-	private void registerAsDefinitionRefed(Names regNames, MatchRole role) {
-
-		for (NodeX n : regNames.asNodes()) {
-
-			n.registerAsDefinitionRefed(role);
 		}
 	}
 

@@ -29,13 +29,19 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class PatternMatcher extends NodeMatcher {
+class PatternMatcher {
 
+	private NodeX node;
 	private Pattern pattern;
 
 	public String toString() {
 
-		return getClass().getSimpleName() + "(" + getNode().getLabel() + ")";
+		return getClass().getSimpleName() + "(" + node.getLabel() + ")";
+	}
+
+	public NodeX getNode() {
+
+		return node;
 	}
 
 	PatternMatcher(NodeX node) {
@@ -45,8 +51,7 @@ class PatternMatcher extends NodeMatcher {
 
 	PatternMatcher(NodeX node, Pattern pattern) {
 
-		super(node);
-
+		this.node = node;
 		this.pattern = pattern;
 	}
 
@@ -70,7 +75,7 @@ class PatternMatcher extends NodeMatcher {
 
 	void checkExpandLocalProfile() {
 
-		ProfilePatternsExpander.checkExpandLocal(pattern);
+		ProfilesExpander.checkExpandLocal(pattern);
 	}
 
 	Pattern getPattern() {
@@ -78,47 +83,9 @@ class PatternMatcher extends NodeMatcher {
 		return pattern;
 	}
 
-	Names getDirectlyImpliedSubNodes() {
-
-		return Names.NO_NAMES;
-	}
-
 	boolean subsumes(PatternMatcher test) {
 
 		return pattern.subsumes(test.pattern);
-	}
-
-	boolean subsumesNodeDirectly(NodeX test) {
-
-		return false;
-	}
-
-	boolean subsumedBy(PatternMatcher test) {
-
-		return test.subsumes(this);
-	}
-
-	boolean subsumedBy(DisjunctionMatcher test) {
-
-		for (NodeX d : test.getDisjuncts().asNodes()) {
-
-			if (d.subsumesMatcher(this)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	boolean hasDisjunct(NodeX test) {
-
-		return false;
-	}
-
-	void acceptVisitor(NodeMatcherVisitor visitor) {
-
-		visitor.visit(this);
 	}
 
 	void render(PatternRenderer r) {

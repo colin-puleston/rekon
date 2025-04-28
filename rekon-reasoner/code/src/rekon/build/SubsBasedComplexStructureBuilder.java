@@ -129,9 +129,9 @@ class SubsBasedComplexStructureBuilder {
 
 	private ClassNode createDefinitionClass(Pattern defn) {
 
-		ClassNode c = matchStructures.createPatternClass();
+		ClassNode c = matchStructures.createFreeClass();
 
-		matchStructures.addDefinitionPattern(c, defn);
+		matchStructures.addDefinition(c, defn);
 
 		return c;
 	}

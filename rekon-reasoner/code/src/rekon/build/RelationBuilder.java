@@ -40,6 +40,8 @@ class RelationBuilder {
 	private AllRelations allRelations;
 	private DataRelations dataRelations;
 
+	private NodeValues nodeValues;
+
 	private abstract class Relations extends EntityBuilder<InputRelation, Relation> {
 
 		Relations(boolean dynamic) {
@@ -57,10 +59,9 @@ class RelationBuilder {
 
 		Relation checkCreate(InputRelation source) {
 
-			NodeProperty prop = source.getNodeProperty();
-			NodeX n = componentBuilder.toNode(source.getNodeValue());
+			NodeValue v = nodeValues.get(source.getNodeValue());
 
-			return n != null ? create(prop, new NodeValue(n)) : null;
+			return v != null ? create(source.getNodeProperty(), v) : null;
 		}
 
 		abstract Relation create(NodeProperty prop, NodeValue target);
@@ -105,6 +106,50 @@ class RelationBuilder {
 		}
 	}
 
+	private class NodeValues extends EntityBuilder<InputNode, NodeValue> {
+
+		NodeValues(boolean dynamic) {
+
+			super(dynamic);
+		}
+
+		NodeValue checkCreate(InputNode source) {
+
+			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
+
+				return new NodeValue(toDisjuncts(source));
+			}
+
+			NodeX n = componentBuilder.toSingleValueNode(source);
+
+			if (n != null) {
+
+				return new NodeValue(n);
+			}
+
+			return null;
+		}
+
+		private Collection<? extends NodeX> toDisjuncts(InputNode source) {
+
+			Set<NodeX> disjuncts = new HashSet<NodeX>();
+
+			for (InputNode in : source.asDisjuncts()) {
+
+				NodeX n = componentBuilder.toSingleValueNode(in);
+
+				if (n == null) {
+
+					return null;
+				}
+
+				disjuncts.add(n);
+			}
+
+			return disjuncts;
+		}
+	}
+
 	RelationBuilder(ComponentBuilder componentBuilder, boolean dynamic) {
 
 		this.componentBuilder = componentBuilder;
@@ -112,6 +157,8 @@ class RelationBuilder {
 		someRelations = new SomeRelations(dynamic);
 		allRelations = new AllRelations(dynamic);
 		dataRelations = new DataRelations(dynamic);
+
+		nodeValues = new NodeValues(dynamic);
 	}
 
 	Relation toRelation(InputRelation source) {

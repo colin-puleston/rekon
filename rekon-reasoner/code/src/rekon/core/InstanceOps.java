@@ -38,7 +38,7 @@ public class InstanceOps {
 
 		private Set<Instance> added = new HashSet<Instance>();
 
-		void add(Instance instance, SinglePatternSource profileBuilder) {
+		void add(Instance instance, PatternSource profileBuilder) {
 
 			InstanceNode node = instance.getNode();
 			InstancePattern ip = new InstancePattern(node, profileBuilder);
@@ -84,7 +84,7 @@ public class InstanceOps {
 		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
-	public void add(Instance instance, SinglePatternSource profileBuilder) {
+	public void add(Instance instance, PatternSource profileBuilder) {
 
 		instance.getNode().checkClassifiable();
 
@@ -105,7 +105,7 @@ public class InstanceOps {
 		return true;
 	}
 
-	public List<Instance> match(MultiPatternSource queryBuilder) {
+	public List<Instance> match(PatternSource queryBuilder) {
 
 		DynamicExpression q = createQueryExpression(queryBuilder);
 		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
@@ -115,9 +115,7 @@ public class InstanceOps {
 				: matchesToInstances(matches);
 	}
 
-	public boolean matches(
-						MultiPatternSource queryBuilder,
-						SinglePatternSource profileBuilder) {
+	public boolean matches(PatternSource queryBuilder, PatternSource profileBuilder) {
 
 		DynamicExpression q = createQueryExpression(queryBuilder);
 		DynamicExpression p = createInstanceExpression(profileBuilder);
@@ -150,12 +148,12 @@ public class InstanceOps {
 		}
 	}
 
-	private DynamicExpression createQueryExpression(MultiPatternSource source) {
+	private DynamicExpression createQueryExpression(PatternSource source) {
 
 		return checkExpressionCreated(new DynamicExpression(source), "query");
 	}
 
-	private DynamicExpression createInstanceExpression(SinglePatternSource source) {
+	private DynamicExpression createInstanceExpression(PatternSource source) {
 
 		return checkExpressionCreated(new DynamicExpression(source), "instance");
 	}

@@ -38,11 +38,8 @@ public class Ontology {
 
 	private List<ClassNode> freeClassNodes = new ArrayList<ClassNode>();
 
-	private List<PatternMatcher> profilePatterns = new ArrayList<PatternMatcher>();
-	private List<PatternMatcher> definitionPatterns = new ArrayList<PatternMatcher>();
-
-	private List<DisjunctionMatcher> allDisjunctions = new ArrayList<DisjunctionMatcher>();
-	private List<DisjunctionMatcher> definitionDisjunctions = new ArrayList<DisjunctionMatcher>();
+	private List<PatternMatcher> allProfiles = new ArrayList<PatternMatcher>();
+	private List<PatternMatcher> allDefinitions = new ArrayList<PatternMatcher>();
 
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
@@ -114,24 +111,14 @@ public class Ontology {
 		return allNodes;
 	}
 
-	List<PatternMatcher> getProfilePatterns() {
+	List<PatternMatcher> getAllProfiles() {
 
-		return profilePatterns;
+		return allProfiles;
 	}
 
-	List<PatternMatcher> getDefinitionPatterns() {
+	List<PatternMatcher> getAllDefinitions() {
 
-		return definitionPatterns;
-	}
-
-	List<DisjunctionMatcher> getAllDisjunctions() {
-
-		return allDisjunctions;
-	}
-
-	List<DisjunctionMatcher> getDefinitionDisjunctions() {
-
-		return definitionDisjunctions;
+		return allDefinitions;
 	}
 
 	DynamicSubsumers getDynamicSubsumers() {
@@ -156,22 +143,8 @@ public class Ontology {
 
 		for (NodeX n : allNodes) {
 
-			profilePatterns.addAll(n.getProfilePatternMatcherAsList());
-			definitionPatterns.addAll(n.getDefinitionPatternMatchers());
-			allDisjunctions.addAll(n.getAllDisjunctionMatchers());
-		}
-
-		addDefinitionDisjunctions();
-	}
-
-	private void addDefinitionDisjunctions() {
-
-		for (DisjunctionMatcher d : allDisjunctions) {
-
-			if (d.definition()) {
-
-				definitionDisjunctions.add(d);
-			}
+			allProfiles.addAll(n.getProfileMatcherAsList());
+			allDefinitions.addAll(n.getDefinitionMatchers());
 		}
 	}
 }

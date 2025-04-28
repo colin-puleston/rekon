@@ -39,7 +39,6 @@ class ComponentBuilder {
 
 	private PatternBuilder patternBuilder;
 	private RelationBuilder relationBuilder;
-	private DisjunctionBuilder disjunctionBuilder;
 
 	private Map<InputNode, ClassNode> patternClasses = new HashMap<InputNode, ClassNode>();
 
@@ -54,7 +53,6 @@ class ComponentBuilder {
 
 		patternBuilder = new PatternBuilder(this, names, dynamic);
 		relationBuilder = new RelationBuilder(this, dynamic);
-		disjunctionBuilder = new DisjunctionBuilder(this, dynamic);
 	}
 
 	Pattern toPattern(InputNode source) {
@@ -72,12 +70,7 @@ class ComponentBuilder {
 		return relationBuilder.toRelation(source);
 	}
 
-	Collection<NodeX> toDisjunction(Collection<InputNode> source) {
-
-		return disjunctionBuilder.toDisjunction(source);
-	}
-
-	NodeX toNode(InputNode source) {
+	NodeX toSingleValueNode(InputNode source) {
 
 		NodeX customNode = customiser.checkToCustomNode(source);
 
@@ -95,10 +88,6 @@ class ComponentBuilder {
 			case INDIVIDUAL:
 
 				return source.asIndividualNode();
-
-			case DISJUNCTION:
-
-				return disjunctsToNode(source.asDisjuncts());
 
 			case CONJUNCTION:
 			case RELATION:
@@ -123,35 +112,14 @@ class ComponentBuilder {
 
 			if (p != null) {
 
-				pCls = structures.createPatternClass();
+				pCls = structures.createFreeClass();
 
-				structures.addProfilePattern(pCls, p);
+				structures.addProfile(pCls, p);
 
 				patternClasses.put(source, pCls);
 			}
 		}
 
 		return pCls;
-	}
-
-	private NodeX disjunctsToNode(Collection<InputNode> source) {
-
-		Collection<NodeX> disjuncts = toDisjunction(source);
-
-		if (disjuncts == null) {
-
-			return null;
-		}
-
-		if (disjuncts.size() == 1) {
-
-			return disjuncts.iterator().next();
-		}
-
-		ClassNode c = structures.createDisjunctionClass();
-
-		structures.addDisjunction(c, disjuncts, false);
-
-		return c;
 	}
 }

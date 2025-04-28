@@ -52,137 +52,42 @@ public class MatchStructures {
 
 			return true;
 		}
-
-		boolean visit(DisjunctionMatcher m) {
-
-			m.ensureDefinition();
-
-			return true;
-		}
 	}
 
-	private class ProfileRelationsDisjunctionTargetConverter {
-
-		private NodeX node;
-
-		ProfileRelationsDisjunctionTargetConverter(NodeX node) {
-
-			this.node = node;
-		}
-
-		void checkAll(Collection<Relation> relations) {
-
-			for (Relation r : relations) {
-
-				if (r instanceof SomeRelation) {
-
-					check((SomeRelation)r);
-				}
-			}
-		}
-
-		private void check(SomeRelation relation) {
-
-			NodeProperty p = relation.getNodeProperty();
-			NodeX v = relation.getNodeValueTarget().getValueNode();
-
-			for (DisjunctionMatcher d : v.getAllDisjunctionMatchers()) {
-
-				convert(p, d);
-			}
-		}
-
-		private void convert(NodeProperty p, DisjunctionMatcher disjunction) {
-
-			List<ClassNode> newDjs = new ArrayList<ClassNode>();
-
-			for (NodeX d : disjunction.getDisjuncts().asNodes()) {
-
-				newDjs.add(addNewDisjunct(p, new NodeValue(d)));
-			}
-
-			node.addSubsumer(addNewDisjunction(newDjs));
-		}
-
-		private ClassNode addNewDisjunct(NodeProperty p, NodeValue target) {
-
-			ClassNode c = createPatternClass();
-			SomeRelation r = new SomeRelation(p, target);
-
-			addProfilePattern(c, new Pattern(c, r));
-
-			return c;
-		}
-
-		private ClassNode addNewDisjunction(List<ClassNode> disjuncts) {
-
-			ClassNode c = createDisjunctionClass();
-
-			addDisjunction(c, disjuncts, false);
-
-			return c;
-		}
-	}
-
-	public void checkAddProfilePattern(NodeX node, Collection<Relation> relations) {
+	public void checkAddProfile(NodeX node, Collection<Relation> relations) {
 
 		if (node.getClassifier().multipleAssertedSubsumers() || !relations.isEmpty()) {
 
-			addProfilePattern(node, new Pattern(node, relations));
+			addProfile(node, new Pattern(node, relations));
 		}
 	}
 
-	public PatternMatcher addProfilePattern(NodeX node, Pattern profile) {
+	public PatternMatcher addProfile(NodeX node, Pattern profile) {
 
 		ensurePatternNodesAreSubsumers(node, profile);
-		checkEnhanceNewProfilePattern(node, profile);
 
-		PatternMatcher m = node.addProfilePatternMatcher(profile);
+		PatternMatcher m = node.addProfile(profile);
 
-		onAddedProfileMatcher(m);
+		onAddedProfile(m);
 
 		return m;
 	}
 
-	public PatternMatcher addDefinitionPattern(NodeX node, Pattern defn) {
+	public PatternMatcher addDefinition(NodeX node, Pattern defn) {
 
 		ensurePatternNodesAreSubsumers(node, defn);
-		ensureProfilePatternMatcher(node, defn);
+		ensureProfile(node, defn);
 
-		PatternMatcher m = node.addDefinitionPatternMatcher(defn);
+		PatternMatcher m = node.addDefinitionMatcher(defn);
 
 		definitionPropagator.crawlFrom(defn);
 
 		return m;
 	}
 
-	public DisjunctionMatcher addDisjunction(
-									NodeX node,
-									Collection<? extends NodeX> disjuncts,
-									boolean definition) {
+	public ClassNode createFreeClass() {
 
-		DisjunctionMatcher m = node.addDisjunctionMatcher(disjuncts);
-
-		if (definition) {
-
-			m.ensureDefinition();
-
-			definitionPropagator.crawlFrom(m);
-		}
-
-		onAddedProfileMatcher(m);
-
-		return m;
-	}
-
-	public ClassNode createPatternClass() {
-
-		return freeClasses.createPatternClass();
-	}
-
-	public ClassNode createDisjunctionClass() {
-
-		return freeClasses.createDisjunctionClass();
+		return freeClasses.create();
 	}
 
 	MatchStructures(FreeClasses freeClasses) {
@@ -190,43 +95,25 @@ public class MatchStructures {
 		this.freeClasses = freeClasses;
 	}
 
-	void onAddedProfileMatcher(NodeMatcher matcher) {
+	void onAddedProfile(PatternMatcher matcher) {
 	}
 
-	private void ensureProfilePatternMatcher(NodeX node, Pattern defn) {
+	private void ensureProfile(NodeX node, Pattern defn) {
 
-		PatternMatcher pm = node.getProfilePatternMatcher();
+		PatternMatcher pm = node.getProfileMatcher();
 
 		if (pm == null) {
 
-			pm = node.addProfilePatternMatcher();
+			pm = node.addProfile();
 
-			onAddedProfileMatcher(pm);
+			onAddedProfile(pm);
 		}
 
 		Collection<Relation> newRels = pm.absorbDefinitionIntoProfile(defn);
-
-		checkEnhanceProfilePattern(node, pm.getPattern(), newRels);
 	}
 
 	private void ensurePatternNodesAreSubsumers(NodeX node, Pattern pattern) {
 
 		node.addSubsumers(pattern.getNodes());
-	}
-
-	private void checkEnhanceNewProfilePattern(NodeX node, Pattern profile) {
-
-		checkEnhanceProfilePattern(node, profile, profile.getDirectRelations());
-	}
-
-	private void checkEnhanceProfilePattern(
-					NodeX node,
-					Pattern profile,
-					Collection<Relation> newRels) {
-
-		if (!newRels.isEmpty()) {
-
-			new ProfileRelationsDisjunctionTargetConverter(node).checkAll(newRels);
-		}
 	}
 }

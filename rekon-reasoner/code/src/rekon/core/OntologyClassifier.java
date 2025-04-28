@@ -31,14 +31,14 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-class OntologyClassifier extends NodeMatcherClassifier {
+class OntologyClassifier extends SubsumptionChecker {
 
 	private Ontology ontology;
 	private OntologyClassifyListener classifyListener;
 
-	private class PatternSubsumedsChecker extends MultiThreadListProcessor<PatternMatcher> {
+	private class MultiSubsumptionChecker extends MultiThreadListProcessor<PatternMatcher> {
 
-		private PotentialPatternSubsumeds candidatesFilter;
+		private PotentialSubsumeds candidatesFilter;
 
 		protected void processElement(PatternMatcher defn) {
 
@@ -48,45 +48,18 @@ class OntologyClassifier extends NodeMatcherClassifier {
 			}
 		}
 
-		PatternSubsumedsChecker(List<PatternMatcher> candidates) {
+		MultiSubsumptionChecker(List<PatternMatcher> candidates) {
 
-			candidatesFilter = new PotentialCorePatternSubsumeds(candidates);
+			candidatesFilter = new PotentialCoreSubsumeds(candidates);
 
-			invokeListProcesses(ontology.getDefinitionPatterns());
-		}
-	}
-
-	private class DisjunctionSubsumedsChecker extends MultiThreadListProcessor<DisjunctionMatcher> {
-
-		private PotentialDisjunctionSubsumeds candidatesFilter;
-
-		protected void processElement(DisjunctionMatcher defn) {
-
-			for (DisjunctionMatcher c : candidatesFilter.getPotentialsFor(defn)) {
-
-				checkSubsumption(defn, c);
-			}
-		}
-
-		DisjunctionSubsumedsChecker(List<DisjunctionMatcher> candidates) {
-
-			candidatesFilter = new PotentialDisjunctionSubsumeds(candidates);
-
-			invokeListProcesses(ontology.getDefinitionDisjunctions());
+			invokeListProcesses(ontology.getAllDefinitions());
 		}
 	}
 
 	private class Pass {
 
 		private ClassifyPassType passType;
-
-		private List<PatternMatcher> patternMatchCandidates
-										= new ArrayList<PatternMatcher>();
-
-		private List<DisjunctionMatcher> disjunctionMatchCandidates
-											= new ArrayList<DisjunctionMatcher>();
-		private List<DisjunctionMatcher> disjunctionClassifyCandidates
-											= new ArrayList<DisjunctionMatcher>();
+		private List<PatternMatcher> candidates = new ArrayList<PatternMatcher>();
 
 		private RelationEndPointSubsumptions relationEndPointSubsumptions;
 
@@ -106,7 +79,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 			if (expansionPass()) {
 
-				ProfilePatternsExpander.expandAll(ontology);
+				ProfilesExpander.expandAll(ontology);
 
 				findAllCandidates();
 			}
@@ -131,9 +104,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 		int candidateCount() {
 
-			return patternMatchCandidates.size()
-					+ disjunctionClassifyCandidates.size()
-					+ relationEndPointSubsumptions.candidateCount();
+			return candidates.size() + relationEndPointSubsumptions.candidateCount();
 		}
 
 		boolean phaseInitialPass() {
@@ -141,7 +112,7 @@ class OntologyClassifier extends NodeMatcherClassifier {
 			return passType != ClassifyPassType.DEFAULT;
 		}
 
-		boolean patternMatchCandidate(Pattern pattern) {
+		boolean classifyCandidate(Pattern pattern) {
 
 			return expansionPass()
 					? pattern.expandedProfile()
@@ -160,56 +131,22 @@ class OntologyClassifier extends NodeMatcherClassifier {
 
 		private void findAllCandidates() {
 
-			findPatternClassifyCandidates();
-			findDisjunctionClassifyCandidates();
-		}
+			for (PatternMatcher m : ontology.getAllProfiles()) {
 
-		private void findPatternClassifyCandidates() {
+				if (classifyCandidate(m.getPattern())) {
 
-			for (PatternMatcher m : ontology.getProfilePatterns()) {
-
-				if (patternMatchCandidate(m.getPattern())) {
-
-					patternMatchCandidates.add(m);
+					candidates.add(m);
 				}
 
 				relationEndPointSubsumptions.checkAddInferenceSource(m);
 			}
 		}
 
-		private void findDisjunctionClassifyCandidates() {
-
-			boolean initPass = phaseInitialPass();
-
-			for (DisjunctionMatcher d : ontology.getAllDisjunctions()) {
-
-				if (d.unprocessedSubsumers(initPass)) {
-
-					disjunctionClassifyCandidates.add(d);
-
-					if (d.matchable(initPass)) {
-
-						disjunctionMatchCandidates.add(d);
-					}
-				}
-			}
-		}
-
 		private void checkSubsumptions() {
 
-			new PatternSubsumedsChecker(patternMatchCandidates);
-			new DisjunctionSubsumedsChecker(disjunctionMatchCandidates);
+			new MultiSubsumptionChecker(candidates);
 
-			inferNewCommonDisjunctSubsumers();
 			relationEndPointSubsumptions.inferNewSubsumptions();
-		}
-
-		private void inferNewCommonDisjunctSubsumers() {
-
-			for (DisjunctionMatcher d : disjunctionClassifyCandidates) {
-
-				d.inferNewCommonDisjunctSubsumers();
-			}
 		}
 
 		private void expandAllNewInferences() {
@@ -291,11 +228,6 @@ class OntologyClassifier extends NodeMatcherClassifier {
 	}
 
 	boolean patternSubsumption(Pattern defn, Pattern candidate) {
-
-		if (candidate.getProfileRelations().getAll().size() < 2) {
-
-			return true;
-		}
 
 		return defn.subsumesRelations(candidate);
 	}

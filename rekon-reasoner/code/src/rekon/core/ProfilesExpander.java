@@ -31,7 +31,7 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-class ProfilePatternsExpander {
+class ProfilesExpander {
 
 	static private class OntologyExpander {
 
@@ -53,7 +53,7 @@ class ProfilePatternsExpander {
 
 				anyNewExpansions = false;
 
-				invokeListProcesses(ontology.getProfilePatterns());
+				invokeListProcesses(ontology.getAllProfiles());
 
 				return anyNewExpansions;
 			}
@@ -100,7 +100,7 @@ class ProfilePatternsExpander {
 
 		private void initExpansions(boolean firstPass) {
 
-			for (PatternMatcher p : ontology.getProfilePatterns()) {
+			for (PatternMatcher p : ontology.getAllProfiles()) {
 
 				initExpansion(p, firstPass);
 			}

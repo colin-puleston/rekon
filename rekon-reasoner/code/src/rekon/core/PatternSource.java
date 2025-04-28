@@ -27,63 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-abstract class NodeMatcher {
+public interface PatternSource {
 
-	private NodeX node;
-
-	private class GeneralSubsumedByTester extends NodeMatcherVisitor {
-
-		boolean subsumedBy = false;
-
-		GeneralSubsumedByTester(NodeMatcher test) {
-
-			test.acceptVisitor(this);
-		}
-
-		void visit(PatternMatcher test) {
-
-			subsumedBy = subsumedBy(test);
-		}
-
-		void visit(DisjunctionMatcher test) {
-
-			subsumedBy = subsumedBy(test);
-		}
-	}
-
-	NodeMatcher(NodeX node) {
-
-		this.node = node;
-	}
-
-	NodeX getNode() {
-
-		return node;
-	}
-
-	abstract void checkExpandLocalProfile();
-
-	abstract Names getDirectlyImpliedSubNodes();
-
-	boolean subsumes(NodeMatcher test) {
-
-		return test.subsumedBy(this);
-	}
-
-	abstract boolean subsumedBy(PatternMatcher test);
-
-	abstract boolean subsumedBy(DisjunctionMatcher test);
-
-	abstract boolean subsumesNodeDirectly(NodeX test);
-
-	abstract boolean hasDisjunct(NodeX test);
-
-	abstract void acceptVisitor(NodeMatcherVisitor visitor);
-
-	abstract void render(PatternRenderer r);
-
-	private boolean subsumedBy(NodeMatcher test) {
-
-		return new GeneralSubsumedByTester(test).subsumedBy;
-	}
+	public Pattern create(MatchStructures matchStructures);
 }

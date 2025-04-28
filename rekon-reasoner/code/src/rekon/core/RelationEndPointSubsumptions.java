@@ -262,7 +262,7 @@ class RelationEndPointSubsumptions {
 					collected.put(p, targets);
 				}
 
-				targets.add(rel.getNodeValueTarget().getValueNode());
+				targets.add(rel.getNodeValueTarget().getSingleValueNode());
 			}
 		}
 
@@ -285,7 +285,7 @@ class RelationEndPointSubsumptions {
 
 			private void checkAddForTarget(SomeRelation r) {
 
-				NodeX target = r.getNodeValueTarget().getValueNode();
+				NodeX target = r.getNodeValueTarget().getSingleValueNode();
 
 				if (target instanceof IndividualNode) {
 
@@ -408,12 +408,12 @@ class RelationEndPointSubsumptions {
 
 	private boolean expandedProfile(NodeX node) {
 
-		return getProfilePattern(node).expandedProfile();
+		return getProfile(node).expandedProfile();
 	}
 
 	private Set<Relation> getIndirectRelations(NodeX node) {
 
-		Pattern p = getProfilePattern(node);
+		Pattern p = getProfile(node);
 		Set<Relation> rels = new HashSet<Relation>();
 
 		rels.addAll(p.getProfileRelations().getAll());
@@ -424,11 +424,11 @@ class RelationEndPointSubsumptions {
 
 	private Collection<Relation> getDirectRelations(NodeX node) {
 
-		return getProfilePattern(node).getDirectRelations();
+		return getProfile(node).getDirectRelations();
 	}
 
-	private Pattern getProfilePattern(NodeX node) {
+	private Pattern getProfile(NodeX node) {
 
-		return node.getProfilePatternMatcher().getPattern();
+		return node.getProfileMatcher().getPattern();
 	}
 }

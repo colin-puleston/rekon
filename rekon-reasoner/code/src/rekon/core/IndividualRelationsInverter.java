@@ -35,7 +35,7 @@ class IndividualRelationsInverter {
 
 		for (IndividualNode n : names.getIndividualNodes()) {
 
-			for (PatternMatcher p : n.getProfilePatternMatcherAsList()) {
+			for (PatternMatcher p : n.getProfileMatcherAsList()) {
 
 				invertAnyFor(p);
 			}
@@ -62,19 +62,19 @@ class IndividualRelationsInverter {
 			NodeValue invSource = forwardRel.getNodeValueTarget();
 			NodeValue invTarget = new NodeValue(forwardSource);
 
-			PatternMatcher pp = resolveProfilePattern(invSource.getValueNode());
+			PatternMatcher pp = resolveProfile(invSource.getSingleValueNode());
 
 			pp.addRelation(new SomeRelation(prop.getInverse(), invTarget));
 		}
 	}
 
-	static private PatternMatcher resolveProfilePattern(NodeX node) {
+	static private PatternMatcher resolveProfile(NodeX node) {
 
-		PatternMatcher p = node.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfileMatcher();
 
 		if (p == null) {
 
-			p = node.addProfilePatternMatcher();
+			p = node.addProfile();
 		}
 
 		return p;

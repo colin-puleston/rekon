@@ -40,11 +40,6 @@ public abstract class Relation extends PatternComponent {
 		this.target = target;
 	}
 
-	boolean existential() {
-
-		return true;
-	}
-
 	boolean chainExpandable() {
 
 		return false;
@@ -65,19 +60,36 @@ public abstract class Relation extends PatternComponent {
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
 	}
 
+	boolean propertySubsumption(PropertyX otherProperty) {
+
+		return property.subsumes(otherProperty);
+	}
+
+	boolean inversePropertyMatch() {
+
+		return false;
+	}
+
 	void collectNames(NameCollector collector) {
 
-		if (existential() || collector.includeUniversalRelationProperties()) {
-
-			collector.collectName(property);
-		}
+		collectNamesForProperty(collector);
 
 		target.collectNames(collector.forNextRank());
 	}
 
-	Names getTargetNodes() {
+	void collectNamesForProperty(NameCollector collector) {
+
+		collector.collectName(property);
+	}
+
+	Names getReferencedNodes() {
 
 		return Names.NO_NAMES;
+	}
+
+	void registerAsDefinitionRefed() {
+
+		property.registerAsDefinitionRefed(MatchRole.RELATION);
 	}
 
 	void render(PatternRenderer r) {
@@ -94,16 +106,6 @@ public abstract class Relation extends PatternComponent {
 
 	private boolean subsumesOtherOfType(Relation r) {
 
-		return propertySubsumption(r) && target.subsumes(r.target);
-	}
-
-	private boolean propertySubsumption(Relation r) {
-
-		return existential() ? subsumesProperty(r) : r.subsumesProperty(this);
-	}
-
-	private boolean subsumesProperty(Relation r) {
-
-		return property.subsumes(r.property);
+		return propertySubsumption(r.getProperty()) && target.subsumes(r.target);
 	}
 }

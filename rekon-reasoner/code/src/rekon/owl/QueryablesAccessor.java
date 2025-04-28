@@ -78,8 +78,8 @@ class QueryablesAccessor {
 		return node != null ? queryables.create(node) : Queryables.INVALID_INPUT;
 	}
 
-	private MultiPatternSource toDynamicPatternSource(OWLClassExpression expr) {
+	private PatternSource toDynamicPatternSource(OWLClassExpression expr) {
 
-		return coreBuilder.createMultiPatternSource(exprConverter.toNode(expr));
+		return coreBuilder.createPatternSource(exprConverter.toNode(expr));
 	}
 }

@@ -36,26 +36,26 @@ class MatchNamesResolver {
 
 	static Names expand(Names leafNames, MatchRole role) {
 
-		NameSet resolved = new NameSet();
+		NameSet expanded = new NameSet();
 
 		for (Name n : leafNames) {
 
-			checkAdd(resolved, n, role);
+			checkAdd(expanded, n, role);
 
 			for (Name s : n.getSubsumers()) {
 
-				checkAdd(resolved, s, role);
+				checkAdd(expanded, s, role);
 			}
 		}
 
-		return resolved;
+		return expanded;
 	}
 
-	static private void checkAdd(Names resolved, Name name, MatchRole role) {
+	static private void checkAdd(Names expanded, Name n, MatchRole role) {
 
-		if (role == null || name.definitionRefed(role)) {
+		if (role == null || n.definitionRefed(role)) {
 
-			resolved.add(name);
+			expanded.add(n);
 		}
 	}
 }

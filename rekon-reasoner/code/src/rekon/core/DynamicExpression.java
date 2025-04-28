@@ -31,9 +31,9 @@ import java.util.*;
  */
 class DynamicExpression extends LocalExpression {
 
-	private MultiPatternSource disjunctsSource;
+	private PatternSource source;
 
-	private NodeMatcher expressionMatcher = null;
+	private PatternMatcher expressionMatcher = null;
 	private NodeX asSingleNode = null;
 
 	private class DynamicClasses extends FreeClasses {
@@ -60,24 +60,14 @@ class DynamicExpression extends LocalExpression {
 
 		NodeX create() {
 
-			Collection<Pattern> djs = disjunctsSource.createAll(matchStructures);
+			Pattern p = source.create(matchStructures);
 
-			if (djs == null) {
+			if (p == null) {
 
 				return null;
 			}
 
-			if (djs.size() == 1) {
-
-				return createSinglePattern(djs.iterator().next());
-			}
-
-			return createDisjunction(djs);
-		}
-
-		private NodeX createSinglePattern(Pattern pattern) {
-
-			asSingleNode = pattern.toSingleNode();
+			asSingleNode = p.toSingleNode();
 
 			if (asSingleNode != null) {
 
@@ -86,49 +76,19 @@ class DynamicExpression extends LocalExpression {
 				return asSingleNode;
 			}
 
-			ClassNode defnCls = matchStructures.createPatternClass();
+			ClassNode defnCls = matchStructures.createFreeClass();
 
-			expressionMatcher = matchStructures.addDefinitionPattern(defnCls, pattern);
+			expressionMatcher = matchStructures.addDefinition(defnCls, p);
 
 			return defnCls;
 		}
-
-		private NodeX createDisjunction(Collection<Pattern> djs) {
-
-			List<NodeX> djNodes = new ArrayList<NodeX>();
-
-			for (Pattern dj : djs) {
-
-				NodeX djNode = dj.toSingleNode();
-
-				if (djNode == null) {
-
-					djNode = matchStructures.createPatternClass();
-
-					matchStructures.addDefinitionPattern(djNode, dj);
-				}
-
-				djNodes.add(djNode);
-			}
-
-			ClassNode djCls = matchStructures.createDisjunctionClass();
-
-			expressionMatcher = matchStructures.addDisjunction(djCls, djNodes, true);
-
-			return djCls;
-		}
 	}
 
-	DynamicExpression(MultiPatternSource disjunctsSource) {
+	DynamicExpression(PatternSource source) {
 
-		this.disjunctsSource = disjunctsSource;
+		this.source = source;
 
 		initialise(new DynamicClasses());
-	}
-
-	DynamicExpression(SinglePatternSource patternSource) {
-
-		this(new SingleAsMultiPatternSource(patternSource));
 	}
 
 	NodeX createExpression(MatchStructures matchStructures) {
@@ -136,7 +96,7 @@ class DynamicExpression extends LocalExpression {
 		return new ExpressionCreator(matchStructures).create();
 	}
 
-	NodeMatcher getExpressionMatcher() {
+	PatternMatcher getExpressionMatcher() {
 
 		return expressionMatcher;
 	}

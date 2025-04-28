@@ -34,10 +34,10 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class PotentialSubsumptions<M extends NodeMatcher> {
+abstract class PotentialSubsumptions {
 
-	private List<M> allOptions = null;
-	private Map<M, Integer> optionIdxs = new HashMap<M, Integer>();
+	private List<PatternMatcher> allOptions = null;
+	private Map<NodeX, Integer> optionIdxsByNode = new HashMap<NodeX, Integer>();
 
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
@@ -50,7 +50,11 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 		private Map<Name, IntHashSet> optionIdxsByRefName = new HashMap<Name, IntHashSet>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
-		void update(M option, int optionIdx, Names rankNames, UpdateType updateType) {
+		void update(
+				PatternMatcher option,
+				int optionIdx,
+				Names rankNames,
+				UpdateType updateType) {
 
 			switch (updateType) {
 
@@ -71,24 +75,28 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			}
 		}
 
-		IntegerCollector collectOptionsFor(Integer requestIdx, Names rankNames) {
+		IntegerCollector collectOptionsFor(Names rankNames) {
 
-			IntegerCollector rankOptions = createRankOptionsCollector();
+			IntegerCollector rankOpts = createRankOptionsCollector();
 
 			for (Name n : rankNames) {
 
-				rankOptions.absorbFrom(getOptionsFor(requestIdx, n));
+				rankOpts.absorbFrom(getOptionsFor(n));
 
-				if (rankOptions.emptyResult()) {
+				if (rankOpts.emptyResult()) {
 
 					break;
 				}
 			}
 
-			return rankOptions;
+			return rankOpts;
 		}
 
-		private void registerOption(M option, int optionIdx, Names rankNames, boolean coreOption) {
+		private void registerOption(
+						PatternMatcher option,
+						int optionIdx,
+						Names rankNames,
+						boolean coreOption) {
 
 			for (Name n : resolveRankNamesForRegistration(rankNames)) {
 
@@ -96,7 +104,10 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			}
 		}
 
-		private void deregisterOption(M option, int optionIdx, Names rankNames) {
+		private void deregisterOption(
+						PatternMatcher option,
+						int optionIdx,
+						Names rankNames) {
 
 			for (Name n : resolveRankNamesForRegistration(rankNames)) {
 
@@ -109,7 +120,11 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			return resolveNamesForRegistration(rankNames, rank).getNames();
 		}
 
-		private void registerOptionName(M option, int optionIdx, Name n, boolean coreOption) {
+		private void registerOptionName(
+						PatternMatcher option,
+						int optionIdx,
+						Name n,
+						boolean coreOption) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
@@ -138,7 +153,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			optIdxs.add(optionIdx);
 		}
 
-		private void deregisterOptionName(M option, int optionIdx, Name n) {
+		private void deregisterOptionName(PatternMatcher option, int optionIdx, Name n) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
@@ -155,13 +170,13 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			optIdxs.remove(optionIdx);
 		}
 
-		private IntegerUnion getOptionsFor(Integer requestIdx, Name n) {
+		private IntegerUnion getOptionsFor(Name n) {
 
 			IntegerUnion optionIdxs = new IntegerUnion();
 
 			for (Name rn : resolveNamesForRetrieval(new NameSet(n), rank)) {
 
-				collectDirectOptionsFor(requestIdx, rn, optionIdxs);
+				collectDirectOptionsFor(rn, optionIdxs);
 
 				if (optionIdxs.allOptionsResult()) {
 
@@ -172,7 +187,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			return optionIdxs;
 		}
 
-		private void collectDirectOptionsFor(Integer requestIdx, Name n, IntegerUnion optionIdxs) {
+		private void collectDirectOptionsFor(Name n, IntegerUnion optionIdxs) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
@@ -184,14 +199,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 				if (optIdxs != null) {
 
-					if (requestIdx != null) {
-
-						optionIdxs.absorbExcept(optIdxs, requestIdx);
-					}
-					else {
-
-						optionIdxs.absorb(optIdxs);
-					}
+					optionIdxs.absorb(optIdxs);
 				}
 			}
 		}
@@ -207,11 +215,11 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 	private class UpdateOp {
 
 		private int optionIdx;
-		private M option;
+		private PatternMatcher option;
 
 		private List<Names> rankedNames;
 
-		UpdateOp(M option, int optionIdx, int startRank, int stopRank) {
+		UpdateOp(PatternMatcher option, int optionIdx, int startRank, int stopRank) {
 
 			this.optionIdx = optionIdx;
 			this.option = option;
@@ -247,7 +255,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 	private class CoreRegisterOp extends UpdateOp {
 
-		CoreRegisterOp(M option, int optionIdx, int startRank, int stopRank) {
+		CoreRegisterOp(PatternMatcher option, int optionIdx, int startRank, int stopRank) {
 
 			super(option, optionIdx, startRank, stopRank);
 		}
@@ -260,7 +268,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 	private abstract class TransientUpdateOp extends UpdateOp {
 
-		TransientUpdateOp(M option, int optionIdx) {
+		TransientUpdateOp(PatternMatcher option, int optionIdx) {
 
 			super(option, optionIdx, 0, allRankMatches.size());
 
@@ -281,7 +289,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 	private class TransientRegisterOp extends TransientUpdateOp {
 
-		TransientRegisterOp(M option) {
+		TransientRegisterOp(PatternMatcher option) {
 
 			super(option, lastOptionIdx());
 		}
@@ -294,9 +302,9 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 	private class TransientDeregisterOp extends TransientUpdateOp {
 
-		TransientDeregisterOp(M option) {
+		TransientDeregisterOp(PatternMatcher option) {
 
-			super(option, optionIdxs.get(option));
+			super(option, optionIdxsByNode.get(option));
 		}
 
 		UpdateType getOpType() {
@@ -331,7 +339,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			ensureRankMatches(stopRank);
 			setMaxProcesses(stopRank - startRank);
 
-			List<M> opts = allOptions;
+			List<PatternMatcher> opts = allOptions;
 
 			for (int i = 0 ; i < opts.size() ; i++) {
 
@@ -366,13 +374,13 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 		}
 	}
 
-	void initialise(List<M> allOptions) {
+	void initialise(List<PatternMatcher> allOptions) {
 
 		this.allOptions = allOptions;
 
 		for (int i = 0 ; i < allOptions.size() ; i++) {
 
-			optionIdxs.put(allOptions.get(i), i);
+			optionIdxsByNode.put(allOptions.get(i).getNode(), i);
 		}
 	}
 
@@ -396,17 +404,17 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 		return new MultiOptionRegistrar(startRank, stopRank).completedMultiReg();
 	}
 
-	void registerTransientOption(M option) {
+	void registerTransientOption(PatternMatcher option) {
 
 		new TransientRegisterOp(option);
 	}
 
-	void deregisterTransientOption(M option) {
+	void deregisterTransientOption(PatternMatcher option) {
 
 		new TransientDeregisterOp(option);
 	}
 
-	Collection<M> getPotentialsFor(M request) {
+	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
 
 		List<Names> requestNames = getRequestMatchNames(request);
 
@@ -417,7 +425,7 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 		IntegerIntersection optionsInsect = new IntegerIntersection();
 
-		Integer requestIdx = optionIdxs.get(request);
+		Integer requestIdx = optionIdxsByNode.get(request.getNode());
 		int rank = 0;
 
 		for (Names rankNames : requestNames) {
@@ -425,20 +433,20 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 			if (!rankNames.isEmpty()) {
 
 				RankMatches matches = allRankMatches.get(rank);
-				IntegerCollector rankOpts = matches.collectOptionsFor(requestIdx, rankNames);
+				IntegerCollector rankOpts = matches.collectOptionsFor(rankNames);
 
-				if (rankOpts.emptyResult()) {
+				if (rankOpts.emptyResultIfExcluded(requestIdx)) {
 
 					return Collections.emptySet();
 				}
 
 				rankOpts.absorbInto(optionsInsect);
-			}
 
-			rank++;
+				rank++;
+			}
 		}
 
-		if (optionsInsect.allOptionsResult() || optionsInsect.emptySubsetResult()) {
+		if (optionsInsect.allOptionsResult()) {
 
 			return allOptions;
 		}
@@ -446,9 +454,9 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 		return optionIdxsToOptions(optionsInsect.getSubsetResult());
 	}
 
-	abstract List<Names> getOptionMatchNames(M option, int startRank, int stopRank);
+	abstract List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank);
 
-	abstract List<Names> getRequestMatchNames(M request);
+	abstract List<Names> getRequestMatchNames(PatternMatcher request);
 
 	abstract Names resolveNamesForRegistration(Names names, int rank);
 
@@ -456,9 +464,9 @@ abstract class PotentialSubsumptions<M extends NodeMatcher> {
 
 	abstract boolean unionRankOptionsForRetrieval();
 
-	private Collection<M> optionIdxsToOptions(IntHashSet idxs) {
+	private Collection<PatternMatcher> optionIdxsToOptions(IntHashSet idxs) {
 
-		List<M> opts = new ArrayList<M>();
+		List<PatternMatcher> opts = new ArrayList<PatternMatcher>();
 
 		Iterator<IntCursor> i = idxs.iterator();
 

@@ -59,7 +59,7 @@ class ProfileRelationsResolver {
 
 			for (NodeX s : node.getSubsumers().asNodes()) {
 
-				for (PatternMatcher p : s.getProfilePatternMatcherAsList()) {
+				for (PatternMatcher p : s.getProfileMatcherAsList()) {
 
 					for (Relation r : getProfileRelations(p)) {
 
@@ -106,7 +106,7 @@ class ProfileRelationsResolver {
 
 	private Collection<Relation> resolveProfileRelations(NodeX node) {
 
-		PatternMatcher p = node.getProfilePatternMatcher();
+		PatternMatcher p = node.getProfileMatcher();
 
 		return p != null
 				? getProfileRelations(p)

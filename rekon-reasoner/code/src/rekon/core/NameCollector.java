@@ -36,16 +36,21 @@ abstract class NameCollector {
 		return !definition();
 	}
 
-	void collectForValueNode(NodeX n) {
+	void collectForSingleValueNode(NodeX n) {
 
 		collectName(n);
+	}
+
+	void collectForDisjunctNodes(NodeValue v) {
+
+		collectNames(v.getDisjunctNodes());
 	}
 
 	abstract void collectName(Name n);
 
 	abstract void collectNames(Names ns);
 
-	abstract boolean includeUniversalRelationProperties();
+	abstract boolean includeAllRelationProperties();
 
 	abstract boolean continueForNextRelationsRank();
 
