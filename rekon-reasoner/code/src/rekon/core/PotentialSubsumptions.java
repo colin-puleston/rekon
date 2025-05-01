@@ -441,9 +441,9 @@ abstract class PotentialSubsumptions {
 				}
 
 				rankOpts.absorbInto(optionsInsect);
-
-				rank++;
 			}
+
+			rank++;
 		}
 
 		if (optionsInsect.allOptionsResult()) {
