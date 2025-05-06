@@ -60,11 +60,6 @@ class ComponentBuilder {
 		return patternBuilder.toPattern(source);
 	}
 
-	List<Pattern> toPatternDisjunction(InputNode source) {
-
-		return patternBuilder.toPatternDisjunction(source);
-	}
-
 	Relation toRelation(InputRelation source) {
 
 		return relationBuilder.toRelation(source);

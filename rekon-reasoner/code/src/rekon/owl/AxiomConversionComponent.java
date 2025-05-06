@@ -67,12 +67,7 @@ abstract class AxiomConversionComponent {
 
 			S typeSource = checkCastTo(source, getSourceAxiomType());
 
-			if (typeSource != null) {
-
-				return convertAxiomOfType(typeSource);
-			}
-
-			return false;
+			return typeSource != null && convertAxiomOfType(typeSource);
 		}
 
 		abstract Class<S> getSourceAxiomType();

@@ -104,45 +104,45 @@ class SimpleProfilesBuilder {
 
 			for (A ax : getSourceAxioms()) {
 
-				NodeX sub = getSub(ax);
-				InputComplexSuper sup = getSuper(ax);
+				NodeX sub = getSubOrNull(ax);
 
-				switch (sup.getComplexSuperType()) {
+				if (sub != null) {
 
-					case CONJUNCTION:
+					InputNode sup = getSuper(ax);
 
-						Pattern p = components.toPattern(sup.toNode());
+					switch (sup.getNodeType()) {
 
-						if (p != null) {
+						case CONJUNCTION:
 
-							matchStructures.addProfile(sub, p);
-						}
-						break;
+							Pattern p = components.toPattern(sup);
 
-					case RELATION:
+							if (p != null) {
 
-						ppBuilder.checkAddRelation(sub, sup.asRelation());
-						break;
+								matchStructures.addProfile(sub, p);
+							}
+							break;
 
-					case OUT_OF_SCOPE:
+						case RELATION:
 
-						break;
+							ppBuilder.checkAddRelation(sub, sup.asRelation());
+							break;
+					}
 				}
 			}
 		}
 
 		abstract Iterable<A> getSourceAxioms();
 
-		abstract NodeX getSub(A axiom);
+		abstract NodeX getSubOrNull(A axiom);
 
-		abstract InputComplexSuper getSuper(A axiom);
+		abstract InputNode getSuper(A axiom);
 
 		abstract Iterable<? extends NodeX> getTypeNodes();
 	}
 
 	private class ClassNodesProfileCreator
 						extends
-							TypeNodesProfileCreator<InputClassSubComplexSuper> {
+							TypeNodesProfileCreator<InputClassSubSuper> {
 
 		void processSourceAxioms(ProfilesBuilder ppBuilder) {
 
@@ -156,17 +156,19 @@ class SimpleProfilesBuilder {
 			}
 		}
 
-		Iterable<InputClassSubComplexSuper> getSourceAxioms() {
+		Iterable<InputClassSubSuper> getSourceAxioms() {
 
-			return axioms.getClassSubComplexSupers();
+			return axioms.getClassSubSupers();
 		}
 
-		NodeX getSub(InputClassSubComplexSuper axiom) {
+		NodeX getSubOrNull(InputClassSubSuper axiom) {
 
-			return axiom.getSub();
+			InputNode s = axiom.getSub();
+
+			return s.getNodeType() == InputNodeType.CLASS ? s.asClassNode() : null;
 		}
 
-		InputComplexSuper getSuper(InputClassSubComplexSuper axiom) {
+		InputNode getSuper(InputClassSubSuper axiom) {
 
 			return axiom.getSuper();
 		}
@@ -184,7 +186,7 @@ class SimpleProfilesBuilder {
 
 	private class IndividualNodesProfileCreator
 						extends
-							TypeNodesProfileCreator<InputIndividualComplexType> {
+							TypeNodesProfileCreator<InputIndividualType> {
 
 		void processSourceAxioms(ProfilesBuilder ppBuilder) {
 
@@ -196,17 +198,17 @@ class SimpleProfilesBuilder {
 			}
 		}
 
-		Iterable<InputIndividualComplexType> getSourceAxioms() {
+		Iterable<InputIndividualType> getSourceAxioms() {
 
-			return axioms.getIndividualComplexTypes();
+			return axioms.getIndividualTypes();
 		}
 
-		NodeX getSub(InputIndividualComplexType axiom) {
+		NodeX getSubOrNull(InputIndividualType axiom) {
 
 			return axiom.getIndividual();
 		}
 
-		InputComplexSuper getSuper(InputIndividualComplexType axiom) {
+		InputNode getSuper(InputIndividualType axiom) {
 
 			return axiom.getType();
 		}

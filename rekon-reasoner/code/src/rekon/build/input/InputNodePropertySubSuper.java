@@ -29,5 +29,5 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputNodePropertySubSuper extends InputNameSubSuper<NodeProperty> {
+public interface InputNodePropertySubSuper extends InputPropertySubSuper<NodeProperty> {
 }

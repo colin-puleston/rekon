@@ -29,27 +29,9 @@ package rekon.build.input;
  */
 public enum InputNodeType {
 
-	CLASS(null),
-	INDIVIDUAL(null),
-	CONJUNCTION(InputComplexNodeType.CONJUNCTION),
-	DISJUNCTION(InputComplexNodeType.DISJUNCTION),
-	RELATION(InputComplexNodeType.RELATION),
-	OUT_OF_SCOPE(InputComplexNodeType.OUT_OF_SCOPE);
-
-	private InputComplexNodeType complexType;
-
-	public InputComplexNodeType toComplexNodeType() {
-
-		if (complexType != null) {
-
-			return complexType;
-		}
-
-		throw new RuntimeException("Cannot convert type: " + this);
-	}
-
-	InputNodeType(InputComplexNodeType complexType) {
-
-		this.complexType = complexType;
-	}
+	CLASS,
+	INDIVIDUAL,
+	CONJUNCTION,
+	RELATION,
+	OUT_OF_SCOPE;
 }

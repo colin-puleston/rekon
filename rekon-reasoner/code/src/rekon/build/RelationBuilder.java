@@ -106,35 +106,18 @@ class RelationBuilder {
 		}
 	}
 
-	private class NodeValues extends EntityBuilder<InputNode, NodeValue> {
+	private class NodeValues extends EntityBuilder<InputDisjunction, NodeValue> {
 
 		NodeValues(boolean dynamic) {
 
 			super(dynamic);
 		}
 
-		NodeValue checkCreate(InputNode source) {
-
-			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
-
-				return new NodeValue(toDisjuncts(source));
-			}
-
-			NodeX n = componentBuilder.toSingleValueNode(source);
-
-			if (n != null) {
-
-				return new NodeValue(n);
-			}
-
-			return null;
-		}
-
-		private Collection<? extends NodeX> toDisjuncts(InputNode source) {
+		NodeValue checkCreate(InputDisjunction source) {
 
 			Set<NodeX> disjuncts = new HashSet<NodeX>();
 
-			for (InputNode in : source.asDisjuncts()) {
+			for (InputNode in : source.getDisjuncts()) {
 
 				NodeX n = componentBuilder.toSingleValueNode(in);
 
@@ -146,7 +129,7 @@ class RelationBuilder {
 				disjuncts.add(n);
 			}
 
-			return disjuncts;
+			return new NodeValue(disjuncts);
 		}
 	}
 
@@ -183,10 +166,5 @@ class RelationBuilder {
 		}
 
 		throw new Error("Unexpected relation-type: " + source.getRelationType());
-	}
-
-	private boolean isClassNode(InputNode node, ClassNode test) {
-
-		return node.getNodeType() == InputNodeType.CLASS && node.asClassNode() == test;
 	}
 }

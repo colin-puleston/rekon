@@ -65,21 +65,16 @@ class QueryablesAccessor {
 
 	Queryable create(OWLClass cls) {
 
-		return create(names.get(cls));
+		return queryables.create(names.get(cls));
 	}
 
 	Queryable create(OWLNamedIndividual ind) {
 
-		return create(names.get(ind));
-	}
-
-	private Queryable create(NodeX node) {
-
-		return node != null ? queryables.create(node) : Queryables.INVALID_INPUT;
+		return queryables.create(names.get(ind));
 	}
 
 	private PatternSource toDynamicPatternSource(OWLClassExpression expr) {
 
-		return coreBuilder.createPatternSource(exprConverter.toNode(expr));
+		return coreBuilder.createPatternSource(exprConverter.toQueryNode(expr));
 	}
 }

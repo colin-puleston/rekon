@@ -51,6 +51,43 @@ class ExpressionConverter {
 		private OwlContainer owlContainer;
 		private E owlExpr;
 
+		class BooleanOperands<B extends OWLNaryBooleanClassExpression> {
+
+			private B owlBool;
+			private Class<B> owlBoolType;
+
+			BooleanOperands(Class<B> owlBoolType) {
+
+				this.owlBoolType = owlBoolType;
+
+				owlBool = owlObjectAs(getOwlExpr(), owlBoolType);
+			}
+
+			Collection<InputNode> toNodes() {
+
+				List<InputNode> nodes = new ArrayList<InputNode>();
+
+				collectNodes(owlBool, nodes);
+
+				return nodes;
+			}
+
+			private void collectNodes(B currentOwlExpr, List<InputNode> nodes) {
+
+				for (OWLClassExpression e : currentOwlExpr.getOperands()) {
+
+					if (owlBoolType.isAssignableFrom(e.getClass())) {
+
+						collectNodes(owlBoolType.cast(e), nodes);
+					}
+					else {
+
+						nodes.add(toReferencedNode(e));
+					}
+				}
+			}
+		}
+
 		public boolean equals(Object other) {
 
 			if (getClass() == other.getClass()) {
@@ -87,6 +124,11 @@ class ExpressionConverter {
 			this.owlExpr = owlExpr;
 		}
 
+		InputNode toReferencedNode(OWLClassExpression owlExpr) {
+
+			return new ConvertedNode(getOwlContainer(), owlExpr);
+		}
+
 		OwlContainer getOwlContainer() {
 
 			return owlContainer;
@@ -110,6 +152,88 @@ class ExpressionConverter {
 		void checkLogOutOfScope() {
 
 			owlContainer.checkLogOutOfScope(owlExpr);
+		}
+	}
+
+	private class ConvertedNode
+					extends ConvertedExpression<OWLClassExpression>
+					implements InputNode {
+
+		private class Conjuncts extends BooleanOperands<OWLObjectIntersectionOf> {
+
+			Conjuncts() {
+
+				super(OWLObjectIntersectionOf.class);
+			}
+		}
+
+		public InputNodeType getNodeType() {
+
+			OWLClassExpression owlExpr = getOwlExpr();
+
+			if (owlExpr instanceof OWLClass) {
+
+				if (owlExpr.equals(owlNothing)) {
+
+					return InputNodeType.OUT_OF_SCOPE;
+				}
+
+				return InputNodeType.CLASS;
+			}
+
+			if (owlExpr instanceof OWLObjectOneOf) {
+
+				if (!asOwlIndividuals().singleInScopeIndividual()) {
+
+					return InputNodeType.OUT_OF_SCOPE;
+				}
+
+				return InputNodeType.INDIVIDUAL;
+			}
+
+			if (owlExpr instanceof OWLRestriction) {
+
+				return InputNodeType.RELATION;
+			}
+
+			if (owlExpr instanceof OWLObjectIntersectionOf) {
+
+				return InputNodeType.CONJUNCTION;
+			}
+
+			checkLogOutOfScope();
+
+			return InputNodeType.OUT_OF_SCOPE;
+		}
+
+		public ClassNode asClassNode() {
+
+			return names.resolve(owlExprAs(OWLClass.class));
+		}
+
+		public IndividualNode asIndividualNode() {
+
+			return names.resolve(asOwlIndividuals().asSingleOwlIndividual());
+		}
+
+		public Collection<InputNode> asConjuncts() {
+
+			return new Conjuncts().toNodes();
+		}
+
+		public InputRelation asRelation() {
+
+			return new ConvertedRelation(getOwlContainer(), owlExprAs(OWLRestriction.class));
+		}
+
+		ConvertedNode(OwlContainer owlContainer, OWLClassExpression owlExpr) {
+
+			super(owlContainer, noValueSubstitutions.resolve(owlContainer, owlExpr));
+		}
+
+		private OwlIndividuals asOwlIndividuals() {
+
+			return new OwlIndividuals(owlExprAs(OWLObjectOneOf.class));
 		}
 	}
 
@@ -149,9 +273,11 @@ class ExpressionConverter {
 			return names.resolve(owlPropertyAs(OWLDataProperty.class));
 		}
 
-		public InputNode getNodeValue() {
+		public InputDisjunction getNodeValue() {
 
-			return new ConvertedNode(getOwlContainer(), resolveOwlFillerToClassExpression());
+			return new ConvertedDisjunction(
+							getOwlContainer(),
+							resolveOwlFillerToClassExpression());
 		}
 
 		public DataValue getDataValue() {
@@ -278,141 +404,33 @@ class ExpressionConverter {
 		}
 	}
 
-	private class ConvertedNode
+	private class ConvertedDisjunction
 					extends ConvertedExpression<OWLClassExpression>
-					implements InputNode {
+					implements InputDisjunction {
 
-		private abstract class NaryBooleanHandler<E extends OWLNaryBooleanClassExpression> {
+		private class Disjuncts extends BooleanOperands<OWLObjectUnionOf> {
 
-			private Class<E> owlExprType;
-			private E owlExpr;
-
-			NaryBooleanHandler(Class<E> owlExprType) {
-
-				this.owlExprType = owlExprType;
-
-				owlExpr = owlExprAs(owlExprType);
-			}
-
-			boolean validOperands() {
-
-				for (OWLClassExpression e : owlExpr.getOperands()) {
-
-					if (invalidOperand(e)) {
-
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			boolean invalidOperand(OWLClassExpression e) {
-
-				return e.equals(owlNothing);
-			}
-
-			Collection<InputNode> operandsAsNodes() {
-
-				List<InputNode> nodes = new ArrayList<InputNode>();
-
-				collectOperandsAsNodes(owlExpr, nodes);
-
-				return nodes;
-			}
-
-			private void collectOperandsAsNodes(E currentOwlExpr, List<InputNode> nodes) {
-
-				for (OWLClassExpression e : currentOwlExpr.getOperands()) {
-
-					if (owlExprType.isAssignableFrom(e.getClass())) {
-
-						collectOperandsAsNodes(owlExprType.cast(e), nodes);
-					}
-					else {
-
-						nodes.add(new ConvertedNode(getOwlContainer(), e));
-					}
-				}
-			}
-		}
-
-		private class ConjunctionHandler extends NaryBooleanHandler<OWLObjectIntersectionOf> {
-
-			ConjunctionHandler() {
-
-				super(OWLObjectIntersectionOf.class);
-			}
-
-			boolean invalidOperand(OWLClassExpression e) {
-
-				return super.invalidOperand(e) || e instanceof OWLObjectUnionOf;
-			}
-		}
-
-		private class DisjunctionHandler extends NaryBooleanHandler<OWLObjectUnionOf> {
-
-			DisjunctionHandler() {
+			Disjuncts() {
 
 				super(OWLObjectUnionOf.class);
 			}
 		}
 
-		public InputNodeType getNodeType() {
+		public Collection<InputNode> getDisjuncts() {
 
-			InputNodeType type = getRelationNodeType();
+			OWLClassExpression owlExpr = getOwlExpr();
 
-			if (type == InputNodeType.OUT_OF_SCOPE && allowSimpleNodes()) {
+			if (owlExpr instanceof OWLObjectUnionOf) {
 
-				type = getSimpleNodeType();
+				return new Disjuncts().toNodes();
 			}
 
-			if (type == InputNodeType.OUT_OF_SCOPE) {
-
-				type = getConjunctionNodeType();
-			}
-
-			if (type == InputNodeType.OUT_OF_SCOPE && allowDisjunctions()) {
-
-				type = getDisjunctionNodeType();
-			}
-
-			if (type == InputNodeType.OUT_OF_SCOPE) {
-
-				checkLogOutOfScope();
-			}
-
-			return type;
+			return Collections.singleton(toReferencedNode(owlExpr));
 		}
 
-		public ClassNode asClassNode() {
+		ConvertedDisjunction(OwlContainer owlContainer, OWLClassExpression owlExpr) {
 
-			return names.resolve(owlExprAs(OWLClass.class));
-		}
-
-		public IndividualNode asIndividualNode() {
-
-			return names.resolve(asOwlIndividuals().asSingleOwlIndividual());
-		}
-
-		public Collection<InputNode> asConjuncts() {
-
-			return new ConjunctionHandler().operandsAsNodes();
-		}
-
-		public Collection<InputNode> asDisjuncts() {
-
-			return new DisjunctionHandler().operandsAsNodes();
-		}
-
-		public InputRelation asRelation() {
-
-			return new ConvertedRelation(getOwlContainer(), owlExprAs(OWLRestriction.class));
-		}
-
-		ConvertedNode(OwlContainer owlContainer, OWLClassExpression owlExpr) {
-
-			super(owlContainer, noValueSubstitutions.resolve(owlContainer, owlExpr));
+			super(owlContainer, owlExpr);
 
 			if (owlExpr instanceof OWLObjectOneOf) {
 
@@ -425,120 +443,9 @@ class ExpressionConverter {
 			}
 		}
 
-		boolean allowSimpleNodes() {
-
-			return true;
-		}
-
-		boolean allowDisjunctions() {
-
-			return true;
-		}
-
-		private InputNodeType getSimpleNodeType() {
-
-			OWLClassExpression owlExpr = getOwlExpr();
-
-			if (owlExpr instanceof OWLClass) {
-
-				if (!owlExpr.equals(owlNothing)) {
-
-					return InputNodeType.CLASS;
-				}
-			}
-			else if (owlExpr instanceof OWLObjectOneOf) {
-
-				if (asOwlIndividuals().singleInScopeIndividual()) {
-
-					return InputNodeType.INDIVIDUAL;
-				}
-			}
-
-			return InputNodeType.OUT_OF_SCOPE;
-		}
-
-		private InputNodeType getRelationNodeType() {
-
-			if (getOwlExpr() instanceof OWLRestriction) {
-
-				return InputNodeType.RELATION;
-			}
-
-			return InputNodeType.OUT_OF_SCOPE;
-		}
-
-		private InputNodeType getConjunctionNodeType() {
-
-			if (getOwlExpr() instanceof OWLObjectIntersectionOf) {
-
-				if (new ConjunctionHandler().validOperands()) {
-
-					return InputNodeType.CONJUNCTION;
-				}
-			}
-
-			return InputNodeType.OUT_OF_SCOPE;
-		}
-
-		private InputNodeType getDisjunctionNodeType() {
-
-			if (getOwlExpr() instanceof OWLObjectUnionOf) {
-
-				if (new DisjunctionHandler().validOperands()) {
-
-					return InputNodeType.DISJUNCTION;
-				}
-			}
-
-			return InputNodeType.OUT_OF_SCOPE;
-		}
-
 		private OwlIndividuals asOwlIndividuals() {
 
 			return new OwlIndividuals(owlExprAs(OWLObjectOneOf.class));
-		}
-	}
-
-	private class ConvertedComplexNode extends ConvertedNode implements InputComplexNode {
-
-		public InputNode toNode() {
-
-			return this;
-		}
-
-		public InputComplexNodeType getComplexNodeType() {
-
-			return getNodeType().toComplexNodeType();
-		}
-
-		ConvertedComplexNode(OwlContainer owlContainer, OWLClassExpression owlExpr) {
-
-			super(owlContainer, owlExpr);
-		}
-
-		boolean allowSimpleNodes() {
-
-			return false;
-		}
-	}
-
-	private class ConvertedComplexSuper
-					extends ConvertedComplexNode
-					implements InputComplexSuper {
-
-		public InputComplexSuperType getComplexSuperType() {
-
-			return getComplexNodeType().toComplexSuperType();
-		}
-
-		ConvertedComplexSuper(OwlContainer owlContainer, OWLClassExpression owlExpr) {
-
-			super(owlContainer, owlExpr);
-		}
-
-		boolean allowDisjunctions() {
-
-			return false;
 		}
 	}
 
@@ -551,28 +458,23 @@ class ExpressionConverter {
 		noValueSubstitutions = new NoValueSubstitutions(factory);
 	}
 
-	InputNode toNode(OWLClassExpression owlExpr) {
+	InputNode toAxiomNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
 
-		return new ConvertedNode(OwlContainer.asContainer(owlExpr), owlExpr);
+		return new ConvertedNode(OwlContainer.asContainer(owlAxiom), owlExpr);
 	}
 
-	InputComplexNode toComplexNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
-
-		return new ConvertedComplexNode(OwlContainer.asContainer(owlAxiom), owlExpr);
-	}
-
-	InputComplexSuper toComplexSuper(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
-
-		return new ConvertedComplexSuper(OwlContainer.asContainer(owlAxiom), owlExpr);
-	}
-
-	InputRelation toRelation(OWLAxiom owlAxiom, OWLRestriction owlExpr) {
+	InputRelation toAxiomRelation(OWLAxiom owlAxiom, OWLRestriction owlExpr) {
 
 		OwlContainer owlContainer = OwlContainer.asContainer(owlAxiom);
 
 		return new ConvertedRelation(
 						owlContainer,
 						noValueSubstitutions.resolve(owlContainer, owlExpr));
+	}
+
+	InputNode toQueryNode(OWLClassExpression owlExpr) {
+
+		return new ConvertedNode(OwlContainer.asContainer(owlExpr), owlExpr);
 	}
 
 	private <O>O owlObjectAs(OWLObject obj, Class<O> type) {

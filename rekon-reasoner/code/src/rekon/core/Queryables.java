@@ -29,7 +29,43 @@ package rekon.core;
  */
 public class Queryables {
 
-	static public final Queryable INVALID_INPUT = new InvalidInputQueryable();
+	static private final Queryable INVALID_INPUT = new InertQueryable();
+
+	static private class InertQueryable implements Queryable {
+
+		public Names getEquivalents() {
+
+			return Names.NO_NAMES;
+		}
+
+		public Names getSupers(boolean direct) {
+
+			return Names.NO_NAMES;
+		}
+
+		public Names getSubs(boolean direct) {
+
+			return Names.NO_NAMES;
+		}
+
+		public Names getIndividuals(boolean direct) {
+
+			return Names.NO_NAMES;
+		}
+
+		public boolean equivalentTo(Queryable other) {
+
+			return false;
+		}
+
+		public boolean subsumes(Queryable other) {
+
+			return false;
+		}
+
+		InertQueryable() {
+		}
+	}
 
 	private Ontology ontology;
 

@@ -57,24 +57,24 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		}
 	}
 
-	abstract class ConvertedEquivalence<F, S>
+	abstract class ConvertedEquivalence<E>
 						extends ConvertedAxiom
-						implements InputEquivalence<F, S> {
+						implements InputEquivalence<E> {
 
-		private F first;
-		private S second;
+		private E first;
+		private E second;
 
-		public F getFirst() {
+		public E getFirst() {
 
 			return first;
 		}
 
-		public S getSecond(){
+		public E getSecond(){
 
 			return second;
 		}
 
-		ConvertedEquivalence(OWLAxiom source, F first, S second) {
+		ConvertedEquivalence(OWLAxiom source, E first, E second) {
 
 			super(source);
 
@@ -83,24 +83,24 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		}
 	}
 
-	abstract class ConvertedSubSuper<SB, SP>
+	abstract class ConvertedSubSuper<E>
 						extends ConvertedAxiom
-						implements InputSubSuper<SB, SP> {
+						implements InputSubSuper<E> {
 
-		private SB sub;
-		private SP sup;
+		private E sub;
+		private E sup;
 
-		public SB getSub() {
+		public E getSub() {
 
 			return sub;
 		}
 
-		public SP getSuper(){
+		public E getSuper(){
 
 			return sup;
 		}
 
-		ConvertedSubSuper(OWLAxiom source, SB sub, SP sup) {
+		ConvertedSubSuper(OWLAxiom source, E sub, E sup) {
 
 			super(source);
 
@@ -108,28 +108,6 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 			this.sup = sup;
 		}
 	}
-
-	abstract class ConvertedNameEquivalence<N extends Name>
-						extends ConvertedEquivalence<N, N>
-						implements InputNameEquivalence<N> {
-
-		ConvertedNameEquivalence(OWLAxiom source, N first, N second) {
-
-			super(source, first, second);
-		}
-	}
-
-	abstract class ConvertedNameSubSuper<N extends Name>
-						extends ConvertedSubSuper<N, N>
-						implements InputNameSubSuper<N> {
-
-		ConvertedNameSubSuper(OWLAxiom source, N sub, N sup) {
-
-			super(source, sub, sup);
-		}
-	}
-
-	enum OwlLinkStatus {VALID_MATCH, INVALID_MATCH, NON_MATCH}
 
 	abstract class OwlLink<E extends OWLObject, N extends Name> {
 
@@ -171,45 +149,34 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 			return asName(secondOrSup);
 		}
 
-		OwlLinkStatus checkMatch(boolean firstOrSubIsName, boolean secondOrSupIsName) {
+		boolean checkValidEndPoints() {
 
-			OwlLinkStatus status1 = checkMatch(firstOrSub, firstOrSubIsName);
+			boolean valid1 = validEndPoint(firstOrSub);
+			boolean valid2 = validEndPoint(secondOrSup);
 
-			if (status1 == OwlLinkStatus.NON_MATCH) {
+			if (valid1 && valid2) {
 
-				return OwlLinkStatus.NON_MATCH;
-			}
-
-			OwlLinkStatus status2 = checkMatch(secondOrSup, secondOrSupIsName);
-
-			if (status2 == OwlLinkStatus.NON_MATCH) {
-
-				return OwlLinkStatus.NON_MATCH;
+				return true;
 			}
 
 			List<E> outOfScopeExprs = new ArrayList<E>();
 
-			if (status1 == OwlLinkStatus.INVALID_MATCH) {
+			if (!valid1) {
 
 				outOfScopeExprs.add(firstOrSub);
 			}
 
-			if (status2 == OwlLinkStatus.INVALID_MATCH) {
+			if (!valid2) {
 
 				outOfScopeExprs.add(secondOrSup);
 			}
 
-			if (outOfScopeExprs.isEmpty()) {
-
-				return OwlLinkStatus.VALID_MATCH;
-			}
-
 			logOutOfScopeAxiom(source, outOfScopeExprs);
 
-			return OwlLinkStatus.INVALID_MATCH;
+			return false;
 		}
 
-		abstract OwlLinkStatus checkMatch(E expr, boolean isName);
+		abstract boolean validEndPoint(E expr);
 
 		abstract N asName(E expr);
 	}

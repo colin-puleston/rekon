@@ -24,10 +24,8 @@
 
 package rekon.build.input;
 
-import rekon.core.*;
-
 /**
  * @author Colin Puleston
  */
-public interface InputClassEquivalence extends InputNameEquivalence<ClassNode> {
+public interface InputClassEquivalence extends InputEquivalence<InputNode> {
 }

@@ -41,7 +41,7 @@ class NodePropertyAxiomConverter
 	private OWLObjectProperty owlBottomObjectProperty;
 
 	private class ConvertedNodePropertyEquivalence
-						extends ConvertedNameEquivalence<NodeProperty>
+						extends ConvertedEquivalence<NodeProperty>
 						implements InputNodePropertyEquivalence {
 
 		ConvertedNodePropertyEquivalence(
@@ -54,7 +54,7 @@ class NodePropertyAxiomConverter
 	}
 
 	private class ConvertedNodePropertySubSuper
-						extends ConvertedNameSubSuper<NodeProperty>
+						extends ConvertedSubSuper<NodeProperty>
 						implements InputNodePropertySubSuper {
 
 		ConvertedNodePropertySubSuper(

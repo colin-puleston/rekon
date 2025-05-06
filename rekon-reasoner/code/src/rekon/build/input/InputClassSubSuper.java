@@ -24,10 +24,8 @@
 
 package rekon.build.input;
 
-import rekon.core.*;
-
 /**
  * @author Colin Puleston
  */
-public interface InputClassSubSuper extends InputNameSubSuper<ClassNode> {
+public interface InputClassSubSuper extends InputSubSuper<InputNode> {
 }

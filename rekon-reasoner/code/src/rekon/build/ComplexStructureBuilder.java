@@ -22,12 +22,69 @@
  * THE SOFTWARE.
  */
 
-package rekon.build.input;
+package rekon.build;
+
+import java.util.*;
+
+import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-public interface InputComplexSubSuper
-					extends
-						InputSubSuper<InputComplexNode, InputComplexSuper> {
+abstract class ComplexStructureBuilder<A extends InputAxiom> {
+
+	void build(Iterable<A> axioms) {
+
+		for (A ax : axioms) {
+
+			InputNode first = getFirst(ax);
+			InputNode second = getSecond(ax);
+
+			boolean complex1 = complexClassNode(first);
+			boolean complex2 = complexClassNode(second);
+
+			if (complex1 && complex2) {
+
+				buildFor(first, second);
+			}
+			else {
+
+				if (complex1) {
+
+					buildFor(first, second.asClassNode());
+				}
+				else if (complex2) {
+
+					buildFor(first.asClassNode(), second);
+				}
+			}
+		}
+	}
+
+	abstract InputNode getFirst(A axiom);
+
+	abstract InputNode getSecond(A axiom);
+
+	abstract void buildFor(InputNode first, InputNode second);
+
+	abstract void buildFor(InputNode first, ClassNode second);
+
+	abstract void buildFor(ClassNode first, InputNode second);
+
+	private boolean complexClassNode(InputNode n) {
+
+		switch (n.getNodeType()) {
+
+			case CLASS:
+
+				return false;
+
+			case INDIVIDUAL:
+
+				throw new RuntimeException("Unexpected individual-node: " + n);
+		}
+
+		return true;
+	}
 }

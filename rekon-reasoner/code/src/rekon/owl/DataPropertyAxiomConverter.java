@@ -41,7 +41,7 @@ class DataPropertyAxiomConverter
 	private OWLDataProperty owlBottomDataProperty;
 
 	private class ConvertedDataPropertyEquivalence
-						extends ConvertedNameEquivalence<DataProperty>
+						extends ConvertedEquivalence<DataProperty>
 						implements InputDataPropertyEquivalence {
 
 		ConvertedDataPropertyEquivalence(
@@ -54,7 +54,7 @@ class DataPropertyAxiomConverter
 	}
 
 	private class ConvertedDataPropertySubSuper
-						extends ConvertedNameSubSuper<DataProperty>
+						extends ConvertedSubSuper<DataProperty>
 						implements InputDataPropertySubSuper {
 
 		ConvertedDataPropertySubSuper(

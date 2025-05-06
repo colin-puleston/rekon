@@ -41,7 +41,5 @@ public interface InputNode extends InputExpression {
 
 	Collection<InputNode> asConjuncts();
 
-	Collection<InputNode> asDisjuncts();
-
 	InputRelation asRelation();
 }

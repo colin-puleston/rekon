@@ -22,43 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build.input;
+
+import rekon.core.*;
 
 /**
  * @author Colin Puleston
  */
-class InvalidInputQueryable implements Queryable {
-
-	public Names getEquivalents() {
-
-		return Names.NO_NAMES;
-	}
-
-	public Names getSupers(boolean direct) {
-
-		return Names.NO_NAMES;
-	}
-
-	public Names getSubs(boolean direct) {
-
-		return Names.NO_NAMES;
-	}
-
-	public Names getIndividuals(boolean direct) {
-
-		return Names.NO_NAMES;
-	}
-
-	public boolean equivalentTo(Queryable other) {
-
-		return false;
-	}
-
-	public boolean subsumes(Queryable other) {
-
-		return false;
-	}
-
-	InvalidInputQueryable() {
-	}
+public interface InputPropertyEquivalence<P extends PropertyX> extends InputEquivalence<P> {
 }

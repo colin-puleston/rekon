@@ -41,7 +41,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 	final MappedNames names;
 	final ExpressionConverter expressions;
 
-	private ClassExprAxiomConverter classExprAxioms;
+	private ClassAxiomConverter classExprAxioms;
 	private NodePropertyAxiomConverter nodePropertyAxioms;
 	private DataPropertyAxiomConverter dataPropertyAxioms;
 	private IndividualAxiomConverter individualAxioms;
@@ -54,34 +54,9 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return classExprAxioms.getClassEquivalences();
 	}
 
-	public Iterable<InputClassComplexEquivalence> getClassComplexEquivalences() {
-
-		return classExprAxioms.getClassComplexEquivalences();
-	}
-
-	public Iterable<InputComplexEquivalence> getComplexEquivalences() {
-
-		return classExprAxioms.getComplexEquivalences();
-	}
-
 	public Iterable<InputClassSubSuper> getClassSubSupers() {
 
 		return classExprAxioms.getClassSubSupers();
-	}
-
-	public Iterable<InputClassSubComplexSuper> getClassSubComplexSupers() {
-
-		return classExprAxioms.getClassSubComplexSupers();
-	}
-
-	public Iterable<InputComplexSubClassSuper> getComplexSubClassSupers() {
-
-		return classExprAxioms.getComplexSubClassSupers();
-	}
-
-	public Iterable<InputComplexSubSuper> getComplexSubSupers() {
-
-		return classExprAxioms.getComplexSubSupers();
 	}
 
 	public Iterable<InputNodePropertyEquivalence> getNodePropertyEquivalences() {
@@ -144,14 +119,9 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return individualAxioms.getIndividualEquivalences();
 	}
 
-	public Iterable<InputIndividualClassType> getIndividualClassTypes() {
+	public Iterable<InputIndividualType> getIndividualTypes() {
 
-		return individualAxioms.getIndividualClassTypes();
-	}
-
-	public Iterable<InputIndividualComplexType> getIndividualComplexTypes() {
-
-		return individualAxioms.getIndividualComplexTypes();
+		return individualAxioms.getIndividualTypes();
 	}
 
 	public Iterable<InputIndividualRelation> getIndividualRelations() {
@@ -169,7 +139,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		this.names = names;
 		this.expressions = expressions;
 
-		classExprAxioms = new ClassExprAxiomConverter(this);
+		classExprAxioms = new ClassAxiomConverter(this);
 		nodePropertyAxioms = new NodePropertyAxiomConverter(this);
 		dataPropertyAxioms = new DataPropertyAxiomConverter(this);
 		individualAxioms = new IndividualAxiomConverter(this);

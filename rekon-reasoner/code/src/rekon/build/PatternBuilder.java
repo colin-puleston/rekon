@@ -71,50 +71,6 @@ class PatternBuilder {
 		}
 	}
 
-	private class PatternDisjunctionSpec {
-
-		private Set<PatternSpec> disjuncts = new HashSet<PatternSpec>();
-
-		PatternDisjunctionSpec(InputNode source) {
-
-			if (source.getNodeType() == InputNodeType.DISJUNCTION) {
-
-				for (InputNode n : source.asDisjuncts()) {
-
-					addDisjunctFor(n);
-				}
-			}
-			else {
-
-				addDisjunctFor(source);
-			}
-		}
-
-		List<Pattern> checkCreate() {
-
-			List<Pattern> patternDisjuncts = new ArrayList<Pattern>();
-
-			for (PatternSpec d : disjuncts) {
-
-				Pattern pd = patterns.get(d);
-
-				if (pd == null) {
-
-					return null;
-				}
-
-				patternDisjuncts.add(pd);
-			}
-
-			return patternDisjuncts;
-		}
-
-		private void addDisjunctFor(InputNode source) {
-
-			disjuncts.add(new PatternSpec(source));
-		}
-	}
-
 	private class Patterns extends EntityBuilder<PatternSpec, Pattern> {
 
 		private class ConjunctsConverter {
@@ -169,10 +125,6 @@ class PatternBuilder {
 					case CONJUNCTION:
 
 						return processConjuncts(conjunct.asConjuncts());
-
-					case DISJUNCTION:
-
-						return false;
 
 					case RELATION:
 
@@ -235,10 +187,6 @@ class PatternBuilder {
 
 					return checkCreateForConjuncts(source.asConjuncts());
 
-				case DISJUNCTION:
-
-					throw new RuntimeException("Unexpected disjunction node: " + source);
-
 				case RELATION:
 
 					return checkCreateForRelation(source.asRelation());
@@ -275,10 +223,5 @@ class PatternBuilder {
 	Pattern toPattern(InputNode source) {
 
 		return patterns.get(source);
-	}
-
-	List<Pattern> toPatternDisjunction(InputNode source) {
-
-		return new PatternDisjunctionSpec(source).checkCreate();
 	}
 }

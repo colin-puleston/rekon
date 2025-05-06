@@ -39,7 +39,7 @@ public interface InputRelation extends InputExpression {
 
 	DataProperty getDataProperty();
 
-	InputNode getNodeValue();
+	InputDisjunction getNodeValue();
 
 	DataValue getDataValue();
 }

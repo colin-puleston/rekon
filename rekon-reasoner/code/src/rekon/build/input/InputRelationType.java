@@ -32,6 +32,5 @@ public enum InputRelationType {
 	SOME_NODES,
 	ALL_NODES,
 	DATA_VALUE,
-	COMPLEMENT,
 	OUT_OF_SCOPE;
 }

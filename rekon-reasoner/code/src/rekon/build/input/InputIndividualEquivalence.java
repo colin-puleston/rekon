@@ -29,5 +29,5 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputIndividualEquivalence extends InputNameEquivalence<IndividualNode> {
+public interface InputIndividualEquivalence extends InputEquivalence<IndividualNode> {
 }

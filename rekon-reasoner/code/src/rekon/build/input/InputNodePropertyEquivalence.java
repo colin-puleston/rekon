@@ -29,5 +29,5 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputNodePropertyEquivalence extends InputNameEquivalence<NodeProperty> {
+public interface InputNodePropertyEquivalence extends InputPropertyEquivalence<NodeProperty> {
 }

@@ -37,7 +37,7 @@ class BasicStructureBuilder {
 	private OntologyNames names;
 	private InputAxioms axioms;
 
-	private abstract class TypeNameHandler<N extends Name> {
+	private abstract class TypeNameHandler<N extends Name, NS> {
 
 		TypeNameHandler() {
 
@@ -49,15 +49,27 @@ class BasicStructureBuilder {
 
 		abstract Iterable<N> getAllTypeNames();
 
-		abstract Iterable<? extends InputNameEquivalence<N>> getTypeEquivalences();
+		abstract Iterable<? extends InputEquivalence<NS>> getTypeEquivalences();
 
 		void addInterNameLinks() {
 
-			for (InputNameEquivalence<N> ax : getTypeEquivalences()) {
+			for (InputEquivalence<NS> ax : getTypeEquivalences()) {
 
-				ax.getFirst().addEquivalent(ax.getSecond());
+				N first = nameSourceToName(ax.getFirst());
+
+				if (first != null) {
+
+					N second = nameSourceToName(ax.getSecond());
+
+					if (second != null) {
+
+						first.addEquivalent(second);
+					}
+				}
 			}
 		}
+
+		abstract N nameSourceToName(NS source);
 
 		private void addOrphansAsRootSubs() {
 
@@ -74,8 +86,8 @@ class BasicStructureBuilder {
 	}
 
 	private abstract class HierarchyNameHandler
-								<N extends Name>
-								extends TypeNameHandler<N> {
+								<N extends Name, NS>
+								extends TypeNameHandler<N, NS> {
 
 		HierarchyNameHandler() {
 
@@ -86,16 +98,26 @@ class BasicStructureBuilder {
 
 			super.addInterNameLinks();
 
-			for (InputNameSubSuper<N> ax : getTypeSubSupers()) {
+			for (InputSubSuper<NS> ax : getTypeSubSupers()) {
 
-				ax.getSub().addSubsumer(ax.getSuper());
+				N sub = nameSourceToName(ax.getSub());
+
+				if (sub != null) {
+
+					N sup = nameSourceToName(ax.getSuper());
+
+					if (sup != null) {
+
+						sub.addSubsumer(sup);
+					}
+				}
 			}
 		}
 
-		abstract Iterable<? extends InputNameSubSuper<N>> getTypeSubSupers();
+		abstract Iterable<? extends InputSubSuper<NS>> getTypeSubSupers();
 	}
 
-	private class ClassNodeHandler extends HierarchyNameHandler<ClassNode> {
+	private class ClassNodeHandler extends HierarchyNameHandler<ClassNode, InputNode> {
 
 		ClassNode getHierarchyRootName() {
 
@@ -116,15 +138,27 @@ class BasicStructureBuilder {
 
 			return axioms.getClassSubSupers();
 		}
+
+		ClassNode nameSourceToName(InputNode source) {
+
+			return asClassNodeOrNull(source);
+		}
 	}
 
-	private class IndividualNodeHandler extends TypeNameHandler<IndividualNode> {
+	private class IndividualNodeHandler
+						extends
+							TypeNameHandler<IndividualNode, IndividualNode> {
 
 		IndividualNodeHandler() {
 
-			for (InputIndividualClassType ax : axioms.getIndividualClassTypes()) {
+			for (InputIndividualType ax : axioms.getIndividualTypes()) {
 
-				ax.getIndividual().addSubsumer(ax.getClassType());
+				ClassNode type = asClassNodeOrNull(ax.getType());
+
+				if (type != null) {
+
+					ax.getIndividual().addSubsumer(type);
+				}
 			}
 		}
 
@@ -142,9 +176,22 @@ class BasicStructureBuilder {
 
 			return axioms.getIndividualEquivalences();
 		}
+
+		IndividualNode nameSourceToName(IndividualNode source) {
+
+			return source;
+		}
 	}
 
-	private class NodePropertyHandler extends HierarchyNameHandler<NodeProperty> {
+	private abstract class PropertyHandler<P extends PropertyX> extends HierarchyNameHandler<P, P> {
+
+		P nameSourceToName(P source) {
+
+			return source;
+		}
+	}
+
+	private class NodePropertyHandler extends PropertyHandler<NodeProperty> {
 
 		NodePropertyHandler() {
 
@@ -195,7 +242,7 @@ class BasicStructureBuilder {
 		}
 	}
 
-	private class DataPropertyHandler extends HierarchyNameHandler<DataProperty> {
+	private class DataPropertyHandler extends PropertyHandler<DataProperty> {
 
 		DataPropertyHandler() {
 
@@ -235,5 +282,10 @@ class BasicStructureBuilder {
 		new IndividualNodeHandler();
 		new NodePropertyHandler();
 		new DataPropertyHandler();
+	}
+
+	private ClassNode asClassNodeOrNull(InputNode in) {
+
+		return in.getNodeType() == InputNodeType.CLASS ? in.asClassNode() : null;
 	}
 }

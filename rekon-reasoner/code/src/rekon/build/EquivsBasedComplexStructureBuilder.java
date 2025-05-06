@@ -32,16 +32,18 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class EquivsBasedComplexStructureBuilder {
+class EquivsBasedComplexStructureBuilder
+			extends
+				ComplexStructureBuilder<InputClassEquivalence> {
 
 	private MatchStructures matchStructures;
 	private ComponentBuilder components;
 
-	private abstract class EquivalenceBasedBuilder {
+	private abstract class DefinitionsBuilder {
 
 		private List<Pattern> definitions = new ArrayList<Pattern>();
 
-		void checkCreate(InputEquivalence<?, ?> axiom, InputComplexSuper... complexEquivs) {
+		void checkCreate(InputNode... complexEquivs) {
 
 			if (absorbComplexEquivs(complexEquivs)) {
 
@@ -61,56 +63,46 @@ class EquivsBasedComplexStructureBuilder {
 			}
 		}
 
-		private boolean absorbComplexEquivs(InputComplexSuper... equivs) {
+		private boolean absorbComplexEquivs(InputNode... equivs) {
 
-			for (InputComplexSuper e : equivs) {
+			for (InputNode e : equivs) {
 
-				if (!absorbComplexEquiv(e)) {
+				Pattern defn = components.toPattern(e);
+
+				if (defn == null) {
 
 					return false;
 				}
+
+				definitions.add(defn);
 			}
 
 			return true;
 		}
-
-		private boolean absorbComplexEquiv(InputComplexSuper e) {
-
-			List<Pattern> djs = components.toPatternDisjunction(e.toNode());
-
-			if (djs != null && djs.size() == 1) {
-
-				definitions.add(djs.get(0));
-
-				return true;
-			}
-
-			return false;
-		}
 	}
 
-	private class ClassComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
+	private class SimpleDefinitionsBuilder extends DefinitionsBuilder {
 
-		private ClassNode first;
+		private ClassNode cls;
 
-		ClassComplexEquivalenceBasedBuilder(InputClassComplexEquivalence axiom) {
+		SimpleDefinitionsBuilder(ClassNode cls, InputNode defn) {
 
-			first = axiom.getFirst();
+			this.cls = cls;
 
-			checkCreate(axiom, axiom.getSecond());
+			checkCreate(defn);
 		}
 
 		ClassNode resolveDefinitionClass() {
 
-			return first;
+			return cls;
 		}
 	}
 
-	private class ComplexEquivalenceBasedBuilder extends EquivalenceBasedBuilder {
+	private class GCIDefinitionsBuilder extends DefinitionsBuilder {
 
-		ComplexEquivalenceBasedBuilder(InputComplexEquivalence axiom) {
+		GCIDefinitionsBuilder(InputNode equiv1, InputNode equiv2) {
 
-			checkCreate(axiom, axiom.getFirst(), axiom.getSecond());
+			checkCreate(equiv1, equiv2);
 		}
 
 		ClassNode resolveDefinitionClass() {
@@ -127,14 +119,31 @@ class EquivsBasedComplexStructureBuilder {
 		this.matchStructures = matchStructures;
 		this.components = components;
 
-		for (InputClassComplexEquivalence ax : axioms.getClassComplexEquivalences()) {
+		build(axioms.getClassEquivalences());
+	}
 
-			new ClassComplexEquivalenceBasedBuilder(ax);
-		}
+	InputNode getFirst(InputClassEquivalence axiom) {
 
-		for (InputComplexEquivalence ax : axioms.getComplexEquivalences()) {
+		return axiom.getFirst();
+	}
 
-			new ComplexEquivalenceBasedBuilder(ax);
-		}
+	InputNode getSecond(InputClassEquivalence axiom) {
+
+		return axiom.getSecond();
+	}
+
+	void buildFor(InputNode first, InputNode second) {
+
+		new GCIDefinitionsBuilder(first, second);
+	}
+
+	void buildFor(InputNode first, ClassNode second) {
+
+		new SimpleDefinitionsBuilder(second, first);
+	}
+
+	void buildFor(ClassNode first, InputNode second) {
+
+		new SimpleDefinitionsBuilder(first, second);
 	}
 }

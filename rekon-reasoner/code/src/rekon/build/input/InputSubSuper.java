@@ -27,9 +27,9 @@ package rekon.build.input;
 /**
  * @author Colin Puleston
  */
-public interface InputSubSuper<SB, SP> extends InputAxiom {
+public interface InputSubSuper<T> extends InputAxiom {
 
-	SB getSub();
+	T getSub();
 
-	SP getSuper();
+	T getSuper();
 }

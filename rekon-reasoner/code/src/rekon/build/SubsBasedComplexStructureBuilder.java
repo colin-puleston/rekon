@@ -32,28 +32,26 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class SubsBasedComplexStructureBuilder {
+class SubsBasedComplexStructureBuilder
+			extends
+				ComplexStructureBuilder<InputClassSubSuper> {
 
 	private MatchStructures matchStructures;
 	private ComponentBuilder components;
 
-	private abstract class ComplexSubBasedBuilder<SP> {
+	private abstract class ComplexSubBuilder<SP> {
 
-		ComplexSubBasedBuilder(InputSubSuper<InputComplexNode, SP> axiom) {
+		ComplexSubBuilder(InputNode sub, SP sup) {
 
-			InputNode sub = axiom.getSub().toNode();
-			List<Pattern> subDjs = components.toPatternDisjunction(sub);
+			ClassNode subCls = complexToClassNode(sub);
 
-			if (subDjs != null) {
+			if (subCls != null) {
 
-				ClassNode supCls = resolveSuperClass(axiom.getSuper());
+				ClassNode supCls = resolveSuperClass(sup);
 
 				if (supCls != null) {
 
-					for (NodeX subCls : resolveDisjunctionToNodes(subDjs)) {
-
-						subCls.addSubsumer(supCls);
-					}
+					subCls.addSubsumer(supCls);
 				}
 			}
 		}
@@ -61,11 +59,11 @@ class SubsBasedComplexStructureBuilder {
 		abstract ClassNode resolveSuperClass(SP sup);
 	}
 
-	private class ComplexSubClassSuperBasedBuilder extends ComplexSubBasedBuilder<ClassNode> {
+	private class ComplexSubSimpleSuperBuilder extends ComplexSubBuilder<ClassNode> {
 
-		ComplexSubClassSuperBasedBuilder(InputComplexSubClassSuper axiom) {
+		ComplexSubSimpleSuperBuilder(InputNode sub, ClassNode sup) {
 
-			super(axiom);
+			super(sub, sup);
 		}
 
 		ClassNode resolveSuperClass(ClassNode sup) {
@@ -74,18 +72,16 @@ class SubsBasedComplexStructureBuilder {
 		}
 	}
 
-	private class ComplexSubSuperBasedBuilder extends ComplexSubBasedBuilder<InputComplexSuper> {
+	private class AllComplexBuilder extends ComplexSubBuilder<InputNode> {
 
-		ComplexSubSuperBasedBuilder(InputComplexSubSuper axiom) {
+		AllComplexBuilder(InputNode sub, InputNode sup) {
 
-			super(axiom);
+			super(sub, sup);
 		}
 
-		ClassNode resolveSuperClass(InputComplexSuper sup) {
+		ClassNode resolveSuperClass(InputNode sup) {
 
-			Pattern p = components.toPattern(sup.toNode());
-
-			return p != null ? createDefinitionClass(p) : null;
+			return complexToClassNode(sup);
 		}
 	}
 
@@ -97,38 +93,49 @@ class SubsBasedComplexStructureBuilder {
 		this.matchStructures = matchStructures;
 		this.components = components;
 
-		for (InputComplexSubClassSuper ax :  axioms.getComplexSubClassSupers()) {
-
-			new ComplexSubClassSuperBasedBuilder(ax);
-		}
-
-		for (InputComplexSubSuper ax :  axioms.getComplexSubSupers()) {
-
-			new ComplexSubSuperBasedBuilder(ax);
-		}
+		build(axioms.getClassSubSupers());
 	}
 
-	private List<NodeX> resolveDisjunctionToNodes(List<Pattern> disjuncts) {
+	InputNode getFirst(InputClassSubSuper axiom) {
 
-		List<NodeX> nodeDjs = new ArrayList<NodeX>();
-
-		for (Pattern d : disjuncts) {
-
-			nodeDjs.add(resolveDisjunctToNode(d));
-		}
-
-		return nodeDjs;
+		return axiom.getSub();
 	}
 
-	private NodeX resolveDisjunctToNode(Pattern disjunct) {
+	InputNode getSecond(InputClassSubSuper axiom) {
 
-		NodeX n = disjunct.toSingleNode();
+		return axiom.getSuper();
+	}
 
-		return n != null ? n : createDefinitionClass(disjunct);
+	void buildFor(InputNode first, InputNode second) {
+
+		new AllComplexBuilder(first, second);
+	}
+
+	void buildFor(InputNode first, ClassNode second) {
+
+		new ComplexSubSimpleSuperBuilder(first, second);
+	}
+
+	void buildFor(ClassNode first, InputNode second) {
+	}
+
+	private ClassNode complexToClassNode(InputNode in) {
+
+		Pattern p = components.toPattern(in);
+
+		if (p == null) {
+
+			return null;
+		}
+
+		NodeX n = p.toSingleNode();
+
+		return n != null ? (ClassNode)n : createDefinitionClass(p);
 	}
 
 	private ClassNode createDefinitionClass(Pattern defn) {
 
+		System.out.println("\nSUBS-FREE-CLASS: ");
 		ClassNode c = matchStructures.createFreeClass();
 
 		matchStructures.addDefinition(c, defn);

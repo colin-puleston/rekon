@@ -88,14 +88,9 @@ abstract class PropertyAxiomConverter
 			super(source, sub, sup);
 		}
 
-		OwlLinkStatus checkMatch(E expr, boolean isName) {
+		boolean validEndPoint(E expr) {
 
-			if (expr instanceof OWLProperty && !expr.equals(getOWLBottomProperty())) {
-
-				return OwlLinkStatus.VALID_MATCH;
-			}
-
-			return OwlLinkStatus.INVALID_MATCH;
+			return expr instanceof OWLProperty && !expr.equals(getOWLBottomProperty());
 		}
 
 		P asName(E expr) {
@@ -112,12 +107,14 @@ abstract class PropertyAxiomConverter
 
 			OwlPropertyLink owlLink = createOwlLink(source);
 
-			if (owlLink.checkMatch(true, true) == OwlLinkStatus.VALID_MATCH) {
+			if (owlLink.checkValidEndPoints()) {
 
 				inputAxioms.add(createInputAxiom(owlLink));
+
+				return true;
 			}
 
-			return true;
+			return false;
 		}
 
 		abstract OwlPropertyLink createOwlLink(S source);
@@ -146,9 +143,7 @@ abstract class PropertyAxiomConverter
 				}
 			}
 
-			logOutOfScopeAxiom(source, expr);
-
-			return true;
+			return false;
 		}
 
 		abstract E getPropertyExpr(S source);

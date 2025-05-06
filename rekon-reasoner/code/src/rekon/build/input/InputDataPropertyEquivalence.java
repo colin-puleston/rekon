@@ -29,5 +29,5 @@ import rekon.core.*;
 /**
  * @author Colin Puleston
  */
-public interface InputDataPropertyEquivalence extends InputNameEquivalence<DataProperty> {
+public interface InputDataPropertyEquivalence extends InputPropertyEquivalence<DataProperty> {
 }

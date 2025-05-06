@@ -27,9 +27,9 @@ package rekon.build.input;
 /**
  * @author Colin Puleston
  */
-public interface InputEquivalence<F, S> extends InputAxiom {
+public interface InputEquivalence<T> extends InputAxiom {
 
-	F getFirst();
+	T getFirst();
 
-	S getSecond();
+	T getSecond();
 }
