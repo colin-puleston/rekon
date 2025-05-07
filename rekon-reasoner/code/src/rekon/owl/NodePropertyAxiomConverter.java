@@ -142,6 +142,9 @@ class NodePropertyAxiomConverter
 			super(source, property);
 
 			this.chain = chain;
+
+			expressions.addChainInvolvedProperty(property);
+			expressions.addChainInvolvedProperties(chain);
 		}
 	}
 
@@ -162,6 +165,8 @@ class NodePropertyAxiomConverter
 		ConvertedNodePropertyTransitive(OWLAxiom source, NodeProperty property) {
 
 			super(source, property);
+
+			expressions.addChainInvolvedProperty(property);
 		}
 	}
 

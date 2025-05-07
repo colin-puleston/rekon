@@ -99,6 +99,16 @@ abstract class OwlContainer {
 		}
 	}
 
+	void checkLogInvalidDisjunctionFiller(
+			OWLRestriction owlRestriction,
+			DisjunctionFillerWarning warning) {
+
+		if (!outOfScope) {
+
+			WARNINGS.logInvalidDisjunctionFiller(owlRestriction, warning);
+		}
+	}
+
 	abstract void logOutOfScope(OWLClassExpression expr);
 
 	abstract void logNoValueExprReplacement(

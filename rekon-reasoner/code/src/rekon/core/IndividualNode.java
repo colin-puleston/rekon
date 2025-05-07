@@ -81,7 +81,7 @@ public abstract class IndividualNode extends NodeX {
 
 			NodeValue nv = target.asNodeValue();
 
-			if (nv != null) {
+			if (nv != null && nv.singleValueNode()) {
 
 				NodeX vn = nv.getSingleValueNode();
 

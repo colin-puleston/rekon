@@ -182,7 +182,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			return OWLSameIndividualAxiom.class;
 		}
 
-		boolean convertAxiomOfType(OWLSameIndividualAxiom source) {
+		boolean convert(OWLSameIndividualAxiom source) {
 
 			OwlIndividualLink owlLink = new OwlIndividualLink(source);
 
@@ -209,7 +209,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
 
-		boolean convertAxiomOfType(S source) {
+		boolean convert(S source) {
 
 			OWLIndividual expr = getIndividualExpr(source);
 			IndividualNode n = toIndividualNode(expr);

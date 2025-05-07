@@ -103,7 +103,7 @@ abstract class PropertyAxiomConverter
 						<S extends OWLAxiom, I extends InputAxiom>
 						extends TypeAxiomConverter<S, I> {
 
-		boolean convertAxiomOfType(S source) {
+		boolean convert(S source) {
 
 			OwlPropertyLink owlLink = createOwlLink(source);
 
@@ -126,7 +126,7 @@ abstract class PropertyAxiomConverter
 						<S extends OWLAxiom, I extends InputAxiom>
 						extends TypeAxiomConverter<S, I> {
 
-		boolean convertAxiomOfType(S source) {
+		boolean convert(S source) {
 
 			E expr = getPropertyExpr(source);
 			P p = toPropertyOrNull(expr);

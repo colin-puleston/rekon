@@ -96,6 +96,18 @@ class WarningLogger {
 		logNoValueExprReplacement(describeQuery(query), replaced, replacement);
 	}
 
+	void logInvalidDisjunctionFiller(
+				OWLRestriction restriction,
+				DisjunctionFillerWarning warning) {
+
+		LogBlock b = createBlock(warning.getText());
+
+		b.addLine("Restriction: " + restriction);
+		b.addLine("Container-expression rendered out-of-scope...");
+
+		writeBlock(b);
+	}
+
 	private void logNoValueExprReplacement(
 					String containerDescription,
 					OWLClassExpression replaced,

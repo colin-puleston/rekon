@@ -41,6 +41,9 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 	final MappedNames names;
 	final ExpressionConverter expressions;
 
+	private Set<OWLObjectProperty> chainInvolvedSourceProperties
+									= new HashSet<OWLObjectProperty>();
+
 	private ClassAxiomConverter classExprAxioms;
 	private NodePropertyAxiomConverter nodePropertyAxioms;
 	private DataPropertyAxiomConverter dataPropertyAxioms;
@@ -139,9 +142,9 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		this.names = names;
 		this.expressions = expressions;
 
-		classExprAxioms = new ClassAxiomConverter(this);
 		nodePropertyAxioms = new NodePropertyAxiomConverter(this);
 		dataPropertyAxioms = new DataPropertyAxiomConverter(this);
+		classExprAxioms = new ClassAxiomConverter(this);
 		individualAxioms = new IndividualAxiomConverter(this);
 
 		convertAll(manager);
@@ -182,7 +185,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 				for (OWLAxiom rax : resolve(ax)) {
 
-					if (!ignoreAxiom(rax) && !convert(rax)) {
+					if (!ignoreAxiom(rax) && !checkAddToConverter(rax)) {
 
 						outOfScopeTypes.add(rax.getAxiomType());
 					}
@@ -193,6 +196,11 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		if (!outOfScopeTypes.isEmpty()) {
 
 			WarningLogger.SINGLETON.logOutOfScopeAxiomTypes(outOfScopeTypes);
+		}
+
+		for (TypeAxiomConverter<?, ?> c : axiomTypeConverters) {
+
+			c.convertAll();
 		}
 	}
 
@@ -211,11 +219,11 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return Collections.singleton(ax);
 	}
 
-	private boolean convert(OWLAxiom ax) {
+	private boolean checkAddToConverter(OWLAxiom ax) {
 
 		for (TypeAxiomConverter<?, ?> c : axiomTypeConverters) {
 
-			if (c.convert(ax)) {
+			if (c.checkAdd(ax)) {
 
 				return true;
 			}

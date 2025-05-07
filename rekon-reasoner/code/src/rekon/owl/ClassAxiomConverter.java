@@ -141,7 +141,7 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
 
-		boolean convertAxiomOfType(S source) {
+		boolean convert(S source) {
 
 			OwlClassLink owlLink = createOwlLink(source);
 
