@@ -205,7 +205,7 @@ public class RekonInstanceBox {
 
 	private InputNode toInputNode(OWLClassExpression expr) {
 
-		return exprConverter.toNode(expr);
+		return exprConverter.toQueryNode(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {
