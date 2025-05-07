@@ -31,8 +31,8 @@ enum DisjunctionFillerWarning {
 
 	CHAIN_INVOLVED_SOME_VALUES(
 		"existential restrictions on transitive or chain-involved properties"),
-	ALL_VALUES(
-		"universal restrictions");
+	ALL_VALUES_INDIVIDUALS_PRESENT(
+		"universal restrictions when individuals present in ontology");
 
 	private String text;
 

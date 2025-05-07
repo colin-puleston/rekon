@@ -408,7 +408,7 @@ class ExpressionConverter {
 
 		private boolean checkValidSomeValuesFiller() {
 
-			if (chainInvolvedProperty() && disjunctionFiller()) {
+			if (disjunctionFiller() && chainInvolvedProperty()) {
 
 				checkLogInvalidDisjunctionFiller(
 					DisjunctionFillerWarning.CHAIN_INVOLVED_SOME_VALUES);
@@ -421,10 +421,10 @@ class ExpressionConverter {
 
 		private boolean checkValidAllValuesFiller() {
 
-			if (disjunctionFiller()) {
+			if (disjunctionFiller() && names.anyIndividuals()) {
 
 				checkLogInvalidDisjunctionFiller(
-					DisjunctionFillerWarning.ALL_VALUES);
+					DisjunctionFillerWarning.ALL_VALUES_INDIVIDUALS_PRESENT);
 
 				return false;
 			}

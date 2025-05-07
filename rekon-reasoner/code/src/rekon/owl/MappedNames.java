@@ -156,6 +156,15 @@ class MappedNames extends OntologyNames {
 			return n != null ? n : addName(entity);
 		}
 
+		N addName(E entity) {
+
+			N n = createName(entity);
+
+			names.put(entity, n);
+
+			return n;
+		}
+
 		N getName(E entity) {
 
 			return names.get(entity);
@@ -166,15 +175,6 @@ class MappedNames extends OntologyNames {
 			return true;
 		}
 
-		N addName(E entity) {
-
-			N n = createName(entity);
-
-			names.put(entity, n);
-
-			return n;
-		}
-
 		abstract N createName(E entity);
 
 		abstract Iterable<E> getEntitiesInSignature(OWLOntology o);
@@ -182,6 +182,11 @@ class MappedNames extends OntologyNames {
 		Iterable<N> getAllNames() {
 
 			return names.values();
+		}
+
+		boolean anyNames() {
+
+			return !names.isEmpty();
 		}
 	}
 
@@ -376,6 +381,11 @@ class MappedNames extends OntologyNames {
 		individuals = new IndividualNodes(manager);
 		nodeProperties = new NodeProperties(manager);
 		dataProperties = new DataProperties(manager);
+	}
+
+	boolean anyIndividuals() {
+
+		return individuals.anyNames();
 	}
 
 	ClassNode resolve(OWLClass entity) {
