@@ -135,7 +135,6 @@ class SubsBasedComplexStructureBuilder
 
 	private ClassNode createDefinitionClass(Pattern defn) {
 
-		System.out.println("\nSUBS-FREE-CLASS: ");
 		ClassNode c = matchStructures.createFreeClass();
 
 		matchStructures.addDefinition(c, defn);
