@@ -245,14 +245,18 @@ class RelationEndPointSubsumptions {
 
 			boolean process(AllRelation rel) {
 
-				add(rel);
+				NodeValue v = rel.getNodeValueTarget();
+
+				if (v.singleValueNode()) {
+
+					add(rel.getNodeProperty(), v.getSingleValueNode());
+				}
 
 				return false;
 			}
 
-			private void add(AllRelation rel) {
+			private void add(NodeProperty p, NodeX v) {
 
-				NodeProperty p = rel.getNodeProperty();
 				Set<NodeX> targets = collected.get(p);
 
 				if (targets == null) {
@@ -262,7 +266,7 @@ class RelationEndPointSubsumptions {
 					collected.put(p, targets);
 				}
 
-				targets.add(rel.getNodeValueTarget().getSingleValueNode());
+				targets.add(v);
 			}
 		}
 

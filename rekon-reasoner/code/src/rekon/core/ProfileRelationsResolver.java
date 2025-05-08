@@ -110,10 +110,10 @@ class ProfileRelationsResolver {
 
 		return p != null
 				? getProfileRelations(p)
-				: getInertNodeProfileRelations(node);
+				: getProfileRelationsFromSubsumers(node);
 	}
 
-	private Collection<Relation> getInertNodeProfileRelations(NodeX node) {
+	private Collection<Relation> getProfileRelationsFromSubsumers(NodeX node) {
 
 		RelationCollector collector = new RelationCollector();
 		NodeRelationsResolver resolver = new NodeRelationsResolver(node, collector);

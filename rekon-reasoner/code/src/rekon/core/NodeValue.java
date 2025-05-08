@@ -60,7 +60,7 @@ public class NodeValue extends Value {
 			return disjunctNodes.getFirstNode();
 		}
 
-		throw new Error("Not a single value node!");
+		throw new RuntimeException("Not a single value node!");
 	}
 
 	Names getDisjunctNodes() {

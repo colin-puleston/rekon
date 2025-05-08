@@ -60,11 +60,15 @@ class IndividualRelationsInverter {
 		if (prop.hasInverse()) {
 
 			NodeValue invSource = forwardRel.getNodeValueTarget();
-			NodeValue invTarget = new NodeValue(forwardSource);
 
-			PatternMatcher pp = resolveProfile(invSource.getSingleValueNode());
+			if (invSource.singleValueNode()) {
 
-			pp.addRelation(new SomeRelation(prop.getInverse(), invTarget));
+				NodeValue invTarget = new NodeValue(forwardSource);
+
+				PatternMatcher pp = resolveProfile(invSource.getSingleValueNode());
+
+				pp.addRelation(new SomeRelation(prop.getInverse(), invTarget));
+			}
 		}
 	}
 
