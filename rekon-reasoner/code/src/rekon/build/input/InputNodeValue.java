@@ -29,7 +29,7 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public interface InputDisjunction extends InputExpression {
+public interface InputNodeValue extends InputExpression {
 
 	Collection<InputNode> getDisjuncts();
 }

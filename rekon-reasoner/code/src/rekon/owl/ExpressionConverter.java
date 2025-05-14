@@ -273,9 +273,9 @@ class ExpressionConverter {
 			return names.resolve(owlPropertyAs(OWLDataProperty.class));
 		}
 
-		public InputDisjunction getNodeValue() {
+		public InputNodeValue getNodeValue() {
 
-			return new ConvertedDisjunction(
+			return new ConvertedNodeValue(
 							getOwlContainer(),
 							resolveOwlFillerToClassExpression());
 		}
@@ -463,9 +463,9 @@ class ExpressionConverter {
 		}
 	}
 
-	private class ConvertedDisjunction
+	private class ConvertedNodeValue
 					extends ConvertedExpression<OWLClassExpression>
-					implements InputDisjunction {
+					implements InputNodeValue {
 
 		private class Disjuncts extends BooleanOperands<OWLObjectUnionOf> {
 
@@ -487,7 +487,7 @@ class ExpressionConverter {
 			return Collections.singleton(toReferencedNode(owlExpr));
 		}
 
-		ConvertedDisjunction(OwlContainer owlContainer, OWLClassExpression owlExpr) {
+		ConvertedNodeValue(OwlContainer owlContainer, OWLClassExpression owlExpr) {
 
 			super(owlContainer, owlExpr);
 

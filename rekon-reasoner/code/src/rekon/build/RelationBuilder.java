@@ -106,14 +106,14 @@ class RelationBuilder {
 		}
 	}
 
-	private class NodeValues extends EntityBuilder<InputDisjunction, NodeValue> {
+	private class NodeValues extends EntityBuilder<InputNodeValue, NodeValue> {
 
 		NodeValues(boolean dynamic) {
 
 			super(dynamic);
 		}
 
-		NodeValue checkCreate(InputDisjunction source) {
+		NodeValue checkCreate(InputNodeValue source) {
 
 			Set<NodeX> disjuncts = new HashSet<NodeX>();
 
