@@ -491,15 +491,39 @@ class ExpressionConverter {
 
 			super(owlContainer, owlExpr);
 
+			OWLClassExpression owlExprMod = checkModifyOwlExpression(owlExpr);
+
+			if (owlExprMod != owlExpr) {
+
+				resetOwlExpression(owlExprMod);
+			}
+		}
+
+		private OWLClassExpression checkModifyOwlExpression(OWLClassExpression owlExpr) {
+
+			if (owlExpr instanceof OWLObjectUnionOf) {
+
+				return normaliseOwlUnion((OWLObjectUnionOf)owlExpr);
+			}
+
 			if (owlExpr instanceof OWLObjectOneOf) {
 
-				OwlIndividuals inds = asOwlIndividuals();
-
-				if (inds.multiInScopeIndividuals()) {
-
-					resetOwlExpression(inds.asOwlExpressionUnion());
-				}
+				return checkConvertOwlOneOf((OWLObjectOneOf)owlExpr);
 			}
+
+			return owlExpr;
+		}
+
+		private OWLClassExpression normaliseOwlUnion(OWLObjectUnionOf union) {
+
+			return new OwlUnionNormaliser(factory, union).normalise();
+		}
+
+		private OWLClassExpression checkConvertOwlOneOf(OWLObjectOneOf oneOf) {
+
+			OwlIndividuals inds = new OwlIndividuals(oneOf);
+
+			return inds.allIndividualsInScope() ? inds.asOwlExpression() : oneOf;
 		}
 
 		private OwlIndividuals asOwlIndividuals() {
