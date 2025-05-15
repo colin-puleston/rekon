@@ -6,7 +6,7 @@ Simple OWL reasoner. Implements OWL API.
 ### Class-expressions ###
 
     ObjectIntersectionOf
-    ObjectUnionOf
+    ObjectUnionOf (limited usage - see below)
     ObjectSomeValuesFrom
     ObjectAllValuesFrom
     ObjectHasValue
@@ -15,6 +15,13 @@ Simple OWL reasoner. Implements OWL API.
     DataSomeValuesFrom (numeric and boolean values only)
     DataHasValue (numeric and boolean values only)
     
+    **ObjectUnionOf Usage Constraints**
+    
+    Permitted only as restriction fillers, but not for:
+    
+    - Existential restrictions on transitive or chain-involved properties
+    - Universal restrictions if any individuals present in ontology
+        
 ### Axioms ###
 
     SubClassOf
