@@ -15,7 +15,7 @@ Simple OWL reasoner. Implements OWL API.
     DataSomeValuesFrom (numeric and boolean values only)
     DataHasValue (numeric and boolean values only)
     
-**-ObjectUnionOf- Usage Constraints**
+**_ObjectUnionOf_ Usage Constraints**
 
 Permitted only as restriction fillers, but not for:
 
