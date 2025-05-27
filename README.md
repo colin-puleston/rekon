@@ -1,4 +1,5 @@
 # rekon #
+
 Simple OWL reasoner. Implements OWL API.
 
 ## Supported OWL constructs ##
@@ -6,25 +7,25 @@ Simple OWL reasoner. Implements OWL API.
 ### Class-expressions ###
 
 - <code>ObjectIntersectionOf</code>
-- <code>ObjectUnionOf</code>(limited usage - see below)
+- <code>ObjectUnionOf</code> _limited usage (see below)_
 - <code>ObjectSomeValuesFrom</code>
 - <code>ObjectAllValuesFrom</code>
 - <code>ObjectHasValue</code>
-- <code>ObjectOneOf</code>
-- <code>DataUnionOf</code>(numeric values only)
-- <code>DataSomeValuesFrom</code>(numeric and boolean values only)
-- <code>DataHasValue</code>(numeric and boolean values only)
+- <code>ObjectOneOf</code> _single individuals only_
+- <code>DataUnionOf</code> _numeric values only_
+- <code>DataSomeValuesFrom</code>_numeric and boolean values only_
+- <code>DataHasValue</code> _numeric and boolean values only_
     
-**Permitted <code>ObjectUnionOf</code> Usage:** Only allowed as restriction fillers, though not allowed for:
+**Note:** <code>ObjectUnionOf</code> permitted only for restriction fillers, though not for:
 
 - _Existential restrictions_ on properties that are either transitive or involved in property chains
-- _Universal restrictions_ on any properties if any individuals are present in the ontology
+- _Universal restrictions_ on any properties if the ontology contains any individuals
         
 ### Axioms ###
 
 - <code>SubClassOf</code>
 - <code>EquivalentClasses</code>
-- <code>SubObjectPropertyOf</code>(including property chains)
+- <code>SubObjectPropertyOf</code> _including property chains_
 - <code>SubDataPropertyOf</code>
 - <code>EquivalentObjectProperties</code>
 - <code>EquivalentDataProperties</code>
@@ -37,7 +38,7 @@ Simple OWL reasoner. Implements OWL API.
 - <code>SameIndividual</code>
 - <code>ClassAssertion</code>
 - <code>ObjectPropertyAssertion</code>
-- <code>DataPropertyAssertion</code>(numeric and boolean values only)
+- <code>DataPropertyAssertion</code> _numeric and boolean values only_
 
 ## Unsupported OWL constructs ##
 
