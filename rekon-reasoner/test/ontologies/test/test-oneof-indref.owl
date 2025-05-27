@@ -48,7 +48,6 @@
                     <owl:Class>
                         <owl:oneOf rdf:parseType="Collection">
                             <rdf:Description rdf:about="urn:test#Indi-1"/>
-                            <rdf:Description rdf:about="urn:test#Indi-2"/>
                         </owl:oneOf>
                     </owl:Class>
                 </owl:someValuesFrom>
