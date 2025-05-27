@@ -183,7 +183,7 @@ class ExpressionConverter {
 			}
 			else if (owlExpr instanceof OWLObjectOneOf) {
 
-				if (asOwlIndividuals().singleInScopeIndividual()) {
+				if (asOwlIndividuals().singleNamedIndividual()) {
 
 					return InputNodeType.INDIVIDUAL;
 				}
@@ -213,7 +213,7 @@ class ExpressionConverter {
 
 		public IndividualNode asIndividualNode() {
 
-			return names.resolve(asOwlIndividuals().asSingleOwlIndividual());
+			return names.resolve(asOwlIndividuals().asSingleNamedIndividual());
 		}
 
 		public Collection<InputNode> asConjuncts() {
@@ -491,7 +491,7 @@ class ExpressionConverter {
 
 			super(owlContainer, owlExpr);
 
-			OWLClassExpression owlExprMod = checkModifyOwlExpression(owlExpr);
+			OWLClassExpression owlExprMod = checkNormaliseOwlExpression(owlExpr);
 
 			if (owlExprMod != owlExpr) {
 
@@ -499,16 +499,11 @@ class ExpressionConverter {
 			}
 		}
 
-		private OWLClassExpression checkModifyOwlExpression(OWLClassExpression owlExpr) {
+		private OWLClassExpression checkNormaliseOwlExpression(OWLClassExpression owlExpr) {
 
 			if (owlExpr instanceof OWLObjectUnionOf) {
 
 				return normaliseOwlUnion((OWLObjectUnionOf)owlExpr);
-			}
-
-			if (owlExpr instanceof OWLObjectOneOf) {
-
-				return checkConvertOwlOneOf((OWLObjectOneOf)owlExpr);
 			}
 
 			return owlExpr;
@@ -517,13 +512,6 @@ class ExpressionConverter {
 		private OWLClassExpression normaliseOwlUnion(OWLObjectUnionOf union) {
 
 			return new OwlUnionNormaliser(factory, union).normalise();
-		}
-
-		private OWLClassExpression checkConvertOwlOneOf(OWLObjectOneOf oneOf) {
-
-			OwlIndividuals inds = new OwlIndividuals(oneOf);
-
-			return inds.allIndividualsInScope() ? inds.asOwlExpression() : oneOf;
 		}
 
 		private OwlIndividuals asOwlIndividuals() {

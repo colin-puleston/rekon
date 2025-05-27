@@ -40,34 +40,23 @@ class OwlIndividuals {
 		this.owlOneOf = owlOneOf;
 	}
 
-	boolean singleInScopeIndividual() {
+	boolean singleNamedIndividual() {
 
-		return getDisjuncts().size() == 1 && allIndividualsInScope();
+		Set<OWLIndividual> djs = owlOneOf.getIndividuals();
+
+		return djs.size() == 1 && djs.iterator().next() instanceof OWLNamedIndividual;
 	}
 
-	boolean allIndividualsInScope() {
+	OWLNamedIndividual asSingleNamedIndividual() {
 
-		for (OWLIndividual d : getDisjuncts()) {
+		Set<OWLIndividual> djs = owlOneOf.getIndividuals();
 
-			if (!(d instanceof OWLNamedIndividual)) {
+		if (djs.size() != 1) {
 
-				return false;
-			}
+			throw new Error("Unexpected multiple individuals: " + djs);
 		}
 
-		return true;
-	}
-
-	OWLNamedIndividual asSingleOwlIndividual() {
-
-		Set<OWLIndividual> disjuncts = getDisjuncts();
-
-		if (disjuncts.size() != 1) {
-
-			throw new Error("Unexpected multiple individuals: " + disjuncts);
-		}
-
-		OWLIndividual i = disjuncts.iterator().next();
+		OWLIndividual i = djs.iterator().next();
 
 		if (i instanceof OWLNamedIndividual) {
 
@@ -75,27 +64,5 @@ class OwlIndividuals {
 		}
 
 		throw new Error("Unexpected anonymous individual!");
-	}
-
-	OWLClassExpression asOwlExpression() {
-
-		OWLClassExpression e = owlOneOf.asObjectUnionOf();
-
-		if (e instanceof OWLObjectUnionOf) {
-
-			Set<OWLClassExpression> ops = ((OWLObjectUnionOf)e).getOperands();
-
-			if (ops.size() == 1) {
-
-				return ops.iterator().next();
-			}
-		}
-
-		return e;
-	}
-
-	private Set<OWLIndividual> getDisjuncts() {
-
-		return owlOneOf.getIndividuals();
 	}
 }
