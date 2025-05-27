@@ -183,7 +183,7 @@ class ExpressionConverter {
 			}
 			else if (owlExpr instanceof OWLObjectOneOf) {
 
-				if (asOwlIndividuals().singleNamedIndividual()) {
+				if (owlExprRepresentsSingleNamedIndividual()) {
 
 					return InputNodeType.INDIVIDUAL;
 				}
@@ -213,7 +213,7 @@ class ExpressionConverter {
 
 		public IndividualNode asIndividualNode() {
 
-			return names.resolve(asOwlIndividuals().asSingleNamedIndividual());
+			return names.resolve(owlExprToSingleNamedIndividual());
 		}
 
 		public Collection<InputNode> asConjuncts() {
@@ -231,9 +231,35 @@ class ExpressionConverter {
 			super(owlContainer, noValueSubstitutions.resolve(owlContainer, owlExpr));
 		}
 
-		private OwlIndividuals asOwlIndividuals() {
+		private boolean owlExprRepresentsSingleNamedIndividual() {
 
-			return new OwlIndividuals(owlExprAs(OWLObjectOneOf.class));
+			Set<OWLIndividual> inds = owlExprToIndividuals();
+
+			return inds.size() == 1 && inds.iterator().next() instanceof OWLNamedIndividual;
+		}
+
+		private OWLNamedIndividual owlExprToSingleNamedIndividual() {
+
+			Set<OWLIndividual> inds = owlExprToIndividuals();
+
+			if (inds.size() != 1) {
+
+				throw new Error("Unexpected multiple individuals: " + inds);
+			}
+
+			OWLIndividual i = inds.iterator().next();
+
+			if (i instanceof OWLNamedIndividual) {
+
+				return (OWLNamedIndividual)i;
+			}
+
+			throw new Error("Unexpected anonymous individual!");
+		}
+
+		private Set<OWLIndividual> owlExprToIndividuals() {
+
+			return owlExprAs(OWLObjectOneOf.class).getIndividuals();
 		}
 	}
 
@@ -512,11 +538,6 @@ class ExpressionConverter {
 		private OWLClassExpression normaliseOwlUnion(OWLObjectUnionOf union) {
 
 			return new OwlUnionNormaliser(factory, union).normalise();
-		}
-
-		private OwlIndividuals asOwlIndividuals() {
-
-			return new OwlIndividuals(owlExprAs(OWLObjectOneOf.class));
 		}
 	}
 
