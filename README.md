@@ -7,7 +7,7 @@ Simple OWL reasoner. Implements OWL API.
 ### Class-expressions ###
 
 - <code>ObjectIntersectionOf</code>
-- <code>ObjectUnionOf</code> _limited usage (see below)_
+- <code>ObjectUnionOf</code> _restriction fillers only - possibly cause incomplete reasoning_ (see below)_
 - <code>ObjectSomeValuesFrom</code>
 - <code>ObjectAllValuesFrom</code>
 - <code>ObjectHasValue</code>
@@ -15,12 +15,7 @@ Simple OWL reasoner. Implements OWL API.
 - <code>DataUnionOf</code> _numeric values only_
 - <code>DataSomeValuesFrom</code>_numeric and boolean values only_
 - <code>DataHasValue</code> _numeric and boolean values only_
-    
-**Note:** <code>ObjectUnionOf</code> permitted only for restriction fillers, though not for:
-
-- _Existential restrictions_ on properties that are either transitive or involved in property chains
-- _Universal restrictions_ on any properties if the ontology contains any individuals
-        
+            
 ### Axioms ###
 
 - <code>SubClassOf</code>
@@ -74,3 +69,8 @@ Simple OWL reasoner. Implements OWL API.
 - <code>NegativeObjectPropertyAssertion</code>
 - <code>NegativeDataPropertyAssertion</code>
 - <code>HasKey</code>
+
+**Note:** Reasoning may be incomplete if <code>ObjectUnionOf</code> provides filler for: 
+
+- _Existential restriction_ on property that is either transitive or involved in any property chains
+- _Universal restriction_ on any property, if the ontology contains any individuals
