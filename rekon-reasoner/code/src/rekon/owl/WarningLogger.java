@@ -80,6 +80,22 @@ class WarningLogger {
 		writeBlock(b);
 	}
 
+	void logIncompletenessRiskAxiomDisjunctionFiller(
+				OWLAxiom axiom,
+				OWLRestriction restriction,
+				DisjunctionFillerWarning warning) {
+
+		logIncompletenessRiskDisjunctionFiller(describeAxiom(axiom), restriction, warning);
+	}
+
+	void logIncompletenessRiskQueryDisjunctionFiller(
+				OWLClassExpression query,
+				OWLRestriction restriction,
+				DisjunctionFillerWarning warning) {
+
+		logIncompletenessRiskDisjunctionFiller(describeQuery(query), restriction, warning);
+	}
+
 	void logNoValueAxiomExprReplacement(
 				OWLAxiom axiom,
 				OWLClassExpression replaced,
@@ -96,14 +112,15 @@ class WarningLogger {
 		logNoValueExprReplacement(describeQuery(query), replaced, replacement);
 	}
 
-	void logInvalidDisjunctionFiller(
-				OWLRestriction restriction,
-				DisjunctionFillerWarning warning) {
+	private void logIncompletenessRiskDisjunctionFiller(
+					String containerDescription,
+					OWLRestriction restriction,
+					DisjunctionFillerWarning warning) {
 
 		LogBlock b = createBlock(warning.getText());
 
+		b.addLine(containerDescription);
 		b.addLine("Restriction: " + restriction);
-		b.addLine("Container-expression rendered out-of-scope...");
 
 		writeBlock(b);
 	}

@@ -54,16 +54,13 @@ class ExpressionConverter {
 
 		private E owlExpr;
 
-		class BooleanOperands<B extends OWLNaryBooleanClassExpression> {
+		abstract class BooleanOperands<B extends OWLNaryBooleanClassExpression> {
 
 			private B owlBool;
-			private Class<B> owlBoolType;
 
-			BooleanOperands(Class<B> owlBoolType) {
+			BooleanOperands(B owlBool) {
 
-				this.owlBoolType = owlBoolType;
-
-				owlBool = owlObjectAs(getOwlExpr(), owlBoolType);
+				this.owlBool = owlBool;
 			}
 
 			Collection<InputNode> toNodes() {
@@ -75,7 +72,11 @@ class ExpressionConverter {
 				return nodes;
 			}
 
+			abstract Class<B> getOwlBoolType();
+
 			private void collectNodes(B currentOwlExpr, List<InputNode> nodes) {
+
+				Class<B> owlBoolType = getOwlBoolType();
 
 				for (OWLClassExpression e : currentOwlExpr.getOperands()) {
 
@@ -122,11 +123,6 @@ class ExpressionConverter {
 			this.owlExpr = owlExpr;
 		}
 
-		void resetOwlExpression(E owlExpr) {
-
-			this.owlExpr = owlExpr;
-		}
-
 		InputNode toReferencedNode(OWLClassExpression owlExpr) {
 
 			return new ConvertedNode(getOwlContainer(), owlExpr);
@@ -166,7 +162,12 @@ class ExpressionConverter {
 
 			Conjuncts() {
 
-				super(OWLObjectIntersectionOf.class);
+				super(owlExprAs(OWLObjectIntersectionOf.class));
+			}
+
+			Class<OWLObjectIntersectionOf> getOwlBoolType() {
+
+				return OWLObjectIntersectionOf.class;
 			}
 		}
 
@@ -327,12 +328,12 @@ class ExpressionConverter {
 
 			OWLRestriction owlExpr = getOwlExpr();
 
-			if (someRelation(owlExpr)) {
+			if (checkSomeRelation(owlExpr)) {
 
 				return InputRelationType.SOME_NODES;
 			}
 
-			if (allRelation(owlExpr)) {
+			if (checkAllRelation(owlExpr)) {
 
 				return InputRelationType.ALL_NODES;
 			}
@@ -345,21 +346,25 @@ class ExpressionConverter {
 			return InputRelationType.OUT_OF_SCOPE;
 		}
 
-		private boolean someRelation(OWLRestriction owlExpr) {
+		private boolean checkSomeRelation(OWLRestriction owlExpr) {
 
 			if (owlExpr instanceof OWLObjectSomeValuesFrom) {
 
-				return checkValidSomeValuesFiller();
+				checkIncompletenessRiskSomeValuesFiller();
+
+				return true;
 			}
 
 			return owlExpr instanceof OWLObjectHasValue;
 		}
 
-		private boolean allRelation(OWLRestriction owlExpr) {
+		private boolean checkAllRelation(OWLRestriction owlExpr) {
 
 			if (owlExpr instanceof OWLObjectAllValuesFrom) {
 
-				return checkValidAllValuesFiller();
+				checkIncompletenessRiskAllValuesFiller();
+
+				return true;
 			}
 
 			return false;
@@ -432,35 +437,27 @@ class ExpressionConverter {
 			throw new RuntimeException("Unexpected anonymous individual!");
 		}
 
-		private boolean checkValidSomeValuesFiller() {
+		private void checkIncompletenessRiskSomeValuesFiller() {
 
 			if (disjunctionFiller() && chainInvolvedProperty()) {
 
-				checkLogInvalidDisjunctionFiller(
+				logIncompletenessRiskDisjunctionFiller(
 					DisjunctionFillerWarning.CHAIN_INVOLVED_SOME_VALUES);
-
-				return false;
 			}
-
-			return true;
 		}
 
-		private boolean checkValidAllValuesFiller() {
+		private void checkIncompletenessRiskAllValuesFiller() {
 
 			if (disjunctionFiller() && names.anyIndividuals()) {
 
-				checkLogInvalidDisjunctionFiller(
+				logIncompletenessRiskDisjunctionFiller(
 					DisjunctionFillerWarning.ALL_VALUES_INDIVIDUALS_PRESENT);
-
-				return false;
 			}
-
-			return true;
 		}
 
-		private void checkLogInvalidDisjunctionFiller(DisjunctionFillerWarning warning) {
+		private void logIncompletenessRiskDisjunctionFiller(DisjunctionFillerWarning warning) {
 
-			owlContainer.checkLogInvalidDisjunctionFiller(getOwlExpr(), warning);
+			owlContainer.logIncompletenessRiskDisjunctionFiller(getOwlExpr(), warning);
 		}
 
 		private boolean chainInvolvedProperty() {
@@ -497,13 +494,23 @@ class ExpressionConverter {
 
 			Disjuncts() {
 
-				super(OWLObjectUnionOf.class);
+				super(owlExprAs(OWLObjectUnionOf.class));
+			}
+
+			Class<OWLObjectUnionOf> getOwlBoolType() {
+
+				return OWLObjectUnionOf.class;
 			}
 		}
 
 		public Collection<InputNode> getDisjuncts() {
 
 			OWLClassExpression owlExpr = getOwlExpr();
+
+			if (owlExpr instanceof OWLObjectUnionOf) {
+
+				owlExpr = normaliseOwlUnion((OWLObjectUnionOf)owlExpr);
+			}
 
 			if (owlExpr instanceof OWLObjectUnionOf) {
 
@@ -516,23 +523,6 @@ class ExpressionConverter {
 		ConvertedNodeValue(OwlContainer owlContainer, OWLClassExpression owlExpr) {
 
 			super(owlContainer, owlExpr);
-
-			OWLClassExpression owlExprMod = checkNormaliseOwlExpression(owlExpr);
-
-			if (owlExprMod != owlExpr) {
-
-				resetOwlExpression(owlExprMod);
-			}
-		}
-
-		private OWLClassExpression checkNormaliseOwlExpression(OWLClassExpression owlExpr) {
-
-			if (owlExpr instanceof OWLObjectUnionOf) {
-
-				return normaliseOwlUnion((OWLObjectUnionOf)owlExpr);
-			}
-
-			return owlExpr;
 		}
 
 		private OWLClassExpression normaliseOwlUnion(OWLObjectUnionOf union) {

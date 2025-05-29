@@ -47,6 +47,13 @@ abstract class OwlContainer {
 			WARNINGS.logOutOfScopeAxiom(axiom, expr);
 		}
 
+		void logIncompletenessRiskDisjunctionFiller(
+				OWLRestriction restriction,
+				DisjunctionFillerWarning warning) {
+
+			WARNINGS.logIncompletenessRiskAxiomDisjunctionFiller(axiom, restriction, warning);
+		}
+
 		void logNoValueExprReplacement(
 				OWLClassExpression replaced,
 				OWLRestriction replacement) {
@@ -67,6 +74,13 @@ abstract class OwlContainer {
 		void logOutOfScope(OWLClassExpression expr) {
 
 			WARNINGS.logOutOfScopeQueryExpr(query, expr);
+		}
+
+		void logIncompletenessRiskDisjunctionFiller(
+				OWLRestriction restriction,
+				DisjunctionFillerWarning warning) {
+
+			WARNINGS.logIncompletenessRiskQueryDisjunctionFiller(query, restriction, warning);
 		}
 
 		void logNoValueExprReplacement(
@@ -99,17 +113,11 @@ abstract class OwlContainer {
 		}
 	}
 
-	void checkLogInvalidDisjunctionFiller(
-			OWLRestriction owlRestriction,
-			DisjunctionFillerWarning warning) {
-
-		if (!outOfScope) {
-
-			WARNINGS.logInvalidDisjunctionFiller(owlRestriction, warning);
-		}
-	}
-
 	abstract void logOutOfScope(OWLClassExpression expr);
+
+	abstract void logIncompletenessRiskDisjunctionFiller(
+						OWLRestriction restriction,
+						DisjunctionFillerWarning warning);
 
 	abstract void logNoValueExprReplacement(
 						OWLClassExpression replaced,

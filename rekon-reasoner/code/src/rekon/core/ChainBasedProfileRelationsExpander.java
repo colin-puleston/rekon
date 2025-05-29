@@ -52,7 +52,7 @@ abstract class ChainBasedProfileRelationsExpander {
 
 			NodeValue v = current.getTarget().asNodeValue();
 
-			if (v != null) {
+			if (v != null && v.singleValueNode()) {
 
 				NodeX t = v.getSingleValueNode();
 

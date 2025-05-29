@@ -32,13 +32,15 @@ enum DisjunctionFillerWarning {
 	CHAIN_INVOLVED_SOME_VALUES(
 		"existential restrictions on transitive or chain-involved properties"),
 	ALL_VALUES_INDIVIDUALS_PRESENT(
-		"universal restrictions when individuals present in ontology");
+		"universal restrictions when individuals are present in the ontology");
 
 	private String text;
 
 	DisjunctionFillerWarning(String restrictionType) {
 
-		 text = "Disjunction fillers not permitted for " + restrictionType;
+		 text = "Disjunction fillers for "
+		 			+ restrictionType
+		 			+ " may result in incomplete reasoning";
 	}
 
 	String getText() {
