@@ -70,7 +70,7 @@ Simple OWL reasoner. Implements OWL API.
 - <code>NegativeDataPropertyAssertion</code>
 - <code>HasKey</code>
 
-**Note:** Reasoning may be incomplete if <code>ObjectUnionOf</code> construct provides filler for: 
+**_Note:_** Reasoning may be incomplete if <code>ObjectUnionOf</code> construct provides filler for: 
 
-- _Existential restriction_ on property that is either transitive or involved in any property chains
-- _Universal restriction_ on any property when the ontology contains any individuals
+- <code>ObjectSomeValuesFrom</code> restriction on property that is either transitive or involved in any property chains
+- <code>ObjectAllValuesFrom</code> restriction on any property when the ontology contains any individuals
