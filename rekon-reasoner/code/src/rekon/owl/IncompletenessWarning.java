@@ -27,16 +27,17 @@ package rekon.owl;
 /**
  * @author Colin Puleston
  */
-enum DisjunctionFillerWarning {
+enum IncompletenessWarning {
 
-	CHAIN_INVOLVED_SOME_VALUES(
+	SOME_VALUES_FILLER(
 		"Existential restriction on transitive or chain-involved property with disjunction filler"),
-	ALL_VALUES_INDIVIDUALS_PRESENT(
+
+	ALL_VALUES_FILLER(
 		"Universal restriction with disjunction filler + individuals present in ontology");
 
 	private String text;
 
-	DisjunctionFillerWarning(String text) {
+	IncompletenessWarning(String text) {
 
 		 this.text = text;
 	}

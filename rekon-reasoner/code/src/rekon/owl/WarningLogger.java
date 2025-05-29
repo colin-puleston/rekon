@@ -80,20 +80,20 @@ class WarningLogger {
 		writeBlock(b);
 	}
 
-	void logIncompletenessRiskAxiomDisjunctionFiller(
+	void logIncompletenessRiskAxiom(
 				OWLAxiom axiom,
 				OWLRestriction restriction,
-				DisjunctionFillerWarning warning) {
+				IncompletenessWarning warning) {
 
-		logIncompletenessRiskDisjunctionFiller(describeAxiom(axiom), restriction, warning);
+		logIncompletenessRisk(describeAxiom(axiom), restriction, warning);
 	}
 
-	void logIncompletenessRiskQueryDisjunctionFiller(
+	void logIncompletenessRiskQuery(
 				OWLClassExpression query,
 				OWLRestriction restriction,
-				DisjunctionFillerWarning warning) {
+				IncompletenessWarning warning) {
 
-		logIncompletenessRiskDisjunctionFiller(describeQuery(query), restriction, warning);
+		logIncompletenessRisk(describeQuery(query), restriction, warning);
 	}
 
 	void logNoValueAxiomExprReplacement(
@@ -112,10 +112,10 @@ class WarningLogger {
 		logNoValueExprReplacement(describeQuery(query), replaced, replacement);
 	}
 
-	private void logIncompletenessRiskDisjunctionFiller(
+	private void logIncompletenessRisk(
 					String containerDescription,
 					OWLRestriction restriction,
-					DisjunctionFillerWarning warning) {
+					IncompletenessWarning warning) {
 
 		LogBlock b = createBlock("Construct may cause incomplete reasoning...");
 

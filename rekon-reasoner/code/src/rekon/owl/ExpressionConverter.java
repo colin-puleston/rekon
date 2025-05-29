@@ -441,8 +441,7 @@ class ExpressionConverter {
 
 			if (disjunctionFiller() && chainInvolvedProperty()) {
 
-				logIncompletenessRiskDisjunctionFiller(
-					DisjunctionFillerWarning.CHAIN_INVOLVED_SOME_VALUES);
+				logIncompletenessRisk(IncompletenessWarning.SOME_VALUES_FILLER);
 			}
 		}
 
@@ -450,14 +449,13 @@ class ExpressionConverter {
 
 			if (disjunctionFiller() && names.anyIndividuals()) {
 
-				logIncompletenessRiskDisjunctionFiller(
-					DisjunctionFillerWarning.ALL_VALUES_INDIVIDUALS_PRESENT);
+				logIncompletenessRisk(IncompletenessWarning.ALL_VALUES_FILLER);
 			}
 		}
 
-		private void logIncompletenessRiskDisjunctionFiller(DisjunctionFillerWarning warning) {
+		private void logIncompletenessRisk(IncompletenessWarning warning) {
 
-			owlContainer.logIncompletenessRiskDisjunctionFiller(getOwlExpr(), warning);
+			owlContainer.logIncompletenessRisk(getOwlExpr(), warning);
 		}
 
 		private boolean chainInvolvedProperty() {
