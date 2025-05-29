@@ -30,17 +30,15 @@ package rekon.owl;
 enum DisjunctionFillerWarning {
 
 	CHAIN_INVOLVED_SOME_VALUES(
-		"existential restrictions on transitive or chain-involved properties"),
+		"Existential restriction on transitive or chain-involved property with disjunction filler"),
 	ALL_VALUES_INDIVIDUALS_PRESENT(
-		"universal restrictions when individuals are present in the ontology");
+		"Universal restriction with disjunction filler + individuals present in ontology");
 
 	private String text;
 
-	DisjunctionFillerWarning(String restrictionType) {
+	DisjunctionFillerWarning(String text) {
 
-		 text = "Disjunction fillers for "
-		 			+ restrictionType
-		 			+ " may result in incomplete reasoning";
+		 this.text = text;
 	}
 
 	String getText() {

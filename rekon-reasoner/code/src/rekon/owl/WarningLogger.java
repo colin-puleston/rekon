@@ -117,10 +117,11 @@ class WarningLogger {
 					OWLRestriction restriction,
 					DisjunctionFillerWarning warning) {
 
-		LogBlock b = createBlock(warning.getText());
+		LogBlock b = createBlock("Construct may cause incomplete reasoning...");
 
 		b.addLine(containerDescription);
 		b.addLine("Restriction: " + restriction);
+		b.addLine("Explanation: " + warning.getText());
 
 		writeBlock(b);
 	}
