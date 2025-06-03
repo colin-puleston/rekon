@@ -441,15 +441,23 @@ class ExpressionConverter {
 
 			if (disjunctionFiller() && chainInvolvedProperty()) {
 
-				logIncompletenessRisk(IncompletenessWarning.SOME_VALUES_FILLER);
+				logIncompletenessRisk(
+					IncompletenessWarning.SOME_VALUES_CHAIN_AND_DISJUNCTION);
 			}
 		}
 
 		private void checkIncompletenessRiskAllValuesFiller() {
 
+			if (chainInvolvedProperty()) {
+
+				logIncompletenessRisk(
+					IncompletenessWarning.ALL_VALUES_CHAIN);
+			}
+
 			if (disjunctionFiller() && names.anyIndividuals()) {
 
-				logIncompletenessRisk(IncompletenessWarning.ALL_VALUES_FILLER);
+				logIncompletenessRisk(
+					IncompletenessWarning.ALL_VALUES_DISJUNCTION_AND_INDIVIDUALS);
 			}
 		}
 
