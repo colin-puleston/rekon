@@ -7,7 +7,7 @@ Simple OWL reasoner. Implements OWL API.
 ### Class-expressions ###
 
 - <code>ObjectIntersectionOf</code>
-- <code>ObjectUnionOf</code> _restriction fillers only (possible incomplete reasoning - see below)_
+- <code>ObjectUnionOf</code> _restriction fillers only_
 - <code>ObjectSomeValuesFrom</code>
 - <code>ObjectAllValuesFrom</code>
 - <code>ObjectHasValue</code>
@@ -70,7 +70,13 @@ Simple OWL reasoner. Implements OWL API.
 - <code>NegativeDataPropertyAssertion</code>
 - <code>HasKey</code>
 
-**_Note:_** Reasoning may be incomplete if <code>ObjectUnionOf</code> construct provides filler for: 
+**_Note:_** Reasoning may be incomplete if ontology contains any constructs of the form: 
 
-- <code>ObjectSomeValuesFrom</code> restriction on property that is either transitive or involved in any property chains
-- <code>ObjectAllValuesFrom</code> restriction on any property when the ontology contains any individuals
+- <code>ObjectSomeValuesFrom</code> restriction on _chained_ property with <code>ObjectUnionOf</code>
+filler
+- <code>ObjectAllValuesFrom</code> restriction on _chained_ property with any filler
+- <code>ObjectAllValuesFrom</code> restriction on any property with <code>ObjectUnionOf</code>
+filler, when the ontology contains any individuals
+
+(where a _chained_ property is a property that is either transitive or involved in one or more property
+chains, as either super- or sub-property)
