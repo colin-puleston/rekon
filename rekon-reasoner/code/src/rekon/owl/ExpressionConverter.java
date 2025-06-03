@@ -561,18 +561,34 @@ class ExpressionConverter {
 		return new ConvertedNode(OwlContainer.asContainer(owlAxiom), owlExpr);
 	}
 
-	InputRelation toAxiomRelation(OWLAxiom owlAxiom, OWLRestriction owlExpr) {
+	InputRelation toAxiomRelation(OWLObjectPropertyAssertionAxiom owlAxiom) {
 
-		OwlContainer owlContainer = OwlContainer.asContainer(owlAxiom);
+		return toAxiomRelation(owlAxiom, toOwlRestriction(owlAxiom));
+	}
 
-		return new ConvertedRelation(
-						owlContainer,
-						noValueSubstitutions.resolve(owlContainer, owlExpr));
+	InputRelation toAxiomRelation(OWLDataPropertyAssertionAxiom owlAxiom) {
+
+		return toAxiomRelation(owlAxiom, toOwlRestriction(owlAxiom));
 	}
 
 	InputNode toQueryNode(OWLClassExpression owlExpr) {
 
 		return new ConvertedNode(OwlContainer.asContainer(owlExpr), owlExpr);
+	}
+
+	private InputRelation toAxiomRelation(OWLAxiom owlAxiom, OWLRestriction owlExpr) {
+
+		return new ConvertedRelation(OwlContainer.asContainer(owlAxiom), owlExpr);
+	}
+
+	private OWLRestriction toOwlRestriction(OWLObjectPropertyAssertionAxiom owlAxiom) {
+
+		return factory.getOWLObjectHasValue(owlAxiom.getProperty(), owlAxiom.getObject());
+	}
+
+	private OWLRestriction toOwlRestriction(OWLDataPropertyAssertionAxiom owlAxiom) {
+
+		return factory.getOWLDataHasValue(owlAxiom.getProperty(), owlAxiom.getObject());
 	}
 
 	private <O>O owlObjectAs(OWLObject obj, Class<O> type) {

@@ -270,12 +270,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			return new ConvertedIndividualRelation(source, node, toRelation(source));
 		}
 
-		abstract OWLRestriction toOwlRestriction(S source);
-
-		private InputRelation toRelation(S source) {
-
-			return expressions.toAxiomRelation(source, toOwlRestriction(source));
-		}
+		abstract InputRelation toRelation(S source);
 	}
 
 	private class IndividualObjectRelationConverter
@@ -287,9 +282,9 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			return OWLObjectPropertyAssertionAxiom.class;
 		}
 
-		OWLRestriction toOwlRestriction(OWLObjectPropertyAssertionAxiom source) {
+		InputRelation toRelation(OWLObjectPropertyAssertionAxiom source) {
 
-			return factory.getOWLObjectHasValue(source.getProperty(), source.getObject());
+			return expressions.toAxiomRelation(source);
 		}
 	}
 
@@ -302,9 +297,9 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			return OWLDataPropertyAssertionAxiom.class;
 		}
 
-		OWLRestriction toOwlRestriction(OWLDataPropertyAssertionAxiom source) {
+		InputRelation toRelation(OWLDataPropertyAssertionAxiom source) {
 
-			return factory.getOWLDataHasValue(source.getProperty(), source.getObject());
+			return expressions.toAxiomRelation(source);
 		}
 	}
 

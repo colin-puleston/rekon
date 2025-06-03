@@ -54,74 +54,6 @@ class NoValueSubstitutions {
 
 	private OWLClass rekonNoValue;
 
-	private ExpressionResolver expressionResolver = new ExpressionResolver();
-	private RestrictionResolver restrictionResolver = new RestrictionResolver();
-
-	private abstract class Resolver<E extends OWLClassExpression> {
-
-		E resolve(OwlContainer container, E expr) {
-
-			if (OPTION.enabled()) {
-
-				OWLRestriction newExpr = checkResolveToRestriction(expr);
-
-				if (newExpr != null) {
-
-					container.logNoValueExprReplacement(expr, newExpr);
-
-					return toTypeExpression(newExpr);
-				}
-			}
-
-			return expr;
-		}
-
-		abstract OWLRestriction checkResolveToRestriction(E expr);
-
-		abstract E toTypeExpression(OWLRestriction expr);
-	}
-
-	private class ExpressionResolver extends Resolver<OWLClassExpression> {
-
-		OWLRestriction checkResolveToRestriction(OWLClassExpression expr) {
-
-			if (expr instanceof OWLObjectComplementOf) {
-
-				return checkCreateForNoValue((OWLObjectComplementOf)expr);
-			}
-
-			if (expr instanceof OWLObjectAllValuesFrom) {
-
-				return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
-			}
-
-			return null;
-		}
-
-		OWLClassExpression toTypeExpression(OWLRestriction expr) {
-
-			return expr;
-		}
-	}
-
-	private class RestrictionResolver extends Resolver<OWLRestriction> {
-
-		OWLRestriction checkResolveToRestriction(OWLRestriction expr) {
-
-			if (expr instanceof OWLObjectAllValuesFrom) {
-
-				return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
-			}
-
-			return null;
-		}
-
-		OWLRestriction toTypeExpression(OWLRestriction expr) {
-
-			return expr;
-		}
-	}
-
 	NoValueSubstitutions(OWLDataFactory factory) {
 
 		this.factory = factory;
@@ -134,12 +66,34 @@ class NoValueSubstitutions {
 
 	OWLClassExpression resolve(OwlContainer container, OWLClassExpression expr) {
 
-		return expressionResolver.resolve(container, expr);
+		if (OPTION.enabled()) {
+
+			OWLRestriction newExpr = checkConvert(expr);
+
+			if (newExpr != null) {
+
+				container.logNoValueExprReplacement(expr, newExpr);
+
+				return newExpr;
+			}
+		}
+
+		return expr;
 	}
 
-	OWLRestriction resolve(OwlContainer container, OWLRestriction expr) {
+	private OWLRestriction checkConvert(OWLClassExpression expr) {
 
-		return restrictionResolver.resolve(container, expr);
+		if (expr instanceof OWLObjectComplementOf) {
+
+			return checkCreateForNoValue((OWLObjectComplementOf)expr);
+		}
+
+		if (expr instanceof OWLObjectAllValuesFrom) {
+
+			return checkCreateForNoValue((OWLObjectAllValuesFrom)expr);
+		}
+
+		return null;
 	}
 
 	private OWLRestriction checkCreateForNoValue(OWLObjectComplementOf expr) {
@@ -164,6 +118,11 @@ class NoValueSubstitutions {
 		return noValueAllRestriction(expr) ? createForNoValue(expr.getProperty()) : null;
 	}
 
+	private OWLRestriction createForNoValue(OWLObjectPropertyExpression prop) {
+
+		return factory.getOWLObjectSomeValuesFrom(prop, rekonNoValue);
+	}
+
 	private boolean noValueComplementedSomeRestriction(OWLObjectSomeValuesFrom expr) {
 
 		OWLClassExpression f = expr.getFiller();
@@ -186,10 +145,5 @@ class NoValueSubstitutions {
 		}
 
 		return f.equals(owlNothing);
-	}
-
-	private OWLRestriction createForNoValue(OWLObjectPropertyExpression prop) {
-
-		return factory.getOWLObjectSomeValuesFrom(prop, rekonNoValue);
 	}
 }
