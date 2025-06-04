@@ -91,16 +91,16 @@ class SimpleProfilesBuilder {
 
 	private abstract class TypeNodesProfileCreator<A extends InputAxiom> {
 
+		final ProfilesBuilder ppBuilder = new ProfilesBuilder();
+
 		TypeNodesProfileCreator() {
 
-			ProfilesBuilder ppBuilder = new ProfilesBuilder();
-
-			processSourceAxioms(ppBuilder);
+			processSourceAxioms();
 
 			ppBuilder.createAllProfiles(getTypeNodes());
 		}
 
-		void processSourceAxioms(ProfilesBuilder ppBuilder) {
+		void processSourceAxioms() {
 
 			for (A ax : getSourceAxioms()) {
 
@@ -108,25 +108,7 @@ class SimpleProfilesBuilder {
 
 				if (sub != null) {
 
-					InputNode sup = getSuper(ax);
-
-					switch (sup.getNodeType()) {
-
-						case CONJUNCTION:
-
-							Pattern p = components.toPattern(sup);
-
-							if (p != null) {
-
-								matchStructures.addProfile(sub, p);
-							}
-							break;
-
-						case RELATION:
-
-							ppBuilder.checkAddRelation(sub, sup.asRelation());
-							break;
-					}
+					checkAddRelations(sub, getSuper(ax));
 				}
 			}
 		}
@@ -138,15 +120,34 @@ class SimpleProfilesBuilder {
 		abstract InputNode getSuper(A axiom);
 
 		abstract Iterable<? extends NodeX> getTypeNodes();
+
+		private void checkAddRelations(NodeX sub, InputNode sup) {
+
+			switch (sup.getNodeType()) {
+
+				case CONJUNCTION:
+
+					for (InputNode supConj : sup.asConjuncts()) {
+
+						checkAddRelations(sub, supConj);
+					}
+					break;
+
+				case RELATION:
+
+					ppBuilder.checkAddRelation(sub, sup.asRelation());
+					break;
+			}
+		}
 	}
 
 	private class ClassNodesProfileCreator
 						extends
 							TypeNodesProfileCreator<InputClassSubSuper> {
 
-		void processSourceAxioms(ProfilesBuilder ppBuilder) {
+		void processSourceAxioms() {
 
-			super.processSourceAxioms(ppBuilder);
+			super.processSourceAxioms();
 
 			ClassNode root = names.getRootClassNode();
 
@@ -188,9 +189,9 @@ class SimpleProfilesBuilder {
 						extends
 							TypeNodesProfileCreator<InputIndividualType> {
 
-		void processSourceAxioms(ProfilesBuilder ppBuilder) {
+		void processSourceAxioms() {
 
-			super.processSourceAxioms(ppBuilder);
+			super.processSourceAxioms();
 
 			for (InputIndividualRelation ax : axioms.getIndividualRelations()) {
 
