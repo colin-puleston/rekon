@@ -289,9 +289,9 @@ abstract class PotentialSubsumptions {
 
 	private class TransientRegisterOp extends TransientUpdateOp {
 
-		TransientRegisterOp(PatternMatcher option) {
+		TransientRegisterOp(PatternMatcher option, int idx) {
 
-			super(option, lastOptionIdx());
+			super(option, idx);
 		}
 
 		UpdateType getOpType() {
@@ -302,9 +302,9 @@ abstract class PotentialSubsumptions {
 
 	private class TransientDeregisterOp extends TransientUpdateOp {
 
-		TransientDeregisterOp(PatternMatcher option) {
+		TransientDeregisterOp(PatternMatcher option, int idx) {
 
-			super(option, optionIdxsByNode.get(option));
+			super(option, idx);
 		}
 
 		UpdateType getOpType() {
@@ -406,12 +406,21 @@ abstract class PotentialSubsumptions {
 
 	void registerTransientOption(PatternMatcher option) {
 
-		new TransientRegisterOp(option);
+		int idx = allOptions.size();
+
+		optionIdxsByNode.put(option.getNode(), idx);
+
+		new TransientRegisterOp(option, idx);
 	}
 
-	void deregisterTransientOption(PatternMatcher option) {
+	void checkDeregisterTransientOption(PatternMatcher option) {
 
-		new TransientDeregisterOp(option);
+		Integer idx = optionIdxsByNode.get(option.getNode());
+
+		if (idx != null) {
+
+			new TransientDeregisterOp(option, idx);
+		}
 	}
 
 	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {

@@ -57,7 +57,7 @@ abstract class PotentialSubsumeds extends PotentialSubsumptions {
 
 		if (p != null) {
 
-			deregisterTransientOption(p);
+			checkDeregisterTransientOption(p);
 		}
 	}
 
