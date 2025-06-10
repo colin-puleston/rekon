@@ -75,7 +75,7 @@ class IntegerIntersection extends IntegerCollector {
 		}
 		else {
 
-			if (!anySubsetsAbsorbed || !integerSets.isEmpty()) {
+			if (potentiallyNonEmptySubsetResult()) {
 
 				integerSets.add(integers);
 			}
@@ -105,6 +105,11 @@ class IntegerIntersection extends IntegerCollector {
 		}
 
 		return false;
+	}
+
+	boolean potentiallyNonEmptySubsetResult() {
+
+		return !anySubsetsAbsorbed || !integerSets.isEmpty();
 	}
 
 	boolean enableSettingToAllOptions() {

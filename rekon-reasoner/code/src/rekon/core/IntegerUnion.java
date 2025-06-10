@@ -73,6 +73,11 @@ class IntegerUnion extends IntegerCollector {
 		return integerUnion.size() == 1 && integerUnion.contains(exclude);
 	}
 
+	boolean potentiallyNonEmptySubsetResult() {
+
+		return true;
+	}
+
 	boolean enableSettingToAllOptions() {
 
 		integerUnion.clear();

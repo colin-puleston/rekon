@@ -83,7 +83,7 @@ abstract class PotentialSubsumptions {
 
 				rankOpts.absorbFrom(getOptionsFor(n));
 
-				if (rankOpts.emptyResult()) {
+				if (!rankOpts.potentiallyNonEmptySubsetResult()) {
 
 					break;
 				}

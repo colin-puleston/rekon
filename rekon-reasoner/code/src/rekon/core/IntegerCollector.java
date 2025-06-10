@@ -72,9 +72,9 @@ abstract class IntegerCollector {
 		return allOptionsResult;
 	}
 
-	boolean emptyResult() {
+	boolean potentiallyNonEmptyResult() {
 
-		return !allOptionsResult && emptySubsetResult();
+		return allOptionsResult || potentiallyNonEmptySubsetResult();
 	}
 
 	boolean emptyResultIfExcluded(Integer exclude) {
@@ -97,6 +97,8 @@ abstract class IntegerCollector {
 	abstract boolean emptySubsetResult();
 
 	abstract boolean emptySubsetResultIfExcluded(int exclude);
+
+	abstract boolean potentiallyNonEmptySubsetResult();
 
 	abstract boolean enableSettingToAllOptions();
 
