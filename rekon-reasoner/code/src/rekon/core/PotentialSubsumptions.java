@@ -408,6 +408,7 @@ abstract class PotentialSubsumptions {
 
 		int idx = allOptions.size();
 
+		allOptions.add(option);
 		optionIdxsByNode.put(option.getNode(), idx);
 
 		new TransientRegisterOp(option, idx);
@@ -415,9 +416,9 @@ abstract class PotentialSubsumptions {
 
 	void checkDeregisterTransientOption(PatternMatcher option) {
 
-		Integer idx = optionIdxsByNode.get(option.getNode());
+		if (allOptions.remove(option)) {
 
-		if (idx != null) {
+			Integer idx = optionIdxsByNode.remove(option.getNode());
 
 			new TransientDeregisterOp(option, idx);
 		}
