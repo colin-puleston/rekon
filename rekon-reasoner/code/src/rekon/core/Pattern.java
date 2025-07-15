@@ -120,17 +120,7 @@ public class Pattern extends PatternComponent {
 
 		if (collector.continueForNextRelationsRank()) {
 
-			Collection<Relation> rels = getRelations(collector.profile());
-
-			if (!rels.isEmpty()) {
-
-				collector = collector.forNextRank();
-
-				for (Relation r : rels) {
-
-					r.collectNames(collector);
-				}
-			}
+			Relation.collectNamesFromAll(collector, getRelations(collector.profile()));
 		}
 	}
 

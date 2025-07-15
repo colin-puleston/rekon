@@ -90,22 +90,34 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 			if (visited.add(n) && !profileLinkingNodes.contains(n)) {
 
+				profileLinkingNodes.push(n);
+
 				PatternMatcher p = n.getProfileMatcher();
 
 				if (p != null) {
 
-					profileLinkingNodes.push(n);
 					p.getPattern().collectNames(this);
-					profileLinkingNodes.pop();
 				}
 				else {
 
-					for (NodeX s : n.getSupers(true).asNodes()) {
+					if (continueForNextRelationsRank()) {
 
-						collectForProfileMatchers(s, visited);
+						collectNamesFromSubsumerRelations(n);
 					}
 				}
+
+				profileLinkingNodes.pop();
 			}
+		}
+
+		private void collectNamesFromSubsumerRelations(NodeX n) {
+
+			Relation.collectNamesFromAll(this, collectSubsumerRelations(n));
+		}
+
+		private Collection<Relation> collectSubsumerRelations(NodeX n) {
+
+			return new ProfileRelationsResolver().collectFromSubsumers(n);
 		}
 	}
 

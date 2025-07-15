@@ -61,7 +61,7 @@ class ProfileRelationsResolver {
 
 				for (PatternMatcher p : s.getProfileMatcherAsList()) {
 
-					for (Relation r : getProfileRelations(p)) {
+					for (Relation r : getFromProfile(p)) {
 
 						collector.retainMostSpecific(r);
 					}
@@ -104,16 +104,7 @@ class ProfileRelationsResolver {
 		resolver.collectChainExpansions();
 	}
 
-	private Collection<Relation> resolveProfileRelations(NodeX node) {
-
-		PatternMatcher p = node.getProfileMatcher();
-
-		return p != null
-				? getProfileRelations(p)
-				: getProfileRelationsFromSubsumers(node);
-	}
-
-	private Collection<Relation> getProfileRelationsFromSubsumers(NodeX node) {
+	Collection<Relation> collectFromSubsumers(NodeX node) {
 
 		RelationCollector collector = new RelationCollector();
 		NodeRelationsResolver resolver = new NodeRelationsResolver(node, collector);
@@ -123,7 +114,14 @@ class ProfileRelationsResolver {
 		return collector.getCollected();
 	}
 
-	private Collection<Relation> getProfileRelations(PatternMatcher p) {
+	private Collection<Relation> resolveProfileRelations(NodeX node) {
+
+		PatternMatcher p = node.getProfileMatcher();
+
+		return p != null ? getFromProfile(p) : collectFromSubsumers(node);
+	}
+
+	private Collection<Relation> getFromProfile(PatternMatcher p) {
 
 		return p.getPattern().getProfileRelations().getAll();
 	}
