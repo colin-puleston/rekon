@@ -82,42 +82,42 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			if (profileValueNodesCollected.add(n)) {
 
 				collectName(n);
-				collectForProfileMatchers(n, new NameSet());
+
+				if (continueForNextRelationsRank() && !profileLinkingNodes.contains(n)) {
+
+					collectFromRelations(n);
+				}
 			}
 		}
 
-		private void collectForProfileMatchers(NodeX n, NameSet visited) {
+		private void collectFromRelations(NodeX n) {
 
-			if (visited.add(n) && !profileLinkingNodes.contains(n)) {
+			Collection<Relation> rels = getRelations(n);
+
+			if (!rels.isEmpty()) {
 
 				profileLinkingNodes.push(n);
 
-				PatternMatcher p = n.getProfileMatcher();
-
-				if (p != null) {
-
-					p.getPattern().collectNames(this);
-				}
-				else {
-
-					if (continueForNextRelationsRank()) {
-
-						collectNamesFromSubsumerRelations(n);
-					}
-				}
+				Relation.collectNamesFromNextRankRelations(this, rels);
 
 				profileLinkingNodes.pop();
 			}
 		}
 
-		private void collectNamesFromSubsumerRelations(NodeX n) {
+		private Collection<Relation> getRelations(NodeX n) {
 
-			Relation.collectNamesFromAll(this, collectSubsumerRelations(n));
-		}
+			PatternMatcher p = n.getProfileMatcher();
 
-		private Collection<Relation> collectSubsumerRelations(NodeX n) {
+			if (p != null) {
+
+				return p.getPattern().getProfileRelations().getAll();
+			}
 
 			return new ProfileRelationsResolver().collectFromSubsumers(n);
+		}
+
+		private void collectNamesFromSubsumerRelations(NodeX n) {
+
 		}
 	}
 

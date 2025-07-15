@@ -31,7 +31,7 @@ import java.util.*;
  */
 public abstract class Relation extends PatternComponent {
 
-	static void collectNamesFromAll(NameCollector collector, Collection<Relation> rels) {
+	static void collectNamesFromNextRankRelations(NameCollector collector, Collection<Relation> rels) {
 
 		if (!rels.isEmpty()) {
 
