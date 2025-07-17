@@ -339,11 +339,9 @@ abstract class PotentialSubsumptions {
 			ensureRankMatches(stopRank);
 			setMaxProcesses(stopRank - startRank);
 
-			List<PatternMatcher> opts = allOptions;
+			for (int i = 0 ; i < allOptions.size() ; i++) {
 
-			for (int i = 0 ; i < opts.size() ; i++) {
-
-				registerOps.add(new CoreRegisterOp(opts.get(i), i, startRank, stopRank));
+				registerOps.add(new CoreRegisterOp(allOptions.get(i), i, startRank, stopRank));
 			}
 
 			execProcesses();
@@ -416,9 +414,9 @@ abstract class PotentialSubsumptions {
 
 	void checkDeregisterTransientOption(PatternMatcher option) {
 
-		if (allOptions.remove(option)) {
+		Integer idx = optionIdxsByNode.remove(option.getNode());
 
-			Integer idx = optionIdxsByNode.remove(option.getNode());
+		if (idx != null) {
 
 			new TransientDeregisterOp(option, idx);
 		}

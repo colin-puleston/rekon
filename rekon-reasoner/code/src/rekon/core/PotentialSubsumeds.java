@@ -31,11 +31,7 @@ import java.util.*;
  */
 abstract class PotentialSubsumeds extends PotentialSubsumptions {
 
-	private List<PatternMatcher> allOptions;
-
 	PotentialSubsumeds(List<PatternMatcher> allOptions) {
-
-		this.allOptions = allOptions;
 
 		initialise(allOptions);
 	}
@@ -46,7 +42,6 @@ abstract class PotentialSubsumeds extends PotentialSubsumptions {
 
 		if (p != null) {
 
-			allOptions.add(p);
 			registerTransientOption(p);
 		}
 	}
