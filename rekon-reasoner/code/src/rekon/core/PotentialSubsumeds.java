@@ -31,31 +31,6 @@ import java.util.*;
  */
 abstract class PotentialSubsumeds extends PotentialSubsumptions {
 
-	PotentialSubsumeds(List<PatternMatcher> allOptions) {
-
-		initialise(allOptions);
-	}
-
-	void checkAddInstanceOption(InstanceNode node) {
-
-		PatternMatcher p = node.getProfileMatcher();
-
-		if (p != null) {
-
-			registerTransientOption(p);
-		}
-	}
-
-	void checkRemoveInstanceOption(InstanceNode node) {
-
-		PatternMatcher p = node.getProfileMatcher();
-
-		if (p != null) {
-
-			checkDeregisterTransientOption(p);
-		}
-	}
-
 	List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
 
 		return getRankedProfileNames(option.getPattern(), startRank, stopRank);

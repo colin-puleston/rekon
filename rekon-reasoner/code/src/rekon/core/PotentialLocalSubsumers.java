@@ -38,6 +38,8 @@ class PotentialLocalSubsumers {
 
 	private abstract class CategoryPotentials extends PotentialSubsumptions {
 
+		private boolean initialised = false;
+
 		void collectPotentialsFor(PatternMatcher request, List<PatternMatcher> potentials) {
 
 			checkInitialised();
@@ -80,10 +82,12 @@ class PotentialLocalSubsumers {
 
 		private synchronized void checkInitialised() {
 
-			if (!initialised()) {
+			if (!initialised) {
 
-				initialise(getCategoryOptions());
+				setFixedOptions(getCategoryOptions());
 				initialiseOptionRanks();
+
+				initialised = true;
 			}
 		}
 

@@ -32,7 +32,9 @@ import java.util.*;
 public class InstanceOps {
 
 	private DynamicSubsumers dynamicSubsumers;
-	private DynamicSubsumeds dynamicSubsumeds;
+	private DynamicSubsumeds instanceSubsumeds;
+
+	private PotentialLocalSubsumeds instanceSubsumedsFilter;
 
 	private class Updater {
 
@@ -45,7 +47,7 @@ public class InstanceOps {
 
 			dynamicSubsumers.inferSubsumers(ip);
 			node.completeClassification();
-			dynamicSubsumeds.checkAddInstanceOption(node);
+			checkAddToInstanceSubsumedsFilter(node);
 
 			instance.checkAddAsReferencer(profileBuilder);
 			added.add(instance);
@@ -56,12 +58,32 @@ public class InstanceOps {
 
 			InstanceNode node = instance.getNode();
 
-			dynamicSubsumeds.checkRemoveInstanceOption(node);
+			checkRemoveFromInstanceSubsumedsFilter(node);
 
 			updateReferencers(instance);
 			instance.removeAsReferencer();
 
 			node.clearLinks();
+		}
+
+		private void checkAddToInstanceSubsumedsFilter(InstanceNode node) {
+
+			PatternMatcher opt = node.getProfileMatcher();
+
+			if (opt != null) {
+
+				instanceSubsumedsFilter.addTransientOption(opt);
+			}
+		}
+
+		private void checkRemoveFromInstanceSubsumedsFilter(InstanceNode node) {
+
+			PatternMatcher opt = node.getProfileMatcher();
+
+			if (opt != null) {
+
+				instanceSubsumedsFilter.removeTransientOption(opt);
+			}
 		}
 
 		private void updateReferencers(Instance instance) {
@@ -81,7 +103,8 @@ public class InstanceOps {
 	public InstanceOps(Ontology ontology) {
 
 		dynamicSubsumers = ontology.getDynamicSubsumers();
-		dynamicSubsumeds = ontology.getDynamicSubsumeds();
+		instanceSubsumedsFilter = new PotentialLocalSubsumeds();
+		instanceSubsumeds = new DynamicSubsumeds(instanceSubsumedsFilter);
 	}
 
 	public void add(Instance instance, PatternSource profileBuilder) {
@@ -108,7 +131,7 @@ public class InstanceOps {
 	public List<Instance> match(PatternSource queryBuilder) {
 
 		DynamicExpression q = createQueryExpression(queryBuilder);
-		NameSet matches = dynamicSubsumeds.inferAllSubsumedNodes(q);
+		NameSet matches = instanceSubsumeds.inferAllSubsumedNodes(q);
 
 		return matches.isEmpty()
 				? Collections.emptyList()

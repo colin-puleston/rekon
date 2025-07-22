@@ -36,12 +36,14 @@ import rekon.util.*;
  */
 abstract class PotentialSubsumptions {
 
-	private List<PatternMatcher> allOptions = null;
-	private Map<NodeX, Integer> optionIdxsByNode = new HashMap<NodeX, Integer>();
+	private boolean fixedOptions = false;
+
+	private List<PatternMatcher> currentOptions = new ArrayList<PatternMatcher>();
+	private Map<PatternMatcher, Integer> optionsToIndexes = new HashMap<PatternMatcher, Integer>();
 
 	private List<RankMatches> allRankMatches = new ArrayList<RankMatches>();
 
-	private enum UpdateType {REGISTER_CORE, REGISTER_TRANSIENT, DEREGISTER_TRANSIENT}
+	private enum UpdateType {REGISTER, DEREGISTER}
 
 	private class RankMatches {
 
@@ -50,27 +52,18 @@ abstract class PotentialSubsumptions {
 		private Map<Name, IntHashSet> optionIdxsByRefName = new HashMap<Name, IntHashSet>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
-		void update(
-				PatternMatcher option,
-				int optionIdx,
-				Names rankNames,
-				UpdateType updateType) {
+		void update(int optionIdx, Names rankNames, UpdateType updateType) {
 
 			switch (updateType) {
 
-				case REGISTER_CORE:
+				case REGISTER:
 
-					registerOption(option, optionIdx, rankNames, true);
+					registerOption(optionIdx, rankNames);
 					break;
 
-				case REGISTER_TRANSIENT:
+				case DEREGISTER:
 
-					registerOption(option, optionIdx, rankNames, false);
-					break;
-
-				case DEREGISTER_TRANSIENT:
-
-					deregisterOption(option, optionIdx, rankNames);
+					deregisterOption(optionIdx, rankNames);
 					break;
 			}
 		}
@@ -92,26 +85,19 @@ abstract class PotentialSubsumptions {
 			return rankOpts;
 		}
 
-		private void registerOption(
-						PatternMatcher option,
-						int optionIdx,
-						Names rankNames,
-						boolean coreOption) {
+		private void registerOption(int optionIdx, Names rankNames) {
 
 			for (Name n : resolveRankNamesForRegistration(rankNames)) {
 
-				registerOptionName(option, optionIdx, n, coreOption);
+				registerOptionName(optionIdx, n);
 			}
 		}
 
-		private void deregisterOption(
-						PatternMatcher option,
-						int optionIdx,
-						Names rankNames) {
+		private void deregisterOption(int optionIdx, Names rankNames) {
 
 			for (Name n : resolveRankNamesForRegistration(rankNames)) {
 
-				deregisterOptionName(option, optionIdx, n);
+				deregisterOptionName(optionIdx, n);
 			}
 		}
 
@@ -120,11 +106,14 @@ abstract class PotentialSubsumptions {
 			return resolveNamesForRegistration(rankNames, rank).getNames();
 		}
 
-		private void registerOptionName(
-						PatternMatcher option,
-						int optionIdx,
-						Name n,
-						boolean coreOption) {
+		private void registerOptionName(int optionIdx, Name n) {
+
+			if (n.rootName()) {
+
+				refNamesCommonToAllOptions.add(n);
+
+				return;
+			}
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
@@ -141,7 +130,7 @@ abstract class PotentialSubsumptions {
 			}
 			else {
 
-				if (coreOption && optIdxs.size() == lastOptionIdx()) {
+				if (fixedOptions && optIdxs.size() == lastOptionIdx()) {
 
 					optionIdxsByRefName.remove(n);
 					refNamesCommonToAllOptions.add(n);
@@ -153,7 +142,7 @@ abstract class PotentialSubsumptions {
 			optIdxs.add(optionIdx);
 		}
 
-		private void deregisterOptionName(PatternMatcher option, int optionIdx, Name n) {
+		private void deregisterOptionName(int optionIdx, Name n) {
 
 			if (refNamesCommonToAllOptions.contains(n)) {
 
@@ -212,25 +201,20 @@ abstract class PotentialSubsumptions {
 		}
 	}
 
-	private class UpdateOp {
+	private abstract class UpdateOp {
 
 		private int optionIdx;
-		private PatternMatcher option;
 
 		private List<Names> rankedNames;
 
 		UpdateOp(PatternMatcher option, int optionIdx, int startRank, int stopRank) {
 
 			this.optionIdx = optionIdx;
-			this.option = option;
 
 			rankedNames = getOptionMatchNames(option, startRank, stopRank);
 		}
 
-		UpdateType getOpType() {
-
-			return UpdateType.REGISTER_CORE;
-		}
+		abstract UpdateType getOpType();
 
 		int totalOptionRanks() {
 
@@ -244,7 +228,7 @@ abstract class PotentialSubsumptions {
 				RankMatches rankMatches = allRankMatches.get(rank);
 				Names rankNames = rankedNames.get(rank);
 
-				rankMatches.update(option, optionIdx, rankNames, getOpType());
+				rankMatches.update(optionIdx, rankNames, getOpType());
 
 				return true;
 			}
@@ -262,7 +246,7 @@ abstract class PotentialSubsumptions {
 
 		UpdateType getOpType() {
 
-			return UpdateType.REGISTER_CORE;
+			return UpdateType.REGISTER;
 		}
 	}
 
@@ -272,10 +256,15 @@ abstract class PotentialSubsumptions {
 
 			super(option, optionIdx, 0, allRankMatches.size());
 
-			processForCurrentRankMatches();
+			if (fixedOptions) {
+
+				throw new Error("Cannot mix fixed and transient options!");
+			}
+
+			performOpForCurrentRankMatches();
 		}
 
-		private void processForCurrentRankMatches() {
+		private void performOpForCurrentRankMatches() {
 
 			for (int rank = 0 ; rank < allRankMatches.size() ; rank++) {
 
@@ -289,27 +278,27 @@ abstract class PotentialSubsumptions {
 
 	private class TransientRegisterOp extends TransientUpdateOp {
 
-		TransientRegisterOp(PatternMatcher option, int idx) {
+		TransientRegisterOp(PatternMatcher option, int optionIdx) {
 
-			super(option, idx);
+			super(option, optionIdx);
 		}
 
 		UpdateType getOpType() {
 
-			return UpdateType.REGISTER_TRANSIENT;
+			return UpdateType.REGISTER;
 		}
 	}
 
 	private class TransientDeregisterOp extends TransientUpdateOp {
 
-		TransientDeregisterOp(PatternMatcher option, int idx) {
+		TransientDeregisterOp(PatternMatcher option, int optionIdx) {
 
-			super(option, idx);
+			super(option, optionIdx);
 		}
 
 		UpdateType getOpType() {
 
-			return UpdateType.DEREGISTER_TRANSIENT;
+			return UpdateType.DEREGISTER;
 		}
 	}
 
@@ -339,9 +328,11 @@ abstract class PotentialSubsumptions {
 			ensureRankMatches(stopRank);
 			setMaxProcesses(stopRank - startRank);
 
-			for (int i = 0 ; i < allOptions.size() ; i++) {
+			for (PatternMatcher opt : currentOptions) {
 
-				registerOps.add(new CoreRegisterOp(allOptions.get(i), i, startRank, stopRank));
+				Integer idx = optionsToIndexes.get(opt);
+
+				registerOps.add(new CoreRegisterOp(opt, idx, startRank, stopRank));
 			}
 
 			execProcesses();
@@ -372,19 +363,40 @@ abstract class PotentialSubsumptions {
 		}
 	}
 
-	void initialise(List<PatternMatcher> allOptions) {
+	void setFixedOptions(List<PatternMatcher> options) {
 
-		this.allOptions = allOptions;
+		currentOptions = options;
 
-		for (int i = 0 ; i < allOptions.size() ; i++) {
+		for (int i = 0 ; i < options.size() ; i++) {
 
-			optionIdxsByNode.put(allOptions.get(i).getNode(), i);
+			optionsToIndexes.put(options.get(i), i);
 		}
+
+		fixedOptions = true;
 	}
 
-	boolean initialised() {
+	void addTransientOption(PatternMatcher option) {
 
-		return allOptions != null;
+		currentOptions.add(option);
+
+		Integer idx = optionsToIndexes.get(option);
+
+		if (idx == null) {
+
+			idx = optionsToIndexes.size();
+
+			optionsToIndexes.put(option, idx);
+		}
+
+		new TransientRegisterOp(option, idx);
+	}
+
+	void removeTransientOption(PatternMatcher option) {
+
+		if (currentOptions.remove(option)) {
+
+			new TransientDeregisterOp(option, optionsToIndexes.get(option));
+		}
 	}
 
 	void registerSingleOptionRank() {
@@ -402,26 +414,6 @@ abstract class PotentialSubsumptions {
 		return new MultiOptionRegistrar(startRank, stopRank).completedMultiReg();
 	}
 
-	void registerTransientOption(PatternMatcher option) {
-
-		int idx = allOptions.size();
-
-		allOptions.add(option);
-		optionIdxsByNode.put(option.getNode(), idx);
-
-		new TransientRegisterOp(option, idx);
-	}
-
-	void checkDeregisterTransientOption(PatternMatcher option) {
-
-		Integer idx = optionIdxsByNode.remove(option.getNode());
-
-		if (idx != null) {
-
-			new TransientDeregisterOp(option, idx);
-		}
-	}
-
 	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
 
 		List<Names> requestNames = getRequestMatchNames(request);
@@ -433,7 +425,7 @@ abstract class PotentialSubsumptions {
 
 		IntegerIntersection optionsInsect = new IntegerIntersection();
 
-		Integer requestIdx = optionIdxsByNode.get(request.getNode());
+		Integer requestIdx = optionsToIndexes.get(request);
 		int rank = 0;
 
 		for (Names rankNames : requestNames) {
@@ -456,7 +448,7 @@ abstract class PotentialSubsumptions {
 
 		if (optionsInsect.allOptionsResult()) {
 
-			return allOptions;
+			return currentOptions;
 		}
 
 		return optionIdxsToOptions(optionsInsect.getSubsetResult());
@@ -480,10 +472,28 @@ abstract class PotentialSubsumptions {
 
 		while (i.hasNext()) {
 
-			opts.add(allOptions.get(i.next().value));
+			opts.add(optionIdxToOption(i.next().value));
 		}
 
 		return opts;
+	}
+
+	private PatternMatcher optionIdxToOption(Integer idx) {
+
+		if (currentOptions.size() == optionsToIndexes.size()) {
+
+			return currentOptions.get(idx);
+		}
+
+		for (Map.Entry<PatternMatcher, Integer> e : optionsToIndexes.entrySet()) {
+
+			if (e.getValue() == idx) {
+
+				return e.getKey();
+			}
+		}
+
+		throw new Error("Option index not found: " + idx);
 	}
 
 	private void ensureRankMatches(int count) {
@@ -496,6 +506,6 @@ abstract class PotentialSubsumptions {
 
 	private int lastOptionIdx() {
 
-		return allOptions.size() - 1;
+		return currentOptions.size() - 1;
 	}
 }

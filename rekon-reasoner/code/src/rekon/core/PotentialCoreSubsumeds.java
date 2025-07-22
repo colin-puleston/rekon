@@ -33,7 +33,7 @@ class PotentialCoreSubsumeds extends PotentialSubsumeds {
 
 	PotentialCoreSubsumeds(List<PatternMatcher> allOptions) {
 
-		super(allOptions);
+		setFixedOptions(allOptions);
 
 		registerDefaultNestedOptionRanks();
 	}

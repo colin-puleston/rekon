@@ -109,14 +109,9 @@ class DynamicSubsumeds {
 		profilesFilter = createProfilesFilter(ontology);
 	}
 
-	void checkAddInstanceOption(InstanceNode node) {
+	DynamicSubsumeds(PotentialLocalSubsumeds profilesFilter) {
 
-		profilesFilter.checkAddInstanceOption(node);
-	}
-
-	void checkRemoveInstanceOption(InstanceNode node) {
-
-		profilesFilter.checkRemoveInstanceOption(node);
+		this.profilesFilter = profilesFilter;
 	}
 
 	NameSet inferSubsumedClasses(LocalExpression expr) {

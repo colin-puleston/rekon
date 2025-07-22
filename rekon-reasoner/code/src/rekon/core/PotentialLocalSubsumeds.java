@@ -36,7 +36,10 @@ class PotentialLocalSubsumeds extends PotentialSubsumeds {
 
 	PotentialLocalSubsumeds(List<PatternMatcher> allOptions) {
 
-		super(allOptions);
+		setFixedOptions(allOptions);
+	}
+
+	PotentialLocalSubsumeds() {
 	}
 
 	Names resolveNamesForRegistration(Names names, int rank) {
