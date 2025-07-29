@@ -66,41 +66,6 @@ class NodePropertyAxiomConverter
 		}
 	}
 
-	private class ConvertedNodePropertyDomain
-						extends ConvertedPropertyDomain<NodeProperty>
-						implements InputNodePropertyDomain {
-
-		ConvertedNodePropertyDomain(
-			OWLAxiom source,
-			NodeProperty property,
-			ClassNode domain) {
-
-			super(source, property, domain);
-		}
-	}
-
-	private class ConvertedNodePropertyRange
-						extends ConvertedPropertyAttribute<NodeProperty>
-						implements InputNodePropertyRange {
-
-		private ClassNode range;
-
-		public ClassNode getRange() {
-
-			return range;
-		}
-
-		ConvertedNodePropertyRange(
-			OWLAxiom source,
-			NodeProperty property,
-			ClassNode range) {
-
-			super(source, property);
-
-			this.range = range;
-		}
-	}
-
 	private class ConvertedNodePropertyInverse
 						extends ConvertedPropertyAttribute<NodeProperty>
 						implements InputNodePropertyInverse {
@@ -238,58 +203,6 @@ class NodePropertyAxiomConverter
 		}
 	}
 
-	private class NodePropertyDomainConverter
-					extends
-						PropertyAttributeConverter
-							<OWLObjectPropertyDomainAxiom,
-							InputNodePropertyDomain> {
-
-		Class<OWLObjectPropertyDomainAxiom> getSourceAxiomType() {
-
-			return OWLObjectPropertyDomainAxiom.class;
-		}
-
-		InputNodePropertyDomain createInputAxiom(
-									NodeProperty prop,
-									OWLObjectPropertyDomainAxiom source) {
-
-			ClassNode d = toClassNode(source.getDomain());
-
-			return d != null ? new ConvertedNodePropertyDomain(source, prop, d) : null;
-		}
-
-		OWLObjectPropertyExpression getPropertyExpr(OWLObjectPropertyDomainAxiom source) {
-
-			return source.getProperty();
-		}
-	}
-
-	private class NodePropertyRangeConverter
-					extends
-						PropertyAttributeConverter
-							<OWLObjectPropertyRangeAxiom,
-							InputNodePropertyRange> {
-
-		Class<OWLObjectPropertyRangeAxiom> getSourceAxiomType() {
-
-			return OWLObjectPropertyRangeAxiom.class;
-		}
-
-		InputNodePropertyRange createInputAxiom(
-									NodeProperty prop,
-									OWLObjectPropertyRangeAxiom source) {
-
-			ClassNode r = toClassNode(source.getRange());
-
-			return r != null ? new ConvertedNodePropertyRange(source, prop, r) : null;
-		}
-
-		OWLObjectPropertyExpression getPropertyExpr(OWLObjectPropertyRangeAxiom source) {
-
-			return source.getProperty();
-		}
-	}
-
 	private class NodePropertyInverseConverter
 					extends
 						PropertyLinkConverter
@@ -402,8 +315,6 @@ class NodePropertyAxiomConverter
 
 		new NodePropertyEquivalenceConverter();
 		new NodePropertySubSuperConverter();
-		new NodePropertyDomainConverter();
-		new NodePropertyRangeConverter();
 		new NodePropertyInverseConverter();
 		new NodePropertyChainConverter();
 		new NodePropertySymmetricConverter();
@@ -418,16 +329,6 @@ class NodePropertyAxiomConverter
 	Iterable<InputNodePropertySubSuper> getSubSupers() {
 
 		return getInputAxioms(NodePropertySubSuperConverter.class);
-	}
-
-	Iterable<InputNodePropertyDomain> getDomains() {
-
-		return getInputAxioms(NodePropertyDomainConverter.class);
-	}
-
-	Iterable<InputNodePropertyRange> getRanges() {
-
-		return getInputAxioms(NodePropertyRangeConverter.class);
 	}
 
 	Iterable<InputNodePropertyInverse> getInverses() {

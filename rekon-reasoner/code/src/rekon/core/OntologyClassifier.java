@@ -56,18 +56,16 @@ class OntologyClassifier extends SubsumptionChecker {
 		}
 	}
 
+	private enum PassType {INITIAL, EXPANSION, DEFAULT}
+
 	private class Pass {
 
-		private ClassifyPassType passType;
+		private PassType passType;
 		private List<PatternMatcher> candidates = new ArrayList<PatternMatcher>();
 
-		private RelationEndPointSubsumptions relationEndPointSubsumptions;
-
-		Pass(ClassifyPassType passType) {
+		Pass(PassType passType) {
 
 			this.passType = passType;
-
-			relationEndPointSubsumptions = createRelationEndPointSubsumptions();
 
 			if (!expansionPass()) {
 
@@ -79,12 +77,12 @@ class OntologyClassifier extends SubsumptionChecker {
 
 			if (expansionPass()) {
 
-				ProfilesExpander.expandAll(ontology);
+				ontology.getProfilesExpander().expandAll();
 
 				findAllCandidates();
 			}
 
-			return candidateCount() != 0;
+			return !candidates.isEmpty();
 		}
 
 		Pass perfomPass() {
@@ -95,7 +93,7 @@ class OntologyClassifier extends SubsumptionChecker {
 
 			expandAllNewInferences();
 
-			Pass next = new Pass(ClassifyPassType.DEFAULT);
+			Pass next = new Pass(PassType.DEFAULT);
 
 			absorbAllNewInferences();
 
@@ -104,12 +102,12 @@ class OntologyClassifier extends SubsumptionChecker {
 
 		int candidateCount() {
 
-			return candidates.size() + relationEndPointSubsumptions.candidateCount();
+			return candidates.size();
 		}
 
 		boolean phaseInitialPass() {
 
-			return passType != ClassifyPassType.DEFAULT;
+			return passType != PassType.DEFAULT;
 		}
 
 		boolean classifyCandidate(Pattern pattern) {
@@ -119,14 +117,9 @@ class OntologyClassifier extends SubsumptionChecker {
 					: pattern.matchable(phaseInitialPass());
 		}
 
-		private RelationEndPointSubsumptions createRelationEndPointSubsumptions() {
-
-			return new RelationEndPointSubsumptions(ontology, passType);
-		}
-
 		private boolean expansionPass() {
 
-			return passType == ClassifyPassType.EXPANSION;
+			return passType == PassType.EXPANSION;
 		}
 
 		private void findAllCandidates() {
@@ -137,16 +130,12 @@ class OntologyClassifier extends SubsumptionChecker {
 
 					candidates.add(m);
 				}
-
-				relationEndPointSubsumptions.checkAddInferenceSource(m);
 			}
 		}
 
 		private void checkSubsumptions() {
 
 			new MultiSubsumptionChecker(candidates);
-
-			relationEndPointSubsumptions.inferNewSubsumptions();
 		}
 
 		private void expandAllNewInferences() {
@@ -167,7 +156,7 @@ class OntologyClassifier extends SubsumptionChecker {
 
 		Phase() {
 
-			this(true, ClassifyPassType.INITIAL);
+			this(true, PassType.INITIAL);
 		}
 
 		boolean performPhase() {
@@ -203,10 +192,10 @@ class OntologyClassifier extends SubsumptionChecker {
 
 		Phase createNextPhase() {
 
-			return new Phase(false, ClassifyPassType.EXPANSION);
+			return new Phase(false, PassType.EXPANSION);
 		}
 
-		private Phase(boolean initialPhase, ClassifyPassType initialPassType) {
+		private Phase(boolean initialPhase, PassType initialPassType) {
 
 			this.initialPhase = initialPhase;
 

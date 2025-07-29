@@ -29,23 +29,6 @@ package rekon.core;
  */
 public abstract class PropertyX extends Name {
 
-	private ClassNode domain = null;
-
-	public void setDomain(ClassNode domain) {
-
-		this.domain = domain;
-	}
-
-	boolean hasDomain() {
-
-		return domain != null;
-	}
-
-	ClassNode getDomain() {
-
-		return domain;
-	}
-
 	boolean matchablePatternProperty() {
 
 		if (definitionRefed()) {

@@ -33,7 +33,7 @@ class ProfileRelationsResolver {
 
 	private class ChainBasedExpander extends ChainBasedProfileRelationsExpander {
 
-		ChainBasedExpander(SomeRelation relation) {
+		ChainBasedExpander(NodeRelation relation) {
 
 			super(relation);
 		}
@@ -82,9 +82,9 @@ class ProfileRelationsResolver {
 
 		private Collection<Relation> getAllChainBasedExpansions(Relation relation) {
 
-			if (relation instanceof SomeRelation) {
+			if (relation instanceof NodeRelation) {
 
-				SomeRelation sr = (SomeRelation)relation;
+				NodeRelation sr = (NodeRelation)relation;
 
 				if (sr.chainExpandable()) {
 

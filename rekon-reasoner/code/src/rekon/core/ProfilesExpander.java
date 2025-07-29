@@ -33,105 +33,101 @@ import rekon.util.*;
  */
 class ProfilesExpander {
 
-	static private class OntologyExpander {
-
-		private Ontology ontology;
-
-		private class ExpansionsChecker extends MultiThreadListProcessor<PatternMatcher> {
-
-			private boolean anyNewExpansions = false;
-
-			protected void processElement(PatternMatcher profile) {
-
-				if (checkNewExpansion(profile) && !anyNewExpansions) {
-
-					setNewExpansions();
-				}
-			}
-
-			boolean checkNewExpansions() {
-
-				anyNewExpansions = false;
-
-				invokeListProcesses(ontology.getAllProfiles());
-
-				return anyNewExpansions;
-			}
-
-			private boolean checkNewExpansion(PatternMatcher profile) {
-
-				ProfileRelations prs = getProfileRelations(profile);
-
-				prs.checkExpansion(new ProfileRelationsResolver());
-
-				return prs.newlyExpanded();
-			}
-
-			private synchronized void setNewExpansions() {
-
-				anyNewExpansions = true;
-			}
-		}
-
-		OntologyExpander(Ontology ontology) {
-
-			this.ontology = ontology;
-
-			performAllExpansions();
-		}
-
-		private void performAllExpansions() {
-
-			ExpansionsChecker checker = new ExpansionsChecker();
-			boolean firstPass = true;
-
-			while (true) {
-
-				initExpansions(firstPass);
-
-				if (!checker.checkNewExpansions() || subsumerOnlyExpansions()) {
-
-					break;
-				}
-
-				firstPass = false;
-			}
-		}
-
-		private void initExpansions(boolean firstPass) {
-
-			for (PatternMatcher p : ontology.getAllProfiles()) {
-
-				initExpansion(p, firstPass);
-			}
-		}
-
-		private boolean subsumerOnlyExpansions() {
-
-			return !ontology.getConstructInclusions().propertyChains;
-		}
-
-		private void initExpansion(PatternMatcher p, boolean firstPass) {
-
-			getProfileRelations(p).initExpansion(firstPass);
-		}
-
-		private ProfileRelations getProfileRelations(PatternMatcher p) {
-
-			return p.getPattern().getProfileRelations();
-		}
-	}
-
-	static void expandAll(Ontology ontology) {
-
-		new OntologyExpander(ontology);
-	}
-
 	static void checkExpandLocal(Pattern pattern) {
 
 		ProfileRelations prs = pattern.getProfileRelations();
 
 		prs.initExpansion(true);
 		prs.checkExpansion(new ProfileRelationsResolver());
+	}
+
+	private Ontology ontology;
+	private boolean subsumerOnlyExpansions;
+
+	private class ExpansionsChecker extends MultiThreadListProcessor<PatternMatcher> {
+
+		private boolean anyNewExpansions = false;
+
+		protected void processElement(PatternMatcher profile) {
+
+			if (checkNewExpansion(profile) && !anyNewExpansions) {
+
+				setNewExpansions();
+			}
+		}
+
+		boolean checkNewExpansions() {
+
+			anyNewExpansions = false;
+
+			invokeListProcesses(ontology.getAllProfiles());
+
+			return anyNewExpansions;
+		}
+
+		private boolean checkNewExpansion(PatternMatcher profile) {
+
+			ProfileRelations prs = profile.getPattern().getProfileRelations();
+
+			prs.checkExpansion(new ProfileRelationsResolver());
+
+			return prs.newlyExpanded();
+		}
+
+		private synchronized void setNewExpansions() {
+
+			anyNewExpansions = true;
+		}
+	}
+
+	ProfilesExpander(Ontology ontology, OntologyNames names) {
+
+		this.ontology = ontology;
+
+		subsumerOnlyExpansions = !anyPropertyChains(names);
+	}
+
+	void expandAll() {
+
+		ExpansionsChecker checker = new ExpansionsChecker();
+		boolean firstPass = true;
+
+		while (true) {
+
+			initExpansions(firstPass);
+
+			if (!checker.checkNewExpansions() || subsumerOnlyExpansions) {
+
+				break;
+			}
+
+			firstPass = false;
+		}
+	}
+
+	private void initExpansions(boolean firstPass) {
+
+		for (PatternMatcher p : ontology.getAllProfiles()) {
+
+			p.getPattern().getProfileRelations().initExpansion(firstPass);
+		}
+	}
+
+	private boolean anyPropertyChains(OntologyNames names) {
+
+		for (PropertyX p : names.getNodeProperties()) {
+
+			if (directChains(p)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean directChains(PropertyX p) {
+
+		return p instanceof NodeProperty && ((NodeProperty)p).directChains();
 	}
 }

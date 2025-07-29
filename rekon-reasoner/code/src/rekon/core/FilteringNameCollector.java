@@ -104,11 +104,6 @@ class FilteringNameCollector {
 			}
 		}
 
-		boolean includeAllRelationProperties() {
-
-			return false;
-		}
-
 		boolean continueForNextRelationsRank() {
 
 			return continueForNextRelationsRank(rank);

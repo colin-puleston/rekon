@@ -150,11 +150,6 @@ class SimpleProfilesBuilder {
 			super.processSourceAxioms();
 
 			ClassNode root = names.getRootClassNode();
-
-			for (InputNodePropertyRange ax : axioms.getNodePropertyRanges()) {
-
-				ppBuilder.addRelation(root, toAllRelation(ax));
-			}
 		}
 
 		Iterable<InputClassSubSuper> getSourceAxioms() {
@@ -177,11 +172,6 @@ class SimpleProfilesBuilder {
 		Iterable<? extends NodeX> getTypeNodes() {
 
 			return names.getClassNodes();
-		}
-
-		private AllRelation toAllRelation(InputNodePropertyRange ax) {
-
-			return new AllRelation(ax.getProperty(), new NodeValue(ax.getRange()));
 		}
 	}
 

@@ -29,14 +29,8 @@ package rekon.owl;
  */
 enum IncompletenessWarning {
 
-	SOME_VALUES_CHAIN_AND_DISJUNCTION(
-		"Existential restriction on transitive or chain-involved property with disjunction filler"),
-
-	ALL_VALUES_DISJUNCTION_AND_INDIVIDUALS(
-		"Universal restriction with disjunction filler + individuals present in ontology"),
-
-	ALL_VALUES_CHAIN(
-		"Universal restriction on transitive or chain-involved property");
+	DISJUNCTION_FILLER_FOR_CHAINED_PROPERTY(
+		"Existential restriction on transitive or chain-involved property with disjunction filler");
 
 	private String text;
 

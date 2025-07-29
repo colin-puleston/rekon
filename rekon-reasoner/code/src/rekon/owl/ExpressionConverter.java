@@ -328,25 +328,20 @@ class ExpressionConverter {
 
 			OWLRestriction owlExpr = getOwlExpr();
 
-			if (checkSomeRelation(owlExpr)) {
+			if (checkNodeRelation(owlExpr)) {
 
-				return InputRelationType.SOME_NODES;
-			}
-
-			if (checkAllRelation(owlExpr)) {
-
-				return InputRelationType.ALL_NODES;
+				return InputRelationType.NODE_VALUED;
 			}
 
 			if (dataRelation(owlExpr)) {
 
-				return InputRelationType.DATA_VALUE;
+				return InputRelationType.DATA_VALUED;
 			}
 
 			return InputRelationType.OUT_OF_SCOPE;
 		}
 
-		private boolean checkSomeRelation(OWLRestriction owlExpr) {
+		private boolean checkNodeRelation(OWLRestriction owlExpr) {
 
 			if (owlExpr instanceof OWLObjectSomeValuesFrom) {
 
@@ -356,18 +351,6 @@ class ExpressionConverter {
 			}
 
 			return owlExpr instanceof OWLObjectHasValue;
-		}
-
-		private boolean checkAllRelation(OWLRestriction owlExpr) {
-
-			if (owlExpr instanceof OWLObjectAllValuesFrom) {
-
-				checkIncompletenessRiskAllValuesFiller();
-
-				return true;
-			}
-
-			return false;
 		}
 
 		private boolean dataRelation(OWLRestriction owlExpr) {
@@ -442,22 +425,7 @@ class ExpressionConverter {
 			if (disjunctionFiller() && chainInvolvedProperty()) {
 
 				logIncompletenessRisk(
-					IncompletenessWarning.SOME_VALUES_CHAIN_AND_DISJUNCTION);
-			}
-		}
-
-		private void checkIncompletenessRiskAllValuesFiller() {
-
-			if (chainInvolvedProperty()) {
-
-				logIncompletenessRisk(
-					IncompletenessWarning.ALL_VALUES_CHAIN);
-			}
-
-			if (disjunctionFiller() && names.anyIndividuals()) {
-
-				logIncompletenessRisk(
-					IncompletenessWarning.ALL_VALUES_DISJUNCTION_AND_INDIVIDUALS);
+					IncompletenessWarning.DISJUNCTION_FILLER_FOR_CHAINED_PROPERTY);
 			}
 		}
 

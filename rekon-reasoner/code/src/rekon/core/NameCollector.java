@@ -50,8 +50,6 @@ abstract class NameCollector {
 
 	abstract void collectNames(Names ns);
 
-	abstract boolean includeAllRelationProperties();
-
 	abstract boolean continueForNextRelationsRank();
 
 	abstract NameCollector forNextRank();

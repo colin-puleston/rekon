@@ -53,11 +53,6 @@ public abstract class Relation extends PatternComponent {
 		this.target = target;
 	}
 
-	boolean chainExpandable() {
-
-		return false;
-	}
-
 	PropertyX getProperty() {
 
 		return property;
@@ -73,26 +68,11 @@ public abstract class Relation extends PatternComponent {
 		return r == this || (r.getClass() == getClass() && subsumesOtherOfType(r));
 	}
 
-	boolean propertySubsumption(PropertyX otherProperty) {
-
-		return property.subsumes(otherProperty);
-	}
-
-	boolean inversePropertyMatch() {
-
-		return false;
-	}
-
 	void collectNames(NameCollector collector) {
 
-		collectNamesForProperty(collector);
+		collector.collectName(property);
 
 		target.collectNames(collector.forNextRank());
-	}
-
-	void collectNamesForProperty(NameCollector collector) {
-
-		collector.collectName(property);
 	}
 
 	Names getReferencedNodes() {
@@ -107,18 +87,13 @@ public abstract class Relation extends PatternComponent {
 
 	void render(PatternRenderer r) {
 
-		r.addLine(property.getLabel() + " (" + renderRelationType() + ")");
+		r.addLine(property.getLabel());
 
 		target.render(r.nextLevel());
 	}
 
-	String renderRelationType() {
-
-		return "some";
-	}
-
 	private boolean subsumesOtherOfType(Relation r) {
 
-		return propertySubsumption(r.getProperty()) && target.subsumes(r.target);
+		return property.subsumes(r.getProperty()) && target.subsumes(r.target);
 	}
 }

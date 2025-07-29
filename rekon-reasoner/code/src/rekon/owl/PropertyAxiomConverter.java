@@ -57,25 +57,6 @@ abstract class PropertyAxiomConverter
 		}
 	}
 
-	abstract class ConvertedPropertyDomain
-						<P extends PropertyX>
-						extends ConvertedPropertyAttribute<P> {
-
-		private ClassNode domain;
-
-		public ClassNode getDomain() {
-
-			return domain;
-		}
-
-		ConvertedPropertyDomain(OWLAxiom source, P property, ClassNode domain) {
-
-			super(source, property);
-
-			this.domain = domain;
-		}
-	}
-
 	class OwlPropertyLink extends OwlLink<E, P> {
 
 		OwlPropertyLink(OWLAxiom source, Set<E> equivs) {

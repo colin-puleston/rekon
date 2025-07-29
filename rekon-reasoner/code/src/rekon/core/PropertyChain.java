@@ -60,9 +60,9 @@ public class PropertyChain {
 		}
 	}
 
-	SomeRelation createLinkRelation(NodeValue target) {
+	NodeRelation createLinkRelation(NodeValue target) {
 
-		return new SomeRelation(sup, target);
+		return new NodeRelation(sup, target);
 	}
 
 	boolean hasSuper(PropertyX prop) {

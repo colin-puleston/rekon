@@ -66,19 +66,6 @@ class DataPropertyAxiomConverter
 		}
 	}
 
-	private class ConvertedDataPropertyDomain
-						extends ConvertedPropertyDomain<DataProperty>
-						implements InputDataPropertyDomain {
-
-		ConvertedDataPropertyDomain(
-			OWLAxiom source,
-			DataProperty property,
-			ClassNode domain) {
-
-			super(source, property, domain);
-		}
-	}
-
 	private class DataPropertyEquivalenceSplitter
 						extends
 							TypeAxiomResolver<OWLEquivalentDataPropertiesAxiom> {
@@ -147,32 +134,6 @@ class DataPropertyAxiomConverter
 		}
 	}
 
-	private class DataPropertyDomainConverter
-					extends
-						PropertyAttributeConverter
-							<OWLDataPropertyDomainAxiom,
-							InputDataPropertyDomain> {
-
-		Class<OWLDataPropertyDomainAxiom> getSourceAxiomType() {
-
-			return OWLDataPropertyDomainAxiom.class;
-		}
-
-		InputDataPropertyDomain createInputAxiom(
-									DataProperty prop,
-									OWLDataPropertyDomainAxiom source) {
-
-			ClassNode d = toClassNode(source.getDomain());
-
-			return d != null ? new ConvertedDataPropertyDomain(source, prop, d) : null;
-		}
-
-		OWLDataPropertyExpression getPropertyExpr(OWLDataPropertyDomainAxiom source) {
-
-			return source.getProperty();
-		}
-	}
-
 	DataPropertyAxiomConverter(AxiomConverter parentConverter) {
 
 		super(parentConverter);
@@ -183,7 +144,6 @@ class DataPropertyAxiomConverter
 
 		new DataPropertyEquivalenceConverter();
 		new DataPropertySubSuperConverter();
-		new DataPropertyDomainConverter();
 	}
 
 	Iterable<InputDataPropertyEquivalence> getEquivalences() {
@@ -194,11 +154,6 @@ class DataPropertyAxiomConverter
 	Iterable<InputDataPropertySubSuper> getSubSupers() {
 
 		return getInputAxioms(DataPropertySubSuperConverter.class);
-	}
-
-	Iterable<InputDataPropertyDomain> getDomains() {
-
-		return getInputAxioms(DataPropertyDomainConverter.class);
 	}
 
 	OWLDataProperty getOWLBottomProperty() {

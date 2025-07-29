@@ -44,7 +44,7 @@ public class Ontology {
 	private DynamicSubsumers dynamicSubsumers;
 	private DynamicSubsumeds dynamicSubsumeds;
 
-	private ConstructInclusions constructInclusions;
+	private ProfilesExpander profilesExpander;
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
@@ -62,7 +62,7 @@ public class Ontology {
 		allNames.addComponent(names.getNodeProperties());
 		allNames.addComponent(names.getDataProperties());
 
-		constructInclusions = new ConstructInclusions(names, this);
+		profilesExpander = new ProfilesExpander(this, names);
 
 		expandAllNameSubsumers();
 		addAllNodeMatchers();
@@ -96,9 +96,9 @@ public class Ontology {
 		freeClassNodes.add(cn);
 	}
 
-	ConstructInclusions getConstructInclusions() {
+	ProfilesExpander getProfilesExpander() {
 
-		return constructInclusions;
+		return profilesExpander;
 	}
 
 	Iterable<Name> getAllNames() {

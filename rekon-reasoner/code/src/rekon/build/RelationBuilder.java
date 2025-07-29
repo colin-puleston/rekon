@@ -36,8 +36,7 @@ class RelationBuilder {
 
 	private ComponentBuilder componentBuilder;
 
-	private SomeRelations someRelations;
-	private AllRelations allRelations;
+	private NodeRelations nodeRelations;
 	private DataRelations dataRelations;
 
 	private NodeValues nodeValues;
@@ -50,7 +49,7 @@ class RelationBuilder {
 		}
 	}
 
-	private abstract class NodeRelations extends Relations {
+	private class NodeRelations extends Relations {
 
 		NodeRelations(boolean dynamic) {
 
@@ -61,35 +60,7 @@ class RelationBuilder {
 
 			NodeValue v = nodeValues.get(source.getNodeValue());
 
-			return v != null ? create(source.getNodeProperty(), v) : null;
-		}
-
-		abstract Relation create(NodeProperty prop, NodeValue target);
-	}
-
-	private class SomeRelations extends NodeRelations {
-
-		SomeRelations(boolean dynamic) {
-
-			super(dynamic);
-		}
-
-		Relation create(NodeProperty prop, NodeValue target) {
-
-			return new SomeRelation(prop, target);
-		}
-	}
-
-	private class AllRelations extends NodeRelations {
-
-		AllRelations(boolean dynamic) {
-
-			super(dynamic);
-		}
-
-		Relation create(NodeProperty prop, NodeValue target) {
-
-			return new AllRelation(prop, target);
+			return v != null ? new NodeRelation(source.getNodeProperty(), v) : null;
 		}
 	}
 
@@ -137,8 +108,7 @@ class RelationBuilder {
 
 		this.componentBuilder = componentBuilder;
 
-		someRelations = new SomeRelations(dynamic);
-		allRelations = new AllRelations(dynamic);
+		nodeRelations = new NodeRelations(dynamic);
 		dataRelations = new DataRelations(dynamic);
 
 		nodeValues = new NodeValues(dynamic);
@@ -148,15 +118,11 @@ class RelationBuilder {
 
 		switch (source.getRelationType()) {
 
-			case SOME_NODES:
+			case NODE_VALUED:
 
-				return someRelations.get(source);
+				return nodeRelations.get(source);
 
-			case ALL_NODES:
-
-				return allRelations.get(source);
-
-			case DATA_VALUE:
+			case DATA_VALUED:
 
 				return dataRelations.get(source);
 

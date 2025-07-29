@@ -195,11 +195,6 @@ class BasicStructureBuilder {
 
 		NodePropertyHandler() {
 
-			for (InputNodePropertyDomain ax : axioms.getNodePropertyDomains()) {
-
-				ax.getProperty().setDomain(ax.getDomain());
-			}
-
 			for (InputNodePropertyInverse ax : axioms.getNodePropertyInverses()) {
 
 				ax.getProperty().setInverse(ax.getInverse());
@@ -243,14 +238,6 @@ class BasicStructureBuilder {
 	}
 
 	private class DataPropertyHandler extends PropertyHandler<DataProperty> {
-
-		DataPropertyHandler() {
-
-			for (InputDataPropertyDomain ax : axioms.getDataPropertyDomains()) {
-
-				ax.getProperty().setDomain(ax.getDomain());
-			}
-		}
 
 		DataProperty getHierarchyRootName() {
 

@@ -33,8 +33,8 @@ abstract class ChainBasedProfileRelationsExpander {
 
 	private List<Relation> allExpansions = new ArrayList<Relation>();
 
-	private List<SomeRelation> passExpansions = new ArrayList<SomeRelation>();
-	private List<SomeRelation> nextPassExpanders;
+	private List<NodeRelation> passExpansions = new ArrayList<NodeRelation>();
+	private List<NodeRelation> nextPassExpanders;
 
 	private class ExpansionCollector {
 
@@ -48,7 +48,7 @@ abstract class ChainBasedProfileRelationsExpander {
 			this.chain = chain;
 		}
 
-		void collectFromTargets(SomeRelation current) {
+		void collectFromTargets(NodeRelation current) {
 
 			NodeValue v = current.getTarget().asNodeValue();
 
@@ -67,14 +67,14 @@ abstract class ChainBasedProfileRelationsExpander {
 
 			for (Relation r : resolveProfileRelations(target)) {
 
-				if (r instanceof SomeRelation) {
+				if (r instanceof NodeRelation) {
 
-					collectFromRelation((SomeRelation)r);
+					collectFromRelation((NodeRelation)r);
 				}
 			}
 		}
 
-		private void collectFromRelation(SomeRelation current) {
+		private void collectFromRelation(NodeRelation current) {
 
 			if (chain.hasSub(current.getProperty(), subsIndex)) {
 
@@ -91,13 +91,13 @@ abstract class ChainBasedProfileRelationsExpander {
 			}
 		}
 
-		private SomeRelation createLinkRelation(SomeRelation endSub) {
+		private NodeRelation createLinkRelation(NodeRelation endSub) {
 
 			return chain.createLinkRelation(endSub.getNodeValueTarget());
 		}
 	}
 
-	ChainBasedProfileRelationsExpander(SomeRelation relation) {
+	ChainBasedProfileRelationsExpander(NodeRelation relation) {
 
 		nextPassExpanders = Collections.singletonList(relation);
 
@@ -117,7 +117,7 @@ abstract class ChainBasedProfileRelationsExpander {
 
 			for (ExpansionCollector c : collectors) {
 
-				for (SomeRelation r : nextPassExpanders) {
+				for (NodeRelation r : nextPassExpanders) {
 
 					c.collectFromTargets(r);
 				}
@@ -129,11 +129,11 @@ abstract class ChainBasedProfileRelationsExpander {
 			}
 
 			nextPassExpanders = passExpansions;
-			passExpansions = new ArrayList<SomeRelation>();
+			passExpansions = new ArrayList<NodeRelation>();
 		}
 	}
 
-	private List<ExpansionCollector> getExpansionCollectors(SomeRelation relation) {
+	private List<ExpansionCollector> getExpansionCollectors(NodeRelation relation) {
 
 		List<ExpansionCollector> collectors = new ArrayList<ExpansionCollector>();
 
@@ -145,7 +145,7 @@ abstract class ChainBasedProfileRelationsExpander {
 		return collectors;
 	}
 
-	private void addExpansion(SomeRelation relation) {
+	private void addExpansion(NodeRelation relation) {
 
 		allExpansions.add(relation);
 		passExpansions.add(relation);

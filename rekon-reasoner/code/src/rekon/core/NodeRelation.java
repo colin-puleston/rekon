@@ -24,12 +24,14 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
-public abstract class NodeRelation extends Relation {
+public class NodeRelation extends Relation {
 
-	NodeRelation(NodeProperty property, NodeValue target) {
+	public NodeRelation(NodeProperty property, NodeValue target) {
 
 		super(property, target);
 	}
@@ -47,6 +49,16 @@ public abstract class NodeRelation extends Relation {
 	Names getReferencedNodes() {
 
 		return getNodeValueTarget().getDisjunctNodes();
+	}
+
+	boolean chainExpandable() {
+
+		return getNodeProperty().anyChains();
+	}
+
+	Collection<PropertyChain> getAllChains() {
+
+		return getNodeProperty().getAllChains();
 	}
 
 	void registerAsDefinitionRefed() {
