@@ -34,13 +34,13 @@ enum IncompletenessWarning {
 
 	private String text;
 
-	IncompletenessWarning(String text) {
-
-		 this.text = text;
-	}
-
 	String getText() {
 
 		return text;
+	}
+
+	private IncompletenessWarning(String text) {
+
+		 this.text = text;
 	}
 }
