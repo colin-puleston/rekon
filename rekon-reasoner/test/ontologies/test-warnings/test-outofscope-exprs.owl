@@ -24,12 +24,19 @@
     <!-- urn:test#SubInverseProperty -->
 
     <owl:ObjectProperty rdf:about="urn:test#SubInverseProperty">
+        <rdfs:subPropertyOf rdf:resource="urn:test#WarningInvokerProperty"/>
         <rdfs:subPropertyOf>
             <rdf:Description>
                 <owl:inverseOf rdf:resource="urn:test#q"/>
             </rdf:Description>
         </rdfs:subPropertyOf>
     </owl:ObjectProperty>
+    
+
+
+    <!-- urn:test#WarningInvokerProperty -->
+
+    <owl:ObjectProperty rdf:about="urn:test#WarningInvokerProperty"/>
     
 
 
@@ -91,6 +98,7 @@
                 <owl:onClass rdf:resource="urn:test#B"/>
             </owl:Restriction>
         </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
         <rdfs:subClassOf>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
@@ -98,6 +106,14 @@
                 <owl:onClass rdf:resource="urn:test#B"/>
             </owl:Restriction>
         </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#IndNegationsClass -->
+
+    <owl:Class rdf:about="urn:test#IndNegationsClass">
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
     </owl:Class>
     
 
@@ -110,6 +126,7 @@
                 <owl:complementOf rdf:resource="urn:test#A"/>
             </owl:Class>
         </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
         <rdfs:subClassOf>
             <owl:Class>
                 <owl:complementOf>
@@ -134,9 +151,36 @@
     
 
 
-    <!-- urn:test#Nothings3 -->
+    <!-- urn:test#NonRestrictionFillerUnions2 -->
 
-    <owl:Class rdf:about="urn:test#Nothings3">
+    <owl:Class rdf:about="urn:test#NonRestrictionFillerUnions2">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="urn:test#A"/>
+                    <rdf:Description rdf:about="urn:test#B"/>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+        <rdfs:subClassOf>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="urn:test#B"/>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="urn:test#p"/>
+                        <owl:someValuesFrom rdf:resource="urn:test#A"/>
+                    </owl:Restriction>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:subClassOf>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#Nothings2 -->
+
+    <owl:Class rdf:about="urn:test#Nothings2">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -151,42 +195,14 @@
                 <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing"/>
             </owl:Restriction>
         </owl:equivalentClass>
-        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Nothing"/>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
     </owl:Class>
     
 
 
-    <!-- urn:test#Unions2 -->
+    <!-- urn:test#Universals2 -->
 
-    <owl:Class rdf:about="urn:test#Unions2">
-        <owl:equivalentClass>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="urn:test#A"/>
-                    <rdf:Description rdf:about="urn:test#B"/>
-                </owl:unionOf>
-            </owl:Class>
-        </owl:equivalentClass>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:someValuesFrom>
-                    <owl:Class>
-                        <owl:unionOf rdf:parseType="Collection">
-                            <rdf:Description rdf:about="urn:test#A"/>
-                            <rdf:Description rdf:about="urn:test#B"/>
-                        </owl:unionOf>
-                    </owl:Class>
-                </owl:someValuesFrom>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-    </owl:Class>
-    
-
-
-    <!-- urn:test#Universals3 -->
-
-    <owl:Class rdf:about="urn:test#Universals3">
+    <owl:Class rdf:about="urn:test#Universals2">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -204,13 +220,14 @@
                 <owl:allValuesFrom rdf:resource="urn:test#A"/>
             </owl:Restriction>
         </owl:equivalentClass>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:allValuesFrom rdf:resource="urn:test#B"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
     </owl:Class>
+    
+
+
+    <!-- urn:test#WarningInvokerClass -->
+
+    <owl:Class rdf:about="urn:test#WarningInvokerClass"/>
     
 
 
@@ -228,6 +245,7 @@
     <!-- urn:test#IndNegations -->
 
     <owl:NamedIndividual rdf:about="urn:test#IndNegations">
+        <rdf:type rdf:resource="urn:test#IndNegationsClass"/>
         <rdf:type>
             <owl:Class>
                 <owl:complementOf rdf:resource="urn:test#A"/>

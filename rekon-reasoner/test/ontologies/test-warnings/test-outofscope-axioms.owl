@@ -24,6 +24,7 @@
     <!-- urn:test#AsymmetricProperty -->
 
     <owl:ObjectProperty rdf:about="urn:test#AsymmetricProperty">
+        <rdfs:subPropertyOf rdf:resource="urn:test#WarningInvokerProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AsymmetricProperty"/>
     </owl:ObjectProperty>
     
@@ -32,6 +33,7 @@
     <!-- urn:test#DisjointProperty -->
 
     <owl:ObjectProperty rdf:about="urn:test#DisjointProperty">
+        <rdfs:subPropertyOf rdf:resource="urn:test#WarningInvokerProperty"/>
         <owl:propertyDisjointWith rdf:resource="urn:test#p"/>
     </owl:ObjectProperty>
     
@@ -40,8 +42,15 @@
     <!-- urn:test#FunctionalProperty -->
 
     <owl:ObjectProperty rdf:about="urn:test#FunctionalProperty">
+        <rdfs:subPropertyOf rdf:resource="urn:test#WarningInvokerProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
     </owl:ObjectProperty>
+    
+
+
+    <!-- urn:test#WarningInvokerProperty -->
+
+    <owl:ObjectProperty rdf:about="urn:test#WarningInvokerProperty"/>
     
 
 
@@ -84,7 +93,15 @@
 
     <!-- urn:test#DisjointClass -->
 
-    <owl:Class rdf:about="urn:test#DisjointClass"/>
+    <owl:Class rdf:about="urn:test#DisjointClass">
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#WarningInvokerClass -->
+
+    <owl:Class rdf:about="urn:test#WarningInvokerClass"/>
 </rdf:RDF>
 
 

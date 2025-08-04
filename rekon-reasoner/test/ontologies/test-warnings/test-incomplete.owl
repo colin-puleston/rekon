@@ -68,24 +68,14 @@
                 </owl:someValuesFrom>
             </owl:Restriction>
         </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
     </owl:Class>
     
 
 
-    <!-- 
-    ///////////////////////////////////////////////////////////////////////////////////////
-    //
-    // Individuals
-    //
-    ///////////////////////////////////////////////////////////////////////////////////////
-     -->
+    <!-- urn:test#WarningInvokerClass -->
 
-    
-
-
-    <!-- urn:test#IndNoValues -->
-
-    <owl:NamedIndividual rdf:about="urn:test#IndNoValues"/>
+    <owl:Class rdf:about="urn:test#WarningInvokerClass"/>
 </rdf:RDF>
 
 

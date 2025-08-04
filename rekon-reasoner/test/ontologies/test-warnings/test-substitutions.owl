@@ -38,15 +38,18 @@
     
 
 
+    <!-- urn:test#IndNoValuesClass -->
+
+    <owl:Class rdf:about="urn:test#IndNoValuesClass">
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+    </owl:Class>
+    
+
+
     <!-- urn:test#NoValues2 -->
 
     <owl:Class rdf:about="urn:test#NoValues2">
-        <owl:equivalentClass>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="urn:test#p"/>
-                <owl:allValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing"/>
-            </owl:Restriction>
-        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
         <rdfs:subClassOf>
             <owl:Class>
                 <owl:complementOf>
@@ -58,6 +61,12 @@
             </owl:Class>
         </rdfs:subClassOf>
     </owl:Class>
+    
+
+
+    <!-- urn:test#WarningInvokerClass -->
+
+    <owl:Class rdf:about="urn:test#WarningInvokerClass"/>
     
 
 
@@ -75,6 +84,7 @@
     <!-- urn:test#IndNoValues -->
 
     <owl:NamedIndividual rdf:about="urn:test#IndNoValues">
+        <rdf:type rdf:resource="urn:test#IndNoValuesClass"/>
         <rdf:type>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
