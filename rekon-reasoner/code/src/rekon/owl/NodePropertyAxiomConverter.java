@@ -108,8 +108,7 @@ class NodePropertyAxiomConverter
 
 			this.chain = chain;
 
-			expressions.addChainInvolvedProperty(property);
-			expressions.addChainInvolvedProperties(chain);
+			expressions.addChainedProperties(chain);
 		}
 	}
 
@@ -131,7 +130,7 @@ class NodePropertyAxiomConverter
 
 			super(source, property);
 
-			expressions.addChainInvolvedProperty(property);
+			expressions.addChainedProperty(property);
 		}
 	}
 

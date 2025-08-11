@@ -80,20 +80,15 @@ class WarningLogger {
 		writeBlock(b);
 	}
 
-	void logIncompletenessRiskAxiom(
-				OWLAxiom axiom,
-				OWLRestriction restriction,
-				IncompletenessWarning warning) {
+	void logOutOfScopeRestrictionFiller(OWLRestriction restriction, String explanation) {
 
-		logIncompletenessRisk(describeAxiom(axiom), restriction, warning);
-	}
+		LogBlock b = createBlock("Out-of-scope restriction filler...");
 
-	void logIncompletenessRiskQuery(
-				OWLClassExpression query,
-				OWLRestriction restriction,
-				IncompletenessWarning warning) {
+		b.addLine("Restriction: " + restriction);
+		b.addLine("Explanation: " + explanation);
+		b.addLine("(Hence out-of-scope container-construct...)");
 
-		logIncompletenessRisk(describeQuery(query), restriction, warning);
+		writeBlock(b);
 	}
 
 	void logNoValueAxiomExprReplacement(
@@ -110,20 +105,6 @@ class WarningLogger {
 				OWLClassExpression replacement) {
 
 		logNoValueExprReplacement(describeQuery(query), replaced, replacement);
-	}
-
-	private void logIncompletenessRisk(
-					String containerDescription,
-					OWLRestriction restriction,
-					IncompletenessWarning warning) {
-
-		LogBlock b = createBlock("Construct may cause incomplete reasoning...");
-
-		b.addLine(containerDescription);
-		b.addLine("Restriction: " + restriction);
-		b.addLine("Explanation: " + warning.getText());
-
-		writeBlock(b);
 	}
 
 	private void logNoValueExprReplacement(

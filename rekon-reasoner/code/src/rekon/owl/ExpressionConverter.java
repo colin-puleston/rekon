@@ -36,13 +36,15 @@ import rekon.build.input.*;
  */
 class ExpressionConverter {
 
+	static private WarningLogger WARNINGS = WarningLogger.SINGLETON;
+
 	private OWLDataFactory factory;
 	private OWLClass owlNothing;
 
 	private MappedNames names;
 
 	private DataTypeConverter dataTypes = new DataTypeConverter(false);
-	private Set<NodeProperty> chainInvolvedProperties = new HashSet<NodeProperty>();
+	private Set<NodeProperty> chainedProperties = new HashSet<NodeProperty>();
 
 	private NoValueSubstitutions noValueSubstitutions;
 
@@ -345,9 +347,7 @@ class ExpressionConverter {
 
 			if (owlExpr instanceof OWLObjectSomeValuesFrom) {
 
-				checkIncompletenessRiskSomeValuesFiller();
-
-				return true;
+				return checkInScopeFiller();
 			}
 
 			return owlExpr instanceof OWLObjectHasValue;
@@ -420,23 +420,33 @@ class ExpressionConverter {
 			throw new RuntimeException("Unexpected anonymous individual!");
 		}
 
-		private void checkIncompletenessRiskSomeValuesFiller() {
+		private boolean checkInScopeFiller() {
 
-			if (disjunctionFiller() && chainInvolvedProperty()) {
+			if (disjunctionFiller() && chainedPropertyOrSubProperty()) {
 
-				logIncompletenessRisk(
-					IncompletenessWarning.DISJUNCTION_FILLER_FOR_CHAINED_PROPERTY);
+				WARNINGS.logOutOfScopeRestrictionFiller(
+					getOwlExpr(),
+					"Restriction on transitive/chained property with disjunction filler");
+
+				return false;
 			}
+
+			return true;
 		}
 
-		private void logIncompletenessRisk(IncompletenessWarning warning) {
+		private boolean chainedPropertyOrSubProperty() {
 
-			owlContainer.logIncompletenessRisk(getOwlExpr(), warning);
-		}
+			NodeProperty p = getNodeProperty();
 
-		private boolean chainInvolvedProperty() {
+			for (NodeProperty cp : chainedProperties) {
 
-			return chainInvolvedProperties.contains(getNodeProperty());
+				if (cp.subsumes(p)) {
+
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private boolean disjunctionFiller() {
@@ -514,14 +524,14 @@ class ExpressionConverter {
 		noValueSubstitutions = new NoValueSubstitutions(factory);
 	}
 
-	void addChainInvolvedProperty(NodeProperty property) {
+	void addChainedProperty(NodeProperty property) {
 
-		chainInvolvedProperties.add(property);
+		chainedProperties.add(property);
 	}
 
-	void addChainInvolvedProperties(Collection<NodeProperty> properties) {
+	void addChainedProperties(Collection<NodeProperty> properties) {
 
-		chainInvolvedProperties.addAll(properties);
+		chainedProperties.addAll(properties);
 	}
 
 	InputNode toAxiomNode(OWLAxiom owlAxiom, OWLClassExpression owlExpr) {
