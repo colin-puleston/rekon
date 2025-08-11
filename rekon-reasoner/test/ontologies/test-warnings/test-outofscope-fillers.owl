@@ -29,6 +29,14 @@
     
 
 
+    <!-- urn:test#q -->
+
+    <owl:ObjectProperty rdf:about="urn:test#q">
+        <rdfs:subPropertyOf rdf:resource="urn:test#p"/>
+    </owl:ObjectProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -58,6 +66,27 @@
         <owl:equivalentClass>
             <owl:Restriction>
                 <owl:onProperty rdf:resource="urn:test#p"/>
+                <owl:someValuesFrom>
+                    <owl:Class>
+                        <owl:unionOf rdf:parseType="Collection">
+                            <rdf:Description rdf:about="urn:test#A"/>
+                            <rdf:Description rdf:about="urn:test#B"/>
+                        </owl:unionOf>
+                    </owl:Class>
+                </owl:someValuesFrom>
+            </owl:Restriction>
+        </owl:equivalentClass>
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#DisjunctionFillerForSubOfChainedProperty -->
+
+    <owl:Class rdf:about="urn:test#DisjunctionFillerForSubOfChainedProperty">
+        <owl:equivalentClass>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#q"/>
                 <owl:someValuesFrom>
                     <owl:Class>
                         <owl:unionOf rdf:parseType="Collection">
