@@ -7,13 +7,18 @@ Simple OWL reasoner. Implements OWL API.
 ### Class-expressions ###
 
 - <code>ObjectIntersectionOf</code>
-- <code>ObjectUnionOf</code> _restriction fillers only_
+- <code>ObjectUnionOf</code> _as restriction fillers only (see below)_
 - <code>ObjectSomeValuesFrom</code>
 - <code>ObjectHasValue</code>
 - <code>ObjectOneOf</code> _single individuals only_
 - <code>DataUnionOf</code> _numeric values only_
 - <code>DataSomeValuesFrom</code> _numeric and boolean values only_
 - <code>DataHasValue</code> _numeric and boolean values only_
+
+**_Unions as Restricion Fillers:_** Unions cannot provide fillers for restrictions on
+_chained properties_, or on sub-properties of _chained properties_ (where a _chained property_
+is a property that is either transitive or is a sub-property in one or more property chains)
+
             
 ### Axioms ###
 
@@ -69,10 +74,3 @@ Simple OWL reasoner. Implements OWL API.
 - <code>NegativeObjectPropertyAssertion</code>
 - <code>NegativeDataPropertyAssertion</code>
 - <code>HasKey</code>
-
-**_Note:_** Reasoning may be incomplete if ontology contains any constructs of the form: 
-
-- <code>ObjectSomeValuesFrom</code> restriction on _chained property_, with <code>ObjectUnionOf</code> filler
-
-...where a _chained property_ is a property that is either transitive or involved in one or more property
-chains, as either super-property or a sub-property
