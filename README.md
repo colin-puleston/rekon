@@ -4,8 +4,9 @@ Simple OWL reasoner. Implements OWL API.
 
 ## Supported OWL constructs ##
 
-### Class-expressions ###
+### Class Expressions ###
 
+- <code>Class</code>
 - <code>ObjectIntersectionOf</code>
 - <code>ObjectUnionOf</code> _as restriction fillers only (see below)_
 - <code>ObjectSomeValuesFrom</code>
@@ -19,6 +20,20 @@ Simple OWL reasoner. Implements OWL API.
 _chained properties_, or on sub-properties of _chained properties_ (where a _chained property_
 is a property that is either transitive or is a sub-property in one or more property chains)
 
+### Property Expressions ###
+
+- <code>ObjectProperty</code>
+- <code>DataProperty</code>
+
+### Individuals ###
+
+- <code>NamedIndividual</code>
+            
+### Built-in Entities ###
+
+- <code>owl:Thing</code>
+- <code>owl:topObjectProperty</code>
+- <code>owl:topDataProperty</code>
             
 ### Axioms ###
 
@@ -38,7 +53,7 @@ is a property that is either transitive or is a sub-property in one or more prop
 
 ## Unsupported OWL constructs ##
 
-### Class-expressions ###
+### Class Expressions ###
 
 - <code>ObjectAllValuesFrom</code>
 - <code>ObjectMaxCardinality</code>
@@ -51,6 +66,20 @@ is a property that is either transitive or is a sub-property in one or more prop
 - <code>DataMinCardinality</code>
 - <code>DataExactCardinality</code>
 - <code>DataAllValuesFrom</code>
+
+### Property Expressions ###
+
+- <code>ObjectInverseOf</code>
+
+### Individuals ###
+
+- <code>AnonymousIndividual</code>
+
+### Built-in Entities ###
+
+- <code>owl:Nothing</code>
+- <code>owl:bottomObjectProperty</code>
+- <code>owl:bottomDataProperty</code>
 
 ### Axioms ###
 
