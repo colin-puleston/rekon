@@ -116,6 +116,9 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		final E firstOrSub;
 		final E secondOrSup;
 
+		private List<OWLObject> outOfScopeEndPoints = new ArrayList<OWLObject>();
+		private List<OutOfScopeExplanation> explanations = new ArrayList<OutOfScopeExplanation>();
+
 		OwlLink(OWLAxiom source, Set<E> equivs) {
 
 			this.source = source;
@@ -151,34 +154,42 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 
 		boolean checkValidEndPoints() {
 
-			boolean valid1 = validEndPoint(firstOrSub);
-			boolean valid2 = validEndPoint(secondOrSup);
-
-			if (valid1 && valid2) {
+			if (checkValidEndPoint(firstOrSub) && checkValidEndPoint(secondOrSup)) {
 
 				return true;
 			}
 
-			List<E> outOfScopeExprs = new ArrayList<E>();
-
-			if (!valid1) {
-
-				outOfScopeExprs.add(firstOrSub);
-			}
-
-			if (!valid2) {
-
-				outOfScopeExprs.add(secondOrSup);
-			}
-
-			logOutOfScopeAxiom(source, outOfScopeExprs);
+			WarningLogger.SINGLETON.logOutOfScopeAxiom(source, outOfScopeEndPoints, explanations);
 
 			return false;
 		}
 
-		abstract boolean validEndPoint(E expr);
+		abstract boolean invalidEndPointExprType(E expr);
+
+		abstract boolean invalidEndPointInbuiltEntity(E expr);
 
 		abstract N asName(E expr);
+
+		private boolean checkValidEndPoint(E expr) {
+
+			if (invalidEndPointExprType(expr)) {
+
+				outOfScopeEndPoints.add(expr);
+				explanations.add(OutOfScopeExplanation.INVALID_EXPRESSION_TYPE);
+
+				return false;
+			}
+
+			if (invalidEndPointInbuiltEntity(expr)) {
+
+				outOfScopeEndPoints.add(expr);
+				explanations.add(OutOfScopeExplanation.INVALID_INBUILT_ENTITY);
+
+				return false;
+			}
+
+			return true;
+		}
 	}
 
 	abstract class SubSuperSplitter
@@ -244,15 +255,5 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		List<I> getInputAxioms(Class<H> converterType) {
 
 		return parentConverter.getInputAxioms(converterType);
-	}
-
-	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
-
-		WarningLogger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExpr);
-	}
-
-	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
-
-		WarningLogger.SINGLETON.logOutOfScopeAxiom(axiom, outOfScopeExprs);
 	}
 }

@@ -81,9 +81,14 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 			return toInputNode(secondOrSup);
 		}
 
-		boolean validEndPoint(OWLClassExpression expr) {
+		boolean invalidEndPointExprType(OWLClassExpression expr) {
 
-			return !expr.equals(owlNothing);
+			return false;
+		}
+
+		boolean invalidEndPointInbuiltEntity(OWLClassExpression expr) {
+
+			return expr.equals(owlNothing);
 		}
 
 		ClassNode asName(OWLClassExpression expr) {

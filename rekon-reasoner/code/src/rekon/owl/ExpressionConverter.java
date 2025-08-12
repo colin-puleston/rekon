@@ -36,8 +36,6 @@ import rekon.build.input.*;
  */
 class ExpressionConverter {
 
-	static private WarningLogger WARNINGS = WarningLogger.SINGLETON;
-
 	private OWLDataFactory factory;
 	private OWLClass owlNothing;
 
@@ -55,6 +53,7 @@ class ExpressionConverter {
 		final OwlContainer owlContainer;
 
 		private E owlExpr;
+		private OutOfScopeExplanation outOfScopeExplanation = OutOfScopeExplanation.INVALID_EXPRESSION_TYPE;
 
 		abstract class BooleanOperands<B extends OWLNaryBooleanClassExpression> {
 
@@ -150,9 +149,23 @@ class ExpressionConverter {
 			return owlObjectAs(owlExpr, type);
 		}
 
+		void setOutOfScopeSubExpression(OutOfScopeExplanation explanation) {
+
+			outOfScopeExplanation = explanation;
+		}
+
 		void checkLogOutOfScope() {
 
-			owlContainer.checkLogOutOfScope(owlExpr);
+			owlContainer.checkLogOutOfScope(owlExpr, resolveOutOfScopeExplanation());
+		}
+
+		private OutOfScopeExplanation resolveOutOfScopeExplanation() {
+
+			OutOfScopeExplanation explanation = outOfScopeExplanation;
+
+			outOfScopeExplanation = OutOfScopeExplanation.INVALID_EXPRESSION_TYPE;
+
+			return explanation;
 		}
 	}
 
@@ -190,6 +203,8 @@ class ExpressionConverter {
 
 					return InputNodeType.INDIVIDUAL;
 				}
+
+				setOutOfScopeSubExpression(OutOfScopeExplanation.INVALID_ONEOF_VALUE);
 			}
 			else {
 
@@ -357,12 +372,12 @@ class ExpressionConverter {
 
 			if (owlExpr instanceof OWLDataSomeValuesFrom) {
 
-				return extractDataType() != null;
+				return validDataType();
 			}
 
 			if (owlExpr instanceof OWLDataHasValue) {
 
-				return extractDataValue() != null;
+				return validDataValue();
 			}
 
 			return false;
@@ -383,6 +398,34 @@ class ExpressionConverter {
 			}
 
 			throw new RuntimeException("Unexpected OWL-restriction type: " + owlExpr);
+		}
+
+		private boolean validDataType() {
+
+			DataValue v = extractDataType();
+
+			if (v == null) {
+
+				setOutOfScopeSubExpression(OutOfScopeExplanation.INVALID_DATATYPE_VALUE);
+
+				return false;
+			}
+
+			return true;
+		}
+
+		private boolean validDataValue() {
+
+			DataValue v = extractDataValue();
+
+			if (v == null) {
+
+				setOutOfScopeSubExpression(OutOfScopeExplanation.INVALID_DATA_VALUE);
+
+				return false;
+			}
+
+			return true;
 		}
 
 		private DataValue extractDataType() {
@@ -424,9 +467,7 @@ class ExpressionConverter {
 
 			if (disjunctionFiller() && chainedPropertyOrSubProperty()) {
 
-				WARNINGS.logOutOfScopeRestrictionFiller(
-					getOwlExpr(),
-					"Restriction on transitive/chained property with disjunction filler");
+				setOutOfScopeSubExpression(OutOfScopeExplanation.DISJUNCTION_FILLER_FOR_CHAINED_PROPERTY);
 
 				return false;
 			}

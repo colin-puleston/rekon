@@ -69,9 +69,14 @@ abstract class PropertyAxiomConverter
 			super(source, sub, sup);
 		}
 
-		boolean validEndPoint(E expr) {
+		boolean invalidEndPointExprType(E expr) {
 
-			return expr instanceof OWLProperty && !expr.equals(getOWLBottomProperty());
+			return !(expr instanceof OWLProperty);
+		}
+
+		boolean invalidEndPointInbuiltEntity(E expr) {
+
+			return expr.equals(getOWLBottomProperty());
 		}
 
 		P asName(E expr) {

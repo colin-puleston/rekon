@@ -42,14 +42,12 @@ abstract class OwlContainer {
 			this.axiom = axiom;
 		}
 
-		void logOutOfScope(OWLClassExpression expr) {
+		void logOutOfScope(OWLClassExpression expr, OutOfScopeExplanation explanation) {
 
-			WARNINGS.logOutOfScopeAxiom(axiom, expr);
+			WARNINGS.logOutOfScopeAxiom(axiom, expr, explanation);
 		}
 
-		void logNoValueExprReplacement(
-				OWLClassExpression replaced,
-				OWLRestriction replacement) {
+		void logNoValueExprReplacement(OWLClassExpression replaced, OWLRestriction replacement) {
 
 			WARNINGS.logNoValueAxiomExprReplacement(axiom, replaced, replacement);
 		}
@@ -64,14 +62,12 @@ abstract class OwlContainer {
 			this.query = query;
 		}
 
-		void logOutOfScope(OWLClassExpression expr) {
+		void logOutOfScope(OWLClassExpression expr, OutOfScopeExplanation explanation) {
 
-			WARNINGS.logOutOfScopeQueryExpr(query, expr);
+			WARNINGS.logOutOfScopeQueryExpr(query, expr, explanation);
 		}
 
-		void logNoValueExprReplacement(
-				OWLClassExpression replaced,
-				OWLRestriction replacement) {
+		void logNoValueExprReplacement(OWLClassExpression replaced, OWLRestriction replacement) {
 
 			WARNINGS.logNoValueQueryExprReplacement(query, replaced, replacement);
 		}
@@ -89,19 +85,17 @@ abstract class OwlContainer {
 
 	private boolean outOfScope = false;
 
-	void checkLogOutOfScope(OWLClassExpression expr) {
+	void checkLogOutOfScope(OWLClassExpression expr, OutOfScopeExplanation explanation) {
 
 		if (!outOfScope) {
 
-			logOutOfScope(expr);
+			logOutOfScope(expr, explanation);
 
 			outOfScope = true;
 		}
 	}
 
-	abstract void logOutOfScope(OWLClassExpression expr);
+	abstract void logOutOfScope(OWLClassExpression expr, OutOfScopeExplanation explanation);
 
-	abstract void logNoValueExprReplacement(
-						OWLClassExpression replaced,
-						OWLRestriction replacement);
+	abstract void logNoValueExprReplacement(OWLClassExpression replaced, OWLRestriction replacement);
 }

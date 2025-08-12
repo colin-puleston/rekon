@@ -120,9 +120,14 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			super(source, source.getIndividuals());
 		}
 
-		boolean validEndPoint(OWLIndividual expr) {
+		boolean invalidEndPointExprType(OWLIndividual expr) {
 
-			return expr instanceof OWLNamedIndividual;
+			return !(expr instanceof OWLNamedIndividual);
+		}
+
+		boolean invalidEndPointInbuiltEntity(OWLIndividual expr) {
+
+			return false;
 		}
 
 		IndividualNode asName(OWLIndividual expr) {

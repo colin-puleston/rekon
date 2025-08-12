@@ -50,43 +50,46 @@ class WarningLogger {
 		writeBlock(b);
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom, OWLObject outOfScopeExpr) {
+	void logOutOfScopeAxiom(
+			OWLAxiom axiom,
+			OWLObject outOfScopeComponent,
+			OutOfScopeExplanation explanation) {
 
-		logOutOfScopeAxiom(axiom, Collections.singleton(outOfScopeExpr));
+		logOutOfScopeAxiom(
+			axiom,
+			Collections.singleton(outOfScopeComponent),
+			Collections.singleton(explanation));
 	}
 
-	void logOutOfScopeAxiom(OWLAxiom axiom, Collection<? extends OWLObject> outOfScopeExprs) {
+	void logOutOfScopeAxiom(
+			OWLAxiom axiom,
+			Collection<? extends OWLObject> outOfScopeComponents,
+			Collection<OutOfScopeExplanation> explanations) {
 
 		LogBlock b = createBlock("Ignoring axiom containing out-of-scope component(s)");
 
 		b.addLine(describeAxiom(axiom));
 
-		for (OWLObject e : outOfScopeExprs) {
+		Iterator<OutOfScopeExplanation> es = explanations.iterator();
 
-			b.addLine("Component: " + e);
+		for (OWLObject c : outOfScopeComponents) {
+
+			addOutOfScopeComponent(b, c, es.next());
 		}
 
 		writeBlock(b);
 	}
 
-	void logOutOfScopeQueryExpr(OWLClassExpression query, OWLClassExpression outOfScopeExpr) {
+	void logOutOfScopeQueryExpr(
+			OWLClassExpression query,
+			OWLClassExpression outOfScopeComponent,
+			OutOfScopeExplanation explanation) {
 
 		LogBlock b = createBlock("Cannot handle out-of-scope query component");
 
 		b.addLine(describeQuery(query));
-		b.addLine("Component: " + outOfScopeExpr);
+		addOutOfScopeComponent(b, outOfScopeComponent, explanation);
 		b.addLine("No results returned!");
-
-		writeBlock(b);
-	}
-
-	void logOutOfScopeRestrictionFiller(OWLRestriction restriction, String explanation) {
-
-		LogBlock b = createBlock("Out-of-scope restriction filler...");
-
-		b.addLine("Restriction: " + restriction);
-		b.addLine("Explanation: " + explanation);
-		b.addLine("(Hence out-of-scope container-construct...)");
 
 		writeBlock(b);
 	}
@@ -115,11 +118,20 @@ class WarningLogger {
 		LogBlock b = createBlock("Replacing out-of-scope \"No Value\" component");
 
 		b.addLine(containerDescription);
-		b.addLine("Component: " + replaced);
-		b.addLine("Replacement: " + replacement);
+		b.addLine("  Replaced: " + replaced);
+		b.addLine("  Replacement: " + replacement);
 		b.addLine("CAUTION!!! Weaker constraint. No contradiction checking.");
 
 		writeBlock(b);
+	}
+
+	private void addOutOfScopeComponent(
+					LogBlock block,
+					OWLObject component,
+					OutOfScopeExplanation explanation) {
+
+		block.addLine("  Component: " + component);
+		block.addLine("  Explanation: " + explanation);
 	}
 
 	private LogBlock createBlock(String warning) {
