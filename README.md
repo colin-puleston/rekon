@@ -8,7 +8,7 @@ Simple OWL reasoner. Implements OWL API.
 
 - <code>Class</code>
 - <code>ObjectIntersectionOf</code>
-- <code>ObjectUnionOf</code> _as restriction fillers only (see below)_
+- <code>ObjectUnionOf</code> _limited usage (see below)_
 - <code>ObjectSomeValuesFrom</code>
 - <code>ObjectHasValue</code>
 - <code>ObjectOneOf</code> _single individuals only_
@@ -16,9 +16,9 @@ Simple OWL reasoner. Implements OWL API.
 - <code>DataSomeValuesFrom</code> _numeric and boolean values only_
 - <code>DataHasValue</code> _numeric and boolean values only_
 
-**_Unions as Restricion Fillers:_** Unions cannot provide fillers for restrictions on
-_chained properties_, or on sub-properties of _chained properties_ (where a _chained property_
-is a property that is either transitive or is a sub-property in one or more property chains)
+**_Note:_** <code>ObjectUnionOf</code> objects are only supported when used as restriction fillers,
+and only for properties that are neither "chained" (_i.e._ either _(a)_ transitive, or _(b)_ involved
+in one or more property chains), nor sub-properties of "chained" properties.
 
 ### Property Expressions ###
 
@@ -62,10 +62,10 @@ is a property that is either transitive or is a sub-property in one or more prop
 - <code>ObjectHasSelf</code>
 - <code>DataIntersectionOf</code>
 - <code>DataOneOf</code>
+- <code>DataAllValuesFrom</code>
 - <code>DataMaxCardinality</code>
 - <code>DataMinCardinality</code>
 - <code>DataExactCardinality</code>
-- <code>DataAllValuesFrom</code>
 
 ### Property Expressions ###
 
