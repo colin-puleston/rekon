@@ -21,9 +21,31 @@
     
 
 
-    <!-- urn:test#SubInverseProperty -->
+    <!-- http://www.w3.org/2002/07/owl#bottomObjectProperty -->
 
-    <owl:ObjectProperty rdf:about="urn:test#SubInverseProperty">
+    <owl:ObjectProperty rdf:about="http://www.w3.org/2002/07/owl#bottomObjectProperty">
+        <owl:equivalentProperty rdf:resource="urn:test#BottomProperty2"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- urn:test#BottomProperty2 -->
+
+    <owl:ObjectProperty rdf:about="urn:test#BottomProperty2">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#bottomObjectProperty"/>
+        <rdfs:subPropertyOf rdf:resource="urn:test#WarningInvokerProperty"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- urn:test#SubInverseProperty2 -->
+
+    <owl:ObjectProperty rdf:about="urn:test#SubInverseProperty2">
+        <owl:equivalentProperty>
+            <rdf:Description>
+                <owl:inverseOf rdf:resource="urn:test#p"/>
+            </rdf:Description>
+        </owl:equivalentProperty>
         <rdfs:subPropertyOf rdf:resource="urn:test#WarningInvokerProperty"/>
         <rdfs:subPropertyOf>
             <rdf:Description>
@@ -60,6 +82,14 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
+    
+
+
+    <!-- http://www.w3.org/2002/07/owl#Nothing -->
+
+    <rdf:Description rdf:about="http://www.w3.org/2002/07/owl#Nothing">
+        <owl:equivalentClass rdf:resource="urn:test#Nothings3"/>
+    </rdf:Description>
     
 
 
@@ -178,9 +208,9 @@
     
 
 
-    <!-- urn:test#Nothings2 -->
+    <!-- urn:test#Nothings3 -->
 
-    <owl:Class rdf:about="urn:test#Nothings2">
+    <owl:Class rdf:about="urn:test#Nothings3">
         <owl:equivalentClass>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">

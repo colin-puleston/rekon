@@ -40,6 +40,23 @@
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- urn:test#dp -->
+
+    <owl:DatatypeProperty rdf:about="urn:test#dp"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
     // Classes
     //
     ///////////////////////////////////////////////////////////////////////////////////////
@@ -57,6 +74,20 @@
     <!-- urn:test#B -->
 
     <owl:Class rdf:about="urn:test#B"/>
+    
+
+
+    <!-- urn:test#BadDataTypeValue -->
+
+    <owl:Class rdf:about="urn:test#BadDataTypeValue">
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="urn:test#dp"/>
+                <owl:someValuesFrom rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
     
 
 
@@ -102,9 +133,66 @@
     
 
 
+    <!-- urn:test#IndBadDataValueClass -->
+
+    <owl:Class rdf:about="urn:test#IndBadDataValueClass">
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+    </owl:Class>
+    
+
+
+    <!-- urn:test#MultiOneOfValues -->
+
+    <owl:Class rdf:about="urn:test#MultiOneOfValues">
+        <rdfs:subClassOf rdf:resource="urn:test#WarningInvokerClass"/>
+    </owl:Class>
+    
+
+
     <!-- urn:test#WarningInvokerClass -->
 
-    <owl:Class rdf:about="urn:test#WarningInvokerClass"/>
+    <owl:Class rdf:about="urn:test#WarningInvokerClass">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:oneOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="urn:test#IndA"/>
+                    <rdf:Description rdf:about="urn:test#IndB"/>
+                </owl:oneOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- urn:test#BadDataValue -->
+
+    <owl:NamedIndividual rdf:about="urn:test#BadDataValue">
+        <rdf:type rdf:resource="urn:test#IndBadDataValueClass"/>
+        <dp rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ABC</dp>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- urn:test#IndA -->
+
+    <owl:NamedIndividual rdf:about="urn:test#IndA"/>
+    
+
+
+    <!-- urn:test#IndB -->
+
+    <owl:NamedIndividual rdf:about="urn:test#IndB"/>
 </rdf:RDF>
 
 
