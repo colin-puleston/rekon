@@ -37,7 +37,10 @@ import rekon.build.input.*;
 class ExpressionConverter {
 
 	private OWLDataFactory factory;
+
 	private OWLClass owlNothing;
+	private OWLObjectProperty owlBottomObjectProperty;
+	private OWLDataProperty owlBottomDataProperty;
 
 	private MappedNames names;
 
@@ -196,6 +199,8 @@ class ExpressionConverter {
 
 					return InputNodeType.CLASS;
 				}
+
+				setOutOfScopeSubExpression(OutOfScopeExplanation.INVALID_INBUILT_ENTITY);
 			}
 			else if (owlExpr instanceof OWLObjectOneOf) {
 
@@ -289,7 +294,7 @@ class ExpressionConverter {
 
 			if (getOwlPropertyExpr() instanceof OWLProperty) {
 
-				InputRelationType type = getRelationTypeForValidProperty();
+				InputRelationType type = getRelationTypeForSimpleProperty();
 
 				if (type != InputRelationType.OUT_OF_SCOPE) {
 
@@ -341,18 +346,23 @@ class ExpressionConverter {
 			super(owlContainer, owlExpr);
 		}
 
-		private InputRelationType getRelationTypeForValidProperty() {
+		private InputRelationType getRelationTypeForSimpleProperty() {
 
 			OWLRestriction owlExpr = getOwlExpr();
 
 			if (checkNodeRelation(owlExpr)) {
 
-				return InputRelationType.NODE_VALUED;
+				if (checkNonBottomProperty(owlExpr, owlBottomObjectProperty)) {
+
+					return InputRelationType.NODE_VALUED;
+				}
 			}
+			else if (dataRelation(owlExpr)) {
 
-			if (dataRelation(owlExpr)) {
+				if (checkNonBottomProperty(owlExpr, owlBottomDataProperty)) {
 
-				return InputRelationType.DATA_VALUED;
+					return InputRelationType.DATA_VALUED;
+				}
 			}
 
 			return InputRelationType.OUT_OF_SCOPE;
@@ -362,10 +372,22 @@ class ExpressionConverter {
 
 			if (owlExpr instanceof OWLObjectSomeValuesFrom) {
 
-				return checkInScopeFiller();
+				return checkInScopeFillerNode();
 			}
 
 			return owlExpr instanceof OWLObjectHasValue;
+		}
+
+		private boolean checkNonBottomProperty(OWLRestriction owlExpr, OWLProperty owlBottomProperty) {
+
+			if (owlPropertyAs(OWLProperty.class).equals(owlBottomProperty)) {
+
+				setOutOfScopeSubExpression(OutOfScopeExplanation.INVALID_INBUILT_ENTITY);
+
+				return false;
+			}
+
+			return true;
 		}
 
 		private boolean dataRelation(OWLRestriction owlExpr) {
@@ -463,7 +485,7 @@ class ExpressionConverter {
 			throw new RuntimeException("Unexpected anonymous individual!");
 		}
 
-		private boolean checkInScopeFiller() {
+		private boolean checkInScopeFillerNode() {
 
 			if (disjunctionFiller() && chainedPropertyOrSubProperty()) {
 
@@ -562,6 +584,9 @@ class ExpressionConverter {
 		this.names = names;
 
 		owlNothing = factory.getOWLNothing();
+		owlBottomObjectProperty = factory.getOWLBottomObjectProperty();
+		owlBottomDataProperty = factory.getOWLBottomDataProperty();
+
 		noValueSubstitutions = new NoValueSubstitutions(factory);
 	}
 
