@@ -42,5 +42,7 @@ public class RekonConfig {
 	}
 
 	RekonConfig() {
+
+		Option.checkInitOptionsFromConfigFile();
 	}
 }

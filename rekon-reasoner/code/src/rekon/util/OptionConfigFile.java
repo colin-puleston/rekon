@@ -24,74 +24,52 @@
 
 package rekon.util;
 
+import java.io.*;
+import java.net.*;
 import java.util.*;
 
 /**
  * @author Colin Puleston
  */
-public class Option {
+class OptionConfigFile {
 
-	static private final String SYSTEM_PROPERTY_NAME_PREFIX = "rekon.";
+	static private final String FILENAME = "rekon.options";
 
-	static private List<Option> allOptions = new ArrayList<Option>();
+	static Properties checkLoad() {
 
-	static public void checkInitOptionsFromConfigFile() {
+		String f = lookForFile();
 
-		Properties p = OptionConfigFile.checkLoad();
+		return f != null ? loadProperties(f) : null;
+	}
 
-		if (p != null) {
+	static private String lookForFile() {
 
-			for (Option o : allOptions) {
+		URL url = getClassLoader().getResource(FILENAME);
 
-				o.checkInitFromConfigProperties(p);
-			}
+		return url != null ? url.getFile() : null;
+	}
+
+	static private Properties loadProperties(String file) {
+
+		Properties p = new Properties();
+
+		try {
+
+			BufferedReader r = new BufferedReader(new FileReader(file));
+
+			p.load(r);
+			r.close();
 		}
-	}
+		catch (IOException e) {
 
-	private boolean enabled;
-	private String propertyId;
-
-	public Option(boolean initAsEnabled, String propertyId) {
-
-		enabled = initAsEnabled;
-
-		this.propertyId = propertyId;
-
-		checkInitFromSystemProperty();
-
-		allOptions.add(this);
-	}
-
-	public void setEnabled(boolean enabled) {
-
-		this.enabled = enabled;
-	}
-
-	public boolean enabled() {
-
-		return enabled;
-	}
-
-	private void checkInitFromSystemProperty() {
-
-		checkInit(System.getProperty(getSystemPropertyName()));
-	}
-
-	private void checkInitFromConfigProperties(Properties props) {
-
-		checkInit(props.getProperty(propertyId));
-	}
-
-	private void checkInit(String value) {
-
-		if (value != null) {
-
-			setEnabled(Boolean.valueOf(value));
+			throw new RuntimeException(e);
 		}
+
+		return p;
 	}
 
-	private String getSystemPropertyName() {
+	static private ClassLoader getClassLoader() {
 
-		return SYSTEM_PROPERTY_NAME_PREFIX + propertyId;
+		return Thread.currentThread().getContextClassLoader();
 	}
 }

@@ -1,0 +1,4 @@
+multithread=true
+novalue-substitutions=true
+logging.warnings=true
+logging.progress=false
