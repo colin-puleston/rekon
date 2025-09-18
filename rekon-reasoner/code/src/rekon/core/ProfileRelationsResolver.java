@@ -100,8 +100,8 @@ class ProfileRelationsResolver {
 
 		NodeRelationsResolver resolver = new NodeRelationsResolver(node, collector);
 
-		resolver.collectFromSubsumers();
 		resolver.collectChainExpansions();
+		resolver.collectFromSubsumers();
 	}
 
 	Collection<Relation> collectFromSubsumers(NodeX node) {
