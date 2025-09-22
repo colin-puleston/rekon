@@ -76,9 +76,9 @@ class PotentialLocalSubsumers {
 
 		abstract boolean nestedPatterns();
 
-		abstract List<Names> getRankedDefinitionNames(Pattern p);
+		abstract List<Names> getRankedDefinitionNames(Pattern defn);
 
-		abstract List<Names> getRankedProfileNames(Pattern p);
+		abstract List<Names> getRankedProfileNames(Pattern profile);
 
 		private synchronized void checkInitialised() {
 
@@ -119,14 +119,14 @@ class PotentialLocalSubsumers {
 			registerSingleOptionRank();
 		}
 
-		List<Names> getRankedDefinitionNames(Pattern p) {
+		List<Names> getRankedDefinitionNames(Pattern defn) {
 
-			return getRankedNames(p);
+			return getRankedNames(defn);
 		}
 
-		List<Names> getRankedProfileNames(Pattern p) {
+		List<Names> getRankedProfileNames(Pattern profile) {
 
-			return getRankedNames(p);
+			return getRankedNames(profile);
 		}
 
 		private List<Names> getRankedNames(Pattern p) {
@@ -147,14 +147,14 @@ class PotentialLocalSubsumers {
 			registerDefaultNestedOptionRanks();
 		}
 
-		List<Names> getRankedDefinitionNames(Pattern p) {
+		List<Names> getRankedDefinitionNames(Pattern defn) {
 
-			return new FilteringNameCollector(true).collect(p);
+			return new DefaultDefinitionFilteringNameCollector().collect(defn);
 		}
 
-		List<Names> getRankedProfileNames(Pattern p) {
+		List<Names> getRankedProfileNames(Pattern profile) {
 
-			return new FilteringNameCollector(false).collect(p);
+			return new DefaultProfileFilteringNameCollector().collect(profile);
 		}
 	}
 

@@ -29,71 +29,41 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class FilteringLinkedNameCollector extends FilteringNameCollector {
+class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 	private int startRank;
 	private int stopRank;
 
-	private Deque<NodeX> profileLinkingNodes = new ArrayDeque<NodeX>();
+	private Deque<NodeX> linkingNodes = new ArrayDeque<NodeX>();
 
-	private class LinkedRankCollector extends RankCollector {
+	private class ProfileFilteringLinkedRankCollector extends RankCollector {
 
-		private NameSet profileValueNodesCollected = new NameSet();
+		private int rank = getCurrentRankCount();
+		private NameSet valueNodesCollected = new NameSet();
+
+		boolean definition() {
+
+			return false;
+		}
 
 		void collectForSingleValueNode(NodeX n) {
 
-			if (definition()) {
+			if (valueNodesCollected.add(n)) {
 
-				collectForDefinitionNode(n);
-			}
-			else {
+				collectName(n);
 
-				collectForProfileNode(n);
+				if (!lastRankForCollection() && !linkingNodes.contains(n)) {
+
+					linkingNodes.push(n);
+					collectForRelations(getProfileRelations(n));
+					linkingNodes.pop();
+				}
 			}
 		}
 
-		boolean preCollectRank(int rank) {
+		boolean preCollectRank() {
 
 			return rank < startRank;
-		}
-
-		private void collectForDefinitionNode(NodeX n) {
-
-			if (n.local()) {
-
-				boolean continueForRels = !lastRankForCollection();
-
-				for (PatternMatcher d : n.getDefinitionMatchers()) {
-
-					Pattern p = d.getPattern();
-
-					collectNames(p.getNodes());
-
-					if (continueForRels) {
-
-						collectForRelations(p.getDirectRelations());
-					}
-				}
-			}
-			else {
-
-				collectName(n);
-			}
-		}
-
-		private void collectForProfileNode(NodeX n) {
-
-			if (profileValueNodesCollected.add(n)) {
-
-				collectName(n);
-
-				if (!lastRankForCollection() && !profileLinkingNodes.contains(n)) {
-
-					profileLinkingNodes.push(n);
-					collectForRelations(getProfileRelations(n));
-					profileLinkingNodes.pop();
-				}
-			}
 		}
 
 		private Collection<Relation> getProfileRelations(NodeX n) {
@@ -110,18 +80,11 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private boolean lastRankForCollection() {
 
-			return getRank() == stopRank - 1;
+			return rank == stopRank - 1;
 		}
 	}
 
-	FilteringLinkedNameCollector(boolean definition) {
-
-		this(definition, 0, -1);
-	}
-
-	FilteringLinkedNameCollector(boolean definition, int startRank, int stopRank) {
-
-		super(definition);
+	ProfileFilteringLinkedNameCollector(int startRank, int stopRank) {
 
 		this.startRank = startRank;
 		this.stopRank = stopRank;
@@ -129,7 +92,7 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 	RankCollector createRankCollector() {
 
-		return new LinkedRankCollector();
+		return new ProfileFilteringLinkedRankCollector();
 	}
 }
 

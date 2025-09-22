@@ -24,52 +24,37 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-class PotentialLocalSubsumeds extends PotentialSubsumeds {
+class DefinitionFilteringLinkedNameCollector extends FilteringNameCollector {
 
-	private int nextOptionRegRank = 0;
-	private boolean optionRegComplete = false;
+	private class DefinitionFilteringLinkedRankCollector extends RankCollector {
 
-	PotentialLocalSubsumeds(List<PatternMatcher> allOptions) {
+		boolean definition() {
 
-		setFixedOptions(allOptions);
-	}
+			return true;
+		}
 
-	PotentialLocalSubsumeds() {
-	}
+		void collectForSingleValueNode(NodeX n) {
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+			if (n.local()) {
 
-		return MatchNamesResolver.expand(names);
-	}
+				for (PatternMatcher d : n.getDefinitionMatchers()) {
 
-	List<Names> getRankedDefinitionNames(Pattern defn) {
+					collectForPattern(d.getPattern());
+				}
+			}
+			else {
 
-		List<Names> defnNames = new DefinitionFilteringLinkedNameCollector().collect(defn);
-
-		checkExpandOptionRanksRegister(defnNames);
-
-		return defnNames;
-	}
-
-	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
-
-		return new ProfileFilteringLinkedNameCollector(startRank, stopRank).collect(profile);
-	}
-
-	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
-
-		int stopRank = defnNames.size();
-
-		if (!optionRegComplete && stopRank > nextOptionRegRank) {
-
-			registerOptionRanks(nextOptionRegRank, stopRank);
-
-			nextOptionRegRank = stopRank;
+				collectName(n);
+			}
 		}
 	}
+
+	RankCollector createRankCollector() {
+
+		return new DefinitionFilteringLinkedRankCollector();
+	}
 }
+

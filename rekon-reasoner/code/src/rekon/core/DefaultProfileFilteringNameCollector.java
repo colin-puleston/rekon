@@ -24,52 +24,22 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-class PotentialLocalSubsumeds extends PotentialSubsumeds {
+class DefaultProfileFilteringNameCollector extends FilteringNameCollector {
 
-	private int nextOptionRegRank = 0;
-	private boolean optionRegComplete = false;
+	private class DefaultProfileFilteringRankCollector extends RankCollector {
 
-	PotentialLocalSubsumeds(List<PatternMatcher> allOptions) {
+		boolean definition() {
 
-		setFixedOptions(allOptions);
-	}
-
-	PotentialLocalSubsumeds() {
-	}
-
-	Names resolveNamesForRegistration(Names names, int rank) {
-
-		return MatchNamesResolver.expand(names);
-	}
-
-	List<Names> getRankedDefinitionNames(Pattern defn) {
-
-		List<Names> defnNames = new DefinitionFilteringLinkedNameCollector().collect(defn);
-
-		checkExpandOptionRanksRegister(defnNames);
-
-		return defnNames;
-	}
-
-	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
-
-		return new ProfileFilteringLinkedNameCollector(startRank, stopRank).collect(profile);
-	}
-
-	private synchronized void checkExpandOptionRanksRegister(List<Names> defnNames) {
-
-		int stopRank = defnNames.size();
-
-		if (!optionRegComplete && stopRank > nextOptionRegRank) {
-
-			registerOptionRanks(nextOptionRegRank, stopRank);
-
-			nextOptionRegRank = stopRank;
+			return false;
 		}
 	}
+
+	RankCollector createRankCollector() {
+
+		return new DefaultProfileFilteringRankCollector();
+	}
 }
+

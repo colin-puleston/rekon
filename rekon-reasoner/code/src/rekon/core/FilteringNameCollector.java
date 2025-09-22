@@ -29,16 +29,14 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-class FilteringNameCollector {
+abstract class FilteringNameCollector {
 
 	static private enum RankStatus {COLLECT, PRE_COLLECT, ROOT_COLLECTED}
 
-	private boolean definition;
 	private List<Names> allNames = new ArrayList<Names>();
 
-	class RankCollector extends NameCollector {
+	abstract class RankCollector extends NameCollector {
 
-		private int rank;
 		private RankStatus rankStatus;
 		private NameSet rankNames = new NameSet();
 
@@ -46,20 +44,14 @@ class FilteringNameCollector {
 
 		RankCollector() {
 
-			rank = allNames.size();
 			rankStatus = getRankInitialStatus();
 
 			allNames.add(rankNames);
 		}
 
-		boolean definition() {
-
-			return definition;
-		}
-
 		void collectForDisjunctNodes(NodeValue v) {
 
-			if (definition) {
+			if (definition()) {
 
 				collectNames(v.getMostSpecificCommonDisjunctSubsumers());
 			}
@@ -123,19 +115,14 @@ class FilteringNameCollector {
 			return nextRankCollector;
 		}
 
-		int getRank() {
-
-			return rank;
-		}
-
-		boolean preCollectRank(int rank) {
+		boolean preCollectRank() {
 
 			return false;
 		}
 
 		private RankStatus getRankInitialStatus() {
 
-			return preCollectRank(rank) ? RankStatus.PRE_COLLECT : RankStatus.COLLECT;
+			return preCollectRank() ? RankStatus.PRE_COLLECT : RankStatus.COLLECT;
 		}
 
 		private void extendRankedNamesList(List<Names> rankedNames) {
@@ -149,11 +136,6 @@ class FilteringNameCollector {
 		}
 	}
 
-	FilteringNameCollector(boolean definition) {
-
-		this.definition = definition;
-	}
-
 	List<Names> collect(Pattern p) {
 
 		RankCollector firstRankCollector = createRankCollector();
@@ -163,9 +145,11 @@ class FilteringNameCollector {
 		return firstRankCollector.createRankedNamesList();
 	}
 
-	RankCollector createRankCollector() {
+	int getCurrentRankCount() {
 
-		return new RankCollector();
+		return allNames.size();
 	}
+
+	abstract RankCollector createRankCollector();
 }
 
