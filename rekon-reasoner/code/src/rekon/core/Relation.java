@@ -31,19 +31,6 @@ import java.util.*;
  */
 public abstract class Relation extends PatternComponent {
 
-	static void collectNamesFromNextRankRelations(NameCollector collector, Collection<Relation> rels) {
-
-		if (!rels.isEmpty()) {
-
-			collector = collector.forNextRank();
-
-			for (Relation r : rels) {
-
-				r.collectNames(collector);
-			}
-		}
-	}
-
 	private PropertyX property;
 	private Value target;
 

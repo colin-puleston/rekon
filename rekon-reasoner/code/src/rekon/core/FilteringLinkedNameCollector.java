@@ -57,18 +57,22 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			return rank < startRank;
 		}
 
-		boolean continueForNextRelationsRank(int rank) {
-
-			return rank != stopRank - 1;
-		}
-
 		private void collectForDefinitionNode(NodeX n) {
 
 			if (n.local()) {
 
+				boolean continueForRels = !lastRankForCollection();
+
 				for (PatternMatcher d : n.getDefinitionMatchers()) {
 
-					d.getPattern().collectNames(this);
+					Pattern p = d.getPattern();
+
+					collectNames(p.getNodes());
+
+					if (continueForRels) {
+
+						collectForRelations(p.getDirectRelations());
+					}
 				}
 			}
 			else {
@@ -83,28 +87,16 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 
 				collectName(n);
 
-				if (continueForNextRelationsRank() && !profileLinkingNodes.contains(n)) {
+				if (!lastRankForCollection() && !profileLinkingNodes.contains(n)) {
 
-					collectFromRelations(n);
+					profileLinkingNodes.push(n);
+					collectForRelations(getProfileRelations(n));
+					profileLinkingNodes.pop();
 				}
 			}
 		}
 
-		private void collectFromRelations(NodeX n) {
-
-			Collection<Relation> rels = getRelations(n);
-
-			if (!rels.isEmpty()) {
-
-				profileLinkingNodes.push(n);
-
-				Relation.collectNamesFromNextRankRelations(this, rels);
-
-				profileLinkingNodes.pop();
-			}
-		}
-
-		private Collection<Relation> getRelations(NodeX n) {
+		private Collection<Relation> getProfileRelations(NodeX n) {
 
 			PatternMatcher p = n.getProfileMatcher();
 
@@ -116,8 +108,9 @@ class FilteringLinkedNameCollector extends FilteringNameCollector {
 			return new ProfileRelationsResolver().collectFromSubsumers(n);
 		}
 
-		private void collectNamesFromSubsumerRelations(NodeX n) {
+		private boolean lastRankForCollection() {
 
+			return getRank() == stopRank - 1;
 		}
 	}
 

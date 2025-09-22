@@ -114,16 +114,6 @@ public class Pattern extends PatternComponent {
 		}
 	}
 
-	void collectNames(NameCollector collector) {
-
-		collector.collectNames(nodes);
-
-		if (collector.continueForNextRelationsRank()) {
-
-			Relation.collectNamesFromNextRankRelations(collector, getRelations(collector.profile()));
-		}
-	}
-
 	boolean expandedProfile() {
 
 		return getProfileRelations().expanded();
@@ -189,6 +179,11 @@ public class Pattern extends PatternComponent {
 		throw new Error("Not a single-node pattern!");
 	}
 
+	Collection<Relation> getRelations(boolean profile) {
+
+		return profile ? getProfileRelations().getAll() : directRelations;
+	}
+
 	Collection<Relation> getDirectRelations() {
 
 		return directRelations;
@@ -245,11 +240,6 @@ public class Pattern extends PatternComponent {
 		}
 
 		return false;
-	}
-
-	private Collection<Relation> getRelations(boolean profile) {
-
-		return profile ? getProfileRelations().getAll() : directRelations;
 	}
 
 	private String nodesToString() {

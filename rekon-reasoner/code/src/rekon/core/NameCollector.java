@@ -24,6 +24,8 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -46,11 +48,22 @@ abstract class NameCollector {
 		collectNames(v.getDisjunctNodes());
 	}
 
+	void collectForRelations(Collection<Relation> rels) {
+
+		if (!rels.isEmpty()) {
+
+			NameCollector nextRankCol = forNextRank();
+
+			for (Relation r : rels) {
+
+				r.collectNames(nextRankCol);
+			}
+		}
+	}
+
 	abstract void collectName(Name n);
 
 	abstract void collectNames(Names ns);
-
-	abstract boolean continueForNextRelationsRank();
 
 	abstract NameCollector forNextRank();
 }

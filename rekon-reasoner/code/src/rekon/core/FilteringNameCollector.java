@@ -57,6 +57,12 @@ class FilteringNameCollector {
 			return definition;
 		}
 
+		void collectForPattern(Pattern p) {
+
+			collectNames(p.getNodes());
+			collectForRelations(p.getRelations(profile()));
+		}
+
 		void collectForDisjunctNodes(NodeValue v) {
 
 			if (definition) {
@@ -104,9 +110,13 @@ class FilteringNameCollector {
 			}
 		}
 
-		boolean continueForNextRelationsRank() {
+		List<Names> createRankedNamesList() {
 
-			return continueForNextRelationsRank(rank);
+			List<Names> rankedNames = new ArrayList<Names>();
+
+			extendRankedNamesList(rankedNames);
+
+			return rankedNames;
 		}
 
 		NameCollector forNextRank() {
@@ -119,28 +129,19 @@ class FilteringNameCollector {
 			return nextRankCollector;
 		}
 
+		int getRank() {
+
+			return rank;
+		}
+
 		boolean preCollectRank(int rank) {
 
 			return false;
 		}
 
-		boolean continueForNextRelationsRank(int rank) {
-
-			return rank == 0;
-		}
-
 		private RankStatus getRankInitialStatus() {
 
 			return preCollectRank(rank) ? RankStatus.PRE_COLLECT : RankStatus.COLLECT;
-		}
-
-		private List<Names> createRankedNamesList() {
-
-			List<Names> rankedNames = new ArrayList<Names>();
-
-			extendRankedNamesList(rankedNames);
-
-			return rankedNames;
 		}
 
 		private void extendRankedNamesList(List<Names> rankedNames) {
@@ -163,7 +164,7 @@ class FilteringNameCollector {
 
 		RankCollector firstRankCollector = createRankCollector();
 
-		p.collectNames(firstRankCollector);
+		firstRankCollector.collectForPattern(p);
 
 		return firstRankCollector.createRankedNamesList();
 	}
