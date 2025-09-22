@@ -38,6 +38,12 @@ abstract class NameCollector {
 		return !definition();
 	}
 
+	void collectForPattern(Pattern p) {
+
+		collectNames(p.getNodes());
+		collectForRelations(p.getRelations(profile()));
+	}
+
 	void collectForSingleValueNode(NodeX n) {
 
 		collectName(n);

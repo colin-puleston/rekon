@@ -57,12 +57,6 @@ class FilteringNameCollector {
 			return definition;
 		}
 
-		void collectForPattern(Pattern p) {
-
-			collectNames(p.getNodes());
-			collectForRelations(p.getRelations(profile()));
-		}
-
 		void collectForDisjunctNodes(NodeValue v) {
 
 			if (definition) {
