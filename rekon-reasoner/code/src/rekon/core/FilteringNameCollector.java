@@ -49,7 +49,7 @@ abstract class FilteringNameCollector {
 			allNames.add(rankNames);
 		}
 
-		void collectForDisjunctNodes(NodeValue v) {
+		void collectForDisjunctNodes(DisjunctionNodeValue v) {
 
 			if (definition()) {
 

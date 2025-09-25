@@ -24,53 +24,55 @@
 
 package rekon.core;
 
-import java.util.*;
-
 /**
  * @author Colin Puleston
  */
-abstract class NameCollector {
+class SingleNodeValue extends NodeValue {
 
-	abstract boolean definition();
+	private NodeX node;
 
-	boolean profile() {
+	SingleNodeValue(NodeX node) {
 
-		return !definition();
+		this.node = node;
 	}
 
-	void collectForPattern(Pattern p) {
+	boolean singleValueNode() {
 
-		collectNames(p.getNodes());
-		collectForRelations(p.getRelations(profile()));
+		return true;
 	}
 
-	void collectForSingleValueNode(NodeX n) {
+	NodeX getSingleValueNode() {
 
-		collectName(n);
+		return node;
 	}
 
-	void collectForDisjunctNodes(DisjunctionNodeValue v) {
+	Names getDisjunctNodes() {
 
-		collectNames(v.getDisjunctNodes());
+		return new NameList(node);
 	}
 
-	void collectForRelations(Collection<Relation> rels) {
+	void collectNames(NameCollector collector) {
 
-		if (!rels.isEmpty()) {
-
-			NameCollector nextRankCol = forNextRank();
-
-			for (Relation r : rels) {
-
-				r.collectNames(nextRankCol);
-			}
-		}
+		collector.collectForSingleValueNode(node);
 	}
 
-	abstract void collectName(Name n);
+	boolean subsumesNode(NodeX n) {
 
-	abstract void collectNames(Names ns);
+		return node.subsumes(n);
+	}
 
-	abstract NameCollector forNextRank();
+	boolean anyNewSubsumers(NodeSelector selector) {
+
+		return node.anyNewSubsumers(selector);
+	}
+
+	void registerAsDefinitionRefed() {
+
+		node.registerAsDefinitionRefed(MatchRole.VALUE);
+	}
+
+	void render(PatternRenderer r) {
+
+		renderNode(r, getSingleValueNode());
+	}
 }
-

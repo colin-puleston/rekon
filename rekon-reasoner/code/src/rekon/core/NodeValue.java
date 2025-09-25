@@ -29,18 +29,20 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-public class NodeValue extends Value {
+public abstract class NodeValue extends Value {
 
-	private NameSet disjunctNodes = new NameSet();
+	static public NodeValue create(Collection<? extends NodeX> disjunctNodes) {
 
-	public NodeValue(NodeX node) {
+		NameSet resolvedDjns = new NameSet();
 
-		disjunctNodes.add(node);
-	}
+		resolvedDjns.retainMostGeneral(new NameList(disjunctNodes));
 
-	public NodeValue(Collection<? extends NodeX> disjunctNodes) {
+		if (resolvedDjns.size() == 1) {
 
-		this.disjunctNodes.retainMostGeneral(new NameList(disjunctNodes));
+			return new SingleNodeValue(resolvedDjns.getFirstNode());
+		}
+
+		return new DisjunctionNodeValue(resolvedDjns);
 	}
 
 	NodeValue asNodeValue() {
@@ -48,138 +50,40 @@ public class NodeValue extends Value {
 		return this;
 	}
 
-	boolean singleValueNode() {
+	abstract boolean singleValueNode();
 
-		return disjunctNodes.size() == 1;
-	}
+	abstract NodeX getSingleValueNode();
 
-	NodeX getSingleValueNode() {
+	abstract Names getDisjunctNodes();
 
-		if (singleValueNode()) {
-
-			return disjunctNodes.getFirstNode();
-		}
-
-		throw new RuntimeException("Not a single value node!");
-	}
-
-	Names getDisjunctNodes() {
-
-		return disjunctNodes;
-	}
-
-	Names getMostSpecificCommonDisjunctSubsumers() {
-
-		List<Collection<Name>> subsumerSets = new ArrayList<Collection<Name>>();
-
-		for (NodeX d : disjunctNodes.asNodes()) {
-
-			subsumerSets.add(d.getSubsumers().getNames());
-		}
-
-		NameSet mostSpecifics = new NameSet();
-
-		mostSpecifics.retainMostSpecific(NameSetIntersector.intersect(subsumerSets));
-
-		return mostSpecifics;
-	}
-
-	void collectNames(NameCollector collector) {
-
-		if (singleValueNode()) {
-
-			collector.collectForSingleValueNode(getSingleValueNode());
-		}
-		else {
-
-			collector.collectForDisjunctNodes(this);
-		}
-	}
+	abstract void collectNames(NameCollector collector);
 
 	boolean subsumesOther(Value v) {
 
 		NodeValue nv = v.asNodeValue();
 
-		return nv != null && subsumesAllDisjunctNodesOf(nv);
-	}
+		if (nv == null) {
 
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		for (NodeX d : disjunctNodes.asNodes()) {
-
-			if (d.anyNewSubsumers(selector)) {
-
-				return true;
-			}
+			return false;
 		}
 
-		return false;
-	}
+		if (nv.singleValueNode()) {
 
-	void registerAsDefinitionRefed() {
-
-		registerAllAsDefinitionRefed(disjunctNodes);
-
-		if (!singleValueNode()) {
-
-			registerAllAsDefinitionRefed(getMostSpecificCommonDisjunctSubsumers());
-		}
-	}
-
-	void render(PatternRenderer r) {
-
-		if (singleValueNode()) {
-
-			renderNode(r, getSingleValueNode());
-		}
-		else {
-
-			r.addLine("OR");
-
-			r = r.nextLevel();
-
-			for (NodeX d : disjunctNodes.asNodes()) {
-
-				renderNode(r, d);
-			}
-		}
-	}
-
-	private boolean subsumesAllDisjunctNodesOf(NodeValue nv) {
-
-		for (NodeX d : nv.disjunctNodes.asNodes()) {
-
-			if (!subsumesNode(d)) {
-
-				return false;
-			}
+			return subsumesNode(nv.getSingleValueNode());
 		}
 
-		return true;
+		return subsumesAllNodes(nv.getDisjunctNodes());
 	}
 
-	private boolean subsumesNode(NodeX n) {
+	abstract boolean subsumesNode(NodeX n);
 
-		for (NodeX d : disjunctNodes.asNodes()) {
+	abstract boolean anyNewSubsumers(NodeSelector selector);
 
-			if (d.subsumes(n)) {
+	abstract void registerAsDefinitionRefed();
 
-				return true;
-			}
-		}
+	abstract void render(PatternRenderer r);
 
-		return false;
-	}
-
-	private void registerAllAsDefinitionRefed(Names names) {
-
-		for (NodeX n : names.asNodes()) {
-
-			n.registerAsDefinitionRefed(MatchRole.VALUE);
-		}
-	}
-
-	private void renderNode(PatternRenderer r, NodeX n) {
+	void renderNode(PatternRenderer r, NodeX n) {
 
 		List<PatternMatcher> nlrMatchers = getNextLevelRenderMatchers(r, n);
 
@@ -198,6 +102,19 @@ public class NodeValue extends Value {
 				m.render(r);
 			}
 		}
+	}
+
+	private boolean subsumesAllNodes(Names ns) {
+
+		for (NodeX n : ns.asNodes()) {
+
+			if (!subsumesNode(n)) {
+
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private List<PatternMatcher> getNextLevelRenderMatchers(PatternRenderer r, NodeX n) {

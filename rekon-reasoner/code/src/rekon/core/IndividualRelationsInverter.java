@@ -63,7 +63,7 @@ class IndividualRelationsInverter {
 
 			if (invSource.singleValueNode()) {
 
-				NodeValue invTarget = new NodeValue(forwardSource);
+				NodeValue invTarget = new SingleNodeValue(forwardSource);
 
 				PatternMatcher pp = resolveProfile(invSource.getSingleValueNode());
 

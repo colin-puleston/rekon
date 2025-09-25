@@ -100,7 +100,7 @@ class RelationBuilder {
 				disjuncts.add(n);
 			}
 
-			return new NodeValue(disjuncts);
+			return NodeValue.create(disjuncts);
 		}
 	}
 
