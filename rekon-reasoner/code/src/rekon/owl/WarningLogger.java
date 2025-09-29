@@ -44,7 +44,7 @@ class WarningLogger {
 
 		for (AxiomType<?> axType : outOfScopeTypes) {
 
-			b.addLine("Axiom-type: " + axType);
+			b.addLine("Axiom Type: " + axType);
 		}
 
 		writeBlock(b);

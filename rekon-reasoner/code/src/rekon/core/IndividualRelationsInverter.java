@@ -31,7 +31,7 @@ import java.util.*;
  */
 class IndividualRelationsInverter {
 
-	static void addAllInvertions(OntologyNames names) {
+	static void addAllInversions(OntologyNames names) {
 
 		for (IndividualNode n : names.getIndividualNodes()) {
 

@@ -52,7 +52,7 @@ public class Ontology {
 		MatchStructures matchStructs = new MatchStructures(freeClasses);
 
 		structureBuilder.build(matchStructs);
-		IndividualRelationsInverter.addAllInvertions(names);
+		IndividualRelationsInverter.addAllInversions(names);
 
 		allNodes.addComponent(names.getClassNodes());
 		allNodes.addComponent(names.getIndividualNodes());
