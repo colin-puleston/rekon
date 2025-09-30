@@ -31,14 +31,14 @@ import java.util.*;
  */
 abstract class PotentialSubsumeds extends PotentialSubsumptions {
 
-	List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
+	List<Names> getOptionMatchNames(Pattern option, int startRank, int stopRank) {
 
-		return getRankedProfileNames(option.getPattern(), startRank, stopRank);
+		return getRankedProfileNames(option, startRank, stopRank);
 	}
 
-	List<Names> getRequestMatchNames(PatternMatcher request) {
+	List<Names> getRequestMatchNames(Pattern request) {
 
-		return getRankedDefinitionNames(request.getPattern());
+		return getRankedDefinitionNames(request);
 	}
 
 	Names resolveNamesForRetrieval(Names names, int rank) {

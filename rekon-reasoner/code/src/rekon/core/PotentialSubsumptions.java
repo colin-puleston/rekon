@@ -211,7 +211,7 @@ abstract class PotentialSubsumptions {
 
 			this.optionIdx = optionIdx;
 
-			rankedNames = getOptionMatchNames(option, startRank, stopRank);
+			rankedNames = getOptionMatchNames(option.getPattern(), startRank, stopRank);
 		}
 
 		abstract UpdateType getOpType();
@@ -237,11 +237,11 @@ abstract class PotentialSubsumptions {
 		}
 	}
 
-	private class CoreRegisterOp extends UpdateOp {
+	private class DefaultRegisterOp extends UpdateOp {
 
-		CoreRegisterOp(PatternMatcher option, int optionIdx, int startRank, int stopRank) {
+		DefaultRegisterOp(PatternMatcher option, int startRank, int stopRank) {
 
-			super(option, optionIdx, startRank, stopRank);
+			super(option, optionsToIndexes.get(option), startRank, stopRank);
 		}
 
 		UpdateType getOpType() {
@@ -250,9 +250,9 @@ abstract class PotentialSubsumptions {
 		}
 	}
 
-	private abstract class TransientUpdateOp extends UpdateOp {
+	private abstract class TransientOptionUpdateOp extends UpdateOp {
 
-		TransientUpdateOp(PatternMatcher option, int optionIdx) {
+		TransientOptionUpdateOp(PatternMatcher option, int optionIdx) {
 
 			super(option, optionIdx, 0, allRankMatches.size());
 
@@ -276,11 +276,11 @@ abstract class PotentialSubsumptions {
 		}
 	}
 
-	private class TransientRegisterOp extends TransientUpdateOp {
+	private class TransientOptionRegisterOp extends TransientOptionUpdateOp {
 
-		TransientRegisterOp(PatternMatcher option, int optionIdx) {
+		TransientOptionRegisterOp(PatternMatcher option) {
 
-			super(option, optionIdx);
+			super(option, resolveOptionIdx(option));
 		}
 
 		UpdateType getOpType() {
@@ -289,11 +289,11 @@ abstract class PotentialSubsumptions {
 		}
 	}
 
-	private class TransientDeregisterOp extends TransientUpdateOp {
+	private class TransientOptionDeregisterOp extends TransientOptionUpdateOp {
 
-		TransientDeregisterOp(PatternMatcher option, int optionIdx) {
+		TransientOptionDeregisterOp(PatternMatcher option) {
 
-			super(option, optionIdx);
+			super(option, optionsToIndexes.get(option));
 		}
 
 		UpdateType getOpType() {
@@ -330,9 +330,7 @@ abstract class PotentialSubsumptions {
 
 			for (PatternMatcher opt : currentOptions) {
 
-				Integer idx = optionsToIndexes.get(opt);
-
-				registerOps.add(new CoreRegisterOp(opt, idx, startRank, stopRank));
+				registerOps.add(new DefaultRegisterOp(opt, startRank, stopRank));
 			}
 
 			execProcesses();
@@ -366,36 +364,26 @@ abstract class PotentialSubsumptions {
 	void setFixedOptions(List<PatternMatcher> options) {
 
 		currentOptions = options;
-
-		for (int i = 0 ; i < options.size() ; i++) {
-
-			optionsToIndexes.put(options.get(i), i);
-		}
-
 		fixedOptions = true;
+
+		for (PatternMatcher opt : options) {
+
+			createOptionIdx(opt);
+		}
 	}
 
 	void addTransientOption(PatternMatcher option) {
 
 		currentOptions.add(option);
 
-		Integer idx = optionsToIndexes.get(option);
-
-		if (idx == null) {
-
-			idx = optionsToIndexes.size();
-
-			optionsToIndexes.put(option, idx);
-		}
-
-		new TransientRegisterOp(option, idx);
+		new TransientOptionRegisterOp(option);
 	}
 
 	void removeTransientOption(PatternMatcher option) {
 
 		if (currentOptions.remove(option)) {
 
-			new TransientDeregisterOp(option, optionsToIndexes.get(option));
+			new TransientOptionDeregisterOp(option);
 		}
 	}
 
@@ -416,7 +404,7 @@ abstract class PotentialSubsumptions {
 
 	Collection<PatternMatcher> getPotentialsFor(PatternMatcher request) {
 
-		List<Names> requestNames = getRequestMatchNames(request);
+		List<Names> requestNames = getRequestMatchNames(request.getPattern());
 
 		if (requestNames.size() > allRankMatches.size()) {
 
@@ -454,15 +442,31 @@ abstract class PotentialSubsumptions {
 		return optionIdxsToOptions(optionsInsect.getSubsetResult());
 	}
 
-	abstract List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank);
+	abstract List<Names> getOptionMatchNames(Pattern option, int startRank, int stopRank);
 
-	abstract List<Names> getRequestMatchNames(PatternMatcher request);
+	abstract List<Names> getRequestMatchNames(Pattern request);
 
 	abstract Names resolveNamesForRegistration(Names names, int rank);
 
 	abstract Names resolveNamesForRetrieval(Names names, int rank);
 
 	abstract boolean unionRankOptionsForRetrieval();
+
+	private int resolveOptionIdx(PatternMatcher option) {
+
+		Integer idx = optionsToIndexes.get(option);
+
+		return idx != null ? idx : createOptionIdx(option);
+	}
+
+	private int createOptionIdx(PatternMatcher option) {
+
+		int idx = optionsToIndexes.size();
+
+		optionsToIndexes.put(option, idx);
+
+		return idx;
+	}
 
 	private Collection<PatternMatcher> optionIdxsToOptions(IntHashSet idxs) {
 

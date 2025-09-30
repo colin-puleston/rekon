@@ -140,6 +140,6 @@ class NameClassifier extends NameLinksHandler {
 			return Names.NO_NAMES;
 		}
 
-		throw new Error("Method should never be invoked!");
+		throw new Error("Should never happen!");
 	}
 }

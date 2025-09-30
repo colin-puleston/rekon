@@ -29,33 +29,33 @@ package rekon.core;
  */
 class MatchNamesResolver {
 
-	static Names expand(Names leafNames) {
+	static Names resolve(Names leafNames) {
 
-		return expand(leafNames, null);
+		return resolve(leafNames, null);
 	}
 
-	static Names expand(Names leafNames, MatchRole role) {
+	static Names resolve(Names leafNames, MatchRole role) {
 
-		NameSet expanded = new NameSet();
+		NameSet resolved = new NameSet();
 
 		for (Name n : leafNames) {
 
-			checkAdd(expanded, n, role);
+			checkAdd(resolved, n, role);
 
 			for (Name s : n.getSubsumers()) {
 
-				checkAdd(expanded, s, role);
+				checkAdd(resolved, s, role);
 			}
 		}
 
-		return expanded;
+		return resolved;
 	}
 
-	static private void checkAdd(Names expanded, Name n, MatchRole role) {
+	static private void checkAdd(Names resolved, Name n, MatchRole role) {
 
 		if (role == null || n.definitionRefed(role)) {
 
-			expanded.add(n);
+			resolved.add(n);
 		}
 	}
 }

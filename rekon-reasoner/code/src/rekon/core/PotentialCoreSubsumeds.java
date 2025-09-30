@@ -40,7 +40,7 @@ class PotentialCoreSubsumeds extends PotentialSubsumeds {
 
 	Names resolveNamesForRegistration(Names names, int rank) {
 
-		return MatchNamesResolver.expand(names, MatchRole.rankToRole(rank));
+		return MatchNamesResolver.resolve(names, MatchRole.rankToRole(rank));
 	}
 
 	List<Names> getRankedDefinitionNames(Pattern defn) {

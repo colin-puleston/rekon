@@ -47,14 +47,14 @@ class PotentialLocalSubsumers {
 			potentials.addAll(getPotentialsFor(request));
 		}
 
-		List<Names> getOptionMatchNames(PatternMatcher option, int startRank, int stopRank) {
+		List<Names> getOptionMatchNames(Pattern option, int startRank, int stopRank) {
 
-			return getRankedDefinitionNames(option.getPattern());
+			return getRankedDefinitionNames(option);
 		}
 
-		List<Names> getRequestMatchNames(PatternMatcher request) {
+		List<Names> getRequestMatchNames(Pattern request) {
 
-			return getRankedProfileNames(request.getPattern());
+			return getRankedProfileNames(request);
 		}
 
 		Names resolveNamesForRegistration(Names names, int rank) {
@@ -64,7 +64,7 @@ class PotentialLocalSubsumers {
 
 		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return MatchNamesResolver.expand(names, MatchRole.rankToRole(rank));
+			return MatchNamesResolver.resolve(names, MatchRole.rankToRole(rank));
 		}
 
 		boolean unionRankOptionsForRetrieval() {
