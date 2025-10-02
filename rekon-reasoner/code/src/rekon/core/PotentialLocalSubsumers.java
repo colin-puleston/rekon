@@ -57,14 +57,9 @@ class PotentialLocalSubsumers {
 			return getRankedProfileNames(request);
 		}
 
-		Names resolveNamesForRegistration(Names names, int rank) {
+		Names resolveNamesForRegistration(Names names, int rank, boolean simpleOption) {
 
 			return names;
-		}
-
-		Names resolveNamesForRetrieval(Names names, int rank) {
-
-			return MatchNamesResolver.resolve(names, rank);
 		}
 
 		boolean unionRankOptionsForRetrieval() {
@@ -119,6 +114,11 @@ class PotentialLocalSubsumers {
 			registerSingleOptionRank();
 		}
 
+		Names resolveNamesForRetrieval(Names names, int rank) {
+
+			return MatchNamesResolver.resolveForSimplePattern(names);
+		}
+
 		List<Names> getRankedDefinitionNames(Pattern defn) {
 
 			return getRankedNames(defn);
@@ -145,6 +145,11 @@ class PotentialLocalSubsumers {
 		void initialiseOptionRanks() {
 
 			registerDefaultNestedOptionRanks();
+		}
+
+		Names resolveNamesForRetrieval(Names names, int rank) {
+
+			return MatchNamesResolver.resolve(names, rank);
 		}
 
 		List<Names> getRankedDefinitionNames(Pattern defn) {

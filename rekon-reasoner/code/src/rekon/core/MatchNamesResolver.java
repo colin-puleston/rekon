@@ -31,15 +31,6 @@ import java.util.*;
  */
 class MatchNamesResolver {
 
-	private static List<List<MatchRole>> ranksToRoles = new ArrayList<List<MatchRole>>();
-
-	static {
-
-		addNextRankToRoles(MatchRole.NESTED_PATTERN_ROOT, MatchRole.SIMPLE_PATTERN_NODE);
-		addNextRankToRoles(MatchRole.NESTED_PATTERN_RELATION);
-		addNextRankToRoles(MatchRole.NESTED_PATTERN_VALUE);
-	}
-
 	static Names resolve(Names leafNames) {
 
 		return resolve(leafNames, null);
@@ -47,7 +38,12 @@ class MatchNamesResolver {
 
 	static Names resolve(Names leafNames, int rank) {
 
-		return resolve(leafNames, ranksToRoles.get(rank));
+		return resolve(leafNames, MatchRole.rankToRoles(rank));
+	}
+
+	static Names resolveForSimplePattern(Names leafNames) {
+
+		return resolve(leafNames, MatchRole.SIMPLE_PATTERN_NODE.roleAsList());
 	}
 
 	static private Names resolve(Names leafNames, List<MatchRole> roles) {
@@ -86,22 +82,5 @@ class MatchNamesResolver {
 		}
 
 		return false;
-	}
-
-	static private void addNextRankToRoles(MatchRole... roles) {
-
-		ranksToRoles.add(Arrays.asList(roles));
-	}
-
-	static private List<MatchRole> rankToRoles(int rank) {
-
-		List<MatchRole> roles = ranksToRoles.get(rank);
-
-		if (roles == null) {
-
-			throw new Error("Rank does not specify any roles: " + rank);
-		}
-
-		return roles;
 	}
 }

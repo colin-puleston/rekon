@@ -24,6 +24,8 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
@@ -33,4 +35,35 @@ enum MatchRole {
 	NESTED_PATTERN_RELATION,
 	NESTED_PATTERN_VALUE,
 	SIMPLE_PATTERN_NODE;
+
+	private static List<List<MatchRole>> ranksToRoles = new ArrayList<List<MatchRole>>();
+
+	static {
+
+		addNextRankToRoles(NESTED_PATTERN_ROOT, SIMPLE_PATTERN_NODE);
+		addNextRankToRoles(NESTED_PATTERN_RELATION);
+		addNextRankToRoles(NESTED_PATTERN_VALUE);
+	}
+
+	static List<MatchRole> rankToRoles(int rank) {
+
+		List<MatchRole> roles = ranksToRoles.get(rank);
+
+		if (roles == null) {
+
+			throw new Error("Rank does not specify any roles: " + rank);
+		}
+
+		return roles;
+	}
+
+	static private void addNextRankToRoles(MatchRole... roles) {
+
+		ranksToRoles.add(Arrays.asList(roles));
+	}
+
+	List<MatchRole> roleAsList() {
+
+		return Collections.singletonList(this);
+	}
 }

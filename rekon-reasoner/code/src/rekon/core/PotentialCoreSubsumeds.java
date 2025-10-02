@@ -38,7 +38,12 @@ class PotentialCoreSubsumeds extends PotentialSubsumeds {
 		registerDefaultNestedOptionRanks();
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	Names resolveNamesForRegistration(Names names, int rank, boolean simpleOption) {
+
+		if (simpleOption) {
+
+			return MatchNamesResolver.resolveForSimplePattern(names);
+		}
 
 		return MatchNamesResolver.resolve(names, rank);
 	}

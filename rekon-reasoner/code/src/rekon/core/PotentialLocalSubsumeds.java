@@ -42,7 +42,7 @@ class PotentialLocalSubsumeds extends PotentialSubsumeds {
 	PotentialLocalSubsumeds() {
 	}
 
-	Names resolveNamesForRegistration(Names names, int rank) {
+	Names resolveNamesForRegistration(Names names, int rank, boolean simpleOption) {
 
 		return MatchNamesResolver.resolve(names);
 	}

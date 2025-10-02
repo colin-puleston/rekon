@@ -52,19 +52,26 @@ abstract class PotentialSubsumptions {
 		private Map<Name, IntHashSet> optionIdxsByRefName = new HashMap<Name, IntHashSet>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
-		void update(int optionIdx, Names rankNames, UpdateType updateType) {
+		void update(
+			int optionIdx,
+			Names rankNames,
+			UpdateType updateType,
+			boolean simpleOption) {
 
-			switch (updateType) {
+			for (Name n : resolveRankNamesForRegistration(rankNames, simpleOption)) {
 
-				case REGISTER:
+				switch (updateType) {
 
-					registerOption(optionIdx, rankNames);
-					break;
+					case REGISTER:
 
-				case DEREGISTER:
+						registerOptionName(optionIdx, n);
+						break;
 
-					deregisterOption(optionIdx, rankNames);
-					break;
+					case DEREGISTER:
+
+						deregisterOptionName(optionIdx, n);
+						break;
+				}
 			}
 		}
 
@@ -85,25 +92,11 @@ abstract class PotentialSubsumptions {
 			return rankOpts;
 		}
 
-		private void registerOption(int optionIdx, Names rankNames) {
+		private Collection<Name> resolveRankNamesForRegistration(
+									Names rankNames,
+									boolean simpleOption) {
 
-			for (Name n : resolveRankNamesForRegistration(rankNames)) {
-
-				registerOptionName(optionIdx, n);
-			}
-		}
-
-		private void deregisterOption(int optionIdx, Names rankNames) {
-
-			for (Name n : resolveRankNamesForRegistration(rankNames)) {
-
-				deregisterOptionName(optionIdx, n);
-			}
-		}
-
-		private Collection<Name> resolveRankNamesForRegistration(Names rankNames) {
-
-			return resolveNamesForRegistration(rankNames, rank).getNames();
+			return resolveNamesForRegistration(rankNames, rank, simpleOption).getNames();
 		}
 
 		private void registerOptionName(int optionIdx, Name n) {
@@ -227,8 +220,9 @@ abstract class PotentialSubsumptions {
 
 				RankMatches rankMatches = allRankMatches.get(rank);
 				Names rankNames = rankedNames.get(rank);
+				boolean singleRank = rankedNames.size() == 1;
 
-				rankMatches.update(optionIdx, rankNames, getOpType());
+				rankMatches.update(optionIdx, rankNames, getOpType(), singleRank);
 
 				return true;
 			}
@@ -446,7 +440,7 @@ abstract class PotentialSubsumptions {
 
 	abstract List<Names> getRequestMatchNames(Pattern request);
 
-	abstract Names resolveNamesForRegistration(Names names, int rank);
+	abstract Names resolveNamesForRegistration(Names names, int rank, boolean simpleOption);
 
 	abstract Names resolveNamesForRetrieval(Names names, int rank);
 
