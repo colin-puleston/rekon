@@ -68,7 +68,7 @@ class SingleNodeValue extends NodeValue {
 
 	void registerAsDefinitionRefed() {
 
-		node.registerAsDefinitionRefed(MatchRole.VALUE);
+		node.registerAsDefinitionRefed(MatchRole.NESTED_PATTERN_VALUE);
 	}
 
 	void render(PatternRenderer r) {

@@ -30,9 +30,9 @@ package rekon.core;
 abstract class NodeSelector {
 
 	static final NodeSelector ANY = new AnyNode();
-	static final NodeSelector STRUCTURED = new StructuredNode();
-	static final NodeSelector PATTERN_ROOT = new PatternRoot();
-	static final NodeSelector PATTERN_VALUE = new PatternValue();
+	static final NodeSelector SIMPLE_PATTERN_NODE = new SimplePatternNode();
+	static final NodeSelector NESTED_PATTERN_ROOT = new NestedPatternRoot();
+	static final NodeSelector NESTED_PATTERN_VALUE = new NestedPatternValue();
 
 	static private class AnyNode extends NodeSelector {
 
@@ -47,7 +47,12 @@ abstract class NodeSelector {
 		}
 	}
 
-	static private abstract class SelectiveSelector extends NodeSelector {
+	static private abstract class PatternNode extends NodeSelector {
+
+		boolean select(NodeX node) {
+
+			return node.definitionRefed(getMatchRole());
+		}
 
 		boolean anyMatches(Names nodes) {
 
@@ -61,41 +66,31 @@ abstract class NodeSelector {
 
 			return false;
 		}
-	}
-
-	static private class StructuredNode extends SelectiveSelector {
-
-		boolean select(NodeX node) {
-
-			PatternMatcher p = node.getProfileMatcher();
-
-			return p != null && p.getPattern().getProfileRelations().anyRelations();
-		}
-	}
-
-	static private abstract class PatternNode extends SelectiveSelector {
-
-		boolean select(NodeX node) {
-
-			return node.definitionRefed(getMatchRole());
-		}
 
 		abstract MatchRole getMatchRole();
 	}
 
-	static private class PatternRoot extends PatternNode {
+	static private class SimplePatternNode extends PatternNode {
 
 		MatchRole getMatchRole() {
 
-			return MatchRole.ROOT;
+			return MatchRole.SIMPLE_PATTERN_NODE;
 		}
 	}
 
-	static private class PatternValue extends PatternNode {
+	static private class NestedPatternRoot extends PatternNode {
 
 		MatchRole getMatchRole() {
 
-			return MatchRole.VALUE;
+			return MatchRole.NESTED_PATTERN_ROOT;
+		}
+	}
+
+	static private class NestedPatternValue extends PatternNode {
+
+		MatchRole getMatchRole() {
+
+			return MatchRole.NESTED_PATTERN_VALUE;
 		}
 	}
 

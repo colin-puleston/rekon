@@ -110,13 +110,6 @@ class OntologyClassifier extends SubsumptionChecker {
 			return passType != PassType.DEFAULT;
 		}
 
-		boolean classifyCandidate(Pattern pattern) {
-
-			return expansionPass()
-					? pattern.expandedProfile()
-					: pattern.matchable(phaseInitialPass());
-		}
-
 		private boolean expansionPass() {
 
 			return passType == PassType.EXPANSION;
@@ -126,11 +119,26 @@ class OntologyClassifier extends SubsumptionChecker {
 
 			for (PatternMatcher m : ontology.getAllProfiles()) {
 
-				if (classifyCandidate(m.getPattern())) {
+				if (isCandidate(m.getPattern())) {
 
 					candidates.add(m);
 				}
 			}
+		}
+
+		private boolean isCandidate(Pattern pattern) {
+
+			if (expansionPass()) {
+
+				return pattern.expandedProfile();
+			}
+
+			if (phaseInitialPass()) {
+
+				return pattern.initialPassMatchableProfile();
+			}
+
+			return pattern.nonInitialPassMatchableProfile();
 		}
 
 		private void checkSubsumptions() {

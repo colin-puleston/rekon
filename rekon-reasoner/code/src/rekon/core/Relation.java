@@ -69,7 +69,23 @@ public abstract class Relation extends PatternComponent {
 
 	void registerAsDefinitionRefed() {
 
-		property.registerAsDefinitionRefed(MatchRole.RELATION);
+		property.registerAsDefinitionRefed(MatchRole.NESTED_PATTERN_RELATION);
+	}
+
+	boolean matchable(boolean newInferencesOnly) {
+
+		if (property.matchablePatternProperty()) {
+
+			for (NodeX n : getReferencedNodes().asNodes()) {
+
+				if (n.matchable(NodeSelector.NESTED_PATTERN_VALUE, newInferencesOnly)) {
+
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	void render(PatternRenderer r) {

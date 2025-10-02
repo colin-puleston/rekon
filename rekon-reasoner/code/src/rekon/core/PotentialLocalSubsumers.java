@@ -64,7 +64,7 @@ class PotentialLocalSubsumers {
 
 		Names resolveNamesForRetrieval(Names names, int rank) {
 
-			return MatchNamesResolver.resolve(names, MatchRole.rankToRole(rank));
+			return MatchNamesResolver.resolve(names, rank);
 		}
 
 		boolean unionRankOptionsForRetrieval() {

@@ -98,6 +98,11 @@ public abstract class NodeX extends Name {
 		return !matchers.isEmpty();
 	}
 
+	boolean matchable(NodeSelector selector, boolean newInferencesOnly) {
+
+		return newInferencesOnly ? anyNewSubsumers(selector) : anyMatches(selector);
+	}
+
 	List<PatternMatcher> getAllMatchers() {
 
 		return matchers;
@@ -123,21 +128,6 @@ public abstract class NodeX extends Name {
 		}
 
 		return Collections.emptyList();
-	}
-
-	boolean matchablePatternRoot(boolean initialPass) {
-
-		return unprocessedSubsumers(initialPass, NodeSelector.PATTERN_ROOT);
-	}
-
-	boolean matchablePatternValue(boolean initialPass) {
-
-		return unprocessedSubsumers(initialPass, NodeSelector.PATTERN_VALUE);
-	}
-
-	boolean unprocessedSubsumers(boolean initialPass, NodeSelector selector) {
-
-		return initialPass ? anyMatches(selector) : anyNewSubsumers(selector);
 	}
 
 	NodeClassifier getNodeClassifier() {

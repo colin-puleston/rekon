@@ -29,17 +29,8 @@ package rekon.core;
  */
 enum MatchRole {
 
-	ROOT, RELATION, VALUE;
-
-	static MatchRole rankToRole(int rank) {
-
-		if (rank > values().length) {
-
-			throw new Error("Rank does not specify a role: " + rank);
-		}
-
-		MatchRole role = values()[rank];
-
-		return role;
-	}
+	NESTED_PATTERN_ROOT,
+	NESTED_PATTERN_RELATION,
+	NESTED_PATTERN_VALUE,
+	SIMPLE_PATTERN_NODE;
 }

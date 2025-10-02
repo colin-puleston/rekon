@@ -24,38 +24,84 @@
 
 package rekon.core;
 
+import java.util.*;
+
 /**
  * @author Colin Puleston
  */
 class MatchNamesResolver {
+
+	private static List<List<MatchRole>> ranksToRoles = new ArrayList<List<MatchRole>>();
+
+	static {
+
+		addNextRankToRoles(MatchRole.NESTED_PATTERN_ROOT, MatchRole.SIMPLE_PATTERN_NODE);
+		addNextRankToRoles(MatchRole.NESTED_PATTERN_RELATION);
+		addNextRankToRoles(MatchRole.NESTED_PATTERN_VALUE);
+	}
 
 	static Names resolve(Names leafNames) {
 
 		return resolve(leafNames, null);
 	}
 
-	static Names resolve(Names leafNames, MatchRole role) {
+	static Names resolve(Names leafNames, int rank) {
+
+		return resolve(leafNames, ranksToRoles.get(rank));
+	}
+
+	static private Names resolve(Names leafNames, List<MatchRole> roles) {
 
 		NameSet resolved = new NameSet();
 
 		for (Name n : leafNames) {
 
-			checkAdd(resolved, n, role);
+			checkAdd(resolved, n, roles);
 
 			for (Name s : n.getSubsumers()) {
 
-				checkAdd(resolved, s, role);
+				checkAdd(resolved, s, roles);
 			}
 		}
 
 		return resolved;
 	}
 
-	static private void checkAdd(Names resolved, Name n, MatchRole role) {
+	static private void checkAdd(Names resolved, Name n, List<MatchRole> roles) {
 
-		if (role == null || n.definitionRefed(role)) {
+		if (roles == null || definitionRefed(n, roles)) {
 
 			resolved.add(n);
 		}
+	}
+
+	static private boolean definitionRefed(Name n, List<MatchRole> roles) {
+
+		for (MatchRole r : roles) {
+
+			if (n.definitionRefed(r)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static private void addNextRankToRoles(MatchRole... roles) {
+
+		ranksToRoles.add(Arrays.asList(roles));
+	}
+
+	static private List<MatchRole> rankToRoles(int rank) {
+
+		List<MatchRole> roles = ranksToRoles.get(rank);
+
+		if (roles == null) {
+
+			throw new Error("Rank does not specify any roles: " + rank);
+		}
+
+		return roles;
 	}
 }

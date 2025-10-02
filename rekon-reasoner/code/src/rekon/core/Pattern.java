@@ -103,15 +103,57 @@ public class Pattern extends PatternComponent {
 
 	void registerDefinitionRefedNames() {
 
+		MatchRole nodesMatchRole = getDefinitionNodesMatchRole();
+
 		for (NodeX n : nodes.asNodes()) {
 
-			n.registerAsDefinitionRefed(MatchRole.ROOT);
+			n.registerAsDefinitionRefed(nodesMatchRole);
 		}
 
 		for (Relation r : directRelations) {
 
 			r.registerAsDefinitionRefed();
 		}
+	}
+
+	boolean initialPassMatchableProfile() {
+
+		if (matchableSimpleProfileNode(false)) {
+
+			return true;
+		}
+
+		if (anyProfileRelations()) {
+
+			return matchableNestedProfileNode(false)
+					&& anyMatchableProfileRelations(false);
+		}
+
+		return false;
+	}
+
+	boolean nonInitialPassMatchableProfile() {
+
+		if (matchableSimpleProfileNode(true)) {
+
+			return true;
+		}
+
+		if (anyProfileRelations()) {
+
+			if (matchableNestedProfileNode(true)) {
+
+				return anyMatchableProfileRelations(false)
+						|| anyMatchableProfileRelations(true);
+			}
+
+			if (anyMatchableProfileRelations(true)) {
+
+				return matchableNestedProfileNode(false);
+			}
+		}
+
+		return false;
 	}
 
 	boolean expandedProfile() {
@@ -135,33 +177,6 @@ public class Pattern extends PatternComponent {
 		}
 
 		return true;
-	}
-
-	boolean matchable(boolean initialPass) {
-
-		for (NodeX n : nodes.asNodes()) {
-
-			if (n.matchablePatternRoot(initialPass)) {
-
-				return true;
-			}
-		}
-
-		for (Relation r : getProfileRelations().getAll()) {
-
-			if (r.getProperty().matchablePatternProperty()) {
-
-				for (NodeX tn : r.getReferencedNodes().asNodes()) {
-
-					if (tn.matchablePatternValue(initialPass)) {
-
-						return true;
-					}
-				}
-			}
-		}
-
-		return false;
 	}
 
 	Names getNodes() {
@@ -240,6 +255,46 @@ public class Pattern extends PatternComponent {
 		}
 
 		return false;
+	}
+
+	private MatchRole getDefinitionNodesMatchRole() {
+
+		return directRelations.isEmpty()
+				? MatchRole.SIMPLE_PATTERN_NODE
+				: MatchRole.NESTED_PATTERN_ROOT;
+	}
+
+	private boolean matchableSimpleProfileNode(boolean newInferencesOnly) {
+
+		return matchableProfileNode(NodeSelector.SIMPLE_PATTERN_NODE, newInferencesOnly);
+	}
+
+	private boolean matchableNestedProfileNode(boolean newInferencesOnly) {
+
+		return matchableProfileNode(NodeSelector.NESTED_PATTERN_ROOT, newInferencesOnly);
+	}
+
+	private boolean matchableProfileNode(NodeSelector selector, boolean newInferencesOnly) {
+
+		return getSingleNode().matchable(selector, newInferencesOnly);
+	}
+
+	private boolean anyMatchableProfileRelations(boolean newInferencesOnly) {
+
+		for (Relation r : getProfileRelations().getAll()) {
+
+			if (r.matchable(newInferencesOnly)) {
+
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean anyProfileRelations() {
+
+		return getProfileRelations().anyRelations();
 	}
 
 	private String nodesToString() {

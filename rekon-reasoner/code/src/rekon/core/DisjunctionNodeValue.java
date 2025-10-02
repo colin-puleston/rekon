@@ -122,7 +122,7 @@ class DisjunctionNodeValue extends NodeValue {
 
 		for (NodeX n : nodes.asNodes()) {
 
-			n.registerAsDefinitionRefed(MatchRole.VALUE);
+			n.registerAsDefinitionRefed(MatchRole.NESTED_PATTERN_VALUE);
 		}
 	}
 }
