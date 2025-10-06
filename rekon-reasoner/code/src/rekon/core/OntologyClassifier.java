@@ -106,11 +106,6 @@ class OntologyClassifier extends SubsumptionChecker {
 			return candidates.size();
 		}
 
-		boolean phaseInitialPass() {
-
-			return phaseInitialPass;
-		}
-
 		private void findAllCandidates() {
 
 			for (PatternMatcher m : ontology.getAllProfiles()) {
@@ -181,10 +176,11 @@ class OntologyClassifier extends SubsumptionChecker {
 	private boolean performPhase(boolean initialPhase) {
 
 		Pass pass = new Pass(initialPhase, true);
+		boolean phaseInitialPass = true;
 
 		while (pass.initialisePass()) {
 
-			if (pass.phaseInitialPass()) {
+			if (phaseInitialPass) {
 
 				classifyListener.onPhaseStart();
 			}
@@ -192,6 +188,7 @@ class OntologyClassifier extends SubsumptionChecker {
 			classifyListener.onPassStart(pass.candidateCount());
 
 			pass = pass.perfomPass();
+			phaseInitialPass = false;
 		}
 
 		if (initialPhase) {
@@ -201,7 +198,7 @@ class OntologyClassifier extends SubsumptionChecker {
 			return true;
 		}
 
-		if (pass.phaseInitialPass()) {
+		if (phaseInitialPass) {
 
 			return false;
 		}
