@@ -67,11 +67,6 @@ class OntologyClassifier extends SubsumptionChecker {
 
 			this.initialPhase = initialPhase;
 			this.phaseInitialPass = phaseInitialPass;
-
-			if (!phaseInitialPass) {
-
-				findAllCandidates();
-			}
 		}
 
 		boolean initialisePass() {
@@ -82,28 +77,27 @@ class OntologyClassifier extends SubsumptionChecker {
 
 				findAllCandidates();
 			}
+			else {
+
+				findAllCandidates();
+
+				absorbAllNewInferences();
+			}
 
 			return !candidates.isEmpty();
 		}
 
-		Pass perfomPass() {
+		void perfomPass() {
+
+			if (phaseInitialPass) {
+
+				classifyListener.onPhaseStart();
+			}
+
+			classifyListener.onPassStart(candidates.size());
 
 			checkSubsumptions();
-
-			Iterable<NodeX> allNodes = ontology.getAllNodes();
-
 			expandAllNewInferences();
-
-			Pass next = new Pass(initialPhase, false);
-
-			absorbAllNewInferences();
-
-			return next;
-		}
-
-		int candidateCount() {
-
-			return candidates.size();
 		}
 
 		private void findAllCandidates() {
@@ -175,40 +169,23 @@ class OntologyClassifier extends SubsumptionChecker {
 
 	private boolean performPhase(boolean initialPhase) {
 
-		Pass pass = new Pass(initialPhase, true);
-		boolean phaseInitialPass = true;
+		boolean initialPass = true;
 
-		while (pass.initialisePass()) {
+		while (true) {
 
-			if (phaseInitialPass) {
+			Pass pass = new Pass(initialPhase, initialPass);
 
-				classifyListener.onPhaseStart();
+			if (!pass.initialisePass()) {
+
+				break;
 			}
 
-			classifyListener.onPassStart(pass.candidateCount());
+			pass.perfomPass();
 
-			pass = pass.perfomPass();
-			phaseInitialPass = false;
+			initialPass = false;
 		}
 
-		if (initialPhase) {
-
-			resetAllPhaseInferredSubsumers();
-
-			return true;
-		}
-
-		if (phaseInitialPass) {
-
-			return false;
-		}
-
-		return resetAllPhaseInferredSubsumers();
-	}
-
-	private boolean resetAllPhaseInferredSubsumers() {
-
-		return NodeClassifier.resetAllPhaseInferredSubsumers(getAllNodes());
+		return !initialPass;
 	}
 
 	private void completeClassification() {
