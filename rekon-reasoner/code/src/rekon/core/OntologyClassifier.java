@@ -153,49 +153,6 @@ class OntologyClassifier extends SubsumptionChecker {
 		}
 	}
 
-	private class Phase {
-
-		private boolean initialPhase;
-
-		Phase(boolean initialPhase) {
-
-			this.initialPhase = initialPhase;
-		}
-
-		boolean performPhase() {
-
-			Pass pass = new Pass(initialPhase, true);
-			boolean phaseInitialPass = true;
-
-			while (pass.initialisePass()) {
-
-				if (phaseInitialPass) {
-
-					classifyListener.onPhaseStart();
-				}
-
-				classifyListener.onPassStart(pass.candidateCount());
-
-				pass = pass.perfomPass();
-				phaseInitialPass = false;
-			}
-
-			if (initialPhase) {
-
-				resetAllPhaseInferredSubsumers();
-
-				return true;
-			}
-
-			if (phaseInitialPass) {
-
-				return false;
-			}
-
-			return resetAllPhaseInferredSubsumers();
-		}
-	}
-
 	OntologyClassifier(Ontology ontology, OntologyClassifyListener classifyListener) {
 
 		this.ontology = ontology;
