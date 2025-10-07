@@ -26,9 +26,6 @@ package rekon.build;
 
 import java.util.*;
 
-import rekon.core.*;
-import rekon.build.input.*;
-
 /**
  * @author Colin Puleston
  */
@@ -45,11 +42,6 @@ abstract class EntityBuilder<S, E> {
 	E get(S source) {
 
 		return dynamic ? checkCreate(source) : getViaCache(source);
-	}
-
-	Collection<E> getAll() {
-
-		return bySource.values();
 	}
 
 	abstract E checkCreate(S source);
