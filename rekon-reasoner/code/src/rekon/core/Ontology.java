@@ -135,7 +135,7 @@ public class Ontology {
 
 		for (Name n : allNames) {
 
-			n.getClassifier().expandSubsumers();
+			n.getClassifier().expandAssertedSubsumers();
 		}
 	}
 

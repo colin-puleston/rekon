@@ -117,13 +117,4 @@ public abstract class IndividualNode extends NodeX {
 
 		return null;
 	}
-
-	NameClassifier createClassifier() {
-
-		NodeClassifier classifier = new NodeClassifier(this);
-
-		classifier.setClassifiableNode();
-
-		return classifier;
-	}
 }

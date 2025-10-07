@@ -251,22 +251,6 @@ class NodeClassifier extends NameClassifier {
 		}
 	}
 
-	void checkAddInferredSubsumers(Names subsumers) {
-
-		for (NodeX s : subsumers.asNodes()) {
-
-			checkAddInferredSubsumer(s);
-		}
-	}
-
-	void checkAddInferredSubsumer(NodeX subsumer) {
-
-		if (newSubsumer(subsumer)) {
-
-			addNewInferredSubsumer(subsumer);
-		}
-	}
-
 	synchronized void addNewInferredSubsumer(Name subsumer) {
 
 		inferredSubsumers.addDirectlyInferred(subsumer);
@@ -282,11 +266,6 @@ class NodeClassifier extends NameClassifier {
 	boolean anyNewSubsumers(NodeSelector selector) {
 
 		return inferredSubsumers.anyNewInferences(selector);
-	}
-
-	private NodeX getNode() {
-
-		return (NodeX)getName();
 	}
 
 	private boolean newSubsumer(NodeX s) {

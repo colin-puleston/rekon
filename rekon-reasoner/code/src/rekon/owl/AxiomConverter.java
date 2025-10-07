@@ -168,11 +168,14 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 			for (OWLAxiom ax : ont.getAxioms(Imports.EXCLUDED)) {
 
-				for (OWLAxiom rax : resolve(ax)) {
+				if (!ignoreAxiom(ax)) {
 
-					if (!ignoreAxiom(rax) && !checkAddToConverter(rax)) {
+					for (OWLAxiom rax : resolve(ax)) {
 
-						outOfScopeTypes.add(rax.getAxiomType());
+						if (!checkAddToConverter(rax)) {
+
+							outOfScopeTypes.add(rax.getAxiomType());
+						}
 					}
 				}
 			}
