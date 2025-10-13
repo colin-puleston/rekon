@@ -85,7 +85,7 @@ abstract class LocalExpression {
 
 		for (PatternMatcher m : orderedProfileMatchers) {
 
-			m.getNode().getClassifier().expandSubsumers();
+			m.getNode().getClassifier().expandAssertedSubsumers();
 		}
 	}
 }
