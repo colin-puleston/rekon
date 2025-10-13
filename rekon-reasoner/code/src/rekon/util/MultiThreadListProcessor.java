@@ -31,9 +31,9 @@ import java.util.*;
  */
 public abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E> {
 
-	private ListReader<E> list = null;
+	private ListReader<? extends E> list = null;
 
-	public void invokeListProcesses(Iterable<E> elements) {
+	public void invokeListProcesses(Iterable<? extends E> elements) {
 
 		list = toListReader(elements);
 
@@ -56,11 +56,11 @@ public abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E
 
 	protected abstract void processElement(E e);
 
-	private ListReader<E> toListReader(Iterable<E> elements) {
+	private ListReader<? extends E> toListReader(Iterable<? extends E> elements) {
 
 		if (elements instanceof CompoundIterable) {
 
-			return ((CompoundIterable<E>)elements).asListReader();
+			return ((CompoundIterable<? extends E>)elements).asListReader();
 		}
 
 		return new SingleListReader<E>(elements);

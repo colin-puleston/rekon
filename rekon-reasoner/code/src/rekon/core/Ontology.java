@@ -33,8 +33,8 @@ import rekon.util.*;
  */
 public class Ontology {
 
-	private CompoundIterable<Name> allNames = new CompoundIterable<Name>();
 	private CompoundIterable<NodeX> allNodes = new CompoundIterable<NodeX>();
+	private CompoundIterable<PropertyX> allProperties = new CompoundIterable<PropertyX>();
 
 	private List<ClassNode> freeClassNodes = new ArrayList<ClassNode>();
 
@@ -48,23 +48,20 @@ public class Ontology {
 
 	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
 
-		FreeOntologyClasses freeClasses = new FreeOntologyClasses(this);
-		MatchStructures matchStructs = new MatchStructures(freeClasses);
+		profilesExpander = new ProfilesExpander(this, names);
 
-		structureBuilder.build(matchStructs);
-		IndividualRelationsInverter.addAllInversions(names);
+		buildStructure(names, structureBuilder);
 
 		allNodes.addComponent(names.getClassNodes());
 		allNodes.addComponent(names.getIndividualNodes());
 		allNodes.addComponent(freeClassNodes);
 
-		allNames.addComponent(allNodes);
-		allNames.addComponent(names.getNodeProperties());
-		allNames.addComponent(names.getDataProperties());
+		allProperties.addComponent(names.getNodeProperties());
+		allProperties.addComponent(names.getDataProperties());
 
-		profilesExpander = new ProfilesExpander(this, names);
+		expandNameSubsumers(allNodes);
+		expandNameSubsumers(allProperties);
 
-		expandAllNameSubsumers();
 		addAllNodeMatchers();
 	}
 
@@ -101,14 +98,14 @@ public class Ontology {
 		return profilesExpander;
 	}
 
-	Iterable<Name> getAllNames() {
-
-		return allNames;
-	}
-
 	Iterable<NodeX> getAllNodes() {
 
 		return allNodes;
+	}
+
+	Iterable<PropertyX> getAllProperties() {
+
+		return allProperties;
 	}
 
 	List<PatternMatcher> getAllProfiles() {
@@ -131,9 +128,17 @@ public class Ontology {
 		return dynamicSubsumeds;
 	}
 
-	private void expandAllNameSubsumers() {
+	private void buildStructure(OntologyNames names, StructureBuilder structureBuilder) {
 
-		for (Name n : allNames) {
+		FreeOntologyClasses freeClasses = new FreeOntologyClasses(this);
+
+		structureBuilder.build(new MatchStructures(freeClasses));
+		IndividualRelationsInverter.addAllInversions(names);
+	}
+
+	private void expandNameSubsumers(CompoundIterable<? extends Name> names) {
+
+		for (Name n : names) {
 
 			n.getClassifier().expandAssertedSubsumers();
 		}

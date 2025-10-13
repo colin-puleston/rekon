@@ -170,50 +170,63 @@ class NameClassification extends NameLinksHandler {
 		}
 	}
 
-	static void completeAllClassifications(Iterable<Name> allNames) {
+	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
 
-		for (Name n : allNames) {
+		protected void processElement(Name n) {
+
+			getInitialiserFor(n).setDirectSupers();
+		}
+
+		DirectSupersSetter(Iterable<? extends Name> names) {
+
+			invokeListProcesses(names);
+		}
+	}
+
+	static void completeClassifications(Iterable<? extends Name> names) {
+
+		for (Name n : names) {
 
 			n.setClassification();
 		}
 
-		initialiseAllClassifications(allNames);
-		optimiseAllLinks(allNames);
+		initialiseClassifications(names);
+		optimiseLinks(names);
 
-		for (Name n : allNames) {
+		for (Name n : names) {
 
 			n.getClassification().completeInitialisation();
 		}
 	}
 
-	static private void initialiseAllClassifications(Iterable<Name> allNames) {
+	static private void initialiseClassifications(Iterable<? extends Name> names) {
 
-		for (Name n : allNames) {
+		for (Name n : names) {
 
 			getInitialiserFor(n).resolveBasicLinksWithSubsumers();
 		}
 
-		new DirectSupersSetter(allNames);
+		new DirectSupersSetter(names);
 
-		for (Name n : allNames) {
+		for (Name n : names) {
 
 			getInitialiserFor(n).setAsDirectSub();
 		}
 	}
 
-	static private void optimiseAllLinks(Iterable<Name> allNames) {
+	static private void optimiseLinks(Iterable<? extends Name> names) {
 
-		for (Name n : allNames) {
+		for (Name n : names) {
 
 			n.getClassification().combineSingleIncomingSupers();
 		}
 
-		for (Name n : allNames) {
+		for (Name n : names) {
 
 			n.getClassification().combineSingleIncomingSubs();
 		}
 
-		for (Name n : allNames) {
+		for (Name n : names) {
 
 			n.getClassification().optimiseEmptyLinks();
 		}
@@ -222,19 +235,6 @@ class NameClassification extends NameLinksHandler {
 	static private Initialiser getInitialiserFor(Name n) {
 
 		return n.getClassification().initialiser;
-	}
-
-	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
-
-		protected void processElement(Name n) {
-
-			getInitialiserFor(n).setDirectSupers();
-		}
-
-		DirectSupersSetter(Iterable<Name> allNames) {
-
-			invokeListProcesses(allNames);
-		}
 	}
 
 	private Name name;
