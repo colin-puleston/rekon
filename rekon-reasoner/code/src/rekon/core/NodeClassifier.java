@@ -37,7 +37,7 @@ class NodeClassifier extends NameClassifier {
 
 		private boolean forMatchables;
 
-		protected void processElement(NodeX n) {
+		protected void processElement(NodeX n, int threadIndex) {
 
 			if (n.matchable() == forMatchables) {
 

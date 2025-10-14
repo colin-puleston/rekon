@@ -172,7 +172,7 @@ class NameClassification extends NameLinksHandler {
 
 	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
 
-		protected void processElement(Name n) {
+		protected void processElement(Name n, int threadIndex) {
 
 			getInitialiserFor(n).setDirectSupers();
 		}

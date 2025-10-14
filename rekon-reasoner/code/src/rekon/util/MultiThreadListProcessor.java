@@ -45,7 +45,7 @@ public abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E
 
 		for (int i = threadIndex ; i < list.size() ; i += totalThreads) {
 
-			processElement(list.get(i));
+			processElement(list.get(i), threadIndex);
 		}
 	}
 
@@ -54,7 +54,7 @@ public abstract class MultiThreadListProcessor<E> extends MultiThreadProcessor<E
 		execThreadProcess(1, 0);
 	}
 
-	protected abstract void processElement(E e);
+	protected abstract void processElement(E e, int threadIndex);
 
 	private ListReader<? extends E> toListReader(Iterable<? extends E> elements) {
 

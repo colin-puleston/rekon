@@ -48,7 +48,7 @@ class ProfilesExpander {
 
 		private boolean anyNewExpansions = false;
 
-		protected void processElement(PatternMatcher profile) {
+		protected void processElement(PatternMatcher profile, int threadIndex) {
 
 			if (checkNewExpansion(profile) && !anyNewExpansions) {
 

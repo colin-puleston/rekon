@@ -90,6 +90,11 @@ public abstract class MultiThreadProcessor<E> {
 		}
 	}
 
+	public int utilisedThreads() {
+
+		return OPTION.enabled() ? totalThreads : 1;
+	}
+
 	protected abstract void execThreadProcess(int totalThreads, int threadIndex);
 
 	protected abstract void execAllInSingleThread();

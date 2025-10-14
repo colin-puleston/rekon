@@ -52,13 +52,9 @@ abstract class PotentialSubsumptions {
 		private Map<Name, IntHashSet> optionIdxsByRefName = new HashMap<Name, IntHashSet>();
 		private Set<Name> refNamesCommonToAllOptions = new HashSet<Name>();
 
-		void update(
-			int optionIdx,
-			Names rankNames,
-			UpdateType updateType,
-			boolean simpleOption) {
+		void update(int optionIdx, Names rankNames, UpdateType updateType) {
 
-			for (Name n : resolveRankNamesForRegistration(rankNames, simpleOption)) {
+			for (Name n : rankNames) {
 
 				switch (updateType) {
 
@@ -90,13 +86,6 @@ abstract class PotentialSubsumptions {
 			}
 
 			return rankOpts;
-		}
-
-		private Collection<Name> resolveRankNamesForRegistration(
-									Names rankNames,
-									boolean simpleOption) {
-
-			return resolveNamesForRegistration(rankNames, rank, simpleOption).getNames();
 		}
 
 		private void registerOptionName(int optionIdx, Name n) {
@@ -205,6 +194,7 @@ abstract class PotentialSubsumptions {
 			this.optionIdx = optionIdx;
 
 			rankedNames = getOptionMatchNames(option.getPattern(), startRank, stopRank);
+			rankedNames = resolveRankedNames();
 		}
 
 		abstract UpdateType getOpType();
@@ -219,15 +209,33 @@ abstract class PotentialSubsumptions {
 			if (rankedNames.size() > rank) {
 
 				RankMatches rankMatches = allRankMatches.get(rank);
-				Names rankNames = rankedNames.get(rank);
-				boolean singleRank = rankedNames.size() == 1;
 
-				rankMatches.update(optionIdx, rankNames, getOpType(), singleRank);
+				rankMatches.update(optionIdx, rankedNames.get(rank), getOpType());
 
 				return true;
 			}
 
 			return false;
+		}
+
+		private List<Names> resolveRankedNames() {
+
+			List<Names> resolved = new ArrayList<Names>();
+			int rank = 0;
+
+			for (Names rankNames : rankedNames) {
+
+				resolved.add(resolveRankNames(rankNames, rank++));
+			}
+
+			return resolved;
+		}
+
+		private Names resolveRankNames(Names rankNames, int rank) {
+
+			boolean singleRank = rankedNames.size() == 1;
+
+			return resolveNamesForRegistration(rankNames, rank, singleRank);
 		}
 	}
 
@@ -304,6 +312,41 @@ abstract class PotentialSubsumptions {
 		private List<UpdateOp> registerOps = new ArrayList<UpdateOp>();
 		private boolean completedMultiReg = true;
 
+		private class RegisterOpSet {
+
+			final List<UpdateOp> ops = new ArrayList<UpdateOp>();
+		}
+
+		private class RegisterOpsCreator extends MultiThreadListProcessor<PatternMatcher> {
+
+			private RegisterOpSet[] opsByThread = new RegisterOpSet[utilisedThreads()];
+
+			protected void processElement(PatternMatcher option, int threadIndex) {
+
+				opsByThread[threadIndex].ops.add(createOp(option));
+			}
+
+			RegisterOpsCreator() {
+
+				for (int i = 0 ; i < opsByThread.length ; i++) {
+
+					opsByThread[i] = new RegisterOpSet();
+				}
+
+				invokeListProcesses(currentOptions);
+
+				for (RegisterOpSet threadOps : opsByThread) {
+
+					registerOps.addAll(threadOps.ops);
+				}
+			}
+
+			private UpdateOp createOp(PatternMatcher option) {
+
+				return new DefaultRegisterOp(option, startRank, stopRank);
+			}
+		}
+
 		protected void execThreadProcess(int totalThreads, int threadIndex) {
 
 			registerRanks(totalThreads, threadIndex);
@@ -319,14 +362,11 @@ abstract class PotentialSubsumptions {
 			this.startRank = startRank;
 			this.stopRank = stopRank;
 
+			new RegisterOpsCreator();
+
 			ensureRankMatches(stopRank);
+
 			setMaxProcesses(stopRank - startRank);
-
-			for (PatternMatcher opt : currentOptions) {
-
-				registerOps.add(new DefaultRegisterOp(opt, startRank, stopRank));
-			}
-
 			execProcesses();
 		}
 

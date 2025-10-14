@@ -40,7 +40,7 @@ class OntologyClassifier extends SubsumptionChecker {
 
 		private PotentialSubsumeds candidatesFilter;
 
-		protected void processElement(PatternMatcher defn) {
+		protected void processElement(PatternMatcher defn, int threadIndex) {
 
 			for (PatternMatcher c : candidatesFilter.getPotentialsFor(defn)) {
 
