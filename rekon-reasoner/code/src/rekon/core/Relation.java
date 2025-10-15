@@ -97,6 +97,6 @@ public abstract class Relation extends PatternComponent {
 
 	private boolean subsumesOtherOfType(Relation r) {
 
-		return property.subsumes(r.getProperty()) && target.subsumes(r.target);
+		return property.subsumes(r.property) && target.subsumes(r.target);
 	}
 }

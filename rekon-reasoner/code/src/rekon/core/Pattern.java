@@ -163,7 +163,7 @@ public class Pattern extends PatternComponent {
 
 	boolean subsumes(Pattern p) {
 
-		return subsumesAllNames(p) && subsumesRelations(p);
+		return subsumesNames(p) && subsumesRelations(p);
 	}
 
 	boolean subsumesRelations(Pattern p) {
@@ -231,7 +231,7 @@ public class Pattern extends PatternComponent {
 		}
 	}
 
-	private boolean subsumesAllNames(Pattern p) {
+	private boolean subsumesNames(Pattern p) {
 
 		for (NodeX n : nodes.asNodes()) {
 

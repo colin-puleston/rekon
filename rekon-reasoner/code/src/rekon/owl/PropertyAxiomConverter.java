@@ -89,18 +89,11 @@ abstract class PropertyAxiomConverter
 						<S extends OWLAxiom, I extends InputAxiom>
 						extends TypeAxiomConverter<S, I> {
 
-		boolean convert(S source) {
+		I checkConvertType(S source) {
 
 			OwlPropertyLink owlLink = createOwlLink(source);
 
-			if (owlLink.checkValidEndPoints()) {
-
-				inputAxioms.add(createInputAxiom(owlLink));
-
-				return true;
-			}
-
-			return false;
+			return owlLink.checkValidEndPoints() ? createInputAxiom(owlLink) : null;
 		}
 
 		abstract OwlPropertyLink createOwlLink(S source);
@@ -112,7 +105,7 @@ abstract class PropertyAxiomConverter
 						<S extends OWLAxiom, I extends InputAxiom>
 						extends TypeAxiomConverter<S, I> {
 
-		boolean convert(S source) {
+		I checkConvertType(S source) {
 
 			E expr = getPropertyExpr(source);
 			P p = toPropertyOrNull(expr);
@@ -123,13 +116,11 @@ abstract class PropertyAxiomConverter
 
 				if (ax != null) {
 
-					inputAxioms.add(ax);
-
-					return true;
+					return ax;
 				}
 			}
 
-			return false;
+			return null;
 		}
 
 		abstract E getPropertyExpr(S source);

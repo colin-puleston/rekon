@@ -58,20 +58,23 @@ abstract class AxiomConversionComponent {
 
 		final List<I> inputAxioms = new ArrayList<I>();
 
-		final List<S> sourceAxioms = new ArrayList<S>();
-
 		TypeAxiomConverter() {
 
 			addTypeAxiomConverter(this);
 		}
 
-		boolean checkAdd(OWLAxiom source) {
+		boolean checkConvert(OWLAxiom source) {
 
 			S typeSource = checkCastTo(source, getSourceAxiomType());
 
 			if (typeSource != null) {
 
-				sourceAxioms.add(typeSource);
+				I input = checkConvertType(typeSource);
+
+				if (input != null) {
+
+					inputAxioms.add(input);
+				}
 
 				return true;
 			}
@@ -79,17 +82,9 @@ abstract class AxiomConversionComponent {
 			return false;
 		}
 
-		void convertAll() {
-
-			for (S source : sourceAxioms) {
-
-				convert(source);
-			}
-		}
-
 		abstract Class<S> getSourceAxiomType();
 
-		abstract boolean convert(S source);
+		abstract I checkConvertType(S source);
 	}
 
 	abstract void addTypeAxiomResolver(TypeAxiomResolver<?> resolver);

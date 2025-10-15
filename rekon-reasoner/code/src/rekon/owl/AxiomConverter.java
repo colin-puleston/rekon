@@ -172,7 +172,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 					for (OWLAxiom rax : resolve(ax)) {
 
-						if (!checkAddToConverter(rax)) {
+						if (!checkConvert(rax)) {
 
 							outOfScopeTypes.add(rax.getAxiomType());
 						}
@@ -184,11 +184,6 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		if (!outOfScopeTypes.isEmpty()) {
 
 			WarningLogger.SINGLETON.logOutOfScopeAxiomTypes(outOfScopeTypes);
-		}
-
-		for (TypeAxiomConverter<?, ?> c : axiomTypeConverters) {
-
-			c.convertAll();
 		}
 	}
 
@@ -207,11 +202,11 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return Collections.singleton(ax);
 	}
 
-	private boolean checkAddToConverter(OWLAxiom ax) {
+	private boolean checkConvert(OWLAxiom ax) {
 
 		for (TypeAxiomConverter<?, ?> c : axiomTypeConverters) {
 
-			if (c.checkAdd(ax)) {
+			if (c.checkConvert(ax)) {
 
 				return true;
 			}

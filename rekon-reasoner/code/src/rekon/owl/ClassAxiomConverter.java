@@ -146,18 +146,11 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
 
-		boolean convert(S source) {
+		I checkConvertType(S source) {
 
 			OwlClassLink owlLink = createOwlLink(source);
 
-			if (owlLink.checkValidEndPoints()) {
-
-				inputAxioms.add(createInputAxiom(owlLink));
-
-				return true;
-			}
-
-			return false;
+			return owlLink.checkValidEndPoints() ? createInputAxiom(owlLink) : null;
 		}
 
 		abstract OwlClassLink createOwlLink(S source);

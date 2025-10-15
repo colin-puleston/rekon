@@ -187,18 +187,11 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			return OWLSameIndividualAxiom.class;
 		}
 
-		boolean convert(OWLSameIndividualAxiom source) {
+		InputIndividualEquivalence checkConvertType(OWLSameIndividualAxiom source) {
 
 			OwlIndividualLink owlLink = new OwlIndividualLink(source);
 
-			if (owlLink.checkValidEndPoints()) {
-
-				inputAxioms.add(createInputAxiom(owlLink));
-
-				return true;
-			}
-
-			return false;
+			return owlLink.checkValidEndPoints() ? createInputAxiom(owlLink) : null;
 		}
 
 		private InputIndividualEquivalence createInputAxiom(OwlIndividualLink owlLink) {
@@ -214,19 +207,12 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
 
-		boolean convert(S source) {
+		I checkConvertType(S source) {
 
 			OWLIndividual expr = getIndividualExpr(source);
 			IndividualNode n = toIndividualNode(expr);
 
-			if (n != null) {
-
-				inputAxioms.add(createInputAxiom(n, source));
-
-				return true;
-			}
-
-			return false;
+			return n != null ? createInputAxiom(n, source) : null;
 		}
 
 		abstract OWLIndividual getIndividualExpr(S source);
