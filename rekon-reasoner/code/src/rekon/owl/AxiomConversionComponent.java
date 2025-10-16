@@ -88,13 +88,13 @@ abstract class AxiomConversionComponent {
 			return false;
 		}
 
-		List<I> getInputAxioms() {
+		Iterable<I> getInputAxioms() {
 
-			List<I> all = new ArrayList<I>();
+			CompoundIterable<I> all = new CompoundIterable<I>();
 
 			for (List<I> threadAxs : inputAxiomsByThread) {
 
-				all.addAll(threadAxs);
+				all.addComponent(threadAxs);
 			}
 
 			return all;

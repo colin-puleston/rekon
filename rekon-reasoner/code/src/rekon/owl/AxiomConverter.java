@@ -163,7 +163,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 	<I extends InputAxiom,
 	H extends TypeAxiomConverter<?, I>>
-		List<I> getInputAxioms(Class<H> converterType) {
+		Iterable<I> getInputAxioms(Class<H> converterType) {
 
 		for (TypeAxiomConverter<?, ?> h : axiomTypeConverters) {
 

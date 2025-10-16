@@ -252,7 +252,7 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 
 	<I extends InputAxiom,
 	H extends TypeAxiomConverter<?, I>>
-		List<I> getInputAxioms(Class<H> converterType) {
+		Iterable<I> getInputAxioms(Class<H> converterType) {
 
 		return parentConverter.getInputAxioms(converterType);
 	}
