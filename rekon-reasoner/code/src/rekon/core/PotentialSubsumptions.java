@@ -312,32 +312,29 @@ abstract class PotentialSubsumptions {
 		private List<UpdateOp> registerOps = new ArrayList<UpdateOp>();
 		private boolean completedMultiReg = true;
 
-		private class RegisterOpSet {
-
-			final List<UpdateOp> ops = new ArrayList<UpdateOp>();
-		}
-
 		private class RegisterOpsCreator extends MultiThreadListProcessor<PatternMatcher> {
 
-			private RegisterOpSet[] opsByThread = new RegisterOpSet[utilisedThreads()];
+			private List<List<UpdateOp>> opsByThread = new ArrayList<List<UpdateOp>>();
 
 			protected void processElement(PatternMatcher option, int threadIndex) {
 
-				opsByThread[threadIndex].ops.add(createOp(option));
+				opsByThread.get(threadIndex).add(createOp(option));
 			}
 
 			RegisterOpsCreator() {
 
-				for (int i = 0 ; i < opsByThread.length ; i++) {
+				int threads = usableProcessors();
 
-					opsByThread[i] = new RegisterOpSet();
+				for (int i = 0 ; i < threads ; i++) {
+
+					opsByThread.add(new ArrayList<UpdateOp>());
 				}
 
 				invokeListProcesses(currentOptions);
 
-				for (RegisterOpSet threadOps : opsByThread) {
+				for (List<UpdateOp> ops : opsByThread) {
 
-					registerOps.addAll(threadOps.ops);
+					registerOps.addAll(ops);
 				}
 			}
 

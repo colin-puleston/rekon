@@ -34,6 +34,11 @@ public abstract class MultiThreadProcessor<E> {
 
 	static public final Option OPTION = new Option(true, "multithread");
 
+	static public int usableProcessors() {
+
+		return OPTION.enabled() ? maxProcessors() : 1;
+	}
+
 	static private int maxProcessors() {
 
 		return Runtime.getRuntime().availableProcessors();
@@ -88,11 +93,6 @@ public abstract class MultiThreadProcessor<E> {
 
 			execAllInSingleThread();
 		}
-	}
-
-	public int utilisedThreads() {
-
-		return OPTION.enabled() ? totalThreads : 1;
 	}
 
 	protected abstract void execThreadProcess(int totalThreads, int threadIndex);

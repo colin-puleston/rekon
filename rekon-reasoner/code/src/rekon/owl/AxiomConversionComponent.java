@@ -29,6 +29,7 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.build.input.*;
+import rekon.util.*;
 
 /**
  * @author Colin Puleston
@@ -56,14 +57,19 @@ abstract class AxiomConversionComponent {
 
 	abstract class TypeAxiomConverter<S extends OWLAxiom, I extends InputAxiom> {
 
-		final List<I> inputAxioms = new ArrayList<I>();
+		private List<List<I>> inputAxiomsByThread = new ArrayList<List<I>>();
 
 		TypeAxiomConverter() {
 
 			addTypeAxiomConverter(this);
+
+			for (int i = 0 ; i < MultiThreadProcessor.usableProcessors() ; i++) {
+
+				inputAxiomsByThread.add(new ArrayList<I>());
+			}
 		}
 
-		boolean checkConvert(OWLAxiom source) {
+		boolean checkConvert(OWLAxiom source, int threadIndex) {
 
 			S typeSource = checkCastTo(source, getSourceAxiomType());
 
@@ -73,13 +79,25 @@ abstract class AxiomConversionComponent {
 
 				if (input != null) {
 
-					inputAxioms.add(input);
+					inputAxiomsByThread.get(threadIndex).add(input);
 				}
 
 				return true;
 			}
 
 			return false;
+		}
+
+		List<I> getInputAxioms() {
+
+			List<I> all = new ArrayList<I>();
+
+			for (List<I> threadAxs : inputAxiomsByThread) {
+
+				all.addAll(threadAxs);
+			}
+
+			return all;
 		}
 
 		abstract Class<S> getSourceAxiomType();

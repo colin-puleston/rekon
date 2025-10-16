@@ -31,6 +31,7 @@ import org.semanticweb.owlapi.model.parameters.*;
 
 import rekon.core.*;
 import rekon.build.input.*;
+import rekon.util.*;
 
 /**
  * @author Colin Puleston
@@ -51,6 +52,21 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 	private List<TypeAxiomResolver<?>> axiomTypeResolvers = new ArrayList<TypeAxiomResolver<?>>();
 	private List<TypeAxiomConverter<?, ?>> axiomTypeConverters = new ArrayList<TypeAxiomConverter<?, ?>>();
+
+	private Set<AxiomType<?>> outOfScopeTypes = new HashSet<AxiomType<?>>();
+
+	private class MultiThreadConverter extends MultiThreadListProcessor<OWLAxiom> {
+
+		protected void processElement(OWLAxiom ax, int threadIndex) {
+
+			checkConvertResolved(ax, threadIndex);
+		}
+
+		MultiThreadConverter(OWLOntology ontology) {
+
+			invokeListProcesses(ontology.getAxioms(Imports.EXCLUDED));
+		}
+	}
 
 	public Iterable<InputClassEquivalence> getClassEquivalences() {
 
@@ -153,7 +169,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 			if (h.getClass() == converterType) {
 
-				return converterType.cast(h).inputAxioms;
+				return converterType.cast(h).getInputAxioms();
 			}
 		}
 
@@ -162,28 +178,28 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 	private void convertAll(OWLOntologyManager manager) {
 
-		Set<AxiomType<?>> outOfScopeTypes = new HashSet<AxiomType<?>>();
-
 		for (OWLOntology ont : manager.getOntologies()) {
 
-			for (OWLAxiom ax : ont.getAxioms(Imports.EXCLUDED)) {
-
-				if (!ignoreAxiom(ax)) {
-
-					for (OWLAxiom rax : resolve(ax)) {
-
-						if (!checkConvert(rax)) {
-
-							outOfScopeTypes.add(rax.getAxiomType());
-						}
-					}
-				}
-			}
+			new MultiThreadConverter(ont);
 		}
 
 		if (!outOfScopeTypes.isEmpty()) {
 
 			WarningLogger.SINGLETON.logOutOfScopeAxiomTypes(outOfScopeTypes);
+		}
+	}
+
+	protected void checkConvertResolved(OWLAxiom ax, int threadIndex) {
+
+		if (!ignoreType(ax)) {
+
+			for (OWLAxiom rax : resolve(ax)) {
+
+				if (!checkConvert(rax, threadIndex)) {
+
+					addOutOfScopeType(rax);
+				}
+			}
 		}
 	}
 
@@ -202,11 +218,11 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return Collections.singleton(ax);
 	}
 
-	private boolean checkConvert(OWLAxiom ax) {
+	private boolean checkConvert(OWLAxiom ax, int threadIndex) {
 
 		for (TypeAxiomConverter<?, ?> c : axiomTypeConverters) {
 
-			if (c.checkConvert(ax)) {
+			if (c.checkConvert(ax, threadIndex)) {
 
 				return true;
 			}
@@ -215,8 +231,13 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return false;
 	}
 
-	private boolean ignoreAxiom(OWLAxiom ax) {
+	private boolean ignoreType(OWLAxiom ax) {
 
 		return ax instanceof OWLDeclarationAxiom || ax instanceof OWLAnnotationAxiom;
+	}
+
+	private synchronized void addOutOfScopeType(OWLAxiom ax) {
+
+		outOfScopeTypes.add(ax.getAxiomType());
 	}
 }
