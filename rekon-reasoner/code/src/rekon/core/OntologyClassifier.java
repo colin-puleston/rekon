@@ -73,15 +73,25 @@ class OntologyClassifier extends SubsumptionChecker {
 
 			if (phaseInitialPass) {
 
+				if (!initialPhase) {
+
+					expandPhaseInferences();
+				}
+
 				ontology.getProfilesExpander().expandAll();
 
 				findAllCandidates();
+
+				if (!initialPhase) {
+
+					absorbPhaseInferenceExpansions();
+				}
 			}
 			else {
 
 				findAllCandidates();
 
-				absorbAllNewInferences();
+				absorbPassInferences();
 			}
 
 			return !candidates.isEmpty();
@@ -97,7 +107,6 @@ class OntologyClassifier extends SubsumptionChecker {
 			classifyListener.onPassStart(candidates.size());
 
 			checkSubsumptions();
-			expandAllNewInferences();
 		}
 
 		private void findAllCandidates() {
@@ -113,17 +122,27 @@ class OntologyClassifier extends SubsumptionChecker {
 
 		private boolean isCandidate(Pattern pattern) {
 
+			if (phaseInitialPass && !initialPhase && pattern.expandedProfile()) {
+
+				return true;
+			}
+
+			return pattern.matchableProfile(getCandidateMatchSubsumerStatus());
+		}
+
+		private SubsumerStatus getCandidateMatchSubsumerStatus() {
+
 			if (phaseInitialPass) {
 
 				if (initialPhase) {
 
-					return pattern.initialPassMatchableProfile();
+					return SubsumerStatus.CURRENT;
 				}
 
-				return pattern.expandedProfile();
+				return SubsumerStatus.PHASE_INFERENCE_EXPANSION;
 			}
 
-			return pattern.nonInitialPassMatchableProfile();
+			return SubsumerStatus.PASS_INFERENCE;
 		}
 
 		private void checkSubsumptions() {
@@ -131,14 +150,19 @@ class OntologyClassifier extends SubsumptionChecker {
 			new MultiSubsumptionChecker(candidates);
 		}
 
-		private void expandAllNewInferences() {
+		private void absorbPassInferences() {
 
-			NodeClassifier.expandAllNewInferredSubsumers(getAllNodes());
+			NodeClassifier.absorbPassInferences(getAllNodes());
 		}
 
-		private void absorbAllNewInferences() {
+		private void expandPhaseInferences() {
 
-			NodeClassifier.absorbAllNewInferredSubsumers(getAllNodes());
+			NodeClassifier.expandPhaseInferences(getAllNodes());
+		}
+
+		private void absorbPhaseInferenceExpansions() {
+
+			NodeClassifier.absorbPhaseInferenceExpansions(getAllNodes());
 		}
 	}
 

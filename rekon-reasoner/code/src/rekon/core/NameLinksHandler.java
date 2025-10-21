@@ -38,9 +38,4 @@ abstract class NameLinksHandler {
 	abstract Names getSubs(boolean direct);
 
 	abstract boolean hasSubsumer(Name test);
-
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return false;
-	}
 }

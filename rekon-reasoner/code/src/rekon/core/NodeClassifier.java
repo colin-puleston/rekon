@@ -33,239 +33,148 @@ import rekon.util.*;
  */
 class NodeClassifier extends NameClassifier {
 
-	static private class NewInferredSubsumerExpander extends MultiThreadListProcessor<NodeX> {
-
-		private boolean forMatchables;
+	static private class PhaseInferredSubsumerExpander extends MultiThreadListProcessor<NodeX> {
 
 		protected void processElement(NodeX n, int threadIndex) {
 
-			if (n.matchable() == forMatchables) {
-
-				getInferredSubsumers(n).expandLatestInferences();
-			}
+			n.getNodeClassifier().expandPhaseInferences();
 		}
 
-		NewInferredSubsumerExpander(Iterable<NodeX> all, boolean forMatchables) {
-
-			this.forMatchables = forMatchables;
+		PhaseInferredSubsumerExpander(Iterable<NodeX> all) {
 
 			invokeListProcesses(all);
 		}
 	}
 
-	static void expandAllNewInferredSubsumers(Iterable<NodeX> all) {
-
-		do {
-
-			new NewInferredSubsumerExpander(all, true);
-			new NewInferredSubsumerExpander(all, false);
-		}
-		while(configureForNextInferenceExpansion(all));
-	}
-
-	static void absorbAllNewInferredSubsumers(Iterable<NodeX> all) {
+	static void absorbPassInferences(Iterable<NodeX> all) {
 
 		for (NodeX n : all) {
 
-			getInferredSubsumers(n).absorbNewInferences();
+			n.getNodeClassifier().absorbPassInferences();
 		}
 	}
 
-	static private boolean configureForNextInferenceExpansion(Iterable<NodeX> all) {
+	static void expandPhaseInferences(Iterable<NodeX> all) {
 
-		boolean expansions = false;
+		new PhaseInferredSubsumerExpander(all);
+	}
+
+	static void absorbPhaseInferenceExpansions(Iterable<NodeX> all) {
 
 		for (NodeX n : all) {
 
-			expansions |= getInferredSubsumers(n).configureForNextExpansion();
-		}
-
-		return expansions;
-	}
-
-	static private InferredSubsumers getInferredSubsumers(NodeX n) {
-
-		return n.getNodeClassifier().inferredSubsumers;
-	}
-
-	static private ActiveInferredSubsumers getActiveInferredSubsumers(NodeX n) {
-
-		return (ActiveInferredSubsumers)getInferredSubsumers(n);
-	}
-
-	private InferredSubsumers inferredSubsumers = new InactiveInferredSubsumers();
-
-	private abstract class InferredSubsumers {
-
-		final NameSet allNewInferreds = new NameSet();
-
-		abstract void addDirectlyInferred(Name subsumer);
-
-		abstract void expandLatestInferences();
-
-		abstract boolean configureForNextExpansion();
-
-		boolean anyNewInferences(NodeSelector selector) {
-
-			return selector.anyMatches(allNewInferreds);
-		}
-
-		boolean absorbNewInferences() {
-
-			if (allNewInferreds.isEmpty()) {
-
-				return false;
-			}
-
-			getSubsumers().addAll(allNewInferreds);
-
-			allNewInferreds.clear();
-
-			return true;
-		}
-
-		void expandNewLocallyInferredSubsumers() {
-
-			for (Name n : allNewInferreds.copyNames()) {
-
-				allNewInferreds.addAll(n.getSubsumers());
-			}
-		}
-
-		Names getActiveSubsumerLatestInferreds(NodeX s) {
-
-			return getActiveInferredSubsumers(s).latestInferreds;
+			n.getNodeClassifier().absorbPhaseInferenceExpansions();
 		}
 	}
 
-	private class ActiveInferredSubsumers extends InferredSubsumers {
-
-		private NameSet latestInferreds = new NameSet();
-		private NameSet currentExpansions = new NameSet();
-
-		void addDirectlyInferred(Name subsumer) {
-
-			allNewInferreds.add(subsumer);
-			latestInferreds.add(subsumer);
-		}
-
-		void expandLatestInferences() {
-
-			expandDirectLatestInferences();
-			expandCurrentSubsumerLatestInferences();
-		}
-
-		boolean configureForNextExpansion() {
-
-			allNewInferreds.addAll(currentExpansions);
-			latestInferreds.clear();
-
-			if (currentExpansions.isEmpty()) {
-
-				return false;
-			}
-
-			latestInferreds = currentExpansions;
-			currentExpansions = new NameSet();
-
-			return true;
-		}
-
-		private void expandDirectLatestInferences() {
-
-			for (NodeX s : latestInferreds.asNodes()) {
-
-				addSubsumerExpansions(s.getSubsumers());
-				addSubsumerExpansions(getInferredSubsumers(s).allNewInferreds);
-			}
-		}
-
-		private void expandCurrentSubsumerLatestInferences() {
-
-			for (NodeX s : getSubsumers().asNodes()) {
-
-				if (s.matchable()) {
-
-					addSubsumerExpansions(getActiveSubsumerLatestInferreds(s));
-				}
-			}
-		}
-
-		private void addSubsumerExpansions(Names subsumerSet) {
-
-			for (NodeX s : subsumerSet.asNodes()) {
-
-				if (newSubsumer(s) && !allNewInferreds.contains(s)) {
-
-					currentExpansions.add(s);
-				}
-			}
-		}
-	}
-
-	private class InactiveInferredSubsumers extends InferredSubsumers {
-
-		void addDirectlyInferred(Name subsumer) {
-
-			throw new UnexpectedMethodInvocationError();
-		}
-
-		void expandLatestInferences() {
-
-			for (NodeX s : getSubsumers().asNodes()) {
-
-				if (s.matchable()) {
-
-					expandForNewMatchableSubsumer(s);
-				}
-			}
-		}
-
-		boolean configureForNextExpansion() {
-
-			return false;
-		}
-
-		private void expandForNewMatchableSubsumer(NodeX s) {
-
-			for (NodeX ss : getActiveSubsumerLatestInferreds(s).asNodes()) {
-
-				if (newSubsumer(ss)) {
-
-					allNewInferreds.add(ss);
-				}
-			}
-		}
-	}
+	private NameSet passInferredSubsumers = new NameSet();
+	private NameSet phaseInferredSubsumers = new NameSet();
+	private NameSet phaseInferredSubsumerExpansions = new NameSet();
 
 	NodeClassifier(NodeX node) {
 
 		super(node);
 	}
 
-	void setClassifiableNode() {
+	synchronized void addNewInferredSubsumer(Name subsumer) {
 
-		if (inferredSubsumers instanceof InactiveInferredSubsumers) {
+		passInferredSubsumers.add(subsumer);
 
-			inferredSubsumers = new ActiveInferredSubsumers();
+		for (NodeX ss : subsumer.getSubsumers().asNodes()) {
+
+			if (newSubsumer(ss)) {
+
+				passInferredSubsumers.add(ss);
+			}
 		}
 	}
 
-	synchronized void addNewInferredSubsumer(Name subsumer) {
+	boolean absorbPassInferences() {
 
-		inferredSubsumers.addDirectlyInferred(subsumer);
+		phaseInferredSubsumers.addAll(passInferredSubsumers);
+
+		return absorbInferreds(passInferredSubsumers);
 	}
 
-	boolean absorbNewLocallyInferredSubsumerExpansions() {
+	void expandPhaseInferences() {
 
-		inferredSubsumers.expandNewLocallyInferredSubsumers();
+		for (NodeX s : phaseInferredSubsumers.asNodes()) {
 
-		return inferredSubsumers.absorbNewInferences();
+			expandPhaseInferred(s);
+		}
+
+		for (NodeX s : getSubsumers().asNodes()) {
+
+			expandPhaseInferreds(s);
+		}
 	}
 
-	boolean anyNewSubsumers(NodeSelector selector) {
+	boolean absorbPhaseInferenceExpansions() {
 
-		return inferredSubsumers.anyNewInferences(selector);
+		phaseInferredSubsumers.clear();
+
+		return absorbInferreds(phaseInferredSubsumerExpansions);
+	}
+
+	boolean absorbExpandedLocalInferences() {
+
+		for (NodeX s : passInferredSubsumers.copyNodes()) {
+
+			passInferredSubsumers.addAll(s.getSubsumers());
+		}
+
+		return absorbInferreds(passInferredSubsumers);
+	}
+
+	boolean anyPassInferredSubsumers(NodeSelector selector) {
+
+		return !passInferredSubsumers.isEmpty();
+	}
+
+	boolean anyPhaseInferredSubsumerExpansions(NodeSelector selector) {
+
+		return !phaseInferredSubsumerExpansions.isEmpty();
+	}
+
+	private void expandPhaseInferences(Names infSubsumers) {
+
+		for (NodeX s : infSubsumers.asNodes()) {
+
+			if (newInferredSubsumer(s) && phaseInferredSubsumerExpansions.add(s)) {
+
+				expandPhaseInferred(s);
+			}
+		}
+	}
+
+	private void expandPhaseInferreds(NodeX n) {
+
+		expandPhaseInferences(n.getNodeClassifier().phaseInferredSubsumers);
+	}
+
+	private void expandPhaseInferred(NodeX s) {
+
+		expandPhaseInferreds(s);
+		expandPhaseInferences(s.getSubsumers());
+	}
+
+	private boolean absorbInferreds(NameSet inferreds) {
+
+		if (inferreds.isEmpty()) {
+
+			return false;
+		}
+
+		getSubsumers().addAll(inferreds);
+
+		inferreds.clear();
+
+		return true;
+	}
+
+	private boolean newInferredSubsumer(NodeX s) {
+
+		return newSubsumer(s) && !phaseInferredSubsumers.contains(s);
 	}
 
 	private boolean newSubsumer(NodeX s) {

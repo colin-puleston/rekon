@@ -160,11 +160,6 @@ public abstract class Name {
 		return definitionRoles.contains(role);
 	}
 
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return linksHandler.anyNewSubsumers(selector);
-	}
-
 	NameClassifier createClassifier() {
 
 		return new NameClassifier(this);

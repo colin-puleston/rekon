@@ -61,11 +61,6 @@ class SingleNodeValue extends NodeValue {
 		return node.subsumes(n);
 	}
 
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return node.anyNewSubsumers(selector);
-	}
-
 	void registerAsDefinitionRefed() {
 
 		node.registerAsDefinitionRefed(MatchRole.NESTED_PATTERN_VALUE);

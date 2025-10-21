@@ -72,13 +72,13 @@ public abstract class Relation extends PatternComponent {
 		property.registerAsDefinitionRefed(MatchRole.NESTED_PATTERN_RELATION);
 	}
 
-	boolean matchable(boolean newInferencesOnly) {
+	boolean matchable(SubsumerStatus subsumerStatus) {
 
 		if (property.matchablePatternProperty()) {
 
 			for (NodeX n : getReferencedNodes().asNodes()) {
 
-				if (n.matchable(NodeSelector.NESTED_PATTERN_VALUE, newInferencesOnly)) {
+				if (subsumerStatus.matchableNode(n, NodeSelector.NESTED_PATTERN_VALUE)) {
 
 					return true;
 				}

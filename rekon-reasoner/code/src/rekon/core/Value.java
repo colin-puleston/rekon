@@ -53,10 +53,5 @@ abstract class Value extends PatternComponent {
 
 	abstract boolean subsumesOther(Value v);
 
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		return false;
-	}
-
 	abstract void render(PatternRenderer r);
 }

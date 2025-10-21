@@ -87,19 +87,6 @@ class DisjunctionNodeValue extends NodeValue {
 		return false;
 	}
 
-	boolean anyNewSubsumers(NodeSelector selector) {
-
-		for (NodeX d : disjunctNodes.asNodes()) {
-
-			if (d.anyNewSubsumers(selector)) {
-
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 	void registerAsDefinitionRefed() {
 
 		registerAllAsDefinitionRefed(disjunctNodes);

@@ -77,8 +77,6 @@ public abstract class NodeValue extends Value {
 
 	abstract boolean subsumesNode(NodeX n);
 
-	abstract boolean anyNewSubsumers(NodeSelector selector);
-
 	abstract void registerAsDefinitionRefed();
 
 	abstract void render(PatternRenderer r);

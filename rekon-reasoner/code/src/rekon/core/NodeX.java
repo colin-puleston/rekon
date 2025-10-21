@@ -98,11 +98,6 @@ public abstract class NodeX extends Name {
 		return !matchers.isEmpty();
 	}
 
-	boolean matchable(NodeSelector selector, boolean newInferencesOnly) {
-
-		return newInferencesOnly ? anyNewSubsumers(selector) : anyMatches(selector);
-	}
-
 	List<PatternMatcher> getAllMatchers() {
 
 		return matchers;
@@ -130,6 +125,11 @@ public abstract class NodeX extends Name {
 		return Collections.emptyList();
 	}
 
+	boolean anyMatches(NodeSelector selector) {
+
+		return selector.select(this) || selector.anyMatches(getSubsumers());
+	}
+
 	NodeClassifier getNodeClassifier() {
 
 		return (NodeClassifier)getClassifier();
@@ -152,8 +152,6 @@ public abstract class NodeX extends Name {
 		if (matchers == NO_MATCHERS) {
 
 			matchers = new ArrayList<PatternMatcher>();
-
-			getNodeClassifier().setClassifiableNode();
 		}
 
 		matchers.add(index, m);
@@ -209,10 +207,5 @@ public abstract class NodeX extends Name {
 		}
 
 		return false;
-	}
-
-	private boolean anyMatches(NodeSelector selector) {
-
-		return selector.select(this) || selector.anyMatches(getSubsumers());
 	}
 }

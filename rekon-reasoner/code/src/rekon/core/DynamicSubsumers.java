@@ -54,14 +54,12 @@ class DynamicSubsumers extends SubsumptionChecker {
 
 			checkSubsumptions(candidate);
 		}
-		while (absorbNewSubsumerExpansions(candidate));
+		while (absorbExpandedInferredSubsumers(candidate));
 	}
 
-	private boolean absorbNewSubsumerExpansions(PatternMatcher candidate) {
+	private boolean absorbExpandedInferredSubsumers(PatternMatcher candidate) {
 
-		NodeClassifier c = candidate.getNode().getNodeClassifier();
-
-		return c.absorbNewLocallyInferredSubsumerExpansions();
+		return candidate.getNode().getNodeClassifier().absorbExpandedLocalInferences();
 	}
 
 	private void checkSubsumptions(PatternMatcher candidate) {

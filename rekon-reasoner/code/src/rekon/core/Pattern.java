@@ -116,40 +116,34 @@ public class Pattern extends PatternComponent {
 		}
 	}
 
-	boolean initialPassMatchableProfile() {
+	boolean matchableProfile(SubsumerStatus subsumerStatus) {
 
-		if (matchableSimpleProfileNode(false)) {
-
-			return true;
-		}
-
-		if (anyProfileRelations()) {
-
-			return matchableNestedProfileNode(false)
-					&& anyMatchableProfileRelations(false);
-		}
-
-		return false;
-	}
-
-	boolean nonInitialPassMatchableProfile() {
-
-		if (matchableSimpleProfileNode(true)) {
+		if (matchableSimpleProfileNode(subsumerStatus)) {
 
 			return true;
 		}
 
 		if (anyProfileRelations()) {
 
-			if (matchableNestedProfileNode(true)) {
+			boolean ssNodesMatch = matchableNestedProfileNode(subsumerStatus);
+			boolean ssRelsMatch = anyMatchableProfileRelations(subsumerStatus);
 
-				return anyMatchableProfileRelations(false)
-						|| anyMatchableProfileRelations(true);
+			if (ssNodesMatch && ssRelsMatch) {
+
+				return true;
 			}
 
-			if (anyMatchableProfileRelations(true)) {
+			if (subsumerStatus != SubsumerStatus.CURRENT) {
 
-				return matchableNestedProfileNode(false);
+				if (ssNodesMatch) {
+
+					return anyMatchableProfileRelations(SubsumerStatus.CURRENT);
+				}
+
+				if (ssRelsMatch) {
+
+					return matchableNestedProfileNode(SubsumerStatus.CURRENT);
+				}
 			}
 		}
 
@@ -264,26 +258,26 @@ public class Pattern extends PatternComponent {
 				: MatchRole.NESTED_PATTERN_ROOT;
 	}
 
-	private boolean matchableSimpleProfileNode(boolean newInferencesOnly) {
+	private boolean matchableSimpleProfileNode(SubsumerStatus subsumerStatus) {
 
-		return matchableProfileNode(NodeSelector.SIMPLE_PATTERN_NODE, newInferencesOnly);
+		return matchableProfileNode(NodeSelector.SIMPLE_PATTERN_NODE, subsumerStatus);
 	}
 
-	private boolean matchableNestedProfileNode(boolean newInferencesOnly) {
+	private boolean matchableNestedProfileNode(SubsumerStatus subsumerStatus) {
 
-		return matchableProfileNode(NodeSelector.NESTED_PATTERN_ROOT, newInferencesOnly);
+		return matchableProfileNode(NodeSelector.NESTED_PATTERN_ROOT, subsumerStatus);
 	}
 
-	private boolean matchableProfileNode(NodeSelector selector, boolean newInferencesOnly) {
+	private boolean matchableProfileNode(NodeSelector selector, SubsumerStatus subsumerStatus) {
 
-		return getSingleNode().matchable(selector, newInferencesOnly);
+		return subsumerStatus.matchableNode(getSingleNode(), selector);
 	}
 
-	private boolean anyMatchableProfileRelations(boolean newInferencesOnly) {
+	private boolean anyMatchableProfileRelations(SubsumerStatus subsumerStatus) {
 
 		for (Relation r : getProfileRelations().getAll()) {
 
-			if (r.matchable(newInferencesOnly)) {
+			if (r.matchable(subsumerStatus)) {
 
 				return true;
 			}
