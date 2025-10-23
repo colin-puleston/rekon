@@ -35,6 +35,112 @@ class NameClassification extends NameLinksHandler {
 
 	static private final EmptyVerticalLinks EMPTY_VERTICAL_LINKS = new EmptyVerticalLinks();
 
+	static private class MultiNodeInitialiser {
+
+		private Iterable<? extends Name> names;
+
+		private abstract class InitialiserOp extends MultiThreadListProcessor<Name> {
+
+			protected void processElement(Name n, int threadIndex) {
+
+				performOp(getInitialiserFor(n));
+			}
+
+			InitialiserOp() {
+
+				invokeListProcesses(names);
+			}
+
+			abstract void performOp(Initialiser initialiser);
+		}
+
+		private class EquivalentsSetter extends InitialiserOp {
+
+			void performOp(Initialiser initialiser) {
+
+				initialiser.setEquivalents();
+			}
+		}
+
+		private class AncestorsPurger extends InitialiserOp {
+
+			void performOp(Initialiser initialiser) {
+
+				initialiser.purgeAncestors();
+			}
+		}
+
+		private class DirectSupersSetter extends InitialiserOp {
+
+			void performOp(Initialiser initialiser) {
+
+				initialiser.setDirectSupers();
+			}
+		}
+
+		MultiNodeInitialiser(Iterable<? extends Name> names) {
+
+			this.names = names;
+
+			setNodeClassifications();
+			setHierarchyLinks();
+			completeInitialisations();
+		}
+
+		private void setNodeClassifications() {
+
+			for (Name n : names) {
+
+				n.setClassification();
+			}
+		}
+
+		private void setHierarchyLinks() {
+
+			new EquivalentsSetter();
+			new AncestorsPurger();
+			new DirectSupersSetter();
+
+			setDirectSubs();
+
+			optimiseHierarchyLinks();
+		}
+
+		private void setDirectSubs() {
+
+			for (Name n : names) {
+
+				getInitialiserFor(n).setAsDirectSub();
+			}
+		}
+
+		private void optimiseHierarchyLinks() {
+
+			for (Name n : names) {
+
+				n.getClassification().combineSingleIncomingSupers();
+			}
+
+			for (Name n : names) {
+
+				n.getClassification().combineSingleIncomingSubs();
+			}
+
+			for (Name n : names) {
+
+				n.getClassification().optimiseEmptyLinks();
+			}
+		}
+
+		private void completeInitialisations() {
+
+			for (Name n : names) {
+
+				n.getClassification().completeInitialisation();
+			}
+		}
+	}
+
 	static private abstract class VerticalLinks {
 
 		void addTransientDirect(Name in) {
@@ -170,66 +276,9 @@ class NameClassification extends NameLinksHandler {
 		}
 	}
 
-	static private class DirectSupersSetter extends MultiThreadListProcessor<Name> {
+	static void completeInitialisations(Iterable<? extends Name> names) {
 
-		protected void processElement(Name n, int threadIndex) {
-
-			getInitialiserFor(n).setDirectSupers();
-		}
-
-		DirectSupersSetter(Iterable<? extends Name> names) {
-
-			invokeListProcesses(names);
-		}
-	}
-
-	static void completeClassifications(Iterable<? extends Name> names) {
-
-		for (Name n : names) {
-
-			n.setClassification();
-		}
-
-		initialiseClassifications(names);
-		optimiseLinks(names);
-
-		for (Name n : names) {
-
-			n.getClassification().completeInitialisation();
-		}
-	}
-
-	static private void initialiseClassifications(Iterable<? extends Name> names) {
-
-		for (Name n : names) {
-
-			getInitialiserFor(n).resolveBasicLinksWithSubsumers();
-		}
-
-		new DirectSupersSetter(names);
-
-		for (Name n : names) {
-
-			getInitialiserFor(n).setAsDirectSub();
-		}
-	}
-
-	static private void optimiseLinks(Iterable<? extends Name> names) {
-
-		for (Name n : names) {
-
-			n.getClassification().combineSingleIncomingSupers();
-		}
-
-		for (Name n : names) {
-
-			n.getClassification().combineSingleIncomingSubs();
-		}
-
-		for (Name n : names) {
-
-			n.getClassification().optimiseEmptyLinks();
-		}
+		new MultiNodeInitialiser(names);
 	}
 
 	static private Initialiser getInitialiserFor(Name n) {
@@ -254,16 +303,22 @@ class NameClassification extends NameLinksHandler {
 			ancestors = subsumers;
 		}
 
-		void resolveBasicLinksWithSubsumers() {
+		void setEquivalents() {
 
 			for (Name a : ancestors.copyNames()) {
 
-				if (getInitialiserFor(a).checkSubsumedToEquiv(name)) {
+				Initialiser ai = getInitialiserFor(a);
 
-					ancestors.remove(a);
+				if (ai.ancestors.contains(name)) {
+
 					equivalents.add(a);
 				}
 			}
+		}
+
+		void purgeAncestors() {
+
+			ancestors.removeAll(equivalents);
 		}
 
 		void setDirectSupers() {
@@ -282,18 +337,6 @@ class NameClassification extends NameLinksHandler {
 
 				d.getClassification().subs.getActiveDirects().add(name);
 			}
-		}
-
-		private boolean checkSubsumedToEquiv(Name subsumed) {
-
-			if (ancestors.remove(subsumed)) {
-
-				equivalents.add(subsumed);
-
-				return true;
-			}
-
-			return false;
 		}
 	}
 

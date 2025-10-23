@@ -216,8 +216,8 @@ class OntologyClassifier extends SubsumptionChecker {
 
 		classifyListener.onCompletionStart();
 
-		NameClassification.completeClassifications(getAllNodes());
-		NameClassification.completeClassifications(getAllProperties());
+		NameClassification.completeInitialisations(getAllNodes());
+		NameClassification.completeInitialisations(getAllProperties());
 	}
 
 	private Iterable<NodeX> getAllNodes() {
