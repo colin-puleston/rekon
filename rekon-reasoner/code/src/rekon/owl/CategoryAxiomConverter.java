@@ -34,13 +34,13 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-class CategoryAxiomConverter extends AxiomConversionComponent {
+class CategoryAxiomConverter {
+
+	final AxiomConverter parentConverter;
 
 	final OWLDataFactory factory;
 	final MappedNames names;
 	final ExpressionConverter expressions;
-
-	private AxiomConverter parentConverter;
 
 	abstract class ConvertedAxiom implements InputAxiom {
 
@@ -192,11 +192,29 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		}
 	}
 
-	abstract class SubSuperSplitter
-						<A extends OWLAxiom, SB extends OWLObject>
-						extends TypeAxiomResolver<A> {
+	abstract class EquivalenceSplitter<A extends OWLAxiom> {
 
-		Collection<? extends OWLAxiom> resolveAxiomOfType(A axiom) {
+		Collection<A> resolve(A axiom) {
+
+			Collection<? extends OWLAxiom> rawAxs = asPairwiseAxioms(axiom);
+			List<A> typeAxs = new ArrayList<A>();
+
+			for (OWLAxiom ax : rawAxs) {
+
+				typeAxs.add(getAxiomType().cast(ax));
+			}
+
+			return typeAxs;
+		}
+
+		abstract Class<A> getAxiomType();
+
+		abstract Collection<? extends OWLAxiom> asPairwiseAxioms(A axiom);
+	}
+
+	abstract class SubSuperSplitter <A extends OWLAxiom, SB extends OWLObject> {
+
+		Collection<A> resolve(A axiom) {
 
 			OWLClassExpression sup = getSuper(axiom);
 
@@ -214,13 +232,11 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 
 		abstract SB getSub(A axiom);
 
-		abstract OWLAxiom createComponentAxiom(OWLClassExpression sup, SB sub);
+		abstract A createComponentAxiom(OWLClassExpression sup, SB sub);
 
-		private Collection<OWLAxiom> createComponentAxioms(
-										OWLObjectIntersectionOf sups,
-										SB sub) {
+		private Collection<A> createComponentAxioms(OWLObjectIntersectionOf sups, SB sub) {
 
-			List<OWLAxiom> components = new ArrayList<OWLAxiom>();
+			List<A> components = new ArrayList<A>();
 
 			for (OWLClassExpression sup : sups.getOperands()) {
 
@@ -238,22 +254,5 @@ class CategoryAxiomConverter extends AxiomConversionComponent {
 		factory = parentConverter.factory;
 		names = parentConverter.names;
 		expressions = parentConverter.expressions;
-	}
-
-	void addTypeAxiomResolver(TypeAxiomResolver<?> resolver) {
-
-		parentConverter.addTypeAxiomResolver(resolver);
-	}
-
-	void addTypeAxiomConverter(TypeAxiomConverter<?, ?> converter) {
-
-		parentConverter.addTypeAxiomConverter(converter);
-	}
-
-	<I extends InputAxiom,
-	H extends TypeAxiomConverter<?, I>>
-		Iterable<I> getInputAxioms(Class<H> converterType) {
-
-		return parentConverter.getInputAxioms(converterType);
 	}
 }

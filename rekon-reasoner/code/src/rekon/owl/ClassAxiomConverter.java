@@ -39,6 +39,9 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 
 	private OWLClass owlNothing;
 
+	private ClassEquivalenceConverter equivalenceConverter = new ClassEquivalenceConverter();
+	private ClassSubSuperConverter subSuperConverter = new ClassSubSuperConverter();
+
 	private class ConvertedClassEquivalence
 						extends ConvertedEquivalence<InputNode>
 						implements InputClassEquivalence {
@@ -104,14 +107,14 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 
 	private class ClassEquivalenceSplitter
 						extends
-							TypeAxiomResolver<OWLEquivalentClassesAxiom> {
+							EquivalenceSplitter<OWLEquivalentClassesAxiom> {
 
 		Class<OWLEquivalentClassesAxiom> getAxiomType() {
 
 			return OWLEquivalentClassesAxiom.class;
 		}
 
-		Collection<? extends OWLAxiom> resolveAxiomOfType(OWLEquivalentClassesAxiom axiom) {
+		Collection<? extends OWLAxiom> asPairwiseAxioms(OWLEquivalentClassesAxiom axiom) {
 
 			return axiom.asPairwiseAxioms();
 		}
@@ -120,11 +123,6 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 	private class ClassSubSuperSplitter
 					extends
 						SubSuperSplitter<OWLSubClassOfAxiom, OWLClassExpression> {
-
-		Class<OWLSubClassOfAxiom> getAxiomType() {
-
-			return OWLSubClassOfAxiom.class;
-		}
 
 		OWLClassExpression getSuper(OWLSubClassOfAxiom axiom) {
 
@@ -136,7 +134,7 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 			return axiom.getSubClass();
 		}
 
-		OWLAxiom createComponentAxiom(OWLClassExpression sup, OWLClassExpression sub) {
+		OWLSubClassOfAxiom createComponentAxiom(OWLClassExpression sup, OWLClassExpression sub) {
 
 			return factory.getOWLSubClassOfAxiom(sub, sup);
 		}
@@ -146,7 +144,12 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
 
-		I checkConvertType(S source) {
+		ClassLinkConverter() {
+
+			super(parentConverter);
+		}
+
+		I checkConvert(S source) {
 
 			OwlClassLink owlLink = createOwlLink(source);
 
@@ -166,6 +169,11 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 		Class<OWLEquivalentClassesAxiom> getSourceAxiomType() {
 
 			return OWLEquivalentClassesAxiom.class;
+		}
+
+		Collection<OWLEquivalentClassesAxiom> resolveSourceAxiom(OWLEquivalentClassesAxiom ax) {
+
+			return new ClassEquivalenceSplitter().resolve(ax);
 		}
 
 		OwlClassLink createOwlLink(OWLEquivalentClassesAxiom source) {
@@ -192,6 +200,11 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 			return OWLSubClassOfAxiom.class;
 		}
 
+		Collection<OWLSubClassOfAxiom> resolveSourceAxiom(OWLSubClassOfAxiom ax) {
+
+			return new ClassSubSuperSplitter().resolve(ax);
+		}
+
 		OwlClassLink createOwlLink(OWLSubClassOfAxiom source) {
 
 			 return new OwlClassLink(source);
@@ -211,21 +224,15 @@ class ClassAxiomConverter extends CategoryAxiomConverter {
 		super(parentConverter);
 
 		owlNothing = factory.getOWLNothing();
-
-		new ClassEquivalenceSplitter();
-		new ClassSubSuperSplitter();
-
-		new ClassEquivalenceConverter();
-		new ClassSubSuperConverter();
 	}
 
 	Iterable<InputClassEquivalence> getClassEquivalences() {
 
-		return getInputAxioms(ClassEquivalenceConverter.class);
+		return equivalenceConverter;
 	}
 
 	Iterable<InputClassSubSuper> getClassSubSupers() {
 
-		return getInputAxioms(ClassSubSuperConverter.class);
+		return subSuperConverter;
 	}
 }

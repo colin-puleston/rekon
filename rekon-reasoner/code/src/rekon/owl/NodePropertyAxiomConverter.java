@@ -40,6 +40,13 @@ class NodePropertyAxiomConverter
 
 	private OWLObjectProperty owlBottomObjectProperty;
 
+	private NodePropertyEquivalenceConverter equivalenceConverter = new NodePropertyEquivalenceConverter();
+	private NodePropertySubSuperConverter subSuperConverter = new NodePropertySubSuperConverter();
+	private NodePropertyInverseConverter inverseConverter = new NodePropertyInverseConverter();
+	private NodePropertyChainConverter chainConverter = new NodePropertyChainConverter();
+	private NodePropertySymmetricConverter symmetricConverter = new NodePropertySymmetricConverter();
+	private NodePropertyTransitiveConverter transitiveConverter = new NodePropertyTransitiveConverter();
+
 	private class ConvertedNodePropertyEquivalence
 						extends ConvertedEquivalence<NodeProperty>
 						implements InputNodePropertyEquivalence {
@@ -136,14 +143,14 @@ class NodePropertyAxiomConverter
 
 	private class NodePropertyEquivalenceSplitter
 						extends
-							TypeAxiomResolver<OWLEquivalentObjectPropertiesAxiom> {
+							EquivalenceSplitter<OWLEquivalentObjectPropertiesAxiom> {
 
 		Class<OWLEquivalentObjectPropertiesAxiom> getAxiomType() {
 
 			return OWLEquivalentObjectPropertiesAxiom.class;
 		}
 
-		Collection<? extends OWLAxiom> resolveAxiomOfType(OWLEquivalentObjectPropertiesAxiom axiom) {
+		Collection<? extends OWLAxiom> asPairwiseAxioms(OWLEquivalentObjectPropertiesAxiom axiom) {
 
 			return axiom.asPairwiseAxioms();
 		}
@@ -158,6 +165,12 @@ class NodePropertyAxiomConverter
 		Class<OWLEquivalentObjectPropertiesAxiom> getSourceAxiomType() {
 
 			return OWLEquivalentObjectPropertiesAxiom.class;
+		}
+
+		Collection<OWLEquivalentObjectPropertiesAxiom> resolveSourceAxiom(
+														OWLEquivalentObjectPropertiesAxiom ax) {
+
+			return new NodePropertyEquivalenceSplitter().resolve(ax);
 		}
 
 		OwlPropertyLink createOwlLink(OWLEquivalentObjectPropertiesAxiom source) {
@@ -309,45 +322,36 @@ class NodePropertyAxiomConverter
 		super(parentConverter);
 
 		owlBottomObjectProperty = factory.getOWLBottomObjectProperty();
-
-		new NodePropertyEquivalenceSplitter();
-
-		new NodePropertyEquivalenceConverter();
-		new NodePropertySubSuperConverter();
-		new NodePropertyInverseConverter();
-		new NodePropertyChainConverter();
-		new NodePropertySymmetricConverter();
-		new NodePropertyTransitiveConverter();
 	}
 
 	Iterable<InputNodePropertyEquivalence> getEquivalences() {
 
-		return getInputAxioms(NodePropertyEquivalenceConverter.class);
+		return equivalenceConverter;
 	}
 
 	Iterable<InputNodePropertySubSuper> getSubSupers() {
 
-		return getInputAxioms(NodePropertySubSuperConverter.class);
+		return subSuperConverter;
 	}
 
 	Iterable<InputNodePropertyInverse> getInverses() {
 
-		return getInputAxioms(NodePropertyInverseConverter.class);
+		return inverseConverter;
 	}
 
 	Iterable<InputNodePropertyChain> getChains() {
 
-		return getInputAxioms(NodePropertyChainConverter.class);
+		return chainConverter;
 	}
 
 	Iterable<InputNodePropertySymmetric> getSymmetrics() {
 
-		return getInputAxioms(NodePropertySymmetricConverter.class);
+		return symmetricConverter;
 	}
 
 	Iterable<InputNodePropertyTransitive> getTransitives() {
 
-		return getInputAxioms(NodePropertyTransitiveConverter.class);
+		return transitiveConverter;
 	}
 
 	OWLObjectProperty getOWLBottomProperty() {

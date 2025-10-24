@@ -40,6 +40,9 @@ class DataPropertyAxiomConverter
 
 	private OWLDataProperty owlBottomDataProperty;
 
+	private DataPropertyEquivalenceConverter equivalenceConverter = new DataPropertyEquivalenceConverter();
+	private DataPropertySubSuperConverter subSuperConverter = new DataPropertySubSuperConverter();
+
 	private class ConvertedDataPropertyEquivalence
 						extends ConvertedEquivalence<DataProperty>
 						implements InputDataPropertyEquivalence {
@@ -68,14 +71,14 @@ class DataPropertyAxiomConverter
 
 	private class DataPropertyEquivalenceSplitter
 						extends
-							TypeAxiomResolver<OWLEquivalentDataPropertiesAxiom> {
+							EquivalenceSplitter<OWLEquivalentDataPropertiesAxiom> {
 
 		Class<OWLEquivalentDataPropertiesAxiom> getAxiomType() {
 
 			return OWLEquivalentDataPropertiesAxiom.class;
 		}
 
-		Collection<? extends OWLAxiom> resolveAxiomOfType(OWLEquivalentDataPropertiesAxiom axiom) {
+		Collection<? extends OWLAxiom> asPairwiseAxioms(OWLEquivalentDataPropertiesAxiom axiom) {
 
 			return axiom.asPairwiseAxioms();
 		}
@@ -90,6 +93,12 @@ class DataPropertyAxiomConverter
 		Class<OWLEquivalentDataPropertiesAxiom> getSourceAxiomType() {
 
 			return OWLEquivalentDataPropertiesAxiom.class;
+		}
+
+		Collection<OWLEquivalentDataPropertiesAxiom> resolveSourceAxiom(
+														OWLEquivalentDataPropertiesAxiom ax) {
+
+			return new DataPropertyEquivalenceSplitter().resolve(ax);
 		}
 
 		OwlPropertyLink createOwlLink(OWLEquivalentDataPropertiesAxiom source) {
@@ -139,21 +148,16 @@ class DataPropertyAxiomConverter
 		super(parentConverter);
 
 		owlBottomDataProperty = factory.getOWLBottomDataProperty();
-
-		new DataPropertyEquivalenceSplitter();
-
-		new DataPropertyEquivalenceConverter();
-		new DataPropertySubSuperConverter();
 	}
 
 	Iterable<InputDataPropertyEquivalence> getEquivalences() {
 
-		return getInputAxioms(DataPropertyEquivalenceConverter.class);
+		return equivalenceConverter;
 	}
 
 	Iterable<InputDataPropertySubSuper> getSubSupers() {
 
-		return getInputAxioms(DataPropertySubSuperConverter.class);
+		return subSuperConverter;
 	}
 
 	OWLDataProperty getOWLBottomProperty() {

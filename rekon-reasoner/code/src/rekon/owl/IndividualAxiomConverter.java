@@ -37,6 +37,11 @@ import rekon.util.*;
  */
 class IndividualAxiomConverter extends CategoryAxiomConverter {
 
+	private IndividualEquivalenceConverter equivalenceConverter = new IndividualEquivalenceConverter();
+	private IndividualTypeConverter typeConverter = new IndividualTypeConverter();
+	private IndividualObjectRelationConverter objectRelationConverter = new IndividualObjectRelationConverter();
+	private IndividualDataRelationConverter dataRelationConverter = new IndividualDataRelationConverter();
+
 	private class ConvertedIndividualEquivalence
 						extends ConvertedEquivalence<IndividualNode>
 						implements InputIndividualEquivalence {
@@ -138,14 +143,14 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 
 	private class IndividualEquivalenceSplitter
 						extends
-							TypeAxiomResolver<OWLSameIndividualAxiom> {
+							EquivalenceSplitter<OWLSameIndividualAxiom> {
 
 		Class<OWLSameIndividualAxiom> getAxiomType() {
 
 			return OWLSameIndividualAxiom.class;
 		}
 
-		Collection<? extends OWLAxiom> resolveAxiomOfType(OWLSameIndividualAxiom axiom) {
+		Collection<? extends OWLAxiom> asPairwiseAxioms(OWLSameIndividualAxiom axiom) {
 
 			return axiom.asPairwiseAxioms();
 		}
@@ -154,11 +159,6 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 	private class IndividualTypeSplitter
 					extends
 						SubSuperSplitter<OWLClassAssertionAxiom, OWLIndividual> {
-
-		Class<OWLClassAssertionAxiom> getAxiomType() {
-
-			return OWLClassAssertionAxiom.class;
-		}
 
 		OWLClassExpression getSuper(OWLClassAssertionAxiom axiom) {
 
@@ -170,7 +170,7 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 			return axiom.getIndividual();
 		}
 
-		OWLAxiom createComponentAxiom(OWLClassExpression sup, OWLIndividual sub) {
+		OWLClassAssertionAxiom createComponentAxiom(OWLClassExpression sup, OWLIndividual sub) {
 
 			return factory.getOWLClassAssertionAxiom(sup, sub);
 		}
@@ -182,12 +182,22 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 							<OWLSameIndividualAxiom,
 							InputIndividualEquivalence> {
 
+		IndividualEquivalenceConverter() {
+
+			super(parentConverter);
+		}
+
 		Class<OWLSameIndividualAxiom> getSourceAxiomType() {
 
 			return OWLSameIndividualAxiom.class;
 		}
 
-		InputIndividualEquivalence checkConvertType(OWLSameIndividualAxiom source) {
+		Collection<OWLSameIndividualAxiom> resolveSourceAxiom(OWLSameIndividualAxiom ax) {
+
+			return new IndividualEquivalenceSplitter().resolve(ax);
+		}
+
+		InputIndividualEquivalence checkConvert(OWLSameIndividualAxiom source) {
 
 			OwlIndividualLink owlLink = new OwlIndividualLink(source);
 
@@ -207,7 +217,12 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 								<S extends OWLAxiom, I extends InputAxiom>
 								extends TypeAxiomConverter<S, I> {
 
-		I checkConvertType(S source) {
+		IndividualAttributeConverter() {
+
+			super(parentConverter);
+		}
+
+		I checkConvert(S source) {
 
 			OWLIndividual expr = getIndividualExpr(source);
 			IndividualNode n = toIndividualNode(expr);
@@ -228,6 +243,11 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		Class<OWLClassAssertionAxiom> getSourceAxiomType() {
 
 			return OWLClassAssertionAxiom.class;
+		}
+
+		Collection<OWLClassAssertionAxiom> resolveSourceAxiom(OWLClassAssertionAxiom ax) {
+
+			return new IndividualTypeSplitter().resolve(ax);
 		}
 
 		OWLIndividual getIndividualExpr(OWLClassAssertionAxiom source) {
@@ -297,24 +317,16 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 	IndividualAxiomConverter(AxiomConverter parentConverter) {
 
 		super(parentConverter);
-
-		new IndividualEquivalenceSplitter();
-		new IndividualTypeSplitter();
-
-		new IndividualEquivalenceConverter();
-		new IndividualTypeConverter();
-		new IndividualObjectRelationConverter();
-		new IndividualDataRelationConverter();
 	}
 
 	Iterable<InputIndividualEquivalence> getIndividualEquivalences() {
 
-		return getInputAxioms(IndividualEquivalenceConverter.class);
+		return equivalenceConverter;
 	}
 
 	Iterable<InputIndividualType> getIndividualTypes() {
 
-		return getInputAxioms(IndividualTypeConverter.class);
+		return typeConverter;
 	}
 
 	Iterable<InputIndividualRelation> getIndividualRelations() {
@@ -322,8 +334,8 @@ class IndividualAxiomConverter extends CategoryAxiomConverter {
 		CompoundIterable<InputIndividualRelation> all
 			= new CompoundIterable<InputIndividualRelation>();
 
-		all.addComponent(getInputAxioms(IndividualObjectRelationConverter.class));
-		all.addComponent(getInputAxioms(IndividualDataRelationConverter.class));
+		all.addComponent(objectRelationConverter);
+		all.addComponent(dataRelationConverter);
 
 		return all;
 	}

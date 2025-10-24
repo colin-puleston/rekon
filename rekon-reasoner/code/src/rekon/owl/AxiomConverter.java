@@ -29,29 +29,24 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.model.parameters.*;
 
-import rekon.core.*;
 import rekon.build.input.*;
 import rekon.util.*;
 
 /**
  * @author Colin Puleston
  */
-class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
+class AxiomConverter implements InputAxioms {
 
 	final OWLDataFactory factory;
 	final MappedNames names;
 	final ExpressionConverter expressions;
-
-	private Set<OWLObjectProperty> chainInvolvedSourceProperties
-									= new HashSet<OWLObjectProperty>();
 
 	private ClassAxiomConverter classExprAxioms;
 	private NodePropertyAxiomConverter nodePropertyAxioms;
 	private DataPropertyAxiomConverter dataPropertyAxioms;
 	private IndividualAxiomConverter individualAxioms;
 
-	private List<TypeAxiomResolver<?>> axiomTypeResolvers = new ArrayList<TypeAxiomResolver<?>>();
-	private List<TypeAxiomConverter<?, ?>> axiomTypeConverters = new ArrayList<TypeAxiomConverter<?, ?>>();
+	private List<TypeAxiomConverter<?, ?>> typeAxiomConverters = new ArrayList<TypeAxiomConverter<?, ?>>();
 
 	private Set<AxiomType<?>> outOfScopeTypes = new HashSet<AxiomType<?>>();
 
@@ -59,7 +54,7 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 
 		protected void processElement(OWLAxiom ax, int threadIndex) {
 
-			checkConvertResolved(ax, threadIndex);
+			checkAddToTypeConverter(ax, threadIndex);
 		}
 
 		MultiThreadConverter(OWLOntology ontology) {
@@ -148,35 +143,15 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		classExprAxioms = new ClassAxiomConverter(this);
 		individualAxioms = new IndividualAxiomConverter(this);
 
-		convertAll(manager);
-	}
-
-	void addTypeAxiomResolver(TypeAxiomResolver<?> resolver) {
-
-		axiomTypeResolvers.add(resolver);
+		initialiseTypeConverters(manager);
 	}
 
 	void addTypeAxiomConverter(TypeAxiomConverter<?, ?> converter) {
 
-		axiomTypeConverters.add(converter);
+		typeAxiomConverters.add(converter);
 	}
 
-	<I extends InputAxiom,
-	H extends TypeAxiomConverter<?, I>>
-		Iterable<I> getInputAxioms(Class<H> converterType) {
-
-		for (TypeAxiomConverter<?, ?> h : axiomTypeConverters) {
-
-			if (h.getClass() == converterType) {
-
-				return converterType.cast(h).getInputAxioms();
-			}
-		}
-
-		throw new Error("No converter of type: " + converterType);
-	}
-
-	private void convertAll(OWLOntologyManager manager) {
+	private void initialiseTypeConverters(OWLOntologyManager manager) {
 
 		for (OWLOntology ont : manager.getOntologies()) {
 
@@ -189,40 +164,19 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		}
 	}
 
-	protected void checkConvertResolved(OWLAxiom ax, int threadIndex) {
+	protected void checkAddToTypeConverter(OWLAxiom ax, int threadIndex) {
 
-		if (!ignoreType(ax)) {
+		if (!ignoreAxiomType(ax) && !addToTypeConverter(ax, threadIndex)) {
 
-			for (OWLAxiom rax : resolve(ax)) {
-
-				if (!checkConvert(rax, threadIndex)) {
-
-					addOutOfScopeType(rax);
-				}
-			}
+			outOfScopeTypes.add(ax.getAxiomType());
 		}
 	}
 
-	private Collection<? extends OWLAxiom> resolve(OWLAxiom ax) {
+	private boolean addToTypeConverter(OWLAxiom ax, int threadIndex) {
 
-		for (TypeAxiomResolver<?> r : axiomTypeResolvers) {
+		for (TypeAxiomConverter<?, ?> c : typeAxiomConverters) {
 
-			Collection<? extends OWLAxiom> axs = r.checkResolve(ax);
-
-			if (axs != null) {
-
-				return axs;
-			}
-		}
-
-		return Collections.singleton(ax);
-	}
-
-	private boolean checkConvert(OWLAxiom ax, int threadIndex) {
-
-		for (TypeAxiomConverter<?, ?> c : axiomTypeConverters) {
-
-			if (c.checkConvert(ax, threadIndex)) {
+			if (c.addAxiom(ax, threadIndex)) {
 
 				return true;
 			}
@@ -231,13 +185,8 @@ class AxiomConverter extends AxiomConversionComponent implements InputAxioms {
 		return false;
 	}
 
-	private boolean ignoreType(OWLAxiom ax) {
+	private boolean ignoreAxiomType(OWLAxiom ax) {
 
 		return ax instanceof OWLDeclarationAxiom || ax instanceof OWLAnnotationAxiom;
-	}
-
-	private synchronized void addOutOfScopeType(OWLAxiom ax) {
-
-		outOfScopeTypes.add(ax.getAxiomType());
 	}
 }
