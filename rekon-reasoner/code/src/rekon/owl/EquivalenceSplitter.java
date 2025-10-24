@@ -24,25 +24,29 @@
 
 package rekon.owl;
 
+import java.util.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-class CategoryAxiomConverter {
+abstract class EquivalenceSplitter<A extends OWLAxiom> {
 
-	final AxiomConverter parentConverter;
+	Collection<A> resolve(A axiom) {
 
-	final OWLDataFactory factory;
-	final MappedNames names;
-	final ExpressionConverter expressions;
+		Collection<? extends OWLAxiom> rawAxs = asPairwiseAxioms(axiom);
+		List<A> typeAxs = new ArrayList<A>();
 
-	CategoryAxiomConverter(AxiomConverter parentConverter) {
+		for (OWLAxiom ax : rawAxs) {
 
-		this.parentConverter = parentConverter;
+			typeAxs.add(getAxiomType().cast(ax));
+		}
 
-		factory = parentConverter.factory;
-		names = parentConverter.names;
-		expressions = parentConverter.expressions;
+		return typeAxs;
 	}
+
+	abstract Class<A> getAxiomType();
+
+	abstract Collection<? extends OWLAxiom> asPairwiseAxioms(A axiom);
 }

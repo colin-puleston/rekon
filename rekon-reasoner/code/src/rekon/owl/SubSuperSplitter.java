@@ -24,25 +24,44 @@
 
 package rekon.owl;
 
+import java.util.*;
+
 import org.semanticweb.owlapi.model.*;
 
 /**
  * @author Colin Puleston
  */
-class CategoryAxiomConverter {
+abstract class SubSuperSplitter <A extends OWLAxiom, SB extends OWLObject> {
 
-	final AxiomConverter parentConverter;
+	Collection<A> resolve(A axiom) {
 
-	final OWLDataFactory factory;
-	final MappedNames names;
-	final ExpressionConverter expressions;
+		OWLClassExpression sup = getSuper(axiom);
 
-	CategoryAxiomConverter(AxiomConverter parentConverter) {
+		if (sup instanceof OWLObjectIntersectionOf) {
 
-		this.parentConverter = parentConverter;
+			SB sub = getSub(axiom);
 
-		factory = parentConverter.factory;
-		names = parentConverter.names;
-		expressions = parentConverter.expressions;
+			return createComponentAxioms((OWLObjectIntersectionOf)sup, sub);
+		}
+
+		return Collections.singleton(axiom);
+	}
+
+	abstract OWLClassExpression getSuper(A axiom);
+
+	abstract SB getSub(A axiom);
+
+	abstract A createComponentAxiom(OWLClassExpression sup, SB sub);
+
+	private Collection<A> createComponentAxioms(OWLObjectIntersectionOf sups, SB sub) {
+
+		List<A> components = new ArrayList<A>();
+
+		for (OWLClassExpression sup : sups.getOperands()) {
+
+			components.add(createComponentAxiom(sup, sub));
+		}
+
+		return components;
 	}
 }

@@ -26,23 +26,31 @@ package rekon.owl;
 
 import org.semanticweb.owlapi.model.*;
 
+import rekon.build.input.*;
+
 /**
  * @author Colin Puleston
  */
-class CategoryAxiomConverter {
+abstract class ConvertedSubSuper<E> extends ConvertedAxiom implements InputSubSuper<E> {
 
-	final AxiomConverter parentConverter;
+	private E sub;
+	private E sup;
 
-	final OWLDataFactory factory;
-	final MappedNames names;
-	final ExpressionConverter expressions;
+	public E getSub() {
 
-	CategoryAxiomConverter(AxiomConverter parentConverter) {
+		return sub;
+	}
 
-		this.parentConverter = parentConverter;
+	public E getSuper(){
 
-		factory = parentConverter.factory;
-		names = parentConverter.names;
-		expressions = parentConverter.expressions;
+		return sup;
+	}
+
+	ConvertedSubSuper(OWLAxiom source, E sub, E sup) {
+
+		super(source);
+
+		this.sub = sub;
+		this.sup = sup;
 	}
 }

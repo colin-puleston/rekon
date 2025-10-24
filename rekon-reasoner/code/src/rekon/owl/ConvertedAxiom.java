@@ -26,23 +26,22 @@ package rekon.owl;
 
 import org.semanticweb.owlapi.model.*;
 
+import rekon.build.input.*;
+
 /**
  * @author Colin Puleston
  */
-class CategoryAxiomConverter {
+abstract class ConvertedAxiom implements InputAxiom {
 
-	final AxiomConverter parentConverter;
+	private OWLAxiom source;
 
-	final OWLDataFactory factory;
-	final MappedNames names;
-	final ExpressionConverter expressions;
+	public String toString() {
 
-	CategoryAxiomConverter(AxiomConverter parentConverter) {
+		return getClass().getSimpleName() + "[" + source + "]";
+	}
 
-		this.parentConverter = parentConverter;
+	ConvertedAxiom(OWLAxiom source) {
 
-		factory = parentConverter.factory;
-		names = parentConverter.names;
-		expressions = parentConverter.expressions;
+		this.source = source;
 	}
 }
