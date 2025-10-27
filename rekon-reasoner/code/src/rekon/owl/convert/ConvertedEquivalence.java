@@ -22,27 +22,37 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import org.semanticweb.owlapi.model.*;
+
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-class CategoryAxiomConverter {
+abstract class ConvertedEquivalence<E>
+					extends ConvertedAxiom
+					implements InputEquivalence<E> {
 
-	final AxiomConverter parentConverter;
+	private E first;
+	private E second;
 
-	final OWLDataFactory factory;
-	final MappedNames names;
-	final ExpressionConverter expressions;
+	public E getFirst() {
 
-	CategoryAxiomConverter(AxiomConverter parentConverter) {
+		return first;
+	}
 
-		this.parentConverter = parentConverter;
+	public E getSecond(){
 
-		factory = parentConverter.factory;
-		names = parentConverter.names;
-		expressions = parentConverter.expressions;
+		return second;
+	}
+
+	ConvertedEquivalence(OWLAxiom source, E first, E second) {
+
+		super(source);
+
+		this.first = first;
+		this.second = second;
 	}
 }

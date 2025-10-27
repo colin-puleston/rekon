@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import java.util.*;
 
@@ -34,7 +34,7 @@ import rekon.build.*;
 /**
  * @author Colin Puleston
  */
-class MappedNames extends OntologyNames {
+public class NameMapper extends OntologyNames {
 
 	static private interface MappedName {
 
@@ -121,7 +121,7 @@ class MappedNames extends OntologyNames {
 		}
 	}
 
-	static <E extends OWLEntity>E toMappedEntity(Name name, Class<E> entityType) {
+	static public <E extends OWLEntity>E toMappedEntity(Name name, Class<E> entityType) {
 
 		return entityType.cast(((MappedName)name).toMappedEntity());
 	}
@@ -375,56 +375,53 @@ class MappedNames extends OntologyNames {
 		return dataProperties.getAllNames();
 	}
 
-	MappedNames(OWLOntologyManager manager) {
+	public ClassNode resolve(OWLClass entity) {
+
+		return classes.resolveName(entity);
+	}
+
+	public IndividualNode resolve(OWLNamedIndividual entity) {
+
+		return individuals.resolveName(entity);
+	}
+
+	public NodeProperty resolve(OWLObjectProperty entity) {
+
+		return nodeProperties.resolveName(entity);
+	}
+
+	public DataProperty resolve(OWLDataProperty entity) {
+
+		return dataProperties.resolveName(entity);
+	}
+
+	public ClassNode get(OWLClass entity) {
+
+		return classes.getName(entity);
+	}
+
+	public IndividualNode get(OWLNamedIndividual entity) {
+
+		return individuals.getName(entity);
+	}
+
+	public NodeProperty get(OWLObjectProperty entity) {
+
+		return nodeProperties.getName(entity);
+	}
+
+	public DataProperty get(OWLDataProperty entity) {
+
+		return dataProperties.getName(entity);
+	}
+
+	NameMapper(OWLOntologyManager manager) {
+
+		NameRenderer.SINGLETON.addDefaultLabel(manager);
 
 		classes = new ClassNodes(manager);
 		individuals = new IndividualNodes(manager);
 		nodeProperties = new NodeProperties(manager);
 		dataProperties = new DataProperties(manager);
-	}
-
-	boolean anyIndividuals() {
-
-		return individuals.anyNames();
-	}
-
-	ClassNode resolve(OWLClass entity) {
-
-		return classes.resolveName(entity);
-	}
-
-	IndividualNode resolve(OWLNamedIndividual entity) {
-
-		return individuals.resolveName(entity);
-	}
-
-	NodeProperty resolve(OWLObjectProperty entity) {
-
-		return nodeProperties.resolveName(entity);
-	}
-
-	DataProperty resolve(OWLDataProperty entity) {
-
-		return dataProperties.resolveName(entity);
-	}
-
-	ClassNode get(OWLClass entity) {
-
-		return classes.getName(entity);
-	}
-
-	IndividualNode get(OWLNamedIndividual entity) {
-
-		return individuals.getName(entity);
-	}
-
-	NodeProperty get(OWLObjectProperty entity) {
-
-		return nodeProperties.getName(entity);
-	}
-
-	DataProperty get(OWLDataProperty entity) {
-
-		return dataProperties.getName(entity);
 	}
 }

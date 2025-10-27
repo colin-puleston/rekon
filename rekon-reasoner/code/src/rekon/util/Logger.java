@@ -22,30 +22,42 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.util;
 
 /**
  * @author Colin Puleston
  */
-enum OutOfScopeExplanation {
+public class Logger {
 
-	INVALID_EXPRESSION_TYPE("expression type"),
-	INVALID_INBUILT_ENTITY("inbuilt entity"),
-	INVALID_ONEOF_VALUE("value (should be single named individual)"),
-	INVALID_DATATYPE_VALUE("value (should be either boolean, numeric, or union of numerics)"),
-	INVALID_DATA_VALUE("value (should be either boolean or numeric)"),
-	DISJUNCTION_FILLER_FOR_CHAINED_PROPERTY(
-		"filler (union fillers not allowed for transitive/chained properties)");
+	static public final Logger SINGLETON = new Logger();
 
-	public String toString() {
+	static private class DefaultOutput implements LogOutput {
 
-		return "Out-of-scope " + textTail;
+		public void write(String text) {
+
+			System.out.print(text);
+		}
 	}
 
-	private String textTail;
+	private LogOutput output = new DefaultOutput();
 
-	private OutOfScopeExplanation(String textTail) {
+	public void setOutput(LogOutput output) {
 
-		this.textTail = textTail;
+		this.output = output;
+	}
+
+	public void writeBlock(LogBlock block) {
+
+		writeToOutput("\n" + block.getText());
+	}
+
+	public void writeLine(String line) {
+
+		writeToOutput(line + "\n");
+	}
+
+	private synchronized void writeToOutput(String text) {
+
+		output.write(text);
 	}
 }

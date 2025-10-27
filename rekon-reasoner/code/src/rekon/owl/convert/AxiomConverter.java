@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import java.util.*;
 
@@ -38,7 +38,7 @@ import rekon.util.*;
 class AxiomConverter implements InputAxioms {
 
 	final OWLDataFactory factory;
-	final MappedNames names;
+	final NameMapper names;
 	final ExpressionConverter expressions;
 
 	private ClassAxiomConverter classExprAxioms;
@@ -130,7 +130,7 @@ class AxiomConverter implements InputAxioms {
 
 	AxiomConverter(
 		OWLOntologyManager manager,
-		MappedNames names,
+		NameMapper names,
 		ExpressionConverter expressions) {
 
 		factory = manager.getOWLDataFactory();

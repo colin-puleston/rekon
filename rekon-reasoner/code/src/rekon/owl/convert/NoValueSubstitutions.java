@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import org.semanticweb.owlapi.model.*;
 
@@ -31,20 +31,20 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-class NoValueSubstitutions {
+public class NoValueSubstitutions {
+
+	static public final Option OPTION = new Option(false, "novalue-substitutions");
 
 	static private final IRI REKON_NO_VALUE_IRI = IRI.create("urn:rekon:RekonNoValue");
 
-	static final Option OPTION = new Option(false, "novalue-substitutions");
+	static public boolean isNoValueClass(OWLClass test) {
+
+		return test.getIRI().equals(REKON_NO_VALUE_IRI);
+	}
 
 	static OWLClass getNoValueClass(OWLDataFactory factory) {
 
 		return factory.getOWLClass(REKON_NO_VALUE_IRI);
-	}
-
-	static boolean isNoValueClass(OWLClass test) {
-
-		return test.getIRI().equals(REKON_NO_VALUE_IRI);
 	}
 
 	private OWLDataFactory factory;

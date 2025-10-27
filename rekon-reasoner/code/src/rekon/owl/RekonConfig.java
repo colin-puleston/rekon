@@ -25,6 +25,7 @@
 package rekon.owl;
 
 import rekon.util.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston

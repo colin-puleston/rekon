@@ -31,6 +31,7 @@ import org.semanticweb.owlapi.model.*;
 import rekon.core.*;
 import rekon.build.*;
 import rekon.build.input.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston
@@ -38,11 +39,12 @@ import rekon.build.input.*;
 public class RekonInstanceBox {
 
 	private InstanceOps instanceOps;
-	private MappedNames names;
-	private ExpressionConverter exprConverter;
 
-	private CoreBuilder instancesCoreBuilder;
-	private CoreBuilder queriesCoreBuilder;
+	private OwlConverter converter;
+	private NameMapper names;
+
+	private CoreBuilder instancesBuilder;
+	private CoreBuilder queriesBuilder;
 
 	private Map<IRI, MappedInstance> instances = new HashMap<IRI, MappedInstance>();
 
@@ -175,17 +177,15 @@ public class RekonInstanceBox {
 		return new RekonInstanceRef(iri);
 	}
 
-	RekonInstanceBox(
-		InstanceOps instanceOps,
-		MappedNames names,
-		ExpressionConverter exprConverter) {
+	RekonInstanceBox(InstanceOps instanceOps, OwlConverter converter) {
 
 		this.instanceOps = instanceOps;
-		this.names = names;
-		this.exprConverter = exprConverter;
+		this.converter = converter;
 
-		instancesCoreBuilder = createCoreBuilder(false);
-		queriesCoreBuilder = createCoreBuilder(true);
+		names = converter.getNameMapper();
+
+		instancesBuilder = createCoreBuilder(false);
+		queriesBuilder = createCoreBuilder(true);
 	}
 
 	private CoreBuilder createCoreBuilder(boolean queries) {
@@ -195,17 +195,17 @@ public class RekonInstanceBox {
 
 	private PatternSource createInstanceExprBuilder(OWLClassExpression expr) {
 
-		return instancesCoreBuilder.createPatternSource(toInputNode(expr));
+		return instancesBuilder.createPatternSource(toInputNode(expr));
 	}
 
 	private PatternSource createQueryExprBuilder(OWLClassExpression expr) {
 
-		return queriesCoreBuilder.createPatternSource(toInputNode(expr));
+		return queriesBuilder.createPatternSource(toInputNode(expr));
 	}
 
 	private InputNode toInputNode(OWLClassExpression expr) {
 
-		return exprConverter.toQueryNode(expr);
+		return converter.toQueryNode(expr);
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

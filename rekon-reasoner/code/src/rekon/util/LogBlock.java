@@ -22,31 +22,31 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import java.util.*;
-
-import org.semanticweb.owlapi.model.*;
+package rekon.util;
 
 /**
  * @author Colin Puleston
  */
-abstract class EquivalenceSplitter<A extends OWLAxiom> {
+public class LogBlock {
 
-	Collection<A> resolve(A axiom) {
+	private StringBuilder text = new StringBuilder();
 
-		Collection<? extends OWLAxiom> rawAxs = asPairwiseAxioms(axiom);
-		List<A> typeAxs = new ArrayList<A>();
-
-		for (OWLAxiom ax : rawAxs) {
-
-			typeAxs.add(getAxiomType().cast(ax));
-		}
-
-		return typeAxs;
+	public LogBlock() {
 	}
 
-	abstract Class<A> getAxiomType();
+	public LogBlock(String firstLine) {
 
-	abstract Collection<? extends OWLAxiom> asPairwiseAxioms(A axiom);
+		addLine(firstLine);
+	}
+
+	public void addLine(String line) {
+
+		text.append(line);
+		text.append("\n");
+	}
+
+	String getText() {
+
+		return text.toString();
+	}
 }

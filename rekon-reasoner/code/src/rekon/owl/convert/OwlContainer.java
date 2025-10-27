@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import org.semanticweb.owlapi.model.*;
 

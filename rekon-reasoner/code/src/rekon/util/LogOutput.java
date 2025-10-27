@@ -22,42 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.util;
 
 /**
  * @author Colin Puleston
  */
-class Logger {
+public interface LogOutput {
 
-	static final Logger SINGLETON = new Logger();
-
-	static private class DefaultOutput implements LogOutput {
-
-		public void write(String text) {
-
-			System.out.print(text);
-		}
-	}
-
-	private LogOutput output = new DefaultOutput();
-
-	void setOutput(LogOutput output) {
-
-		this.output = output;
-	}
-
-	void writeBlock(LogBlock block) {
-
-		writeToOutput("\n" + block.getText());
-	}
-
-	void writeLine(String line) {
-
-		writeToOutput(line + "\n");
-	}
-
-	private synchronized void writeToOutput(String text) {
-
-		output.write(text);
-	}
+	public void write(String line);
 }

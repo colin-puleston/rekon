@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import org.semanticweb.owlapi.model.*;
 
@@ -31,28 +31,17 @@ import rekon.build.input.*;
 /**
  * @author Colin Puleston
  */
-abstract class ConvertedEquivalence<E>
-					extends ConvertedAxiom
-					implements InputEquivalence<E> {
+abstract class ConvertedAxiom implements InputAxiom {
 
-	private E first;
-	private E second;
+	private OWLAxiom source;
 
-	public E getFirst() {
+	public String toString() {
 
-		return first;
+		return getClass().getSimpleName() + "[" + source + "]";
 	}
 
-	public E getSecond(){
+	ConvertedAxiom(OWLAxiom source) {
 
-		return second;
-	}
-
-	ConvertedEquivalence(OWLAxiom source, E first, E second) {
-
-		super(source);
-
-		this.first = first;
-		this.second = second;
+		this.source = source;
 	}
 }

@@ -22,39 +22,35 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import org.semanticweb.owlapi.model.*;
 
-import rekon.core.*;
-import rekon.owl.convert.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-class DataPropertyOps extends PropertyOps<OWLDataProperty> {
+abstract class ConvertedSubSuper<E> extends ConvertedAxiom implements InputSubSuper<E> {
 
-	private NameMapper names;
+	private E sub;
+	private E sup;
 
-	DataPropertyOps(OWLDataFactory factory, NameMapper names) {
+	public E getSub() {
 
-		this.names = names;
-
-		initialise(factory.getOWLTopDataProperty(), factory.getOWLBottomDataProperty());
+		return sub;
 	}
 
-	Iterable<? extends Name> getAllEntityNames() {
+	public E getSuper(){
 
-		return names.getNodeProperties();
+		return sup;
 	}
 
-	OWLDataProperty toMappedEntity(Name name) {
+	ConvertedSubSuper(OWLAxiom source, E sub, E sup) {
 
-		return NameMapper.toMappedEntity(name, OWLDataProperty.class);
-	}
+		super(source);
 
-	PropertyX getPropertyName(OWLDataProperty prop) {
-
-		return names.get(prop);
+		this.sub = sub;
+		this.sup = sup;
 	}
 }

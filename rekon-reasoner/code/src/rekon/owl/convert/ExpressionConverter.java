@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import java.util.*;
 
@@ -42,7 +42,7 @@ class ExpressionConverter {
 	private OWLObjectProperty owlBottomObjectProperty;
 	private OWLDataProperty owlBottomDataProperty;
 
-	private MappedNames names;
+	private NameMapper names;
 
 	private DataTypeConverter dataTypes = new DataTypeConverter(false);
 	private Set<NodeProperty> chainedProperties = new HashSet<NodeProperty>();
@@ -578,7 +578,7 @@ class ExpressionConverter {
 		}
 	}
 
-	ExpressionConverter(OWLDataFactory factory, MappedNames names) {
+	ExpressionConverter(OWLDataFactory factory, NameMapper names) {
 
 		this.factory = factory;
 		this.names = names;

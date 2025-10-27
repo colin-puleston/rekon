@@ -29,16 +29,17 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston
  */
 class ClassOps extends HierarchyEntityOps<OWLClassExpression, OWLClass> {
 
-	private MappedNames names;
-	private QueryablesAccessor queryables;
+	private NameMapper names;
+	private OwlQueryables queryables;
 
-	ClassOps(OWLDataFactory factory, MappedNames names, QueryablesAccessor queryables) {
+	ClassOps(OWLDataFactory factory, NameMapper names, OwlQueryables queryables) {
 
 		this.names = names;
 		this.queryables = queryables;
@@ -88,7 +89,7 @@ class ClassOps extends HierarchyEntityOps<OWLClassExpression, OWLClass> {
 
 	OWLClass toMappedEntity(Name name) {
 
-		return MappedNames.toMappedEntity(name, OWLClass.class);
+		return NameMapper.toMappedEntity(name, OWLClass.class);
 	}
 
 	boolean insertedEntity(OWLClass entity) {

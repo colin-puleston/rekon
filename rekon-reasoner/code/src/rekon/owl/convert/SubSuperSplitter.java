@@ -22,35 +22,46 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
+
+import java.util.*;
 
 import org.semanticweb.owlapi.model.*;
-
-import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class ConvertedSubSuper<E> extends ConvertedAxiom implements InputSubSuper<E> {
+abstract class SubSuperSplitter <A extends OWLAxiom, SB extends OWLObject> {
 
-	private E sub;
-	private E sup;
+	Collection<A> resolve(A axiom) {
 
-	public E getSub() {
+		OWLClassExpression sup = getSuper(axiom);
 
-		return sub;
+		if (sup instanceof OWLObjectIntersectionOf) {
+
+			SB sub = getSub(axiom);
+
+			return createComponentAxioms((OWLObjectIntersectionOf)sup, sub);
+		}
+
+		return Collections.singleton(axiom);
 	}
 
-	public E getSuper(){
+	abstract OWLClassExpression getSuper(A axiom);
 
-		return sup;
-	}
+	abstract SB getSub(A axiom);
 
-	ConvertedSubSuper(OWLAxiom source, E sub, E sup) {
+	abstract A createComponentAxiom(OWLClassExpression sup, SB sub);
 
-		super(source);
+	private Collection<A> createComponentAxioms(OWLObjectIntersectionOf sups, SB sub) {
 
-		this.sub = sub;
-		this.sup = sup;
+		List<A> components = new ArrayList<A>();
+
+		for (OWLClassExpression sup : sups.getOperands()) {
+
+			components.add(createComponentAxiom(sup, sub));
+		}
+
+		return components;
 	}
 }

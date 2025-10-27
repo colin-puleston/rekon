@@ -27,15 +27,16 @@ package rekon.owl;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston
  */
 class ObjectPropertyOps extends PropertyOps<OWLObjectProperty> {
 
-	private MappedNames names;
+	private NameMapper names;
 
-	ObjectPropertyOps(OWLDataFactory factory, MappedNames names) {
+	ObjectPropertyOps(OWLDataFactory factory, NameMapper names) {
 
 		this.names = names;
 
@@ -49,7 +50,7 @@ class ObjectPropertyOps extends PropertyOps<OWLObjectProperty> {
 
 	OWLObjectProperty toMappedEntity(Name name) {
 
-		return MappedNames.toMappedEntity(name, OWLObjectProperty.class);
+		return NameMapper.toMappedEntity(name, OWLObjectProperty.class);
 	}
 
 	PropertyX getPropertyName(OWLObjectProperty prop) {

@@ -22,31 +22,42 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
+
+import org.semanticweb.owlapi.model.*;
+
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-class LogBlock {
+public class OwlConverter {
 
-	private StringBuilder text = new StringBuilder();
+	private OWLOntologyManager manager;
 
-	LogBlock() {
+	private NameMapper names;
+	private ExpressionConverter expressions;
+
+	public OwlConverter(OWLOntologyManager manager) {
+
+		this.manager = manager;
+
+		names = new NameMapper(manager);
+		expressions = new ExpressionConverter(manager.getOWLDataFactory(), names);
 	}
 
-	LogBlock(String firstLine) {
+	public NameMapper getNameMapper() {
 
-		addLine(firstLine);
+		return names;
 	}
 
-	void addLine(String line) {
+	public InputAxioms createAxiomConverter() {
 
-		text.append(line);
-		text.append("\n");
+		return new AxiomConverter(manager, names, expressions);
 	}
 
-	String getText() {
+	public InputNode toQueryNode(OWLClassExpression owlExpr) {
 
-		return text.toString();
+		return expressions.toQueryNode(owlExpr);
 	}
 }

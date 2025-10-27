@@ -28,6 +28,7 @@ import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
 import rekon.build.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston
@@ -41,43 +42,19 @@ class Classification {
 
 	final EntailmentTester entailmentTester;
 
-	private InstanceBoxCreator instanceBoxCreator;
-
-	private class InstanceBoxCreator {
-
-		private MappedNames names;
-		private ExpressionConverter exprConverter;
-
-		private InstanceOps instanceOps;
-
-		InstanceBoxCreator(
-			Ontology ontology,
-			MappedNames names,
-			ExpressionConverter exprConverter) {
-
-			this.names = names;
-			this.exprConverter = exprConverter;
-
-			instanceOps = ontology.createInstanceOps();
-		}
-
-		RekonInstanceBox create() {
-
-			return new RekonInstanceBox(instanceOps, names, exprConverter);
-		}
-	}
+	private OwlConverter converter;
+	private InstanceOps instanceOps;
 
 	private class Initialiser {
 
 		private OWLOntologyManager manager;
 		private OWLDataFactory factory;
 
-		private MappedNames names;
-		private ExpressionConverter exprConverter;
+		private Ontology ontology;
 		private CoreBuilder coreBuilder;
 
-		private Ontology ontology;
-		private QueryablesAccessor queryables;
+		private NameMapper names;
+		private OwlQueryables queryables;
 
 		Initialiser(OWLOntologyManager manager, StartupMonitor monitor) {
 
@@ -94,6 +71,7 @@ class Classification {
 			monitor.onClassificationComplete();
 
 			queryables = createQueryables();
+			instanceOps = ontology.createInstanceOps();
 		}
 
 		ClassOps createClassOps() {
@@ -116,15 +94,11 @@ class Classification {
 			return new DataPropertyOps(factory, names);
 		}
 
-		InstanceBoxCreator createInstanceBoxCreator() {
-
-			return new InstanceBoxCreator(ontology, names, exprConverter);
-		}
-
 		private void performLoad() {
 
-			names = new MappedNames(manager);
-			exprConverter = new ExpressionConverter(factory, names);
+			converter = new OwlConverter(manager);
+			names = converter.getNameMapper();
+
 			coreBuilder = new CoreBuilder(names);
 			ontology = new Ontology(names, createStructureBuilder());
 		}
@@ -136,17 +110,12 @@ class Classification {
 
 		private StructureBuilder createStructureBuilder() {
 
-			return coreBuilder.createStructureBuilder(createAxiomConverter());
+			return coreBuilder.createStructureBuilder(converter.createAxiomConverter());
 		}
 
-		private AxiomConverter createAxiomConverter() {
+		private OwlQueryables createQueryables() {
 
-			return new AxiomConverter(manager, names, exprConverter);
-		}
-
-		private QueryablesAccessor createQueryables() {
-
-			return new QueryablesAccessor(ontology, names, coreBuilder, exprConverter);
+			return new OwlQueryables(ontology, coreBuilder, converter);
 		}
 	}
 
@@ -160,12 +129,10 @@ class Classification {
 		dataPropertyOps = init.createDataPropertyOps();
 
 		entailmentTester = new EntailmentTester(this);
-
-		instanceBoxCreator = init.createInstanceBoxCreator();
 	}
 
 	RekonInstanceBox createInstanceBox() {
 
-		return instanceBoxCreator.create();
+		return new RekonInstanceBox(instanceOps, converter);
 	}
 }

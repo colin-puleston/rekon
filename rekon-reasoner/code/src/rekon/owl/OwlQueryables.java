@@ -24,44 +24,55 @@
 
 package rekon.owl;
 
-import java.util.*;
-
 import org.semanticweb.owlapi.model.*;
+
+import rekon.core.*;
+import rekon.build.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston
  */
-abstract class SubSuperSplitter <A extends OWLAxiom, SB extends OWLObject> {
+class OwlQueryables {
 
-	Collection<A> resolve(A axiom) {
+	private CoreBuilder coreBuilder;
 
-		OWLClassExpression sup = getSuper(axiom);
+	private OwlConverter converter;
+	private NameMapper names;
 
-		if (sup instanceof OWLObjectIntersectionOf) {
+	private Queryables queryables;
 
-			SB sub = getSub(axiom);
+	OwlQueryables(Ontology ontology, CoreBuilder coreBuilder, OwlConverter converter) {
 
-			return createComponentAxioms((OWLObjectIntersectionOf)sup, sub);
-		}
+		this.coreBuilder = coreBuilder;
+		this.converter = converter;
 
-		return Collections.singleton(axiom);
+		names = converter.getNameMapper();
+		queryables = ontology.createQueryables();
 	}
 
-	abstract OWLClassExpression getSuper(A axiom);
+	Queryable create(OWLClassExpression expr) {
 
-	abstract SB getSub(A axiom);
+		if (expr instanceof OWLClass) {
 
-	abstract A createComponentAxiom(OWLClassExpression sup, SB sub);
-
-	private Collection<A> createComponentAxioms(OWLObjectIntersectionOf sups, SB sub) {
-
-		List<A> components = new ArrayList<A>();
-
-		for (OWLClassExpression sup : sups.getOperands()) {
-
-			components.add(createComponentAxiom(sup, sub));
+			return create((OWLClass)expr);
 		}
 
-		return components;
+		return queryables.create(toDynamicPatternSource(expr));
+	}
+
+	Queryable create(OWLClass cls) {
+
+		return queryables.create(names.get(cls));
+	}
+
+	Queryable create(OWLNamedIndividual ind) {
+
+		return queryables.create(names.get(ind));
+	}
+
+	private PatternSource toDynamicPatternSource(OWLClassExpression expr) {
+
+		return coreBuilder.createPatternSource(converter.toQueryNode(expr));
 	}
 }

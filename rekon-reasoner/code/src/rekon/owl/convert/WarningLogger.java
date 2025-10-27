@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
+package rekon.owl.convert;
 
 import java.util.*;
 
@@ -33,10 +33,10 @@ import rekon.util.*;
 /**
  * @author Colin Puleston
  */
-class WarningLogger {
+public class WarningLogger {
 
-	static final WarningLogger SINGLETON = new WarningLogger();
-	static final Option OPTION = new Option(false, "logging.warnings");
+	static public final WarningLogger SINGLETON = new WarningLogger();
+	static public final Option OPTION = new Option(false, "logging.warnings");
 
 	void logOutOfScopeAxiomTypes(Set<AxiomType<?>> outOfScopeTypes) {
 

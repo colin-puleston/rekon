@@ -30,6 +30,8 @@ import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.reasoner.*;
 import org.semanticweb.owlapi.util.Version;
 
+import rekon.owl.convert.*;
+
 /**
  * @author Colin Puleston
  */
@@ -57,8 +59,6 @@ public class RekonReasoner extends UnsupportedOps implements OWLReasoner {
 		factory = manager.getOWLDataFactory();
 
 		updateHandler = new UpdateHandler(manager);
-
-		NameRenderer.SINGLETON.setDefaultLabel(manager);
 	}
 
 	public RekonInstanceBox createInstanceBox() {

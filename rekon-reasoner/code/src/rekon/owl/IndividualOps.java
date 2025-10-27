@@ -29,6 +29,7 @@ import java.util.*;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
+import rekon.owl.convert.*;
 
 /**
  * @author Colin Puleston
@@ -37,13 +38,13 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 	private OWLDataFactory factory;
 
-	private MappedNames names;
-	private QueryablesAccessor queryables;
+	private NameMapper names;
+	private OwlQueryables queryables;
 
 	IndividualOps(
 		OWLDataFactory factory,
-		MappedNames names,
-		QueryablesAccessor queryables) {
+		NameMapper names,
+		OwlQueryables queryables) {
 
 		this.factory = factory;
 		this.names = names;
@@ -99,6 +100,6 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 	OWLNamedIndividual toMappedEntity(Name name) {
 
-		return MappedNames.toMappedEntity(name, OWLNamedIndividual.class);
+		return NameMapper.toMappedEntity(name, OWLNamedIndividual.class);
 	}
 }

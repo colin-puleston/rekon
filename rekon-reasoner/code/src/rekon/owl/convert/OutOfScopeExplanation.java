@@ -22,59 +22,30 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import org.semanticweb.owlapi.model.*;
-
-import rekon.core.*;
-import rekon.build.*;
+package rekon.owl.convert;
 
 /**
  * @author Colin Puleston
  */
-class QueryablesAccessor {
+enum OutOfScopeExplanation {
 
-	private MappedNames names;
-	private CoreBuilder coreBuilder;
-	private ExpressionConverter exprConverter;
+	INVALID_EXPRESSION_TYPE("expression type"),
+	INVALID_INBUILT_ENTITY("inbuilt entity"),
+	INVALID_ONEOF_VALUE("value (should be single named individual)"),
+	INVALID_DATATYPE_VALUE("value (should be either boolean, numeric, or union of numerics)"),
+	INVALID_DATA_VALUE("value (should be either boolean or numeric)"),
+	DISJUNCTION_FILLER_FOR_CHAINED_PROPERTY(
+		"filler (union fillers not allowed for transitive/chained properties)");
 
-	private Queryables queryables;
+	public String toString() {
 
-	QueryablesAccessor(
-		Ontology ontology,
-		MappedNames names,
-		CoreBuilder coreBuilder,
-		ExpressionConverter exprConverter) {
-
-		this.names = names;
-		this.coreBuilder = coreBuilder;
-		this.exprConverter = exprConverter;
-
-		queryables = ontology.createQueryables();
+		return "Out-of-scope " + textTail;
 	}
 
-	Queryable create(OWLClassExpression expr) {
+	private String textTail;
 
-		if (expr instanceof OWLClass) {
+	private OutOfScopeExplanation(String textTail) {
 
-			return create((OWLClass)expr);
-		}
-
-		return queryables.create(toDynamicPatternSource(expr));
-	}
-
-	Queryable create(OWLClass cls) {
-
-		return queryables.create(names.get(cls));
-	}
-
-	Queryable create(OWLNamedIndividual ind) {
-
-		return queryables.create(names.get(ind));
-	}
-
-	private PatternSource toDynamicPatternSource(OWLClassExpression expr) {
-
-		return coreBuilder.createPatternSource(exprConverter.toQueryNode(expr));
+		this.textTail = textTail;
 	}
 }
