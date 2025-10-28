@@ -22,12 +22,32 @@
  * THE SOFTWARE.
  */
 
-package rekon.core;
+package rekon.build;
+
+import rekon.core.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-public interface StructureBuilder {
+public class StructureBuilder implements StructureCreator {
 
-	public void build(MatchStructures matchStructures);
+	private OntologyNames names;
+	private InputAxioms axioms;
+
+	public StructureBuilder(OntologyNames names, InputAxioms axioms) {
+
+		this.names = names;
+		this.axioms = axioms;
+	}
+
+	public void create(MatchStructures matchStructures) {
+
+		ComponentBuilder comps = new ComponentBuilder(names, matchStructures, false);
+
+		new BasicStructureBuilder(names, axioms);
+		new SimpleProfilesBuilder(matchStructures, names, axioms, comps);
+		new SubsBasedComplexStructureBuilder(matchStructures, axioms, comps);
+		new EquivsBasedComplexStructureBuilder(matchStructures, axioms, comps);
+	}
 }

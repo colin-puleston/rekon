@@ -42,36 +42,49 @@ class Classification {
 
 	final EntailmentTester entailmentTester;
 
-	private OwlConverter converter;
-	private InstanceOps instanceOps;
+	private InstanceBoxCreator instanceBoxCreator;
+
+	private class InstanceBoxCreator {
+
+		private OwlConverter converter;
+		private InstanceOps instanceOps;
+
+		InstanceBoxCreator(OwlConverter converter, Ontology ontology) {
+
+			this.converter = converter;
+
+			instanceOps = ontology.createInstanceOps();
+		}
+
+		RekonInstanceBox create() {
+
+			return new RekonInstanceBox(instanceOps, converter);
+		}
+	}
 
 	private class Initialiser {
 
-		private OWLOntologyManager manager;
-		private OWLDataFactory factory;
-
-		private Ontology ontology;
-		private CoreBuilder coreBuilder;
-
+		private OwlConverter converter;
 		private NameMapper names;
+		private Ontology ontology;
+
+		private OWLDataFactory factory;
 		private OwlQueryables queryables;
 
 		Initialiser(OWLOntologyManager manager, StartupMonitor monitor) {
 
-			this.manager = manager;
-
-			factory = manager.getOWLDataFactory();
-
 			monitor.onLoadingStart();
-			performLoad();
+			performLoad(manager);
 			monitor.onLoadingComplete();
 
 			monitor.onClassificationStart();
 			performClassification(monitor);
 			monitor.onClassificationComplete();
 
-			queryables = createQueryables();
-			instanceOps = ontology.createInstanceOps();
+			factory = manager.getOWLDataFactory();
+			queryables = new OwlQueryables(ontology, converter);
+
+			instanceBoxCreator = new InstanceBoxCreator(converter, ontology);
 		}
 
 		ClassOps createClassOps() {
@@ -94,12 +107,10 @@ class Classification {
 			return new DataPropertyOps(factory, names);
 		}
 
-		private void performLoad() {
+		private void performLoad(OWLOntologyManager manager) {
 
 			converter = new OwlConverter(manager);
 			names = converter.getNameMapper();
-
-			coreBuilder = new CoreBuilder(names);
 			ontology = new Ontology(names, createStructureBuilder());
 		}
 
@@ -110,12 +121,7 @@ class Classification {
 
 		private StructureBuilder createStructureBuilder() {
 
-			return coreBuilder.createStructureBuilder(converter.createAxiomConverter());
-		}
-
-		private OwlQueryables createQueryables() {
-
-			return new OwlQueryables(ontology, coreBuilder, converter);
+			return new StructureBuilder(names, converter.createAxiomConverter());
 		}
 	}
 
@@ -133,6 +139,6 @@ class Classification {
 
 	RekonInstanceBox createInstanceBox() {
 
-		return new RekonInstanceBox(instanceOps, converter);
+		return instanceBoxCreator.create();
 	}
 }

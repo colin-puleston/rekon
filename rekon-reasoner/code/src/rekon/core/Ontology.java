@@ -46,11 +46,11 @@ public class Ontology {
 
 	private ProfilesExpander profilesExpander;
 
-	public Ontology(OntologyNames names, StructureBuilder structureBuilder) {
+	public Ontology(OntologyNames names, StructureCreator structureCreator) {
 
 		profilesExpander = new ProfilesExpander(this, names);
 
-		buildStructure(names, structureBuilder);
+		createStructure(names, structureCreator);
 
 		allNodes.addComponent(names.getClassNodes());
 		allNodes.addComponent(names.getIndividualNodes());
@@ -128,11 +128,11 @@ public class Ontology {
 		return dynamicSubsumeds;
 	}
 
-	private void buildStructure(OntologyNames names, StructureBuilder structureBuilder) {
+	private void createStructure(OntologyNames names, StructureCreator creator) {
 
 		FreeOntologyClasses freeClasses = new FreeOntologyClasses(this);
 
-		structureBuilder.build(new MatchStructures(freeClasses));
+		creator.create(new MatchStructures(freeClasses));
 		IndividualRelationsInverter.addAllInversions(names);
 	}
 

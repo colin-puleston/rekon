@@ -22,54 +22,41 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import org.semanticweb.owlapi.model.*;
+package rekon.build;
 
 import rekon.core.*;
-import rekon.build.*;
-import rekon.owl.convert.*;
+import rekon.build.input.*;
 
 /**
  * @author Colin Puleston
  */
-class OwlQueryables {
+public class SinglePatternBuilder implements PatternSource {
 
-	private OwlConverter converter;
-	private NameMapper names;
+	private OntologyNames names;
+	private InputNode source;
 
-	private Queryables queryables;
+	private BuildCustomiser customiser = null;
 
-	OwlQueryables(Ontology ontology, OwlConverter converter) {
+	public SinglePatternBuilder(OntologyNames names, InputNode source) {
 
-		this.converter = converter;
-
-		names = converter.getNameMapper();
-		queryables = ontology.createQueryables();
+		this.names = names;
+		this.source = source;
 	}
 
-	Queryable create(OWLClassExpression expr) {
+	public void setCustomiser(BuildCustomiser customiser) {
 
-		if (expr instanceof OWLClass) {
+		this.customiser = customiser;
+	}
 
-			return create((OWLClass)expr);
+	public Pattern create(MatchStructures matchStructures) {
+
+		ComponentBuilder comps = new ComponentBuilder(names, matchStructures, true);
+
+		if (customiser != null) {
+
+			comps.setCustomiser(customiser);
 		}
 
-		return queryables.create(toSinglePatternBuilder(expr));
-	}
-
-	Queryable create(OWLClass cls) {
-
-		return queryables.create(names.get(cls));
-	}
-
-	Queryable create(OWLNamedIndividual ind) {
-
-		return queryables.create(names.get(ind));
-	}
-
-	private PatternSource toSinglePatternBuilder(OWLClassExpression expr) {
-
-		return new SinglePatternBuilder(names, converter.toQueryNode(expr));
+		return comps.toPattern(source);
 	}
 }

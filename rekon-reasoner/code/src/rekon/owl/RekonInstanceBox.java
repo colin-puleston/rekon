@@ -43,8 +43,11 @@ public class RekonInstanceBox {
 	private OwlConverter converter;
 	private NameMapper names;
 
-	private CoreBuilder instancesBuilder;
-	private CoreBuilder queriesBuilder;
+	private InstanceBoxBuildCustomiser instancesBuildCustomiser
+											= new InstanceBoxBuildCustomiser(false);
+
+	private InstanceBoxBuildCustomiser queriesBuildCustomiser
+											= new InstanceBoxBuildCustomiser(true);
 
 	private Map<IRI, MappedInstance> instances = new HashMap<IRI, MappedInstance>();
 
@@ -183,29 +186,28 @@ public class RekonInstanceBox {
 		this.converter = converter;
 
 		names = converter.getNameMapper();
-
-		instancesBuilder = createCoreBuilder(false);
-		queriesBuilder = createCoreBuilder(true);
 	}
 
-	private CoreBuilder createCoreBuilder(boolean queries) {
+	private SinglePatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
 
-		return new CoreBuilder(names, new InstanceBoxBuildCustomiser(queries));
+		return createExprBuilder(expr, instancesBuildCustomiser);
 	}
 
-	private PatternSource createInstanceExprBuilder(OWLClassExpression expr) {
+	private SinglePatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
 
-		return instancesBuilder.createPatternSource(toInputNode(expr));
+		return createExprBuilder(expr, queriesBuildCustomiser);
 	}
 
-	private PatternSource createQueryExprBuilder(OWLClassExpression expr) {
+	private SinglePatternBuilder createExprBuilder(
+									OWLClassExpression expr,
+									InstanceBoxBuildCustomiser customiser) {
 
-		return queriesBuilder.createPatternSource(toInputNode(expr));
-	}
+		InputNode exprNode = converter.toQueryNode(expr);
+		SinglePatternBuilder bldr = new SinglePatternBuilder(names, exprNode);
 
-	private InputNode toInputNode(OWLClassExpression expr) {
+		bldr.setCustomiser(customiser);
 
-		return converter.toQueryNode(expr);
+		return bldr;
 	}
 
 	private List<IRI> extractIRIs(Collection<Instance> instances) {

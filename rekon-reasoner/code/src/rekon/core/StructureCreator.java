@@ -22,54 +22,12 @@
  * THE SOFTWARE.
  */
 
-package rekon.owl;
-
-import org.semanticweb.owlapi.model.*;
-
-import rekon.core.*;
-import rekon.build.*;
-import rekon.owl.convert.*;
+package rekon.core;
 
 /**
  * @author Colin Puleston
  */
-class OwlQueryables {
+public interface StructureCreator {
 
-	private OwlConverter converter;
-	private NameMapper names;
-
-	private Queryables queryables;
-
-	OwlQueryables(Ontology ontology, OwlConverter converter) {
-
-		this.converter = converter;
-
-		names = converter.getNameMapper();
-		queryables = ontology.createQueryables();
-	}
-
-	Queryable create(OWLClassExpression expr) {
-
-		if (expr instanceof OWLClass) {
-
-			return create((OWLClass)expr);
-		}
-
-		return queryables.create(toSinglePatternBuilder(expr));
-	}
-
-	Queryable create(OWLClass cls) {
-
-		return queryables.create(names.get(cls));
-	}
-
-	Queryable create(OWLNamedIndividual ind) {
-
-		return queryables.create(names.get(ind));
-	}
-
-	private PatternSource toSinglePatternBuilder(OWLClassExpression expr) {
-
-		return new SinglePatternBuilder(names, converter.toQueryNode(expr));
-	}
+	public void create(MatchStructures matchStructures);
 }

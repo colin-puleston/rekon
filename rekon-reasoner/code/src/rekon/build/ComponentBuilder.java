@@ -34,25 +34,33 @@ import rekon.build.input.*;
  */
 class ComponentBuilder {
 
+	static private class NonCustomisingCustomiser implements BuildCustomiser {
+
+		public NodeX checkToCustomNode(InputNode source) {
+
+			return null;
+		}
+	}
+
 	private MatchStructures structures;
-	private BuildCustomiser customiser;
+	private BuildCustomiser customiser = new NonCustomisingCustomiser();
 
 	private PatternBuilder patternBuilder;
 	private RelationBuilder relationBuilder;
 
 	private Map<InputNode, ClassNode> patternClasses = new HashMap<InputNode, ClassNode>();
 
-	ComponentBuilder(
-		OntologyNames names,
-		MatchStructures structures,
-		BuildCustomiser customiser,
-		boolean dynamic) {
+	ComponentBuilder(OntologyNames names, MatchStructures structures, boolean dynamic) {
 
 		this.structures = structures;
-		this.customiser = customiser;
 
 		patternBuilder = new PatternBuilder(this, names, dynamic);
 		relationBuilder = new RelationBuilder(this, dynamic);
+	}
+
+	void setCustomiser(BuildCustomiser customiser) {
+
+		this.customiser = customiser;
 	}
 
 	Pattern toPattern(InputNode source) {
