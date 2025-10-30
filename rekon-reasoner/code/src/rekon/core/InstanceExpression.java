@@ -27,7 +27,7 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class InstancePattern extends LocalExpression {
+class InstanceExpression extends LocalExpression {
 
 	private PatternSource patternSource;
 
@@ -52,7 +52,7 @@ class InstancePattern extends LocalExpression {
 		}
 	}
 
-	InstancePattern(InstanceNode instanceNode, PatternSource patternSource) {
+	InstanceExpression(InstanceNode instanceNode, PatternSource patternSource) {
 
 		this.instanceNode = instanceNode;
 		this.patternSource = patternSource;

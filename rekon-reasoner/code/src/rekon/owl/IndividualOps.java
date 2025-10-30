@@ -36,24 +36,18 @@ import rekon.owl.convert.*;
  */
 class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
-	private OWLDataFactory factory;
-
 	private NameMapper names;
-	private OwlQueryables queryables;
+	private DynamicConverter dynamicConverter;
 
-	IndividualOps(
-		OWLDataFactory factory,
-		NameMapper names,
-		OwlQueryables queryables) {
+	IndividualOps(NameMapper names, DynamicConverter dynamicConverter) {
 
-		this.factory = factory;
 		this.names = names;
-		this.queryables = queryables;
+		this.dynamicConverter = dynamicConverter;
 	}
 
 	Set<Set<OWLNamedIndividual>> getIndividuals(OWLClassExpression expr, boolean direct) {
 
-		return toEquivGroups(queryables.create(expr).getIndividuals(direct));
+		return toEquivGroups(dynamicConverter.toQueryable(expr).getIndividuals(direct));
 	}
 
 	Set<Set<OWLNamedIndividual>> getObjectValues(OWLNamedIndividual ind, OWLObjectProperty prop) {
@@ -80,26 +74,36 @@ class IndividualOps extends EntityOps<OWLNamedIndividual, OWLNamedIndividual> {
 
 	boolean equivalent(OWLNamedIndividual inObject1, OWLNamedIndividual inObject2) {
 
-		return queryables.create(inObject1).equivalentTo(queryables.create(inObject2));
+		return toQueryable(inObject1).equivalentTo(toQueryable(inObject2));
 	}
 
 	boolean subsumption(OWLNamedIndividual inSup, OWLNamedIndividual inSub) {
 
-		return queryables.create(inSup).subsumes(queryables.create(inSub));
+		return toQueryable(inSup).subsumes(toQueryable(inSub));
 	}
 
 	boolean hasType(OWLNamedIndividual ind, OWLClassExpression type) {
 
-		return queryables.create(type).subsumes(queryables.create(ind));
+		return toQueryable(type).subsumes(toQueryable(ind));
 	}
 
 	Names getEquivalentNames(OWLNamedIndividual inObject) {
 
-		return queryables.create(inObject).getEquivalents();
+		return toQueryable(inObject).getEquivalents();
 	}
 
 	OWLNamedIndividual toMappedEntity(Name name) {
 
 		return NameMapper.toMappedEntity(name, OWLNamedIndividual.class);
+	}
+
+	private Queryable toQueryable(OWLClassExpression expr) {
+
+		return dynamicConverter.toQueryable(expr);
+	}
+
+	private Queryable toQueryable(OWLNamedIndividual ind) {
+
+		return dynamicConverter.toQueryable(ind);
 	}
 }

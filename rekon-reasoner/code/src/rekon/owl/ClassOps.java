@@ -37,44 +37,44 @@ import rekon.owl.convert.*;
 class ClassOps extends HierarchyEntityOps<OWLClassExpression, OWLClass> {
 
 	private NameMapper names;
-	private OwlQueryables queryables;
+	private DynamicConverter dynamicConverter;
 
-	ClassOps(OWLDataFactory factory, NameMapper names, OwlQueryables queryables) {
+	ClassOps(OWLDataFactory factory, NameMapper names, DynamicConverter dynamicConverter) {
 
 		this.names = names;
-		this.queryables = queryables;
+		this.dynamicConverter = dynamicConverter;
 
 		initialise(factory.getOWLThing(), factory.getOWLNothing());
 	}
 
 	Set<Set<OWLClass>> getTypes(OWLNamedIndividual ind, boolean direct) {
 
-		return toEquivGroups(queryables.create(ind).getSupers(direct));
+		return toEquivGroups(toQueryable(ind).getSupers(direct));
 	}
 
 	boolean equivalent(OWLClassExpression inObject1, OWLClassExpression inObject2) {
 
-		return queryables.create(inObject1).equivalentTo(queryables.create(inObject2));
+		return toQueryable(inObject1).equivalentTo(toQueryable(inObject2));
 	}
 
 	boolean subsumption(OWLClassExpression inSup, OWLClassExpression inSub) {
 
-		return queryables.create(inSup).subsumes(queryables.create(inSub));
+		return toQueryable(inSup).subsumes(toQueryable(inSub));
 	}
 
 	Names getEquivalentNames(OWLClassExpression inObject) {
 
-		return queryables.create(inObject).getEquivalents();
+		return toQueryable(inObject).getEquivalents();
 	}
 
 	Names getSuperNames(OWLClassExpression inObject, boolean direct) {
 
-		return queryables.create(inObject).getSupers(direct);
+		return toQueryable(inObject).getSupers(direct);
 	}
 
 	Names getSubNames(OWLClassExpression inObject, boolean direct) {
 
-		return queryables.create(inObject).getSubs(direct);
+		return toQueryable(inObject).getSubs(direct);
 	}
 
 	Iterable<? extends Name> getAllEntityNames() {
@@ -95,5 +95,15 @@ class ClassOps extends HierarchyEntityOps<OWLClassExpression, OWLClass> {
 	boolean insertedEntity(OWLClass entity) {
 
 		return NoValueSubstitutions.isNoValueClass(entity);
+	}
+
+	private Queryable toQueryable(OWLClassExpression expr) {
+
+		return dynamicConverter.toQueryable(expr);
+	}
+
+	private Queryable toQueryable(OWLNamedIndividual ind) {
+
+		return dynamicConverter.toQueryable(ind);
 	}
 }

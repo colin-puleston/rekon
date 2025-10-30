@@ -41,7 +41,7 @@ class ProfilesExpander {
 		prs.checkExpansion(new ProfileRelationsResolver());
 	}
 
-	private Ontology ontology;
+	private List<PatternMatcher> profiles;
 	private boolean subsumerOnlyExpansions;
 
 	private class ExpansionsChecker extends MultiThreadListProcessor<PatternMatcher> {
@@ -60,7 +60,7 @@ class ProfilesExpander {
 
 			anyNewExpansions = false;
 
-			invokeListProcesses(ontology.getAllProfiles());
+			invokeListProcesses(profiles);
 
 			return anyNewExpansions;
 		}
@@ -80,9 +80,9 @@ class ProfilesExpander {
 		}
 	}
 
-	ProfilesExpander(Ontology ontology, OntologyNames names) {
+	ProfilesExpander(List<PatternMatcher> profiles, OntologyNames names) {
 
-		this.ontology = ontology;
+		this.profiles = profiles;
 
 		subsumerOnlyExpansions = !anyPropertyChains(names);
 	}
@@ -107,7 +107,7 @@ class ProfilesExpander {
 
 	private void initExpansions(boolean firstPass) {
 
-		for (PatternMatcher p : ontology.getAllProfiles()) {
+		for (PatternMatcher p : profiles) {
 
 			p.getPattern().getProfileRelations().initExpansion(firstPass);
 		}

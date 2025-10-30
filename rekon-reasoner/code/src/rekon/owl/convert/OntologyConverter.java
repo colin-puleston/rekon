@@ -22,41 +22,56 @@
  * THE SOFTWARE.
  */
 
-package rekon.build;
+package rekon.owl.convert;
+
+import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
-import rekon.build.input.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
  */
-public class SinglePatternBuilder implements PatternSource {
+public class OntologyConverter {
 
-	private OntologyNames names;
-	private InputNode source;
+	private OWLOntologyManager manager;
 
-	private BuildCustomiser customiser = null;
+	private NameMapper names;
+	private Ontology ontology;
 
-	public SinglePatternBuilder(OntologyNames names, InputNode source) {
+	private ExpressionConverter expressions;
 
-		this.names = names;
-		this.source = source;
+	public OntologyConverter(OWLOntologyManager manager) {
+
+		this.manager = manager;
+
+		names = new NameMapper(manager);
+		expressions = new ExpressionConverter(manager.getOWLDataFactory(), names);
+		ontology = new Ontology(names, createStructureBuilder(manager));
 	}
 
-	public void setCustomiser(BuildCustomiser customiser) {
+	public NameMapper getNameMapper() {
 
-		this.customiser = customiser;
+		return names;
 	}
 
-	public Pattern create(MatchStructures matchStructures) {
+	public Ontology getOntology() {
 
-		ComponentBuilder comps = new ComponentBuilder(names, matchStructures, true);
+		return ontology;
+	}
 
-		if (customiser != null) {
+	public DynamicConverter createDynamicConverter() {
 
-			comps.setCustomiser(customiser);
-		}
+		return new DynamicConverter(names, ontology, expressions);
+	}
 
-		return comps.toPattern(source);
+	private StructureBuilder createStructureBuilder(OWLOntologyManager manager) {
+
+		return new StructureBuilder(names, createAxiomConverter(manager));
+	}
+
+	private AxiomConverter createAxiomConverter(OWLOntologyManager manager) {
+
+		return new AxiomConverter(manager, names, expressions);
 	}
 }

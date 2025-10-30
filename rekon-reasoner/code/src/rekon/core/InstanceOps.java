@@ -43,9 +43,9 @@ public class InstanceOps {
 		void add(Instance instance, PatternSource profileBuilder) {
 
 			InstanceNode node = instance.getNode();
-			InstancePattern ip = new InstancePattern(node, profileBuilder);
+			InstanceExpression expr = new InstanceExpression(node, profileBuilder);
 
-			dynamicSubsumers.inferSubsumers(ip);
+			dynamicSubsumers.inferSubsumers(expr);
 			node.completeClassification();
 			checkAddToInstanceSubsumedsFilter(node);
 

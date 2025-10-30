@@ -46,55 +46,53 @@ class Classification {
 
 	private class InstanceBoxCreator {
 
-		private OwlConverter converter;
+		private DynamicConverter dynamicConverter;
 		private InstanceOps instanceOps;
 
-		InstanceBoxCreator(OwlConverter converter, Ontology ontology) {
+		InstanceBoxCreator(Ontology ontology, DynamicConverter dynamicConverter) {
 
-			this.converter = converter;
+			this.dynamicConverter = dynamicConverter;
 
 			instanceOps = ontology.createInstanceOps();
 		}
 
 		RekonInstanceBox create() {
 
-			return new RekonInstanceBox(instanceOps, converter);
+			return new RekonInstanceBox(instanceOps, dynamicConverter);
 		}
 	}
 
 	private class Initialiser {
 
-		private OwlConverter converter;
+		private OWLDataFactory factory;
+
 		private NameMapper names;
 		private Ontology ontology;
-
-		private OWLDataFactory factory;
-		private OwlQueryables queryables;
+		private DynamicConverter dynamicConverter;
 
 		Initialiser(OWLOntologyManager manager, StartupMonitor monitor) {
 
-			monitor.onLoadingStart();
-			performLoad(manager);
-			monitor.onLoadingComplete();
-
-			monitor.onClassificationStart();
-			performClassification(monitor);
-			monitor.onClassificationComplete();
-
 			factory = manager.getOWLDataFactory();
-			queryables = new OwlQueryables(ontology, converter);
 
-			instanceBoxCreator = new InstanceBoxCreator(converter, ontology);
+			OntologyConverter ontoConv = performLoad(manager, monitor);
+
+			names = ontoConv.getNameMapper();
+			ontology = ontoConv.getOntology();
+
+			performClassification(monitor);
+
+			dynamicConverter = ontoConv.createDynamicConverter();
+			instanceBoxCreator = new InstanceBoxCreator(ontology, dynamicConverter);
 		}
 
 		ClassOps createClassOps() {
 
-			return new ClassOps(factory, names, queryables);
+			return new ClassOps(factory, names, dynamicConverter);
 		}
 
 		IndividualOps createIndividualOps() {
 
-			return new IndividualOps(factory, names, queryables);
+			return new IndividualOps(names, dynamicConverter);
 		}
 
 		ObjectPropertyOps createObjectPropertyOps() {
@@ -107,21 +105,24 @@ class Classification {
 			return new DataPropertyOps(factory, names);
 		}
 
-		private void performLoad(OWLOntologyManager manager) {
+		private OntologyConverter performLoad(OWLOntologyManager manager, StartupMonitor monitor) {
 
-			converter = new OwlConverter(manager);
-			names = converter.getNameMapper();
-			ontology = new Ontology(names, createStructureBuilder());
+			monitor.onLoadingStart();
+
+			OntologyConverter ontoConv = new OntologyConverter(manager);
+
+			monitor.onLoadingComplete();
+
+			return ontoConv;
 		}
 
 		private void performClassification(StartupMonitor monitor) {
 
+			monitor.onClassificationStart();
+
 			ontology.classify(monitor.createClassifyListener());
-		}
 
-		private StructureBuilder createStructureBuilder() {
-
-			return new StructureBuilder(names, converter.createAxiomConverter());
+			monitor.onClassificationComplete();
 		}
 	}
 

@@ -26,38 +26,52 @@ package rekon.owl.convert;
 
 import org.semanticweb.owlapi.model.*;
 
-import rekon.build.input.*;
+import rekon.core.*;
+import rekon.build.*;
 
 /**
  * @author Colin Puleston
  */
-public class OwlConverter {
-
-	private OWLOntologyManager manager;
+public class DynamicConverter {
 
 	private NameMapper names;
 	private ExpressionConverter expressions;
 
-	public OwlConverter(OWLOntologyManager manager) {
+	private Queryables queryables;
 
-		this.manager = manager;
+	public Queryable toQueryable(OWLClassExpression expr) {
 
-		names = new NameMapper(manager);
-		expressions = new ExpressionConverter(manager.getOWLDataFactory(), names);
+		if (expr instanceof OWLClass) {
+
+			return toQueryable((OWLClass)expr);
+		}
+
+		return queryables.create(toDynamicPatternBuilder(expr));
 	}
 
-	public NameMapper getNameMapper() {
+	public Queryable toQueryable(OWLClass cls) {
 
-		return names;
+		return queryables.create(names.get(cls));
 	}
 
-	public InputAxioms createAxiomConverter() {
+	public Queryable toQueryable(OWLNamedIndividual ind) {
 
-		return new AxiomConverter(manager, names, expressions);
+		return queryables.create(names.get(ind));
 	}
 
-	public InputNode toQueryNode(OWLClassExpression owlExpr) {
+	public DynamicPatternBuilder toDynamicPatternBuilder(OWLClassExpression expr) {
 
-		return expressions.toQueryNode(owlExpr);
+		return new DynamicPatternBuilder(names, expressions.toDynamicNode(expr));
+	}
+
+	DynamicConverter(
+		NameMapper names,
+		Ontology ontology,
+		ExpressionConverter expressions) {
+
+		this.names = names;
+		this.expressions = expressions;
+
+		queryables = ontology.createQueryables();
 	}
 }

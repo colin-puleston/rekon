@@ -615,7 +615,7 @@ class ExpressionConverter {
 		return toAxiomRelation(owlAxiom, toOwlRestriction(owlAxiom));
 	}
 
-	InputNode toQueryNode(OWLClassExpression owlExpr) {
+	InputNode toDynamicNode(OWLClassExpression owlExpr) {
 
 		return new ConvertedNode(OwlContainer.asContainer(owlExpr), owlExpr);
 	}

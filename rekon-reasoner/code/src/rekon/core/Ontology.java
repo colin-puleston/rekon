@@ -41,14 +41,14 @@ public class Ontology {
 	private List<PatternMatcher> allProfiles = new ArrayList<PatternMatcher>();
 	private List<PatternMatcher> allDefinitions = new ArrayList<PatternMatcher>();
 
-	private DynamicSubsumers dynamicSubsumers;
-	private DynamicSubsumeds dynamicSubsumeds;
+	private DynamicSubsumers dynamicSubsumers = null;
+	private DynamicSubsumeds dynamicSubsumeds = null;
 
 	private ProfilesExpander profilesExpander;
 
 	public Ontology(OntologyNames names, StructureCreator structureCreator) {
 
-		profilesExpander = new ProfilesExpander(this, names);
+		profilesExpander = new ProfilesExpander(allProfiles, names);
 
 		createStructure(names, structureCreator);
 
@@ -120,10 +120,14 @@ public class Ontology {
 
 	DynamicSubsumers getDynamicSubsumers() {
 
+		checkClassified();
+
 		return dynamicSubsumers;
 	}
 
 	DynamicSubsumeds getDynamicSubsumeds() {
+
+		checkClassified();
 
 		return dynamicSubsumeds;
 	}
@@ -150,6 +154,14 @@ public class Ontology {
 
 			allProfiles.addAll(n.getProfileMatcherAsList());
 			allDefinitions.addAll(n.getDefinitionMatchers());
+		}
+	}
+
+	private void checkClassified() {
+
+		if (dynamicSubsumers == null) {
+
+			throw new RuntimeException("Ontology has not been classified!");
 		}
 	}
 }

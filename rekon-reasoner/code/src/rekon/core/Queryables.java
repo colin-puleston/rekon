@@ -67,7 +67,8 @@ public class Queryables {
 		}
 	}
 
-	private Ontology ontology;
+	private DynamicSubsumers dynamicSubsumers;
+	private DynamicSubsumeds dynamicSubsumeds;
 
 	public Queryable create(NodeX node) {
 
@@ -87,7 +88,7 @@ public class Queryables {
 				return new QueryableNode(node);
 			}
 
-			return new QueryableExpression(ontology, expr);
+			return createQueryableExpression(expr);
 		}
 
 		return INVALID_INPUT;
@@ -95,6 +96,12 @@ public class Queryables {
 
 	Queryables(Ontology ontology) {
 
-		this.ontology = ontology;
+		dynamicSubsumers = ontology.getDynamicSubsumers();
+		dynamicSubsumeds = ontology.getDynamicSubsumeds();
+	}
+
+	private QueryableExpression createQueryableExpression(DynamicExpression expr) {
+
+		return new QueryableExpression(dynamicSubsumers, dynamicSubsumeds, expr);
 	}
 }

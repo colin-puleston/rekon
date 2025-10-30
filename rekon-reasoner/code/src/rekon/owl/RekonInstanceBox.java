@@ -39,9 +39,7 @@ import rekon.owl.convert.*;
 public class RekonInstanceBox {
 
 	private InstanceOps instanceOps;
-
-	private OwlConverter converter;
-	private NameMapper names;
+	private DynamicConverter dynamicConverter;
 
 	private InstanceBoxBuildCustomiser instancesBuildCustomiser
 											= new InstanceBoxBuildCustomiser(false);
@@ -180,30 +178,27 @@ public class RekonInstanceBox {
 		return new RekonInstanceRef(iri);
 	}
 
-	RekonInstanceBox(InstanceOps instanceOps, OwlConverter converter) {
+	RekonInstanceBox(InstanceOps instanceOps, DynamicConverter dynamicConverter) {
 
 		this.instanceOps = instanceOps;
-		this.converter = converter;
-
-		names = converter.getNameMapper();
+		this.dynamicConverter = dynamicConverter;
 	}
 
-	private SinglePatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
+	private DynamicPatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
 
 		return createExprBuilder(expr, instancesBuildCustomiser);
 	}
 
-	private SinglePatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
+	private DynamicPatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
 
 		return createExprBuilder(expr, queriesBuildCustomiser);
 	}
 
-	private SinglePatternBuilder createExprBuilder(
+	private DynamicPatternBuilder createExprBuilder(
 									OWLClassExpression expr,
 									InstanceBoxBuildCustomiser customiser) {
 
-		InputNode exprNode = converter.toQueryNode(expr);
-		SinglePatternBuilder bldr = new SinglePatternBuilder(names, exprNode);
+		DynamicPatternBuilder bldr = dynamicConverter.toDynamicPatternBuilder(expr);
 
 		bldr.setCustomiser(customiser);
 

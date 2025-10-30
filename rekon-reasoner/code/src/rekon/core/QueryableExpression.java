@@ -114,12 +114,14 @@ class QueryableExpression extends ValidInputQueryable {
 
 	private DynamicExpression expression;
 
-	QueryableExpression(Ontology ontology, DynamicExpression expression) {
+	QueryableExpression(
+		DynamicSubsumers dynamicSubsumers,
+		DynamicSubsumeds dynamicSubsumeds,
+		DynamicExpression expression) {
 
+		this.dynamicSubsumers = dynamicSubsumers;
+		this.dynamicSubsumeds = dynamicSubsumeds;
 		this.expression = expression;
-
-		dynamicSubsumers = ontology.getDynamicSubsumers();
-		dynamicSubsumeds = ontology.getDynamicSubsumeds();
 	}
 
 	void configureAsPotentialSubsumed() {
