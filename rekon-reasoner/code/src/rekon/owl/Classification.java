@@ -27,7 +27,6 @@ package rekon.owl;
 import org.semanticweb.owlapi.model.*;
 
 import rekon.core.*;
-import rekon.build.*;
 import rekon.owl.convert.*;
 
 /**

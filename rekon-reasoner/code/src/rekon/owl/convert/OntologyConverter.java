@@ -34,16 +34,12 @@ import rekon.build.*;
  */
 public class OntologyConverter {
 
-	private OWLOntologyManager manager;
-
 	private NameMapper names;
 	private Ontology ontology;
 
 	private ExpressionConverter expressions;
 
 	public OntologyConverter(OWLOntologyManager manager) {
-
-		this.manager = manager;
 
 		names = new NameMapper(manager);
 		expressions = new ExpressionConverter(manager.getOWLDataFactory(), names);
