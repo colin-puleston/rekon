@@ -41,11 +41,8 @@ public class RekonInstanceBox {
 	private InstanceOps instanceOps;
 	private DynamicConverter dynamicConverter;
 
-	private InstanceBoxBuildCustomiser instancesBuildCustomiser
-											= new InstanceBoxBuildCustomiser(false);
-
-	private InstanceBoxBuildCustomiser queriesBuildCustomiser
-											= new InstanceBoxBuildCustomiser(true);
+	private BuildCustomiser instanceCustomiser = new InstanceCustomiser();
+	private BuildCustomiser queryCustomiser = new QueryCustomiser();
 
 	private Map<IRI, MappedInstance> instances = new HashMap<IRI, MappedInstance>();
 
@@ -73,9 +70,7 @@ public class RekonInstanceBox {
 		}
 	}
 
-	private class InstanceBoxBuildCustomiser implements BuildCustomiser {
-
-		private boolean queries;
+	private abstract class InstanceBoxBuildCustomiser implements BuildCustomiser {
 
 		public NodeX checkToCustomNode(InputNode source) {
 
@@ -89,10 +84,7 @@ public class RekonInstanceBox {
 			return null;
 		}
 
-		InstanceBoxBuildCustomiser(boolean queries) {
-
-			this.queries = queries;
-		}
+		abstract Instance checkCreateRefedInstance(IRI iri);
 
 		private InstanceNode toInstanceNode(RekonInstanceRef source) {
 
@@ -101,15 +93,26 @@ public class RekonInstanceBox {
 
 			if (i == null) {
 
-				if (queries) {
-
-					throw new RekonInstanceBoxException("Instance does not exist: " + iri);
-				}
-
-				i = new MappedInstance(iri, true);
+				i = checkCreateRefedInstance(iri);
 			}
 
 			return i.getNode();
+		}
+	}
+
+	private class InstanceCustomiser extends InstanceBoxBuildCustomiser {
+
+		Instance checkCreateRefedInstance(IRI iri) {
+
+			return new MappedInstance(iri, true);
+		}
+	}
+
+	private class QueryCustomiser extends InstanceBoxBuildCustomiser {
+
+		Instance checkCreateRefedInstance(IRI iri) {
+
+			throw new RekonInstanceBoxException("Instance does not exist: " + iri);
 		}
 	}
 
@@ -186,17 +189,17 @@ public class RekonInstanceBox {
 
 	private DynamicPatternBuilder createInstanceExprBuilder(OWLClassExpression expr) {
 
-		return createExprBuilder(expr, instancesBuildCustomiser);
+		return createExprBuilder(expr, instanceCustomiser);
 	}
 
 	private DynamicPatternBuilder createQueryExprBuilder(OWLClassExpression expr) {
 
-		return createExprBuilder(expr, queriesBuildCustomiser);
+		return createExprBuilder(expr, queryCustomiser);
 	}
 
 	private DynamicPatternBuilder createExprBuilder(
 									OWLClassExpression expr,
-									InstanceBoxBuildCustomiser customiser) {
+									BuildCustomiser customiser) {
 
 		DynamicPatternBuilder bldr = dynamicConverter.toDynamicPatternBuilder(expr);
 
