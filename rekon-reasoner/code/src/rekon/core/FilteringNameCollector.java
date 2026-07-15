@@ -44,9 +44,9 @@ abstract class FilteringNameCollector {
 
 		RankCollector() {
 
-			rankStatus = getRankInitialStatus();
-
 			allNames.add(rankNames);
+
+			rankStatus = getRankInitialStatus();
 		}
 
 		void collectForDisjunctNodes(DisjunctionNodeValue v) {
@@ -145,9 +145,9 @@ abstract class FilteringNameCollector {
 		return firstRankCollector.createRankedNamesList();
 	}
 
-	int getCurrentRankCount() {
+	int getCurrentRankIndex() {
 
-		return allNames.size();
+		return allNames.size() - 1;
 	}
 
 	abstract RankCollector createRankCollector();

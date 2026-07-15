@@ -44,6 +44,11 @@ class PatternMatcher {
 		return node;
 	}
 
+	public Pattern getPattern() {
+
+		return pattern;
+	}
+
 	PatternMatcher(NodeX node) {
 
 		this(node, new Pattern(node));
@@ -76,11 +81,6 @@ class PatternMatcher {
 	void checkExpandLocalProfile() {
 
 		ProfilesExpander.checkExpandLocal(pattern);
-	}
-
-	Pattern getPattern() {
-
-		return pattern;
 	}
 
 	boolean subsumes(PatternMatcher test) {

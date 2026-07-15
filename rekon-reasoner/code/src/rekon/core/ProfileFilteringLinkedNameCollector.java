@@ -38,7 +38,6 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 	private class ProfileFilteringLinkedRankCollector extends RankCollector {
 
-		private int rank = getCurrentRankCount();
 		private NameSet valueNodesCollected = new NameSet();
 
 		boolean definition() {
@@ -63,7 +62,7 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 		boolean preCollectRank() {
 
-			return rank < startRank;
+			return getCurrentRankIndex() < startRank;
 		}
 
 		private Collection<Relation> getProfileRelations(NodeX n) {
@@ -80,7 +79,7 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private boolean lastRankForCollection() {
 
-			return rank == stopRank - 1;
+			return getCurrentRankIndex() == stopRank - 1;
 		}
 	}
 
