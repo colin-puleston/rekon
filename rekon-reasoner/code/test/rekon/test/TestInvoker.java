@@ -28,40 +28,38 @@ import java.io.*;
 
 abstract class TestInvoker<O extends TestOpts> {
 
-	TestInvoker(TestConfig config) {
+	TestInvoker(TestConfig<O> config) {
 
-		O customOpts = createCustomOpts(config.customConfig);
+		O opts = config.createOpts();
 
 		if (config.ontologyFile == null) {
 
-			runGeneralTests(customOpts, config.reasonerOpt);
+			runGeneralTests(opts, config.reasonerOpt);
 		}
 		else {
 
-			run(customOpts, config.reasonerOpt, config.ontologyFile);
+			run(opts, config.reasonerOpt, config.ontologyFile);
 		}
 	}
 
-	abstract O createCustomOpts(String customConfig);
+	abstract void run(O opts, ReasonerOpt reasonerOpt, File ontologyFile);
 
-	abstract void run(O customOpts, ReasonerOpt reasonerOpt, File ontologyFile);
+	private void runGeneralTests(O opts, ReasonerOpt reasonerOpt) {
 
-	private void runGeneralTests(O customOpts, ReasonerOpt reasonerOpt) {
+		opts.setRunningGeneralTests();
 
-		customOpts.setRunningGeneralTests();
-
-		for (File file : getGeneralTestsDir(customOpts).listFiles()) {
+		for (File file : getGeneralTestsDir(opts).listFiles()) {
 
 			if (file.getName().endsWith(".owl")) {
 
-				run(customOpts, reasonerOpt, file);
+				run(opts, reasonerOpt, file);
 			}
 		}
 	}
 
-	private File getGeneralTestsDir(O customOpts) {
+	private File getGeneralTestsDir(O opts) {
 
-		File dir = customOpts.getGeneralTestsDir();
+		File dir = opts.getGeneralTestsDir();
 
 		if (!dir.exists()) {
 

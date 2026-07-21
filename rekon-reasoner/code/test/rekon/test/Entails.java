@@ -34,19 +34,27 @@ public class Entails extends Tester {
 
 	static private final String ENTAILMENTS_BASE_CLASS_NAME = "_Entailment";
 
-	static private class EntailsInvoker extends TestInvoker<EntailsOpts> {
+	static private class EntailsConfig extends TestConfig<EntailsOpts> {
 
-		EntailsInvoker(TestConfig config) {
+		EntailsConfig(String[] args) {
 
-			super(config);
+			super(args, false);
 		}
 
-		EntailsOpts createCustomOpts(String customConfig) {
+		EntailsOpts createOpts() {
 
 			return new EntailsOpts();
 		}
+	}
 
-		void run(EntailsOpts customOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
+	static private class EntailsInvoker extends TestInvoker<EntailsOpts> {
+
+		EntailsInvoker(String[] args) {
+
+			super(new EntailsConfig(args));
+		}
+
+		void run(EntailsOpts opts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
 			new Entails(reasonerOpt, ontologyFile);
 		}
@@ -54,7 +62,7 @@ public class Entails extends Tester {
 
 	static public void main(String[] args) {
 
-		new EntailsInvoker(new TestConfig(args, false));
+		new EntailsInvoker(args);
 	}
 
 	private OWLReasoner reasoner;

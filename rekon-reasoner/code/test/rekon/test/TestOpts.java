@@ -53,28 +53,4 @@ class TestOpts {
 
 		return runningGeneralTests;
 	}
-
-	Iterator<String> parseArg(String arg, int minLen, int maxLen) {
-
-		String[] vals = arg.split(":");
-
-		if (vals.length < minLen || vals.length > maxLen) {
-
-			throw new RuntimeException("ERROR: Bad run-opts string!");
-		}
-
-		return Arrays.asList(vals).iterator();
-	}
-
-	Integer parseInt(String value) {
-
-		try {
-
-			return Integer.parseInt(value);
-		}
-		catch (NumberFormatException e) {
-
-			throw new RuntimeException("ERROR: Bad integer!");
-		}
-	}
 }

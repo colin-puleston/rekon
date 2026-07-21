@@ -25,54 +25,33 @@
 package rekon.test;
 
 import java.io.*;
+import java.util.*;
 
-class TestConfig {
+abstract class TestConfig<O extends TestOpts> {
 
 	static private final String TEST_ONTOLOGIES_DIR = "test/ontologies/";
 	static private final String OWL_EXTN = ".owl";
 
-	static class ArgReader {
-
-		private String[] args;
-		private int current = 0;
-
-		ArgReader(String[] args, int min) {
-
-			this.args = args;
-
-			if (args.length < min) {
-
-				throw new RuntimeException("ERROR: Not enough args!");
-			}
-		}
-
-		boolean more() {
-
-			return current < args.length;
-		}
-
-		String next() {
-
-			return args[current++];
-		}
-	}
-
 	final ReasonerOpt reasonerOpt;
 	final File ontologyFile;
 
-	final String customConfig;
+	final String customArg;
 
-	TestConfig(String[] args, boolean expectCustomConfig) {
+	private boolean expectCustomArg;
 
-		ArgReader ar = new ArgReader(args, expectCustomConfig ? 2 : 1);
+	TestConfig(String[] args, boolean expectCustomArg) {
 
-		customConfig = expectCustomConfig ? ar.next() : "";
-		reasonerOpt = ReasonerOpt.valueOf(ar.next());
+		this.expectCustomArg = expectCustomArg;
 
-		if (ar.more()) {
+		ArgReader ar = new ArgReader(this, args);
 
-			String testDir = ar.next();
-			String testFile = ar.more() ? ar.next() : getLeafDir(testDir);
+		customArg = expectCustomArg ? ar.readNext() : "";
+		reasonerOpt = ReasonerOpt.valueOf(ar.readNext());
+
+		if (ar.hasNext()) {
+
+			String testDir = ar.readNext();
+			String testFile = ar.hasNext() ? ar.readNext() : getLeafDir(testDir);
 
 			ontologyFile = new File(TEST_ONTOLOGIES_DIR + testDir, testFile + OWL_EXTN);
 		}
@@ -82,8 +61,53 @@ class TestConfig {
 		}
 	}
 
+	void exitOnError(String erroMsg) {
+
+		System.err.println("");
+		System.err.println("ERROR: " + erroMsg);
+		System.err.println("");
+		System.err.println("ARGS: " + describeArgs());
+		System.err.println("");
+
+		String argOpts = describeCustomArgOptions();
+
+		if (!argOpts.isEmpty()) {
+
+			System.err.println(argOpts);
+			System.err.println("");
+		}
+
+		System.exit(0);
+	}
+
+	abstract O createOpts();
+
+	String describeCustomArg() {
+
+		throw new Error("No custom arg!");
+	}
+
+	String describeCustomArgOptions() {
+
+		return "";
+	}
+
 	private String getLeafDir(String dir) {
 
 		return dir.substring(dir.lastIndexOf(File.separatorChar) + 1);
+	}
+
+	private String describeArgs() {
+
+		StringBuilder args = new StringBuilder();
+
+		if (expectCustomArg) {
+
+			args.append(describeCustomArg() + " ");
+		}
+
+		args.append("<reasoner> [<dir> [<file>]]");
+
+		return args.toString();
 	}
 }

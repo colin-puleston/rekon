@@ -30,6 +30,28 @@ class CompareOpts extends TestOpts {
 
 	static private final String GENERAL_TESTS_ONTO_QUERIES_LEAF_DIR = "test-query";
 
+	static String describeCompareOptions() {
+
+		StringBuilder args = new StringBuilder();
+
+		args.append(describeArgOption("test-type", TestType.values()));
+		args.append(describeArgOption("test-scope", TestScope.values()));
+		args.append(describeArgOption("query-source", QuerySource.values()));
+
+		return args.toString();
+	}
+
+	static private String describeArgOption(String optName, Enum<?>[] optValues) {
+
+		StringBuilder args = new StringBuilder();
+
+		args.append(optName + ": ");
+		args.append(Arrays.asList(optValues));
+		args.append("\n");
+
+		return args.toString();
+	}
+
 	final TestType testType;
 	final TestScope testScope;
 	final QuerySource querySource;
@@ -60,21 +82,21 @@ class CompareOpts extends TestOpts {
 		AUTO, ONTO, NONE;
 	}
 
-	CompareOpts(String arg) {
+	CompareOpts(TestConfig<?> config, String optionsArg) {
 
-		Iterator<String> vals = parseArg(arg, 2, 4);
+		ArgReader opts = new ArgReader(config, optionsArg, 2, 4);
 
-		testType = TestType.valueOf(vals.next());
+		testType = TestType.valueOf(opts.readNext());
 
 		if (testType == TestType.QUERY) {
 
-			testScope = TestScope.valueOf(vals.next());
-			querySource = QuerySource.valueOf(vals.next());
-			maxQueries = vals.hasNext() ? parseInt(vals.next()) : -1;
+			testScope = TestScope.valueOf(opts.readNext());
+			querySource = QuerySource.valueOf(opts.readNext());
+			maxQueries = opts.parseNextInt(-1);
 		}
 		else {
 
-			testScope = TestScope.valueOf(vals.next());
+			testScope = TestScope.valueOf(opts.readNext());
 			querySource = QuerySource.NONE;
 			maxQueries = -1;
 		}

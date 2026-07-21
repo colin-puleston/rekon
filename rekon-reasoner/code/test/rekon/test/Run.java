@@ -32,27 +32,40 @@ import org.semanticweb.owlapi.reasoner.*;
 
 public class Run extends Tester {
 
+	static private class RunConfig extends TestConfig<RunOpts> {
+
+		RunConfig(String[] args) {
+
+			super(args, true);
+		}
+
+		RunOpts createOpts() {
+
+			return new RunOpts(this, customArg);
+		}
+
+		String describeCustomArg() {
+
+			return "<class-runs>:<query-runs>[:<max-queries>]";
+		}
+	}
+
 	static private class RunInvoker extends TestInvoker<RunOpts> {
 
-		RunInvoker(TestConfig config) {
+		RunInvoker(String[] args) {
 
-			super(config);
+			super(new RunConfig(args));
 		}
 
-		RunOpts createCustomOpts(String customConfig) {
+		void run(RunOpts opts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
-			return new RunOpts(customConfig);
-		}
-
-		void run(RunOpts customOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
-
-			new Run(customOpts, reasonerOpt, ontologyFile);
+			new Run(opts, reasonerOpt, ontologyFile);
 		}
 	}
 
 	static public void main(String[] args) {
 
-		new RunInvoker(new TestConfig(args, true));
+		new RunInvoker(args);
 	}
 
 	private OWLReasoner reasoner;

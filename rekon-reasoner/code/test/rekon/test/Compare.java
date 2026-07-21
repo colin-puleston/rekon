@@ -32,27 +32,45 @@ import org.semanticweb.owlapi.reasoner.*;
 
 public class Compare extends Tester {
 
+	static private class CompareConfig extends TestConfig<CompareOpts> {
+
+		CompareConfig(String[] args) {
+
+			super(args, true);
+		}
+
+		CompareOpts createOpts() {
+
+			return new CompareOpts(this, customArg);
+		}
+
+		String describeCustomArg() {
+
+			return "<test-type>:<test-scope>[:<queries-source>[:<max-queries>]]";
+		}
+
+		String describeCustomArgOptions() {
+
+			return CompareOpts.describeCompareOptions();
+		}
+	}
+
 	static private class CompareInvoker extends TestInvoker<CompareOpts> {
 
-		CompareInvoker(TestConfig config) {
+		CompareInvoker(String[] args) {
 
-			super(config);
+			super(new CompareConfig(args));
 		}
 
-		CompareOpts createCustomOpts(String customConfig) {
+		void run(CompareOpts opts, ReasonerOpt reasonerOpt, File ontologyFile) {
 
-			return new CompareOpts(customConfig);
-		}
-
-		void run(CompareOpts customOpts, ReasonerOpt reasonerOpt, File ontologyFile) {
-
-			new Compare(customOpts, reasonerOpt, ontologyFile);
+			new Compare(opts, reasonerOpt, ontologyFile);
 		}
 	}
 
 	static public void main(String[] args) {
 
-		new CompareInvoker(new TestConfig(args, true));
+		new CompareInvoker(args);
 	}
 
 	private OWLReasoner rekon;

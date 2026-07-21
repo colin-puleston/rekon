@@ -32,12 +32,12 @@ class RunOpts extends TestOpts {
 	final int queryRuns;
 	final int maxQueries;
 
-	RunOpts(String arg) {
+	RunOpts(TestConfig<?> config, String optionsArg) {
 
-		Iterator<String> vals = parseArg(arg, 2, 3);
+		ArgReader opts = new ArgReader(config, optionsArg, 2, 3);
 
-		classRuns = parseInt(vals.next());
-		queryRuns = parseInt(vals.next());
-		maxQueries = vals.hasNext() ? parseInt(vals.next()) : -1;
+		classRuns = opts.parseNextInt();
+		queryRuns = opts.parseNextInt();
+		maxQueries = opts.parseNextInt(-1);
 	}
 }
