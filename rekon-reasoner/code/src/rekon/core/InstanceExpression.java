@@ -62,7 +62,9 @@ class InstanceExpression extends LocalExpression {
 
 	NodeX createExpression(MatchStructures matchStructures) {
 
-		expressionMatcher = createExpressionMatcher(matchStructures);
+		Pattern p = createPattern(matchStructures);
+
+		expressionMatcher = matchStructures.addDefinition(instanceNode, p);
 
 		return instanceNode;
 	}
@@ -70,19 +72,6 @@ class InstanceExpression extends LocalExpression {
 	PatternMatcher getExpressionMatcher() {
 
 		return expressionMatcher;
-	}
-
-	private PatternMatcher createExpressionMatcher(MatchStructures matchStructures) {
-
-		Pattern p = createPattern(matchStructures);
-		NodeX n = p.toSingleNode();
-
-		if (n != null) {
-
-			return new PatternMatcher(n);
-		}
-
-		return matchStructures.addDefinition(instanceNode, p);
 	}
 
 	private Pattern createPattern(MatchStructures matchStructures) {
