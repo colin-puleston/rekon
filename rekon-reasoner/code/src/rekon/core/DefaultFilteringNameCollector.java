@@ -27,19 +27,31 @@ package rekon.core;
 /**
  * @author Colin Puleston
  */
-class DefaultDefinitionFilteringNameCollector extends FilteringNameCollector {
+class DefaultFilteringNameCollector extends FilteringNameCollector {
 
-	private class DefaultDefinitionFilteringRankCollector extends RankCollector {
+	private boolean definition;
+
+	private class DefaultFilteringRankCollector extends RankCollector {
+
+		DefaultFilteringRankCollector(int rank) {
+
+			super(rank);
+		}
 
 		boolean definition() {
 
-			return true;
+			return definition;
 		}
 	}
 
-	RankCollector createRankCollector() {
+	DefaultFilteringNameCollector(boolean definition) {
 
-		return new DefaultDefinitionFilteringRankCollector();
+		this.definition = definition;
+	}
+
+	RankCollector createRankCollector(int rank) {
+
+		return new DefaultFilteringRankCollector(rank);
 	}
 }
 

@@ -37,12 +37,16 @@ abstract class FilteringNameCollector {
 
 	abstract class RankCollector extends NameCollector {
 
+		private int rank;
+
 		private RankStatus rankStatus;
 		private NameSet rankNames = new NameSet();
 
 		private RankCollector nextRankCollector = null;
 
-		RankCollector() {
+		RankCollector(int rank) {
+
+			this.rank = rank;
 
 			allNames.add(rankNames);
 
@@ -109,7 +113,7 @@ abstract class FilteringNameCollector {
 
 			if (nextRankCollector == null) {
 
-				nextRankCollector = createRankCollector();
+				nextRankCollector = createRankCollector(rank + 1);
 			}
 
 			return nextRankCollector;
@@ -118,6 +122,11 @@ abstract class FilteringNameCollector {
 		boolean preCollectRank() {
 
 			return false;
+		}
+
+		int getRank() {
+
+			return rank;
 		}
 
 		private RankStatus getRankInitialStatus() {
@@ -138,18 +147,13 @@ abstract class FilteringNameCollector {
 
 	List<Names> collect(Pattern p) {
 
-		RankCollector firstRankCollector = createRankCollector();
+		RankCollector firstRankCollector = createRankCollector(0);
 
 		firstRankCollector.collectForPattern(p);
 
 		return firstRankCollector.createRankedNamesList();
 	}
 
-	int getCurrentRankIndex() {
-
-		return allNames.size() - 1;
-	}
-
-	abstract RankCollector createRankCollector();
+	abstract RankCollector createRankCollector(int rank);
 }
 

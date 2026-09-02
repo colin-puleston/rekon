@@ -50,11 +50,11 @@ class PotentialCoreSubsumeds extends PotentialSubsumeds {
 
 	List<Names> getRankedDefinitionNames(Pattern defn) {
 
-		return new DefaultDefinitionFilteringNameCollector().collect(defn);
+		return new DefaultFilteringNameCollector(true).collect(defn);
 	}
 
 	List<Names> getRankedProfileNames(Pattern profile, int startRank, int stopRank) {
 
-		return new DefaultProfileFilteringNameCollector().collect(profile);
+		return new DefaultFilteringNameCollector(false).collect(profile);
 	}
 }

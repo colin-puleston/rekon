@@ -31,6 +31,11 @@ class DefinitionFilteringLinkedNameCollector extends FilteringNameCollector {
 
 	private class DefinitionFilteringLinkedRankCollector extends RankCollector {
 
+		DefinitionFilteringLinkedRankCollector(int rank) {
+
+			super(rank);
+		}
+
 		boolean definition() {
 
 			return true;
@@ -52,9 +57,9 @@ class DefinitionFilteringLinkedNameCollector extends FilteringNameCollector {
 		}
 	}
 
-	RankCollector createRankCollector() {
+	RankCollector createRankCollector(int rank) {
 
-		return new DefinitionFilteringLinkedRankCollector();
+		return new DefinitionFilteringLinkedRankCollector(rank);
 	}
 }
 

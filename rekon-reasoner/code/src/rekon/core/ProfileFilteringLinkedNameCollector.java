@@ -40,6 +40,11 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private NameSet valueNodesCollected = new NameSet();
 
+		ProfileFilteringLinkedRankCollector(int rank) {
+
+			super(rank);
+		}
+
 		boolean definition() {
 
 			return false;
@@ -51,7 +56,7 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 				collectName(n);
 
-				if (!lastRankForCollection() && !linkingNodes.contains(n)) {
+				if (!linkingNodes.contains(n)) {
 
 					linkingNodes.push(n);
 					collectForRelations(getProfileRelations(n));
@@ -60,9 +65,17 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 			}
 		}
 
+		void collectForRelations(Collection<Relation> rels) {
+
+			if (!lastRankForCollection()) {
+
+				super.collectForRelations(rels);
+			}
+		}
+
 		boolean preCollectRank() {
 
-			return getCurrentRankIndex() < startRank;
+			return getRank() < startRank;
 		}
 
 		private Collection<Relation> getProfileRelations(NodeX n) {
@@ -79,7 +92,7 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 
 		private boolean lastRankForCollection() {
 
-			return getCurrentRankIndex() == stopRank - 1;
+			return getRank() == stopRank - 1;
 		}
 	}
 
@@ -89,9 +102,9 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 		this.stopRank = stopRank;
 	}
 
-	RankCollector createRankCollector() {
+	RankCollector createRankCollector(int rank) {
 
-		return new ProfileFilteringLinkedRankCollector();
+		return new ProfileFilteringLinkedRankCollector(rank);
 	}
 }
 
