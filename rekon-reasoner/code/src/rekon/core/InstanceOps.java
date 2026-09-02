@@ -88,7 +88,7 @@ public class InstanceOps {
 
 		private void updateReferencers(Instance instance) {
 
-			for (Instance r : instance.getReferencers()) {
+			for (Instance r : instance.copyReferencers()) {
 
 				if (!added.contains(r)) {
 

@@ -108,6 +108,11 @@ public abstract class Instance {
 		return referencers;
 	}
 
+	Collection<Instance> copyReferencers() {
+
+		return new ArrayList<Instance>(referencers);
+	}
+
 	Collection<Instance> getReferenceds() {
 
 		Set<Instance> refs = new HashSet<Instance>();
