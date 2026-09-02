@@ -189,9 +189,12 @@ abstract class PotentialSubsumptions {
 
 		private List<Names> rankedNames;
 
-		UpdateOp(PatternMatcher option, int optionIdx, int startRank, int stopRank) {
+		UpdateOp(int optionIdx) {
 
 			this.optionIdx = optionIdx;
+		}
+
+		void initialise(PatternMatcher option, int startRank, int stopRank) {
 
 			rankedNames = getOptionMatchNames(option.getPattern(), startRank, stopRank);
 			rankedNames = resolveRankedNames();
@@ -243,7 +246,9 @@ abstract class PotentialSubsumptions {
 
 		DefaultRegisterOp(PatternMatcher option, int startRank, int stopRank) {
 
-			super(option, optionsToIndexes.get(option), startRank, stopRank);
+			super(optionsToIndexes.get(option));
+
+			initialise(option, startRank, stopRank);
 		}
 
 		UpdateType getOpType() {
@@ -256,14 +261,19 @@ abstract class PotentialSubsumptions {
 
 		TransientOptionUpdateOp(PatternMatcher option, int optionIdx) {
 
-			super(option, optionIdx, 0, allRankMatches.size());
+			super(optionIdx);
 
 			if (fixedOptions) {
 
 				throw new Error("Cannot mix fixed and transient options!");
 			}
 
-			performOpForCurrentRankMatches();
+			if (!allRankMatches.isEmpty()) {
+
+				initialise(option, 0, allRankMatches.size());
+
+				performOpForCurrentRankMatches();
+			}
 		}
 
 		private void performOpForCurrentRankMatches() {
