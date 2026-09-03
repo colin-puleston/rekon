@@ -29,13 +29,14 @@ import java.util.*;
 /**
  * @author Colin Puleston
  */
-abstract class FilteringNameCollector {
+class FilteringNameCollector {
 
 	static private enum RankStatus {COLLECT, PRE_COLLECT, ROOT_COLLECTED}
 
+	private boolean definition;
 	private List<Names> allNames = new ArrayList<Names>();
 
-	abstract class RankCollector extends NameCollector {
+	class RankCollector extends NameCollector {
 
 		private int rank;
 
@@ -51,6 +52,11 @@ abstract class FilteringNameCollector {
 			allNames.add(rankNames);
 
 			rankStatus = getRankInitialStatus();
+		}
+
+		boolean definition() {
+
+			return definition;
 		}
 
 		void collectForDisjunctNodes(DisjunctionNodeValue v) {
@@ -145,6 +151,11 @@ abstract class FilteringNameCollector {
 		}
 	}
 
+	FilteringNameCollector(boolean definition) {
+
+		this.definition = definition;
+	}
+
 	List<Names> collect(Pattern p) {
 
 		RankCollector firstRankCollector = createRankCollector(0);
@@ -154,6 +165,9 @@ abstract class FilteringNameCollector {
 		return firstRankCollector.createRankedNamesList();
 	}
 
-	abstract RankCollector createRankCollector(int rank);
+	RankCollector createRankCollector(int rank) {
+
+		return new RankCollector(rank);
+	}
 }
 

@@ -36,11 +36,6 @@ class DefinitionFilteringLinkedNameCollector extends FilteringNameCollector {
 			super(rank);
 		}
 
-		boolean definition() {
-
-			return true;
-		}
-
 		void collectForSingleValueNode(NodeX n) {
 
 			if (n.local()) {
@@ -55,6 +50,11 @@ class DefinitionFilteringLinkedNameCollector extends FilteringNameCollector {
 				collectName(n);
 			}
 		}
+	}
+
+	DefinitionFilteringLinkedNameCollector() {
+
+		super(true);
 	}
 
 	RankCollector createRankCollector(int rank) {

@@ -45,11 +45,6 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 			super(rank);
 		}
 
-		boolean definition() {
-
-			return false;
-		}
-
 		void collectForSingleValueNode(NodeX n) {
 
 			if (valueNodesCollected.add(n)) {
@@ -97,6 +92,8 @@ class ProfileFilteringLinkedNameCollector extends FilteringNameCollector {
 	}
 
 	ProfileFilteringLinkedNameCollector(int startRank, int stopRank) {
+
+		super(false);
 
 		this.startRank = startRank;
 		this.stopRank = stopRank;
