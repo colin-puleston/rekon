@@ -26,6 +26,7 @@ package rekon.protege;
 
 import java.awt.event.*;
 
+import rekon.util.*;
 import rekon.owl.*;
 
 /**
