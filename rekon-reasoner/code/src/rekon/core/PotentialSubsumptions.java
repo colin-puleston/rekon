@@ -532,7 +532,7 @@ abstract class PotentialSubsumptions {
 
 		for (Map.Entry<PatternMatcher, Integer> e : optionsToIndexes.entrySet()) {
 
-			if (e.getValue() == idx) {
+			if (e.getValue().equals(idx)) {
 
 				return e.getKey();
 			}
