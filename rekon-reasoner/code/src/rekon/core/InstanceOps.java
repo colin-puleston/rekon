@@ -39,6 +39,7 @@ public class InstanceOps {
 	private class Updater {
 
 		private Set<Instance> added = new HashSet<Instance>();
+		private Set<Instance> updatingRefs = new HashSet<Instance>();
 
 		void add(Instance instance, PatternSource profileBuilder) {
 
@@ -88,13 +89,16 @@ public class InstanceOps {
 
 		private void updateReferencers(Instance instance) {
 
-			for (Instance r : instance.copyReferencers()) {
+			if (updatingRefs.add(instance)) {
 
-				if (!added.contains(r)) {
+				for (Instance r : instance.copyReferencers()) {
 
-					remove(r);
-					r.getNode().resetClassifier();
-					add(r, r.getProfileRebuilder());
+					if (!added.contains(r)) {
+
+						remove(r);
+						r.getNode().resetClassifier();
+						add(r, r.getProfileRebuilder());
+					}
 				}
 			}
 		}
